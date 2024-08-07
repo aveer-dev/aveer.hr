@@ -1,7 +1,6 @@
-import { NavMenu } from '@/components/nav-menu';
-import { Button } from '@/components/ui/button';
-import { CircleHelp, LogOut } from 'lucide-react';
-import Link from 'next/link';
+import { NavMenu } from '@/components/ui/nav-menu';
+import { CircleHelp } from 'lucide-react';
+import { LogoutButton } from './logout-button';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
@@ -18,9 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 					<div className="h-3 w-px bg-muted-foreground"></div>
 
-					<Button variant={'secondary'} size={'icon'} className="h-8">
-						<LogOut size={12} />
-					</Button>
+					<LogoutButton />
 				</div>
 			</header>
 

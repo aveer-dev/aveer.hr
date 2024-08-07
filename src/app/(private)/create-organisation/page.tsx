@@ -6,23 +6,23 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 
 export default function Home() {
 	return (
-		<form className="grid gap-6 w-full mx-auto max-w-4xl">
+		<form className="mx-auto grid w-full max-w-4xl gap-6">
 			{/* organisation details */}
 			<h1 className="text-xl font-semibold">Organisation Setup</h1>
 
 			<div className="grid grid-cols-2 border-t border-t-border pt-10">
 				<div>
 					<h2 className="font-semibold">Organisation details</h2>
-					<p className="text-xs text-muted-foreground max-w-72 mt-3 font-thin">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+					<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
 				</div>
 
-				<div className="grid gap-8 mb-10">
-					<div className="grid gap-3 w-full">
+				<div className="mb-10 grid gap-8">
+					<div className="grid w-full gap-3">
 						<Label htmlFor="org-name">Organisation name</Label>
 						<Input id="org-name" type="text" placeholder="aveer HQ" required />
 					</div>
 
-					<div className="grid gap-3 w-full">
+					<div className="grid w-full gap-3">
 						<Label htmlFor="org-name">Organisation website</Label>
 						<Input id="org-name" type="text" placeholder="aveer HQ" required />
 					</div>
@@ -34,21 +34,21 @@ export default function Home() {
 			<div className="grid grid-cols-2 border-t border-t-border pt-10">
 				<div>
 					<h2 className="mb-1 font-normal">Legal Entity</h2>
-					<p className="text-xs text-muted-foreground max-w-72 mt-3 font-thin">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+					<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
 				</div>
 
-				<div className="grid gap-8 mb-10">
-					<div className="grid gap-3 w-full">
+				<div className="mb-10 grid gap-8">
+					<div className="grid w-full gap-3">
 						<Label htmlFor="legal-name">Legal entity name</Label>
 						<Input id="legal-name" type="text" placeholder="Organisation legal name" required />
 					</div>
 
-					<div className="grid gap-3 w-full">
+					<div className="grid w-full gap-3">
 						<Label>Formation date</Label>
 						<DatePicker />
 					</div>
 
-					<div className="grid gap-3 w-full">
+					<div className="grid w-full gap-3">
 						<Label htmlFor="country-of-inc">Country of incorporation</Label>
 						<Select>
 							<SelectTrigger className="w-full">
@@ -66,7 +66,7 @@ export default function Home() {
 						</Select>
 					</div>
 
-					<div className="grid gap-3 w-full">
+					<div className="grid w-full gap-3">
 						<Label htmlFor="entity-type">Entity type</Label>
 						<Select>
 							<SelectTrigger className="w-full">
@@ -85,12 +85,12 @@ export default function Home() {
 
 					{/* legal entity details */}
 					<div className="grid grid-cols-2 gap-6">
-						<div className="grid gap-3 w-full">
+						<div className="grid w-full gap-3">
 							<Label htmlFor="ein">EIN</Label>
 							<Input id="ein" type="text" placeholder="Enter employer identification number" required />
 						</div>
 
-						<div className="grid gap-3 w-full">
+						<div className="grid w-full gap-3">
 							<Label htmlFor="ein">SIC number</Label>
 							<Input id="ein" type="text" placeholder="Enter SIC number" required />
 						</div>
@@ -102,11 +102,11 @@ export default function Home() {
 			<div className="grid grid-cols-2 border-t border-t-border pt-10">
 				<div>
 					<h2 className="mb-1 font-normal">Organisation contact details</h2>
-					<p className="text-xs text-muted-foreground max-w-72 mt-3 font-thin">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+					<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
 				</div>
 
-				<div className="grid gap-10 grid-cols-2">
-					<div className="grid gap-3 w-full">
+				<div className="grid grid-cols-2 gap-10">
+					<div className="grid w-full gap-3">
 						<Label htmlFor="org-state">State</Label>
 						<Select>
 							<SelectTrigger className="w-full">
@@ -124,24 +124,24 @@ export default function Home() {
 						</Select>
 					</div>
 
-					<div className="grid gap-3 w-full">
+					<div className="grid w-full gap-3">
 						<Label htmlFor="org-city">City</Label>
 						<Input id="org-city" type="text" placeholder="Enter organisation address city" required />
 					</div>
 
-					<div className="grid gap-3 w-full">
+					<div className="grid w-full gap-3">
 						<Label htmlFor="org-street">Street address</Label>
 						<Input id="org-street" type="text" placeholder="Enter organisation street address" required />
 					</div>
 
-					<div className="grid gap-3 w-full">
+					<div className="grid w-full gap-3">
 						<Label htmlFor="org-post">Post code</Label>
 						<Input id="org-post" type="text" placeholder="Enter organisation address post code" required />
 					</div>
 				</div>
 			</div>
 
-			<div className="flex justify-end mt-16">
+			<div className="mt-16 flex justify-end">
 				<Button size={'sm'}>Setup Organisation</Button>
 			</div>
 		</form>
