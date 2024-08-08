@@ -1,4 +1,4 @@
-'use client';
+// 'use client';
 
 import * as React from 'react';
 import { format } from 'date-fns';
@@ -9,20 +9,30 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-export function DatePicker() {
-	const [date, setDate] = React.useState<Date>();
+export function DatePicker({ onSetDate, selected }: { onSetDate: (date: Date | undefined) => void; selected: Date }) {
+	const [date, setDate] = React.useState<Date>(selected);
 
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button variant={'outline'} className={cn('w-full text-left font-light flex justify-between bg-input-bg border-input px-3', !date && 'text-muted-foreground')}>
+				<Button variant={'outline'} className={cn('flex w-full justify-between border-input bg-input-bg px-3 text-left font-light', !date && 'text-muted-foreground')}>
 					{date ? format(date, 'PPP') : <span>Pick a date</span>}
 					<CalendarIcon className="mr-2 h-4 w-4" />
 				</Button>
 			</PopoverTrigger>
 
 			<PopoverContent className="w-auto p-0">
-				<Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+				<Calendar
+					mode="single"
+					selected={selected || date}
+					onSelect={event => {
+						if (event) {
+							setDate(event);
+							onSetDate(event);
+						}
+					}}
+					initialFocus
+				/>
 			</PopoverContent>
 		</Popover>
 	);

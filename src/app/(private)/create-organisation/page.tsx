@@ -45,7 +45,7 @@ export default function Home() {
 
 					<div className="grid w-full gap-3">
 						<Label>Formation date</Label>
-						<DatePicker />
+						{/* <DatePicker /> */}
 					</div>
 
 					<div className="grid w-full gap-3">
