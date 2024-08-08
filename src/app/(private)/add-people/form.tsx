@@ -38,9 +38,9 @@ const formSchema = z.object({
 	fixed_allowance: z.array(z.object({ name: z.string(), amount: z.string(), frequency: z.string() })),
 	start_date: z.date(),
 	end_date: z.date(),
-	probation_period: z.string(),
-	paid_leave: z.string(),
-	sick_leave: z.string()
+	probation_period: z.number(),
+	paid_leave: z.number(),
+	sick_leave: z.number()
 });
 
 export const AddPerson = () => {
@@ -70,9 +70,9 @@ export const AddPerson = () => {
 			responsibilities: [],
 			fixed_allowance: [],
 			start_date: new Date(),
-			probation_period: '90',
-			paid_leave: '20',
-			sick_leave: '20'
+			probation_period: 90,
+			paid_leave: 20,
+			sick_leave: 20
 		}
 	});
 

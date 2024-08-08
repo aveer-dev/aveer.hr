@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-export function DatePicker({ onSetDate, selected }: { onSetDate: (date: Date | undefined) => void; selected: Date }) {
-	const [date, setDate] = React.useState<Date>(selected);
+export function DatePicker({ onSetDate, selected }: { onSetDate: (date: Date | undefined) => void; selected?: Date }) {
+	const [date, setDate] = React.useState<Date>();
 
 	return (
 		<Popover>
