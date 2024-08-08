@@ -15,26 +15,31 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { toast } from 'sonner';
+import { Tables, TablesInsert } from '@/type/database.types';
+import { useRouter } from 'next/navigation';
 
 const supabase = createClient();
 
 const formSchema = z.object({
 	name: z.string(),
-	website: z.string(),
-	legal_name: z.string().email(),
-	incorporation_country: z.string(),
-	company_type: z.string(),
-	ein: z.string(),
-	sic: z.string(),
-	address_state: z.string(),
-	address_code: z.string(),
-	street_address: z.array(z.string()),
-	formation_date: z.date()
+	website: z.string().url().optional(),
+	legal_name: z.string(),
+	incorporation_country: z.string().optional(),
+	company_type: z.string().optional(),
+	ein: z.string().optional(),
+	sic: z.string().optional(),
+	address_state: z.number().optional(),
+	address_code: z.string().optional(),
+	street_address: z.string().optional(),
+	formation_date: z.string().or(z.date()).optional()
 });
 
 export const CreateOrgForm = () => {
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
-	const [states, setStates] = useState<{ name: string; short_code: string; country_code: string }[]>([]);
+	const [states, setStates] = useState<Tables<'states'>[]>([]);
+	const [isSubmiting, toggleSubmitState] = useState(false);
+	const router = useRouter();
 
 	const getCountries = async () => {
 		const { data, error } = await supabase.from('countries').select();
@@ -42,18 +47,69 @@ export const CreateOrgForm = () => {
 	};
 
 	const getStates = async () => {
-		const { data, error } = await supabase.from('states').select().eq('country_code', form.getValues('incorporation_country'));
+		const countryCode = form.getValues('incorporation_country');
+		if (!countryCode) return;
+
+		const { data, error } = await supabase.from('states').select().eq('country_code', countryCode);
 		if (!error) setStates(data);
 	};
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: {}
+		defaultValues: {
+			name: '',
+			website: '',
+			legal_name: '',
+			incorporation_country: '',
+			company_type: '',
+			ein: '',
+			sic: '',
+			address_state: undefined,
+			address_code: '',
+			street_address: '',
+			formation_date: ''
+		}
 	});
 
-	function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values);
-	}
+	const createOrganisation = async (payload: TablesInsert<'organisations'>) => await supabase.from('organisations').insert(payload).select('id').single();
+	const createLegalEntity = async (payload: TablesInsert<'legal_entities'>) => await supabase.from('legal_entities').insert(payload).select('id').single();
+	const createLegalEntityWithOrg = async (payload: TablesInsert<'organisations_legal_entities'>) => await supabase.from('organisations_legal_entities').insert(payload);
+
+	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+		toggleSubmitState(true);
+
+		const orgData: TablesInsert<'organisations'> = {
+			name: values.name,
+			website: values.website
+		};
+		const legalData: TablesInsert<'legal_entities'> = {
+			name: values.legal_name,
+			incorporation_country: values.incorporation_country,
+			company_type: values.company_type,
+			ein: values.ein,
+			sic: values.sic,
+			address_state: values.address_state,
+			address_code: values.address_code,
+			street_address: values.street_address,
+			formation_date: values.formation_date as string
+		};
+
+		const [orgRes, legalRes] = await Promise.all([createOrganisation(orgData), createLegalEntity(legalData)]);
+		if (orgRes.error || legalRes.error) {
+			toggleSubmitState(false);
+			return toast.error(
+				<div className="grid gap-1 text-xs">
+					<div>org error: {orgRes.error && orgRes.error.message}</div>
+					<div>legal error: {legalRes.error && legalRes.error.message}</div>
+				</div>
+			);
+		}
+
+		const { error } = await createLegalEntityWithOrg({ org_id: orgRes.data.id, legal_ent_id: legalRes.data.id });
+		if (error) return toast.error(error.message);
+
+		router.push('/add-people');
+	};
 
 	useEffect(() => {
 		getCountries();
@@ -61,10 +117,8 @@ export const CreateOrgForm = () => {
 
 	return (
 		<Form {...form}>
-			<form className="mx-auto grid w-full max-w-4xl gap-6" onSubmit={form.handleSubmit(onSubmit)}>
+			<form className="grid w-full gap-6" onSubmit={form.handleSubmit(onSubmit)}>
 				{/* organisation details */}
-				<h1 className="text-xl font-semibold">Organisation Setup</h1>
-
 				<div className="grid grid-cols-2 border-t border-t-border pt-10">
 					<div>
 						<h2 className="font-semibold">Organisation details</h2>
@@ -93,7 +147,7 @@ export const CreateOrgForm = () => {
 								<FormItem>
 									<FormLabel>Organisation website</FormLabel>
 									<FormControl>
-										<Input type="text" placeholder="Enter organisation website url" {...field} />
+										<Input type="url" placeholder="Enter organisation website url" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -147,7 +201,7 @@ export const CreateOrgForm = () => {
 													<CommandGroup>
 														{countries.map(country => (
 															<CommandItem
-																value={country.country_code}
+																value={country.name}
 																key={country.country_code}
 																onSelect={() => {
 																	form.setValue('incorporation_country', country.country_code);
@@ -255,7 +309,7 @@ export const CreateOrgForm = () => {
 										<PopoverTrigger asChild>
 											<FormControl>
 												<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
-													{field.value ? countries.find(country => country.country_code === field.value)?.name : `Select organisation state`}
+													{field.value ? states.find(state => state.id === field.value)?.name : `Select organisation state`}
 													<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 												</Button>
 											</FormControl>
@@ -268,12 +322,12 @@ export const CreateOrgForm = () => {
 													<CommandGroup>
 														{states.map(state => (
 															<CommandItem
-																value={state.short_code}
-																key={state.short_code}
+																value={String(state.name)}
+																key={state.id}
 																onSelect={() => {
-																	form.setValue('address_state', state.short_code);
+																	form.setValue('address_state', state.id);
 																}}>
-																<Check className={cn('mr-2 h-4 w-4', state.short_code === field.value ? 'opacity-100' : 'opacity-0')} />
+																<Check className={cn('mr-2 h-4 w-4', state.id === field.value ? 'opacity-100' : 'opacity-0')} />
 																{state.name}
 															</CommandItem>
 														))}
@@ -292,7 +346,7 @@ export const CreateOrgForm = () => {
 							name="street_address"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>SIC</FormLabel>
+									<FormLabel>Street address</FormLabel>
 									<FormControl>
 										<Input type="text" autoComplete="address-level1" placeholder="Enter organisation street address" {...field} />
 									</FormControl>
@@ -318,7 +372,7 @@ export const CreateOrgForm = () => {
 				</div>
 
 				<div className="mt-16 flex justify-end">
-					<Button size={'sm'}>Setup Organisation</Button>
+					<Button size={'sm'}>{isSubmiting ? 'Setting up organisation...' : 'Setup organisation'}</Button>
 				</div>
 			</form>
 		</Form>
