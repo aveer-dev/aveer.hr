@@ -5,12 +5,12 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuL
 import { Bolt, UserPlus, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export function NavMenu() {
+export function NavMenu({ orgId }: { orgId: string }) {
 	return (
 		<NavigationMenu>
 			<NavigationMenuList className="group-hover:text-accent">
 				<NavigationMenuItem>
-					<Link href="/" legacyBehavior passHref>
+					<Link href={`/${orgId}/`} legacyBehavior passHref>
 						<NavigationMenuLink className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
 							<Users size={16} />
 							People
@@ -18,7 +18,7 @@ export function NavMenu() {
 					</Link>
 				</NavigationMenuItem>
 				<NavigationMenuItem>
-					<Link href="/open-roles" legacyBehavior passHref>
+					<Link href={`/${orgId}/open-roles`} legacyBehavior passHref>
 						<NavigationMenuLink className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
 							<UserPlus size={16} />
 							Open Roles
@@ -26,7 +26,7 @@ export function NavMenu() {
 					</Link>
 				</NavigationMenuItem>
 				<NavigationMenuItem>
-					<Link href="/docs" legacyBehavior passHref>
+					<Link href={`/${orgId}/settings`} legacyBehavior passHref>
 						<NavigationMenuLink className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
 							<Bolt size={16} />
 							Settings
