@@ -73,7 +73,6 @@ export const CreateOrgForm = () => {
 
 	const createOrganisation = async (payload: TablesInsert<'organisations'>) => await supabase.from('organisations').insert(payload).select('id').single();
 	const createLegalEntity = async (payload: TablesInsert<'legal_entities'>) => await supabase.from('legal_entities').insert(payload).select('id').single();
-	const createLegalEntityWithOrg = async (payload: TablesInsert<'organisations_legal_entities'>) => await supabase.from('organisations_legal_entities').insert(payload);
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		toggleSubmitState(true);
@@ -91,24 +90,23 @@ export const CreateOrgForm = () => {
 			address_state: values.address_state,
 			address_code: values.address_code,
 			street_address: values.street_address,
-			formation_date: values.formation_date as string
+			formation_date: values.formation_date as string,
+			org: 0
 		};
 
-		const [orgRes, legalRes] = await Promise.all([createOrganisation(orgData), createLegalEntity(legalData)]);
-		if (orgRes.error || legalRes.error) {
+		const orgRes = await createOrganisation(orgData);
+		if (orgRes.error) {
 			toggleSubmitState(false);
-			return toast.error(
-				<div className="grid gap-1 text-xs">
-					<div>org error: {orgRes.error && orgRes.error.message}</div>
-					<div>legal error: {legalRes.error && legalRes.error.message}</div>
-				</div>
-			);
+			return toast.error(orgRes.error.message);
 		}
 
-		const { error } = await createLegalEntityWithOrg({ org_id: orgRes.data.id, legal_ent_id: legalRes.data.id });
-		if (error) return toast.error(error.message);
+		const legalRes = await createLegalEntity({ ...legalData, org: orgRes.data.id });
+		if (legalRes.error) {
+			toggleSubmitState(false);
+			return toast.error(legalRes.error.message);
+		}
 
-		router.push('/add-people');
+		router.push(`/${orgRes.data.id}/add-people`);
 	};
 
 	useEffect(() => {
@@ -371,7 +369,7 @@ export const CreateOrgForm = () => {
 					</div>
 				</div>
 
-				<div className="mt-16 flex justify-end">
+				<div className="mt-16 flex justify-end border-t border-t-border pt-10">
 					<Button size={'sm'}>{isSubmiting ? 'Setting up organisation...' : 'Setup organisation'}</Button>
 				</div>
 			</form>

@@ -1,13 +1,8 @@
 export interface PERSON {
-	first_name: string;
-	last_name: string;
-	email: string;
-	agreement_type?: 'employee' | 'contractor';
-	payment_type?: 'fixed' | 'payg' | 'milestone' | '';
 	status: string;
-	country: string;
-	start_date: string;
+	job_title: string;
 	employment_type: string;
+	start_date: string;
+	profile: { last_name: string; first_name: string; nationality: { name: string } };
 	id: string;
-	job_title?: string;
 }

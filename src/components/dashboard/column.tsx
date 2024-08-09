@@ -26,18 +26,21 @@ export const columns: ColumnDef<PERSON>[] = [
 	{
 		id: 'name',
 		header: 'Name',
-		cell: ({ row }) => (
-			<div className="grid gap-1">
-				<div className="font-medium">
-					{row.original.first_name} {row.original.last_name}
+		cell: ({ row }) => {
+			return (
+				<div className="grid gap-1">
+					<div className="font-medium">
+						{row.original.profile.first_name} {row.original.profile.last_name}
+					</div>
+					<div>{row.original.job_title}</div>
 				</div>
-				<div>{row.original.job_title}</div>
-			</div>
-		)
+			);
+		}
 	},
 	{
-		accessorKey: 'country',
-		header: 'Country'
+		id: `nationality`,
+		header: 'Country',
+		cell: ({ row }) => <span>{row.original.profile.nationality.name}</span>
 	},
 	{
 		id: 'status',
@@ -49,8 +52,9 @@ export const columns: ColumnDef<PERSON>[] = [
 		)
 	},
 	{
-		accessorKey: 'employment_type',
-		header: 'Employment type'
+		id: 'employment_type',
+		header: 'Employment type',
+		cell: ({ row }) => <span className="capitalize">{row.original.employment_type}</span>
 	},
 	{
 		accessorKey: 'start_date',

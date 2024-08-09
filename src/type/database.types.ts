@@ -8,12 +8,17 @@ export type Database = {
 					created_at: string;
 					employment_type: string | null;
 					end_date: string | null;
+					entity: number;
 					fixed_allowance: Json | null;
 					id: number;
 					job_title: string;
 					level: string | null;
+					org: number;
+					org_signed: string | null;
 					paid_leave: number | null;
 					probation_period: number | null;
+					profile: string;
+					profile_signed: string | null;
 					responsibilities: Json | null;
 					salary: number | null;
 					sick_leave: number | null;
@@ -26,12 +31,17 @@ export type Database = {
 					created_at?: string;
 					employment_type?: string | null;
 					end_date?: string | null;
+					entity: number;
 					fixed_allowance?: Json | null;
 					id?: number;
 					job_title: string;
 					level?: string | null;
+					org: number;
+					org_signed?: string | null;
 					paid_leave?: number | null;
 					probation_period?: number | null;
+					profile: string;
+					profile_signed?: string | null;
 					responsibilities?: Json | null;
 					salary?: number | null;
 					sick_leave?: number | null;
@@ -44,12 +54,17 @@ export type Database = {
 					created_at?: string;
 					employment_type?: string | null;
 					end_date?: string | null;
+					entity?: number;
 					fixed_allowance?: Json | null;
 					id?: number;
 					job_title?: string;
 					level?: string | null;
+					org?: number;
+					org_signed?: string | null;
 					paid_leave?: number | null;
 					probation_period?: number | null;
+					profile?: string;
+					profile_signed?: string | null;
 					responsibilities?: Json | null;
 					salary?: number | null;
 					sick_leave?: number | null;
@@ -58,7 +73,29 @@ export type Database = {
 					work_schedule?: string | null;
 					work_shedule_interval?: string | null;
 				};
-				Relationships: [];
+				Relationships: [
+					{
+						foreignKeyName: 'contracts_entity_fkey';
+						columns: ['entity'];
+						isOneToOne: false;
+						referencedRelation: 'legal_entities';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'contracts_org_fkey';
+						columns: ['org'];
+						isOneToOne: false;
+						referencedRelation: 'organisations';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'contracts_profile_fkey';
+						columns: ['profile'];
+						isOneToOne: false;
+						referencedRelation: 'profiles';
+						referencedColumns: ['id'];
+					}
+				];
 			};
 			countries: {
 				Row: {
@@ -84,6 +121,38 @@ export type Database = {
 				};
 				Relationships: [];
 			};
+			dashboard_stats: {
+				Row: {
+					created_at: string;
+					id: number;
+					open_contracts: number;
+					org: number;
+					signed_contracts: number | null;
+				};
+				Insert: {
+					created_at?: string;
+					id?: number;
+					open_contracts?: number;
+					org: number;
+					signed_contracts?: number | null;
+				};
+				Update: {
+					created_at?: string;
+					id?: number;
+					open_contracts?: number;
+					org?: number;
+					signed_contracts?: number | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'dashboard_stats_org_fkey';
+						columns: ['org'];
+						isOneToOne: false;
+						referencedRelation: 'organisations';
+						referencedColumns: ['id'];
+					}
+				];
+			};
 			legal_entities: {
 				Row: {
 					address_code: string | null;
@@ -95,6 +164,7 @@ export type Database = {
 					id: number;
 					incorporation_country: string | null;
 					name: string;
+					org: number;
 					sic: string | null;
 					street_address: string | null;
 					updated_at: string;
@@ -109,6 +179,7 @@ export type Database = {
 					id?: number;
 					incorporation_country?: string | null;
 					name: string;
+					org: number;
 					sic?: string | null;
 					street_address?: string | null;
 					updated_at?: string;
@@ -123,6 +194,7 @@ export type Database = {
 					id?: number;
 					incorporation_country?: string | null;
 					name?: string;
+					org?: number;
 					sic?: string | null;
 					street_address?: string | null;
 					updated_at?: string;
@@ -141,6 +213,13 @@ export type Database = {
 						isOneToOne: false;
 						referencedRelation: 'countries';
 						referencedColumns: ['country_code'];
+					},
+					{
+						foreignKeyName: 'legal_entities_org_fkey';
+						columns: ['org'];
+						isOneToOne: false;
+						referencedRelation: 'organisations';
+						referencedColumns: ['id'];
 					}
 				];
 			};
@@ -167,45 +246,6 @@ export type Database = {
 					website?: string | null;
 				};
 				Relationships: [];
-			};
-			organisations_legal_entities: {
-				Row: {
-					created_at: string;
-					id: number;
-					legal_ent_id: number;
-					org_id: number;
-					updated_at: string;
-				};
-				Insert: {
-					created_at?: string;
-					id?: number;
-					legal_ent_id: number;
-					org_id: number;
-					updated_at?: string;
-				};
-				Update: {
-					created_at?: string;
-					id?: number;
-					legal_ent_id?: number;
-					org_id?: number;
-					updated_at?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'organisations_legal_entitys_legal_ent_id_fkey';
-						columns: ['legal_ent_id'];
-						isOneToOne: false;
-						referencedRelation: 'legal_entities';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'organisations_legal_entitys_org_id_fkey';
-						columns: ['org_id'];
-						isOneToOne: false;
-						referencedRelation: 'organisations';
-						referencedColumns: ['id'];
-					}
-				];
 			};
 			profiles: {
 				Row: {
@@ -256,65 +296,36 @@ export type Database = {
 					}
 				];
 			};
-			profiles_contracts: {
-				Row: {
-					contract: number;
-					created_at: string;
-					id: number;
-					profile: string;
-					updated_at: string;
-				};
-				Insert: {
-					contract: number;
-					created_at?: string;
-					id?: number;
-					profile: string;
-					updated_at?: string;
-				};
-				Update: {
-					contract?: number;
-					created_at?: string;
-					id?: number;
-					profile?: string;
-					updated_at?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'profiles_contracts_contract_fkey';
-						columns: ['contract'];
-						isOneToOne: false;
-						referencedRelation: 'contracts';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'profiles_contracts_profile_fkey';
-						columns: ['profile'];
-						isOneToOne: false;
-						referencedRelation: 'profiles';
-						referencedColumns: ['id'];
-					}
-				];
-			};
 			profiles_roles: {
 				Row: {
 					created_at: string;
 					id: number;
+					organisation: number;
 					profile: string;
 					role: number;
 				};
 				Insert: {
 					created_at?: string;
 					id?: number;
+					organisation: number;
 					profile: string;
 					role: number;
 				};
 				Update: {
 					created_at?: string;
 					id?: number;
+					organisation?: number;
 					profile?: string;
 					role?: number;
 				};
 				Relationships: [
+					{
+						foreignKeyName: 'profiles_roles_organisation_fkey';
+						columns: ['organisation'];
+						isOneToOne: false;
+						referencedRelation: 'organisations';
+						referencedColumns: ['id'];
+					},
 					{
 						foreignKeyName: 'profiles_roles_profile_fkey';
 						columns: ['profile'];

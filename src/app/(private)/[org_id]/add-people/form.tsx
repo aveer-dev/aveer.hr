@@ -19,6 +19,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { Tables, TablesInsert } from '@/type/database.types';
+import { inviteUser } from './invite-user.action';
+import { toast } from 'sonner';
+import { useParams } from 'next/navigation';
 
 const supabase = createClient();
 
@@ -28,16 +32,16 @@ const formSchema = z.object({
 	email: z.string().email(),
 	nationality: z.string(),
 	job_title: z.string(),
-	level: z.string(),
-	employment_type: z.string(),
-	work_schedule: z.string(),
-	work_shedule_interval: z.string(),
+	level: z.string().optional(),
+	employment_type: z.string().optional(),
+	work_schedule: z.string().optional(),
+	work_shedule_interval: z.string().optional(),
 	responsibilities: z.array(z.string()),
 	salary: z.string(),
-	signing_bonus: z.string(),
-	fixed_allowance: z.array(z.object({ name: z.string(), amount: z.string(), frequency: z.string() })),
+	signing_bonus: z.number().optional(),
+	fixed_allowance: z.array(z.object({ name: z.string(), amount: z.string(), frequency: z.string() })).optional(),
 	start_date: z.date(),
-	end_date: z.date(),
+	end_date: z.date().optional(),
 	probation_period: z.number(),
 	paid_leave: z.number(),
 	sick_leave: z.number()
@@ -45,6 +49,7 @@ const formSchema = z.object({
 
 export const AddPerson = () => {
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
+	const [entities, setEntities] = useState<{ id: number }[]>([]);
 	const [jobTitles, updateJobTitles] = useState<string[]>([]);
 	const [jobLevels, updateJobLevels] = useState<string[]>([]);
 	const [responsibility, updateResponsibility] = useState('');
@@ -54,10 +59,17 @@ export const AddPerson = () => {
 	const [indefiniteEndDate, toggleIndefiniteEndDate] = useState(false);
 	const [jobQuery, setJobQuery] = useState<string>('');
 	const [levelQuery, setLevelQuery] = useState<string>('');
+	const [isSubmiting, toggleSubmitState] = useState(false);
+	const params = useParams<{ org_id: string }>();
 
 	const getCountries = async () => {
 		const { data, error } = await supabase.from('countries').select();
 		if (!error) setCountries(data);
+	};
+
+	const getEntities = async () => {
+		const { data, error } = await supabase.from('legal_entities').select('id').eq('org', params.org_id);
+		if (!error) setEntities(data);
 	};
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -72,23 +84,56 @@ export const AddPerson = () => {
 			start_date: new Date(),
 			probation_period: 90,
 			paid_leave: 20,
-			sick_leave: 20
+			sick_leave: 20,
+			work_schedule: '8',
+			work_shedule_interval: 'daily',
+			salary: undefined
 		}
 	});
 
-	function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values);
-	}
+	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+		toggleSubmitState(true);
+
+		const profile: TablesInsert<'profiles'> = {
+			first_name: values.first_name,
+			last_name: values.last_name,
+			nationality: values.nationality,
+			email: values.email,
+			id: ''
+		};
+		const contract: TablesInsert<'contracts'> = {
+			employment_type: values.employment_type,
+			end_date: values.end_date as unknown as string,
+			start_date: values.start_date as unknown as string,
+			salary: Number(values.salary),
+			sick_leave: values.sick_leave,
+			paid_leave: values.paid_leave,
+			probation_period: values.probation_period,
+			work_schedule: values.work_schedule,
+			work_shedule_interval: values.work_shedule_interval,
+			job_title: values.job_title,
+			level: values.level,
+			responsibilities: values.responsibilities,
+			profile: '',
+			entity: entities[0].id,
+			org: Number(params.org_id)
+		};
+		if (showSigningBonus) contract.signing_bonus = values.signing_bonus;
+		if (showFixedIncome) contract.fixed_allowance = values.fixed_allowance;
+
+		const inviteUserRes = await inviteUser(JSON.stringify(contract), JSON.stringify(profile));
+		toggleSubmitState(false);
+		if (inviteUserRes) toast.error(inviteUserRes);
+	};
 
 	useEffect(() => {
 		getCountries();
+		getEntities();
 	}, []);
 
 	return (
 		<Form {...form}>
-			<form className="mx-auto grid w-full max-w-4xl gap-6" onSubmit={form.handleSubmit(onSubmit)}>
-				<h1 className="text-xl font-semibold">Add Person</h1>
-
+			<form className="grid w-full gap-6" onSubmit={form.handleSubmit(onSubmit)}>
 				<div className="grid grid-cols-2 border-t border-t-border pt-10">
 					<div>
 						<h2 className="font-semibold">Personal details</h2>
@@ -164,7 +209,7 @@ export const AddPerson = () => {
 														<CommandGroup>
 															{countries.map(country => (
 																<CommandItem
-																	value={country.country_code}
+																	value={country.name}
 																	key={country.country_code}
 																	onSelect={() => {
 																		form.setValue('nationality', country.country_code);
@@ -443,9 +488,9 @@ export const AddPerson = () => {
 
 							{showFixedIncome && (
 								<>
-									{form.getValues().fixed_allowance.length ? (
+									{form.getValues().fixed_allowance?.length ? (
 										<ul className="grid list-disc gap-2 py-2">
-											{form.getValues().fixed_allowance.map(allowance => (
+											{form.getValues().fixed_allowance?.map(allowance => (
 												<li className="flex list-disc items-center justify-between p-1 text-xs font-light">
 													<div>
 														{allowance.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
@@ -478,7 +523,7 @@ export const AddPerson = () => {
 										type="button"
 										disabled={!fixedAllowance.amount || !fixedAllowance.name || !fixedAllowance.frequency}
 										onClick={() => {
-											form.setValue('fixed_allowance', [...form.getValues().fixed_allowance, fixedAllowance]);
+											form.setValue('fixed_allowance', [...(form.getValues()?.fixed_allowance || []), fixedAllowance]);
 											updateFixedAllowance({ name: '', amount: '', frequency: '' });
 										}}>
 										Add allowance
@@ -580,7 +625,11 @@ export const AddPerson = () => {
 				</div>
 
 				<div className="flex items-center justify-end border-t border-t-border pt-10">
-					<div className={cn(buttonVariants(), 'p-0')}>
+					<Button type="submit" size={'sm'} className="px-10 text-sm font-light">
+						{isSubmiting ? 'Adding person...' : 'Add person'}
+					</Button>
+
+					{/* <div className={cn(buttonVariants(), 'p-0')}>
 						<DropdownMenu>
 							<Button size={'sm'}>Add Person</Button>
 
@@ -599,7 +648,7 @@ export const AddPerson = () => {
 								</DropdownMenuGroup>
 							</DropdownMenuContent>
 						</DropdownMenu>
-					</div>
+					</div> */}
 				</div>
 			</form>
 		</Form>

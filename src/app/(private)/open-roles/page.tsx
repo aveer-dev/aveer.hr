@@ -11,48 +11,12 @@ import Link from 'next/link';
 export default function PeoplePage() {
 	const data: PERSON[] = [
 		{
-			id: '728ed52f',
-			first_name: 'Emmanuel',
-			last_name: 'Aina',
-			country: 'Nigeria',
-			status: 'pending',
-			email: 'm@example.com',
-			job_title: 'Software Engineer',
-			start_date: '12 May, 2024',
-			employment_type: 'Full-time'
-		},
-		{
-			id: '728ed52f',
-			first_name: 'Emmanuel',
-			last_name: 'Aina',
-			country: 'United States',
-			status: 'pending',
-			email: 'm@example.com',
-			job_title: 'Business Developer',
-			start_date: '12 Jan, 2024',
-			employment_type: 'Full-time'
-		},
-		{
-			id: '728ed52f',
-			first_name: 'Emmanuel',
-			last_name: 'Aina',
-			country: 'United Kingdom',
-			status: 'pending',
-			email: 'm@example.com',
-			job_title: 'Sales Manager',
-			start_date: '12 Dec, 2012',
-			employment_type: 'Part-time'
-		},
-		{
-			id: '728ed52f',
-			first_name: 'Emmanuel',
-			last_name: 'Aina',
-			country: 'Ghana',
-			status: 'pending',
-			email: 'm@example.com',
-			job_title: 'Chief Executive Officer',
-			start_date: '12 Sept, 2016',
-			employment_type: 'Full-time'
+			status: 'awaiting signatures',
+			job_title: 'New',
+			employment_type: 'full-time',
+			start_date: '2024-08-09',
+			profile: { last_name: 'Aina', first_name: 'Emmanuel', nationality: { name: 'AF' } },
+			id: '393'
 		}
 	];
 
