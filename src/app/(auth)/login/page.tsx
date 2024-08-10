@@ -12,10 +12,9 @@ export default function SigninPage() {
 			email: payload.get('email') as string,
 			password: payload.get('password') as string
 		};
-
 		const { error } = await supabase.auth.signInWithPassword(signinData);
-		if (error) return error;
 
+		if (error) return error;
 		return redirect('/');
 	};
 

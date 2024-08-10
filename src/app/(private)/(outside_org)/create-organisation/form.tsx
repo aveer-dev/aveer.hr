@@ -73,6 +73,7 @@ export const CreateOrgForm = () => {
 
 	const createOrganisation = async (payload: TablesInsert<'organisations'>) => await supabase.from('organisations').insert(payload).select('id').single();
 	const createLegalEntity = async (payload: TablesInsert<'legal_entities'>) => await supabase.from('legal_entities').insert(payload).select('id').single();
+	const createUserRole = async (payload: TablesInsert<'profiles_roles'>) => await supabase.from('profiles_roles').insert(payload);
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		toggleSubmitState(true);
@@ -81,6 +82,12 @@ export const CreateOrgForm = () => {
 			name: values.name,
 			website: values.website
 		};
+		const orgRes = await createOrganisation(orgData);
+		if (orgRes.error) {
+			toggleSubmitState(false);
+			return toast.error(orgRes.error.message);
+		}
+
 		const legalData: TablesInsert<'legal_entities'> = {
 			name: values.legal_name,
 			incorporation_country: values.incorporation_country,
@@ -91,20 +98,16 @@ export const CreateOrgForm = () => {
 			address_code: values.address_code,
 			street_address: values.street_address,
 			formation_date: values.formation_date as string,
-			org: 0
+			org: orgRes.data.id
 		};
 
-		const orgRes = await createOrganisation(orgData);
-		if (orgRes.error) {
-			toggleSubmitState(false);
-			return toast.error(orgRes.error.message);
-		}
-
-		const legalRes = await createLegalEntity({ ...legalData, org: orgRes.data.id });
+		const legalRes = await createLegalEntity({ ...legalData });
 		if (legalRes.error) {
 			toggleSubmitState(false);
 			return toast.error(legalRes.error.message);
 		}
+
+		await createUserRole({ organisation: orgRes.data.id, role: 'admin' });
 
 		router.push(`/${orgRes.data.id}/add-people`);
 	};

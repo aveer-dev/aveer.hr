@@ -24,6 +24,7 @@ export type Database = {
 					sick_leave: number | null;
 					signing_bonus: number | null;
 					start_date: string | null;
+					status: Database['public']['Enums']['contract_status'];
 					work_schedule: string | null;
 					work_shedule_interval: string | null;
 				};
@@ -47,6 +48,7 @@ export type Database = {
 					sick_leave?: number | null;
 					signing_bonus?: number | null;
 					start_date?: string | null;
+					status?: Database['public']['Enums']['contract_status'];
 					work_schedule?: string | null;
 					work_shedule_interval?: string | null;
 				};
@@ -70,6 +72,7 @@ export type Database = {
 					sick_leave?: number | null;
 					signing_bonus?: number | null;
 					start_date?: string | null;
+					status?: Database['public']['Enums']['contract_status'];
 					work_schedule?: string | null;
 					work_shedule_interval?: string | null;
 				};
@@ -302,21 +305,21 @@ export type Database = {
 					id: number;
 					organisation: number;
 					profile: string;
-					role: number;
+					role: string;
 				};
 				Insert: {
 					created_at?: string;
 					id?: number;
 					organisation: number;
-					profile: string;
-					role: number;
+					profile?: string;
+					role: string;
 				};
 				Update: {
 					created_at?: string;
 					id?: number;
 					organisation?: number;
 					profile?: string;
-					role?: number;
+					role?: string;
 				};
 				Relationships: [
 					{
@@ -334,11 +337,11 @@ export type Database = {
 						referencedColumns: ['id'];
 					},
 					{
-						foreignKeyName: 'user_roles_role_fkey';
+						foreignKeyName: 'profiles_roles_role_fkey';
 						columns: ['role'];
 						isOneToOne: false;
 						referencedRelation: 'roles';
-						referencedColumns: ['id'];
+						referencedColumns: ['name'];
 					}
 				];
 			};
@@ -400,7 +403,7 @@ export type Database = {
 			[_ in never]: never;
 		};
 		Enums: {
-			[_ in never]: never;
+			contract_status: 'awaiting signatures' | 'awaiting approval' | 'active' | 'inactive';
 		};
 		CompositeTypes: {
 			[_ in never]: never;
