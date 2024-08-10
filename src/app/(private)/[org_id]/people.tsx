@@ -7,11 +7,8 @@ import { cn } from '@/lib/utils';
 import { PERSON } from '@/type/person';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
-import { createClient } from '@/utils/supabase/client';
 import { useState } from 'react';
 import { DashboardFilters } from '@/components/dashboard/filters';
-
-const supabase = createClient();
 
 export const ClientTable = ({ orgId, data }: { orgId: string; data: PERSON[] }) => {
 	const [tableData, updateData] = useState<PERSON[]>(data);
