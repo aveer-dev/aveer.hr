@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '../ui/badge';
 import { PERSON } from '@/type/person';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { format } from 'date-fns';
 
 export const columns: ColumnDef<PERSON>[] = [
 	{
@@ -68,8 +69,9 @@ export const columns: ColumnDef<PERSON>[] = [
 		cell: ({ row }) => <span className="capitalize">{row.original.employment_type}</span>
 	},
 	{
-		accessorKey: 'start_date',
-		header: 'Start Date'
+		id: 'start_date',
+		header: 'Start Date',
+		cell: ({ row }) => <span>{format(row.original.start_date, 'PP')}</span>
 	},
 	{
 		id: 'actions',
