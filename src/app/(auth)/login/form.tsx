@@ -18,7 +18,7 @@ export const LoginForm = ({ formAction }: props) => {
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" size={'sm'} className="px-10 text-sm font-light">
+			<Button type="submit" disabled={pending} size={'sm'} className="px-8 text-xs font-light">
 				{pending ? 'Logging in...' : 'Login'}
 			</Button>
 		);

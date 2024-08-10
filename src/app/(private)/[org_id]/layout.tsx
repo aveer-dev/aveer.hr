@@ -1,6 +1,6 @@
 import { NavMenu } from '@/components/ui/nav-menu';
 import { CircleHelp } from 'lucide-react';
-import { LogoutButton } from '../../logout-button';
+import { LogoutButton } from '../logout-button';
 
 export default function RootLayout({ children, params }: { children: React.ReactNode; params: { [key: string]: string } }) {
 	return (
