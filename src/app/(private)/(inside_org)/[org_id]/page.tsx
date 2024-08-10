@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { ChevronsUpDown, Plus } from 'lucide-react';
-import { DashboardCharts } from './chart';
-import { PeopleTable } from './people-table';
+import { DashboardCharts } from './chart.component';
+import { PeopleTable } from './people.component';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 

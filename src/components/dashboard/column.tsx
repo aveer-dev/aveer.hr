@@ -1,12 +1,13 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
+import { Info, MoreHorizontal } from 'lucide-react';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '../ui/badge';
 import { PERSON } from '@/type/person';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const columns: ColumnDef<PERSON>[] = [
 	{
@@ -46,8 +47,18 @@ export const columns: ColumnDef<PERSON>[] = [
 		id: 'status',
 		header: 'Status',
 		cell: ({ row }) => (
-			<Badge className="font-light" variant="secondary">
+			<Badge className="gap-2 py-1 font-light" variant="secondary">
 				{row.original['status']}
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger>
+							<Info size={12} className="stroke-1" />
+						</TooltipTrigger>
+						<TooltipContent>
+							<p className="text-xs font-thin">{row.original['status']}</p>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
 			</Badge>
 		)
 	},
@@ -73,12 +84,17 @@ export const columns: ColumnDef<PERSON>[] = [
 							<MoreHorizontal className="h-4 w-4" />
 						</Button>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent align="start">
-						<DropdownMenuItem className="text-xs font-light" onClick={() => navigator.clipboard.writeText(payment.id)}>
-							Copy payment ID
+					<DropdownMenuContent align="end">
+						<DropdownMenuItem className="text-xs font-light" asChild>
+							<Button size={'sm'} variant={'ghost'} className="h-7 w-full cursor-pointer justify-start focus:!ring-0">
+								View
+							</Button>
 						</DropdownMenuItem>
-						<DropdownMenuItem className="text-xs font-light">View customer</DropdownMenuItem>
-						<DropdownMenuItem className="text-xs font-light">View payment details</DropdownMenuItem>
+						<DropdownMenuItem className="text-xs font-light" asChild>
+							<Button size={'sm'} variant={'ghost'} className="h-7 w-full cursor-pointer justify-start focus:!ring-0">
+								Edit
+							</Button>
+						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			);

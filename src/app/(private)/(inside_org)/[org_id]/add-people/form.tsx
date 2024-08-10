@@ -17,12 +17,13 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Tables, TablesInsert } from '@/type/database.types';
 import { inviteUser } from './invite-user.action';
 import { toast } from 'sonner';
 import { useParams } from 'next/navigation';
+import { LoadingSpinner } from '@/components/ui/loader';
 
 const supabase = createClient();
 
@@ -38,7 +39,7 @@ const formSchema = z.object({
 	work_shedule_interval: z.string().optional(),
 	responsibilities: z.array(z.string()),
 	salary: z.string(),
-	signing_bonus: z.number().optional(),
+	signing_bonus: z.string().optional(),
 	fixed_allowance: z.array(z.object({ name: z.string(), amount: z.string(), frequency: z.string() })).optional(),
 	start_date: z.date(),
 	end_date: z.date().optional(),
@@ -67,10 +68,10 @@ export const AddPerson = () => {
 		if (!error) setCountries(data);
 	};
 
-	const getEntities = async () => {
+	const getEntities = useCallback(async () => {
 		const { data, error } = await supabase.from('legal_entities').select('id').eq('org', params.org_id);
 		if (!error) setEntities(data);
-	};
+	}, [params.org_id]);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -118,7 +119,7 @@ export const AddPerson = () => {
 			entity: entities[0].id,
 			org: Number(params.org_id)
 		};
-		if (showSigningBonus) contract.signing_bonus = values.signing_bonus;
+		if (showSigningBonus) contract.signing_bonus = Number(values.signing_bonus);
 		if (showFixedIncome) contract.fixed_allowance = values.fixed_allowance;
 
 		const inviteUserRes = await inviteUser(JSON.stringify(contract), JSON.stringify(profile));
@@ -129,7 +130,7 @@ export const AddPerson = () => {
 	useEffect(() => {
 		getCountries();
 		getEntities();
-	}, []);
+	}, [getEntities]);
 
 	return (
 		<Form {...form}>
@@ -405,8 +406,10 @@ export const AddPerson = () => {
 							<Label htmlFor="email">Job responsibilities</Label>
 							{form.getValues().responsibilities.length ? (
 								<ul className="ml-4 grid gap-2">
-									{form.getValues().responsibilities.map(resp => (
-										<li className="list-disc text-xs text-foreground">{resp}</li>
+									{form.getValues().responsibilities.map((resp, index) => (
+										<li key={index} className="list-disc text-xs text-foreground">
+											{resp}
+										</li>
 									))}
 								</ul>
 							) : (
@@ -490,8 +493,8 @@ export const AddPerson = () => {
 								<>
 									{form.getValues().fixed_allowance?.length ? (
 										<ul className="grid list-disc gap-2 py-2">
-											{form.getValues().fixed_allowance?.map(allowance => (
-												<li className="flex list-disc items-center justify-between p-1 text-xs font-light">
+											{form.getValues().fixed_allowance?.map((allowance, index) => (
+												<li key={index} className="flex list-disc items-center justify-between p-1 text-xs font-light">
 													<div>
 														{allowance.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
 													</div>
@@ -625,7 +628,8 @@ export const AddPerson = () => {
 				</div>
 
 				<div className="flex items-center justify-end border-t border-t-border pt-10">
-					<Button type="submit" size={'sm'} className="px-10 text-sm font-light">
+					<Button disabled={isSubmiting} type="submit" size={'sm'} className="gap-3 px-6 text-sm font-light">
+						{isSubmiting && <LoadingSpinner />}
 						{isSubmiting ? 'Adding person...' : 'Add person'}
 					</Button>
 
