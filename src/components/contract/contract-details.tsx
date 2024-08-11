@@ -1,7 +1,7 @@
 'use server';
 
 import { Badge } from '@/components/ui/badge';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
 import { format } from 'date-fns';
@@ -97,7 +97,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 			{signatureType === 'profile' && (
 				<div className="flex w-fit items-center gap-2 rounded-sm border border-accent bg-accent px-3 py-2 text-xs font-thin">
 					<InfoIcon size={12} />
-					You can not edit your contract details. You'd need to reachout to your contact or manager to request an edit/change
+					{`You can not edit your contract details. You'd need to reachout to your contact or manager to request an edit/change`}
 				</div>
 			)}
 
