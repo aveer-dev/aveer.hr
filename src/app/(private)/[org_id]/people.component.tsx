@@ -1,5 +1,5 @@
 import { PERSON } from '@/type/person';
-import { ClientTable } from './people';
+import { ClientTable } from './table';
 import { createClient } from '@/utils/supabase/server';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';

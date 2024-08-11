@@ -27,7 +27,7 @@ export const ClientTable = ({ orgId, data }: { orgId: string; data: PERSON[] }) 
 				</Link>
 			</div>
 
-			{data && <DataTable columns={columns} data={tableData} loading={tableLoading} />}
+			<DataTable columns={columns} orgId={orgId} data={tableData} loading={tableLoading} />
 		</div>
 	);
 };

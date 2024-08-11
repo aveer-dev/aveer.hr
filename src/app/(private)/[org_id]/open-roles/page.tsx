@@ -55,7 +55,7 @@ export default function PeoplePage() {
 					</Link>
 				</div>
 
-				<DataTable columns={columns} data={data} />
+				<DataTable orgId="" columns={columns} data={data} />
 			</div>
 		</div>
 	);

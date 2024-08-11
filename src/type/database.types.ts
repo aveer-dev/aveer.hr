@@ -1,470 +1,522 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
-	public: {
-		Tables: {
-			contracts: {
-				Row: {
-					created_at: string;
-					employment_type: string | null;
-					end_date: string | null;
-					entity: number;
-					fixed_allowance: Json | null;
-					id: number;
-					job_title: string;
-					level: string | null;
-					org: number;
-					org_signed: string | null;
-					paid_leave: number | null;
-					probation_period: number | null;
-					profile: string;
-					profile_signed: string | null;
-					responsibilities: Json | null;
-					salary: number | null;
-					sick_leave: number | null;
-					signing_bonus: number | null;
-					start_date: string | null;
-					status: Database['public']['Enums']['contract_status'];
-					work_schedule: string | null;
-					work_shedule_interval: string | null;
-				};
-				Insert: {
-					created_at?: string;
-					employment_type?: string | null;
-					end_date?: string | null;
-					entity: number;
-					fixed_allowance?: Json | null;
-					id?: number;
-					job_title: string;
-					level?: string | null;
-					org: number;
-					org_signed?: string | null;
-					paid_leave?: number | null;
-					probation_period?: number | null;
-					profile: string;
-					profile_signed?: string | null;
-					responsibilities?: Json | null;
-					salary?: number | null;
-					sick_leave?: number | null;
-					signing_bonus?: number | null;
-					start_date?: string | null;
-					status?: Database['public']['Enums']['contract_status'];
-					work_schedule?: string | null;
-					work_shedule_interval?: string | null;
-				};
-				Update: {
-					created_at?: string;
-					employment_type?: string | null;
-					end_date?: string | null;
-					entity?: number;
-					fixed_allowance?: Json | null;
-					id?: number;
-					job_title?: string;
-					level?: string | null;
-					org?: number;
-					org_signed?: string | null;
-					paid_leave?: number | null;
-					probation_period?: number | null;
-					profile?: string;
-					profile_signed?: string | null;
-					responsibilities?: Json | null;
-					salary?: number | null;
-					sick_leave?: number | null;
-					signing_bonus?: number | null;
-					start_date?: string | null;
-					status?: Database['public']['Enums']['contract_status'];
-					work_schedule?: string | null;
-					work_shedule_interval?: string | null;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'contracts_entity_fkey';
-						columns: ['entity'];
-						isOneToOne: false;
-						referencedRelation: 'legal_entities';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'contracts_org_fkey';
-						columns: ['org'];
-						isOneToOne: false;
-						referencedRelation: 'organisations';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'contracts_profile_fkey';
-						columns: ['profile'];
-						isOneToOne: false;
-						referencedRelation: 'profiles';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			countries: {
-				Row: {
-					country_code: string;
-					created_at: string;
-					dial_code: string;
-					id: number;
-					name: string;
-				};
-				Insert: {
-					country_code: string;
-					created_at?: string;
-					dial_code: string;
-					id?: number;
-					name: string;
-				};
-				Update: {
-					country_code?: string;
-					created_at?: string;
-					dial_code?: string;
-					id?: number;
-					name?: string;
-				};
-				Relationships: [];
-			};
-			dashboard_stats: {
-				Row: {
-					created_at: string;
-					id: number;
-					open_contracts: number;
-					org: number;
-					signed_contracts: number | null;
-				};
-				Insert: {
-					created_at?: string;
-					id?: number;
-					open_contracts?: number;
-					org: number;
-					signed_contracts?: number | null;
-				};
-				Update: {
-					created_at?: string;
-					id?: number;
-					open_contracts?: number;
-					org?: number;
-					signed_contracts?: number | null;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'dashboard_stats_org_fkey';
-						columns: ['org'];
-						isOneToOne: false;
-						referencedRelation: 'organisations';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			legal_entities: {
-				Row: {
-					address_code: string | null;
-					address_state: number;
-					company_type: string | null;
-					created_at: string;
-					ein: string | null;
-					formation_date: string | null;
-					id: number;
-					incorporation_country: string | null;
-					name: string;
-					org: number;
-					sic: string | null;
-					street_address: string | null;
-					updated_at: string;
-				};
-				Insert: {
-					address_code?: string | null;
-					address_state?: number;
-					company_type?: string | null;
-					created_at?: string;
-					ein?: string | null;
-					formation_date?: string | null;
-					id?: number;
-					incorporation_country?: string | null;
-					name: string;
-					org: number;
-					sic?: string | null;
-					street_address?: string | null;
-					updated_at?: string;
-				};
-				Update: {
-					address_code?: string | null;
-					address_state?: number;
-					company_type?: string | null;
-					created_at?: string;
-					ein?: string | null;
-					formation_date?: string | null;
-					id?: number;
-					incorporation_country?: string | null;
-					name?: string;
-					org?: number;
-					sic?: string | null;
-					street_address?: string | null;
-					updated_at?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'legal_entities_address_state_fkey';
-						columns: ['address_state'];
-						isOneToOne: false;
-						referencedRelation: 'states';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'legal_entities_incorporation_country_fkey';
-						columns: ['incorporation_country'];
-						isOneToOne: false;
-						referencedRelation: 'countries';
-						referencedColumns: ['country_code'];
-					},
-					{
-						foreignKeyName: 'legal_entities_org_fkey';
-						columns: ['org'];
-						isOneToOne: false;
-						referencedRelation: 'organisations';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			organisations: {
-				Row: {
-					created_at: string;
-					id: number;
-					name: string;
-					updated_at: string;
-					website: string | null;
-				};
-				Insert: {
-					created_at?: string;
-					id?: number;
-					name?: string;
-					updated_at?: string;
-					website?: string | null;
-				};
-				Update: {
-					created_at?: string;
-					id?: number;
-					name?: string;
-					updated_at?: string;
-					website?: string | null;
-				};
-				Relationships: [];
-			};
-			profiles: {
-				Row: {
-					email: string;
-					first_name: string;
-					id: string;
-					last_name: string;
-					nationality: string | null;
-					org: number | null;
-				};
-				Insert: {
-					email: string;
-					first_name: string;
-					id: string;
-					last_name: string;
-					nationality?: string | null;
-					org?: number | null;
-				};
-				Update: {
-					email?: string;
-					first_name?: string;
-					id?: string;
-					last_name?: string;
-					nationality?: string | null;
-					org?: number | null;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'profiles_id_fkey';
-						columns: ['id'];
-						isOneToOne: true;
-						referencedRelation: 'users';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'profiles_nationality_fkey';
-						columns: ['nationality'];
-						isOneToOne: false;
-						referencedRelation: 'countries';
-						referencedColumns: ['country_code'];
-					},
-					{
-						foreignKeyName: 'profiles_org_fkey';
-						columns: ['org'];
-						isOneToOne: false;
-						referencedRelation: 'organisations';
-						referencedColumns: ['id'];
-					}
-				];
-			};
-			profiles_roles: {
-				Row: {
-					created_at: string;
-					id: number;
-					organisation: number;
-					profile: string;
-					role: string;
-				};
-				Insert: {
-					created_at?: string;
-					id?: number;
-					organisation: number;
-					profile?: string;
-					role: string;
-				};
-				Update: {
-					created_at?: string;
-					id?: number;
-					organisation?: number;
-					profile?: string;
-					role?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'profiles_roles_organisation_fkey';
-						columns: ['organisation'];
-						isOneToOne: false;
-						referencedRelation: 'organisations';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'profiles_roles_profile_fkey';
-						columns: ['profile'];
-						isOneToOne: false;
-						referencedRelation: 'profiles';
-						referencedColumns: ['id'];
-					},
-					{
-						foreignKeyName: 'profiles_roles_role_fkey';
-						columns: ['role'];
-						isOneToOne: false;
-						referencedRelation: 'roles';
-						referencedColumns: ['name'];
-					}
-				];
-			};
-			roles: {
-				Row: {
-					created_at: string;
-					description: string | null;
-					id: number;
-					name: string;
-				};
-				Insert: {
-					created_at?: string;
-					description?: string | null;
-					id?: number;
-					name?: string;
-				};
-				Update: {
-					created_at?: string;
-					description?: string | null;
-					id?: number;
-					name?: string;
-				};
-				Relationships: [];
-			};
-			states: {
-				Row: {
-					country_code: string;
-					id: number;
-					name: string;
-					short_code: string;
-				};
-				Insert: {
-					country_code: string;
-					id?: number;
-					name: string;
-					short_code: string;
-				};
-				Update: {
-					country_code?: string;
-					id?: number;
-					name?: string;
-					short_code?: string;
-				};
-				Relationships: [
-					{
-						foreignKeyName: 'states_country_code_fkey';
-						columns: ['country_code'];
-						isOneToOne: false;
-						referencedRelation: 'countries';
-						referencedColumns: ['country_code'];
-					}
-				];
-			};
-		};
-		Views: {
-			[_ in never]: never;
-		};
-		Functions: {
-			[_ in never]: never;
-		};
-		Enums: {
-			contract_status: 'awaiting signatures' | 'awaiting approval' | 'active' | 'inactive';
-		};
-		CompositeTypes: {
-			[_ in never]: never;
-		};
-	};
-};
+  public: {
+    Tables: {
+      contracts: {
+        Row: {
+          created_at: string
+          employment_type: string | null
+          end_date: string | null
+          entity: number
+          fixed_allowance: Json | null
+          id: number
+          job_title: string
+          level: string | null
+          org: number
+          org_signature_string: string | null
+          org_signed: string | null
+          paid_leave: number | null
+          probation_period: number | null
+          profile: string
+          profile_signature_string: string | null
+          profile_signed: string | null
+          responsibilities: Json | null
+          salary: number | null
+          sick_leave: number | null
+          signed_by: string | null
+          signing_bonus: number | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["contract_status"]
+          work_schedule: string | null
+          work_shedule_interval: string | null
+        }
+        Insert: {
+          created_at?: string
+          employment_type?: string | null
+          end_date?: string | null
+          entity: number
+          fixed_allowance?: Json | null
+          id?: number
+          job_title: string
+          level?: string | null
+          org: number
+          org_signature_string?: string | null
+          org_signed?: string | null
+          paid_leave?: number | null
+          probation_period?: number | null
+          profile: string
+          profile_signature_string?: string | null
+          profile_signed?: string | null
+          responsibilities?: Json | null
+          salary?: number | null
+          sick_leave?: number | null
+          signed_by?: string | null
+          signing_bonus?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["contract_status"]
+          work_schedule?: string | null
+          work_shedule_interval?: string | null
+        }
+        Update: {
+          created_at?: string
+          employment_type?: string | null
+          end_date?: string | null
+          entity?: number
+          fixed_allowance?: Json | null
+          id?: number
+          job_title?: string
+          level?: string | null
+          org?: number
+          org_signature_string?: string | null
+          org_signed?: string | null
+          paid_leave?: number | null
+          probation_period?: number | null
+          profile?: string
+          profile_signature_string?: string | null
+          profile_signed?: string | null
+          responsibilities?: Json | null
+          salary?: number | null
+          sick_leave?: number | null
+          signed_by?: string | null
+          signing_bonus?: number | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["contract_status"]
+          work_schedule?: string | null
+          work_shedule_interval?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_signed_by_fkey"
+            columns: ["signed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      countries: {
+        Row: {
+          country_code: string
+          created_at: string
+          dial_code: string
+          id: number
+          name: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string
+          dial_code: string
+          id?: number
+          name: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          dial_code?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      dashboard_stats: {
+        Row: {
+          created_at: string
+          id: number
+          open_contracts: number
+          org: number
+          signed_contracts: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          open_contracts?: number
+          org: number
+          signed_contracts?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          open_contracts?: number
+          org?: number
+          signed_contracts?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_stats_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_entities: {
+        Row: {
+          address_code: string | null
+          address_state: number
+          company_type: string | null
+          created_at: string
+          ein: string | null
+          formation_date: string | null
+          id: number
+          incorporation_country: string | null
+          name: string
+          org: number
+          sic: string | null
+          street_address: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_code?: string | null
+          address_state?: number
+          company_type?: string | null
+          created_at?: string
+          ein?: string | null
+          formation_date?: string | null
+          id?: number
+          incorporation_country?: string | null
+          name: string
+          org: number
+          sic?: string | null
+          street_address?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_code?: string | null
+          address_state?: number
+          company_type?: string | null
+          created_at?: string
+          ein?: string | null
+          formation_date?: string | null
+          id?: number
+          incorporation_country?: string | null
+          name?: string
+          org?: number
+          sic?: string | null
+          street_address?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_entities_address_state_fkey"
+            columns: ["address_state"]
+            isOneToOne: false
+            referencedRelation: "states"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_entities_incorporation_country_fkey"
+            columns: ["incorporation_country"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["country_code"]
+          },
+          {
+            foreignKeyName: "legal_entities_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organisations: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          nationality: string | null
+          org: number | null
+        }
+        Insert: {
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          nationality?: string | null
+          org?: number | null
+        }
+        Update: {
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          nationality?: string | null
+          org?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_nationality_fkey"
+            columns: ["nationality"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["country_code"]
+          },
+          {
+            foreignKeyName: "profiles_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles_roles: {
+        Row: {
+          created_at: string
+          id: number
+          organisation: number
+          profile: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          organisation: number
+          profile?: string
+          role: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          organisation?: number
+          profile?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_roles_organisation_fkey"
+            columns: ["organisation"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_roles_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_roles_role_fkey"
+            columns: ["role"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["name"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      states: {
+        Row: {
+          country_code: string
+          id: number
+          name: string
+          short_code: string
+        }
+        Insert: {
+          country_code: string
+          id?: number
+          name: string
+          short_code: string
+        }
+        Update: {
+          country_code?: string
+          id?: number
+          name?: string
+          short_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "states_country_code_fkey"
+            columns: ["country_code"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["country_code"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      contract_status:
+        | "awaiting signatures"
+        | "awaiting approval"
+        | "active"
+        | "inactive"
+        | "awaiting org signature"
+        | "awaiting signature"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
 
-type PublicSchema = Database[Extract<keyof Database, 'public'>];
+type PublicSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-	PublicTableNameOrOptions extends keyof (PublicSchema['Tables'] & PublicSchema['Views']) | { schema: keyof Database },
-	TableName extends PublicTableNameOrOptions extends { schema: keyof Database } ? keyof (Database[PublicTableNameOrOptions['schema']]['Tables'] & Database[PublicTableNameOrOptions['schema']]['Views']) : never = never
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-	? (Database[PublicTableNameOrOptions['schema']]['Tables'] & Database[PublicTableNameOrOptions['schema']]['Views'])[TableName] extends {
-			Row: infer R;
-		}
-		? R
-		: never
-	: PublicTableNameOrOptions extends keyof (PublicSchema['Tables'] & PublicSchema['Views'])
-		? (PublicSchema['Tables'] & PublicSchema['Views'])[PublicTableNameOrOptions] extends {
-				Row: infer R;
-			}
-			? R
-			: never
-		: never;
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
 export type TablesInsert<
-	PublicTableNameOrOptions extends keyof PublicSchema['Tables'] | { schema: keyof Database },
-	TableName extends PublicTableNameOrOptions extends { schema: keyof Database } ? keyof Database[PublicTableNameOrOptions['schema']]['Tables'] : never = never
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-	? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
-			Insert: infer I;
-		}
-		? I
-		: never
-	: PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-		? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
-				Insert: infer I;
-			}
-			? I
-			: never
-		: never;
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
 export type TablesUpdate<
-	PublicTableNameOrOptions extends keyof PublicSchema['Tables'] | { schema: keyof Database },
-	TableName extends PublicTableNameOrOptions extends { schema: keyof Database } ? keyof Database[PublicTableNameOrOptions['schema']]['Tables'] : never = never
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-	? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
-			Update: infer U;
-		}
-		? U
-		: never
-	: PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-		? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
-				Update: infer U;
-			}
-			? U
-			: never
-		: never;
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
 export type Enums<
-	PublicEnumNameOrOptions extends keyof PublicSchema['Enums'] | { schema: keyof Database },
-	EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database } ? keyof Database[PublicEnumNameOrOptions['schema']]['Enums'] : never = never
-> = PublicEnumNameOrOptions extends { schema: keyof Database } ? Database[PublicEnumNameOrOptions['schema']]['Enums'][EnumName] : PublicEnumNameOrOptions extends keyof PublicSchema['Enums'] ? PublicSchema['Enums'][PublicEnumNameOrOptions] : never;
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
