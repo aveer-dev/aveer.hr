@@ -1,10 +1,9 @@
 'use client';
 
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Check, ChevronDown } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,8 +18,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Tables, TablesInsert } from '@/type/database.types';
-import { inviteUser } from './invite-user.action';
+import { TablesInsert, TablesUpdate } from '@/type/database.types';
+import { inviteUser, updateContract } from './invite-user.action';
 import { toast } from 'sonner';
 import { useParams } from 'next/navigation';
 import { LoadingSpinner } from '@/components/ui/loader';
@@ -48,16 +47,16 @@ const formSchema = z.object({
 	sick_leave: z.number()
 });
 
-export const AddPerson = () => {
+export const AddPerson = ({ data }: { data?: TablesUpdate<'contracts'> }) => {
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
 	const [entities, setEntities] = useState<{ id: number }[]>([]);
 	const [jobTitles, updateJobTitles] = useState<string[]>([]);
 	const [jobLevels, updateJobLevels] = useState<string[]>([]);
 	const [responsibility, updateResponsibility] = useState('');
 	const [fixedAllowance, updateFixedAllowance] = useState({ name: '', amount: '', frequency: '' });
-	const [showSigningBonus, toggleShowSigningBonus] = useState(false);
-	const [showFixedIncome, toggleShowFixedIncome] = useState(false);
-	const [indefiniteEndDate, toggleIndefiniteEndDate] = useState(false);
+	const [showSigningBonus, toggleShowSigningBonus] = useState(!!data?.signing_bonus);
+	const [showFixedIncome, toggleShowFixedIncome] = useState(!!data?.fixed_allowance);
+	const [indefiniteEndDate, toggleIndefiniteEndDate] = useState(!data?.end_date);
 	const [jobQuery, setJobQuery] = useState<string>('');
 	const [levelQuery, setLevelQuery] = useState<string>('');
 	const [isSubmiting, toggleSubmitState] = useState(false);
@@ -76,19 +75,24 @@ export const AddPerson = () => {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			first_name: '',
-			last_name: '',
-			email: '',
-			nationality: '',
-			responsibilities: [],
-			fixed_allowance: [],
-			start_date: new Date(),
-			probation_period: 90,
-			paid_leave: 20,
-			sick_leave: 20,
-			work_schedule: '8',
-			work_shedule_interval: 'daily',
-			salary: undefined
+			first_name: (data?.profile as any)?.first_name || '',
+			last_name: (data?.profile as any)?.last_name || '',
+			email: (data?.profile as any)?.email || '',
+			nationality: (data?.profile as any)?.nationality || '',
+			responsibilities: (data?.responsibilities as string[]) || [],
+			fixed_allowance: (data?.fixed_allowance as any) || [],
+			start_date: data?.start_date ? new Date(data?.start_date) : new Date(),
+			end_date: data?.end_date ? new Date(data?.end_date) : new Date(),
+			probation_period: data?.probation_period || 90,
+			paid_leave: data?.paid_leave || 20,
+			sick_leave: data?.sick_leave || 20,
+			work_schedule: data?.work_schedule || '8',
+			work_shedule_interval: data?.work_shedule_interval || 'daily',
+			salary: data?.salary ? String(data?.salary) : undefined,
+			signing_bonus: data?.signing_bonus ? String(data?.signing_bonus) : undefined,
+			employment_type: data?.employment_type || undefined,
+			level: data?.level || undefined,
+			job_title: data?.job_title || undefined
 		}
 	});
 
@@ -115,16 +119,18 @@ export const AddPerson = () => {
 			job_title: values.job_title,
 			level: values.level,
 			responsibilities: values.responsibilities,
-			profile: '',
+			profile: (data?.profile as any).id || '',
 			entity: entities[0].id,
 			org: Number(params.org_id)
 		};
 		if (showSigningBonus) contract.signing_bonus = Number(values.signing_bonus);
 		if (showFixedIncome) contract.fixed_allowance = values.fixed_allowance;
 
-		const inviteUserRes = await inviteUser(JSON.stringify(contract), JSON.stringify(profile));
+		const responseMessage = data ? await updateContract(JSON.stringify(contract)) : await inviteUser(JSON.stringify(contract), JSON.stringify(profile));
 		toggleSubmitState(false);
-		if (inviteUserRes) toast.error(inviteUserRes);
+
+		if (responseMessage == 'update') return toast.success('Contract details updated successfully');
+		if (responseMessage) toast.error(responseMessage);
 	};
 
 	useEffect(() => {
@@ -137,7 +143,7 @@ export const AddPerson = () => {
 			<form className="grid w-full gap-6" onSubmit={form.handleSubmit(onSubmit)}>
 				<div className="grid grid-cols-2 border-t border-t-border pt-10">
 					<div>
-						<h2 className="font-semibold">Personal details</h2>
+						<h2 className="font-semibold">{data ? 'Employee details' : 'Personal details'}</h2>
 						<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
 					</div>
 
@@ -150,7 +156,7 @@ export const AddPerson = () => {
 									<FormItem>
 										<FormLabel>First name</FormLabel>
 										<FormControl>
-											<Input type="text" placeholder="Enter first name" {...field} required />
+											<Input disabled={!!data} type="text" placeholder="Enter first name" {...field} required />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -164,7 +170,7 @@ export const AddPerson = () => {
 									<FormItem>
 										<FormLabel>Last name</FormLabel>
 										<FormControl>
-											<Input type="text" placeholder="Enter last name" {...field} required />
+											<Input disabled={!!data} type="text" placeholder="Enter last name" {...field} required />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -180,7 +186,7 @@ export const AddPerson = () => {
 									<FormItem>
 										<FormLabel>Email</FormLabel>
 										<FormControl>
-											<Input type="email" placeholder="Enter email" {...field} required />
+											<Input disabled={!!data} type="email" placeholder="Enter email" {...field} required />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -196,7 +202,7 @@ export const AddPerson = () => {
 										<Popover>
 											<PopoverTrigger asChild>
 												<FormControl>
-													<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
+													<Button disabled={!!data} variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
 														{field.value ? countries.find(country => country.country_code === field.value)?.name : `Select employee's nationality`}
 														<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 													</Button>
@@ -469,7 +475,7 @@ export const AddPerson = () => {
 									<FormItem>
 										<div className="flex items-center justify-between space-x-2">
 											<FormLabel>Add signing bonus</FormLabel>
-											<Switch onCheckedChange={event => toggleShowSigningBonus(event)} id="signin-bonus" className="scale-75" />
+											<Switch checked={showSigningBonus} onCheckedChange={event => toggleShowSigningBonus(event)} id="signin-bonus" className="scale-75" />
 										</div>
 
 										{showSigningBonus && (
@@ -486,7 +492,7 @@ export const AddPerson = () => {
 						<div className="grid w-full gap-3 rounded-lg bg-accent px-2 py-2">
 							<div className="flex items-center justify-between space-x-2">
 								<Label htmlFor="signin-bonus">Fixed allowances</Label>
-								<Switch id="signin-bonus" onCheckedChange={event => toggleShowFixedIncome(event)} className="scale-75" />
+								<Switch id="fixed-allowance" checked={showFixedIncome} onCheckedChange={event => toggleShowFixedIncome(event)} className="scale-75" />
 							</div>
 
 							{showFixedIncome && (
@@ -565,7 +571,7 @@ export const AddPerson = () => {
 									<div className="grid w-full gap-3 rounded-lg bg-accent px-2 py-2">
 										<div className="flex items-center justify-between space-x-2">
 											<Label htmlFor="indefinite">Indefinite</Label>
-											<Switch onCheckedChange={event => toggleIndefiniteEndDate(event)} id="indefinite" className="scale-75" />
+											<Switch checked={indefiniteEndDate} onCheckedChange={event => toggleIndefiniteEndDate(event)} id="indefinite" className="scale-75" />
 										</div>
 
 										{!indefiniteEndDate && <DatePicker onSetDate={field.onChange} selected={field.value} />}
@@ -630,7 +636,7 @@ export const AddPerson = () => {
 				<div className="flex items-center justify-end border-t border-t-border pt-10">
 					<Button disabled={isSubmiting} type="submit" size={'sm'} className="gap-3 px-6 text-sm font-light">
 						{isSubmiting && <LoadingSpinner />}
-						{isSubmiting ? 'Adding person...' : 'Add person'}
+						{isSubmiting ? (data ? 'Updating contract...' : 'Adding person...') : data ? 'Update Contract' : 'Add person'}
 					</Button>
 
 					{/* <div className={cn(buttonVariants(), 'p-0')}>

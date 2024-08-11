@@ -36,3 +36,20 @@ export const inviteUser = async (contract: string, profile: string) => {
 	if (contractRes.error) return contractRes.error.message;
 	if (!contractRes.error) return redirect(`/${parsedContract.org}`);
 };
+
+export const updateContract = async (contract: string) => {
+	const supabase = createClient();
+
+	const parsedContract: TablesInsert<'contracts'> = JSON.parse(contract);
+
+	const role = await supabase.from('profiles_roles').select().match({ organisation: parsedContract.org, profile: parsedContract.profile });
+	if (role.error) return role.error.message;
+
+	const { error } = await supabase
+		.from('contracts')
+		.update({ ...parsedContract })
+		.match({ org: parsedContract.org, profile: parsedContract.profile });
+
+	if (error) return error.message;
+	return 'update';
+};

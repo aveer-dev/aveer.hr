@@ -4,14 +4,17 @@ import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '../ui/skeleton';
+import Link from 'next/link';
+import { PERSON } from '@/type/person';
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
 	loading?: boolean;
+	orgId: string;
 }
 
-export function DataTable<TData, TValue>({ columns, data, loading }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, orgId, loading }: DataTableProps<TData, TValue>) {
 	const table = useReactTable({
 		data,
 		columns,
@@ -37,7 +40,11 @@ export function DataTable<TData, TValue>({ columns, data, loading }: DataTablePr
 							table.getRowModel().rows.map(row => (
 								<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
 									{row.getVisibleCells().map(cell => (
-										<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+										<TableCell key={cell.id} className="p-0">
+											<Link className="block p-4" href={`/${orgId}/person/${(row.original as PERSON).id}`}>
+												{flexRender(cell.column.columnDef.cell, cell.getContext())}
+											</Link>
+										</TableCell>
 									))}
 								</TableRow>
 							))
