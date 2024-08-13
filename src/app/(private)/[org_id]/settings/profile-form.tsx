@@ -3,13 +3,15 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
+
 import { TablesUpdate } from '@/type/database.types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/client';
@@ -86,9 +88,7 @@ export const ProfileForm = ({ data }: { data?: TablesUpdate<'profiles'> }) => {
 									</FormItem>
 								)}
 							/>
-						</div>
 
-						<div className="grid grid-cols-2 gap-6">
 							<FormField
 								control={form.control}
 								name="email"
@@ -145,6 +145,18 @@ export const ProfileForm = ({ data }: { data?: TablesUpdate<'profiles'> }) => {
 								)}
 							/>
 						</div>
+
+						<Alert>
+							<Info size={12} />
+							<AlertDescription className="grid gap-4 text-xs">
+								<div>Your current profile detail were set by your first employee. You'd require an ID verication process to update them</div>
+								<div className="flex w-full justify-end">
+									<Button disabled className="self-end" size={'sm'}>
+										Update Personal Detail
+									</Button>
+								</div>
+							</AlertDescription>
+						</Alert>
 					</div>
 				</div>
 			</form>
