@@ -161,7 +161,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 
 		checkTitle();
 		checkLevel();
-	}, [data, duplicate]);
+	}, [data, duplicate, jobTitles]);
 
 	return (
 		<Form {...form}>

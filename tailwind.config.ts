@@ -13,7 +13,8 @@ const config = {
 			}
 		},
 		fontFamily: {
-			logo: ['Pacifico']
+			logo: ['Pacifico'],
+			karla: ['karla']
 		},
 		extend: {
 			colors: {

@@ -38,23 +38,31 @@ export const SignatureDrawer = ({ job_title, first_name, signatureAction }: { jo
 				</DrawerTrigger>
 				<DrawerContent>
 					<form className="mx-auto my-12 w-full max-w-sm" action={signContract}>
-						<DrawerHeader>
+						<DrawerHeader className="gap-3">
 							<DrawerTitle>Sign Contract</DrawerTitle>
-							<DrawerDescription className="text-xs font-light">
+							<DrawerDescription className="text-xs font-light leading-6">
 								Enter your legal full name to sign the <strong className="text-foreground">{job_title}</strong> contract, hiring <strong className="text-foreground">{first_name}</strong>
 							</DrawerDescription>
 						</DrawerHeader>
 
-						<input type="text" name="signature-string" autoComplete="off" required id="signature-string" aria-label="Signature text" className="signature m-4 mt-7 w-[calc(100%-32px)] border-b border-b-foreground text-2xl outline-none" />
+						<input
+							type="text"
+							placeholder="Enter your legal full name"
+							name="signature-string"
+							autoComplete="off"
+							required
+							id="signature-string"
+							aria-label="Signature text"
+							className="placeholder:font-karla signature m-4 mt-7 w-[calc(100%-32px)] border-b border-b-foreground text-2xl outline-none"
+						/>
 
-						<DrawerFooter>
-							<SubmitButton />
-
+						<DrawerFooter className="grid grid-cols-2 items-center gap-4">
 							<DrawerClose asChild>
 								<Button type="button" variant="outline">
 									Cancel
 								</Button>
 							</DrawerClose>
+							<SubmitButton />
 						</DrawerFooter>
 					</form>
 				</DrawerContent>
