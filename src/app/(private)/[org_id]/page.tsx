@@ -9,7 +9,13 @@ export default function OrgPage(props: { params: { [key: string]: string }; sear
 	return (
 		<div className="mx-auto grid gap-20">
 			<div className="flex justify-between">
-				<Suspense fallback={<Skeleton className="h-32 w-full max-w-[1200px]"></Skeleton>}>
+				<Suspense
+					fallback={
+						<>
+							<Skeleton className="h-32 w-full max-w-80" />
+							<Skeleton className="h-32 w-full max-w-80" />
+						</>
+					}>
 					<DashboardCharts orgId={props.params.org_id} />
 				</Suspense>
 
