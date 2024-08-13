@@ -140,9 +140,16 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					<div className="grid gap-2">
 						<h1 className="flex items-center gap-4 text-2xl font-bold">
 							{data?.job_title}
-							<Badge className="h-fit gap-2 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
-								{data?.status}
-							</Badge>
+							<div className="flex gap-1">
+								<Badge className="h-fit gap-2 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
+									{data?.status}
+								</Badge>
+								{data?.status == 'scheduled termination' && data?.end_date && (
+									<Badge className="h-fit gap-2 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
+										{format(data?.end_date, 'PP')}
+									</Badge>
+								)}
+							</div>
 						</h1>
 						<p className="flex gap-2 text-xs font-light">
 							<span className="capitalize">{data?.organisations?.name}</span> • <span className="capitalize">{data?.employment_type}</span>
