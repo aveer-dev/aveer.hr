@@ -19,10 +19,10 @@ import { useForm } from 'react-hook-form';
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { TablesInsert, TablesUpdate } from '@/type/database.types';
-import { inviteUser, updateContract } from './invite-user.action';
 import { toast } from 'sonner';
 import { useParams } from 'next/navigation';
 import { LoadingSpinner } from '@/components/ui/loader';
+import { inviteUser, updateContract } from './invite-user.action';
 
 const supabase = createClient();
 
@@ -47,15 +47,15 @@ const formSchema = z.object({
 	sick_leave: z.number()
 });
 
-export const AddPerson = ({ data }: { data?: TablesUpdate<'contracts'> }) => {
+export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'>; duplicate?: TablesUpdate<'contracts'> }) => {
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
 	const [entities, setEntities] = useState<{ id: number }[]>([]);
 	const [jobTitles, updateJobTitles] = useState<string[]>([]);
 	const [jobLevels, updateJobLevels] = useState<string[]>([]);
 	const [responsibility, updateResponsibility] = useState('');
 	const [fixedAllowance, updateFixedAllowance] = useState({ name: '', amount: '', frequency: '' });
-	const [showSigningBonus, toggleShowSigningBonus] = useState(!!data?.signing_bonus);
-	const [showFixedIncome, toggleShowFixedIncome] = useState(!!data?.fixed_allowance);
+	const [showSigningBonus, toggleShowSigningBonus] = useState(!!data?.signing_bonus || !!duplicate?.signing_bonus);
+	const [showFixedIncome, toggleShowFixedIncome] = useState(!!data?.fixed_allowance || !!duplicate?.fixed_allowance);
 	const [indefiniteEndDate, toggleIndefiniteEndDate] = useState(!data?.end_date);
 	const [jobQuery, setJobQuery] = useState<string>('');
 	const [levelQuery, setLevelQuery] = useState<string>('');
@@ -79,20 +79,20 @@ export const AddPerson = ({ data }: { data?: TablesUpdate<'contracts'> }) => {
 			last_name: (data?.profile as any)?.last_name || '',
 			email: (data?.profile as any)?.email || '',
 			nationality: (data?.profile as any)?.nationality || '',
-			responsibilities: (data?.responsibilities as string[]) || [],
-			fixed_allowance: (data?.fixed_allowance as any) || [],
+			responsibilities: (data?.responsibilities as string[]) || (duplicate?.responsibilities as string[]) || [],
+			fixed_allowance: (data?.fixed_allowance as any) || (duplicate?.fixed_allowance as any) || [],
 			start_date: data?.start_date ? new Date(data?.start_date) : new Date(),
-			end_date: data?.end_date ? new Date(data?.end_date) : new Date(),
-			probation_period: data?.probation_period || 90,
-			paid_leave: data?.paid_leave || 20,
-			sick_leave: data?.sick_leave || 20,
-			work_schedule: data?.work_schedule || '8',
-			work_shedule_interval: data?.work_shedule_interval || 'daily',
-			salary: data?.salary ? String(data?.salary) : undefined,
-			signing_bonus: data?.signing_bonus ? String(data?.signing_bonus) : undefined,
-			employment_type: data?.employment_type || undefined,
-			level: data?.level || undefined,
-			job_title: data?.job_title || undefined
+			end_date: data?.end_date ? new Date(data?.end_date) : duplicate?.end_date ? new Date(duplicate?.end_date) : new Date(),
+			probation_period: data?.probation_period || duplicate?.probation_period || 90,
+			paid_leave: data?.paid_leave || duplicate?.paid_leave || 20,
+			sick_leave: data?.sick_leave || duplicate?.sick_leave || 20,
+			work_schedule: data?.work_schedule || duplicate?.work_schedule || '8',
+			work_shedule_interval: data?.work_shedule_interval || duplicate?.work_shedule_interval || 'daily',
+			salary: data?.salary ? String(data?.salary) : duplicate?.salary ? String(duplicate?.salary) : undefined,
+			signing_bonus: data?.signing_bonus ? String(data?.signing_bonus) : duplicate?.signing_bonus ? String(duplicate?.signing_bonus) : undefined,
+			employment_type: data?.employment_type || duplicate?.employment_type || undefined,
+			level: data?.level || duplicate?.level || undefined,
+			job_title: data?.job_title || duplicate?.job_title || undefined
 		}
 	});
 
@@ -119,7 +119,7 @@ export const AddPerson = ({ data }: { data?: TablesUpdate<'contracts'> }) => {
 			job_title: values.job_title,
 			level: values.level,
 			responsibilities: values.responsibilities,
-			profile: (data?.profile as any).id || '',
+			profile: data ? (data?.profile as any).id : '',
 			entity: entities[0].id,
 			org: Number(params.org_id)
 		};
@@ -138,9 +138,35 @@ export const AddPerson = ({ data }: { data?: TablesUpdate<'contracts'> }) => {
 		getEntities();
 	}, [getEntities]);
 
+	useEffect(() => {
+		const checkTitle = () => {
+			if (!data?.job_title && !duplicate?.job_title) return;
+
+			const newJobTitle = jobTitles.find(title => title == data?.job_title || title == duplicate?.job_title);
+			if (newJobTitle) return;
+
+			const title = data?.job_title || duplicate?.job_title;
+			if (title) updateJobTitles([...jobTitles, title]);
+		};
+
+		const checkLevel = () => {
+			if (!data?.level && !duplicate?.level) return;
+
+			const newJobLevel = jobTitles.find(title => title == data?.level || title == duplicate?.level);
+			if (newJobLevel) return;
+
+			const level = data?.level || duplicate?.level;
+			if (level) updateJobLevels([...jobTitles, level]);
+		};
+
+		checkTitle();
+		checkLevel();
+	}, [data, duplicate]);
+
 	return (
 		<Form {...form}>
 			<form className="grid w-full gap-6" onSubmit={form.handleSubmit(onSubmit)}>
+				{/* employee details */}
 				<div className="grid grid-cols-2 border-t border-t-border pt-10">
 					<div>
 						<h2 className="font-semibold">{data ? 'Employee details' : 'Personal details'}</h2>
@@ -238,6 +264,7 @@ export const AddPerson = ({ data }: { data?: TablesUpdate<'contracts'> }) => {
 					</div>
 				</div>
 
+				{/* employment details */}
 				<div className="grid grid-cols-2 border-t border-t-border pt-10">
 					<div>
 						<h2 className="font-semibold">Employment details</h2>
@@ -543,6 +570,7 @@ export const AddPerson = ({ data }: { data?: TablesUpdate<'contracts'> }) => {
 					</div>
 				</div>
 
+				{/* job schedule */}
 				<div className="grid grid-cols-2 border-t border-t-border pt-10">
 					<div>
 						<h2 className="font-semibold">Job Schedule</h2>

@@ -109,7 +109,7 @@ export const CreateOrgForm = () => {
 
 		await createUserRole({ organisation: orgRes.data.id, role: 'admin' });
 
-		router.push(`/${orgRes.data.id}/add-people`);
+		router.push(`/${orgRes.data.id}/`);
 	};
 
 	useEffect(() => {

@@ -46,6 +46,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData }: props)
             job_title,
             employment_type,
             start_date,
+            org,
             profile:profiles!id(
                 first_name,
                 last_name,

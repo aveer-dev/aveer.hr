@@ -41,7 +41,7 @@ export function DataTable<TData, TValue>({ columns, data, orgId, loading }: Data
 								<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
 									{row.getVisibleCells().map(cell => (
 										<TableCell key={cell.id} className="p-0">
-											<Link className="block p-4" href={`/${orgId}/person/${(row.original as PERSON).id}`}>
+											<Link scroll={true} className="block p-4" href={`/${orgId}/people/${(row.original as PERSON).id}`}>
 												{flexRender(cell.column.columnDef.cell, cell.getContext())}
 											</Link>
 										</TableCell>

@@ -20,7 +20,7 @@ export const DashboardCharts = async ({ orgId }: { orgId: string }) => {
 			<div className="flex w-full max-w-80 flex-wrap items-start justify-between gap-4">
 				<div className="grid gap-2">
 					<h3 className="text-base font-medium">Open roles</h3>
-					<p className="text-5xl font-bold">{data?.open_contracts || 0}</p>
+					<p className="text-5xl font-bold">{data?.contracts || 0}</p>
 				</div>
 
 				<Chart />

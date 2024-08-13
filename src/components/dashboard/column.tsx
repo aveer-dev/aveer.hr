@@ -2,13 +2,16 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Info, MoreHorizontal } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button, buttonVariants } from '../ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '../ui/badge';
 import { PERSON } from '@/type/person';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { ReactNode } from 'react';
 
 export const columns: ColumnDef<PERSON>[] = [
 	{
@@ -76,8 +79,6 @@ export const columns: ColumnDef<PERSON>[] = [
 	{
 		id: 'actions',
 		cell: ({ row }) => {
-			const payment = row.original;
-
 			return (
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
@@ -88,14 +89,10 @@ export const columns: ColumnDef<PERSON>[] = [
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
 						<DropdownMenuItem className="text-xs font-light" asChild>
-							<Button size={'sm'} variant={'ghost'} className="h-7 w-full cursor-pointer justify-start focus:!ring-0">
-								View
-							</Button>
+							<DropdownListItem href={`/${row.original.org}/people/${row.original.id}`}>View</DropdownListItem>
 						</DropdownMenuItem>
 						<DropdownMenuItem className="text-xs font-light" asChild>
-							<Button size={'sm'} variant={'ghost'} className="h-7 w-full cursor-pointer justify-start focus:!ring-0">
-								Edit
-							</Button>
+							<DropdownListItem href={`/${row.original.org}/people/${row.original.id}/edit`}>Edit</DropdownListItem>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -103,3 +100,9 @@ export const columns: ColumnDef<PERSON>[] = [
 		}
 	}
 ];
+
+const DropdownListItem = ({ children, href }: { children: ReactNode; href: string }) => (
+	<Link className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-7 w-full cursor-pointer justify-start focus:!ring-0')} href={href}>
+		{children}
+	</Link>
+);

@@ -21,7 +21,7 @@ export const ClientTable = ({ orgId, data }: { orgId: string; data: PERSON[] }) 
 
 				<DashboardFilters toggleTableLoadingState={toggleTableLoadingState} updateData={updateData} />
 
-				<Link href={`${orgId}/add-people`} className={cn(buttonVariants({ size: 'sm' }), 'ml-auto h-8 gap-4')}>
+				<Link href={`${orgId}/people/new`} className={cn(buttonVariants({ size: 'sm' }), 'ml-auto h-8 gap-4')}>
 					<Plus size={12} />
 					App person
 				</Link>

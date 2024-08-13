@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { AddPerson } from '../../../add-people/form';
+import { AddPerson } from '../../new/form';
 
 export const EditContractFormComponent = async ({ org, id }: { org: string; id: string }) => {
 	const supabase = createClient();

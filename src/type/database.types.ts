@@ -24,7 +24,7 @@ export type Database = {
           org_signed: string | null
           paid_leave: number | null
           probation_period: number | null
-          profile: string
+          profile: string | null
           profile_signature_string: string | null
           profile_signed: string | null
           responsibilities: Json | null
@@ -33,7 +33,8 @@ export type Database = {
           signed_by: string | null
           signing_bonus: number | null
           start_date: string | null
-          status: Database["public"]["Enums"]["contract_status"]
+          status: Database["public"]["Enums"]["contract_state"]
+          terminated_by: string | null
           work_schedule: string | null
           work_shedule_interval: string | null
         }
@@ -51,7 +52,7 @@ export type Database = {
           org_signed?: string | null
           paid_leave?: number | null
           probation_period?: number | null
-          profile: string
+          profile?: string | null
           profile_signature_string?: string | null
           profile_signed?: string | null
           responsibilities?: Json | null
@@ -60,7 +61,8 @@ export type Database = {
           signed_by?: string | null
           signing_bonus?: number | null
           start_date?: string | null
-          status?: Database["public"]["Enums"]["contract_status"]
+          status?: Database["public"]["Enums"]["contract_state"]
+          terminated_by?: string | null
           work_schedule?: string | null
           work_shedule_interval?: string | null
         }
@@ -78,7 +80,7 @@ export type Database = {
           org_signed?: string | null
           paid_leave?: number | null
           probation_period?: number | null
-          profile?: string
+          profile?: string | null
           profile_signature_string?: string | null
           profile_signed?: string | null
           responsibilities?: Json | null
@@ -87,7 +89,8 @@ export type Database = {
           signed_by?: string | null
           signing_bonus?: number | null
           start_date?: string | null
-          status?: Database["public"]["Enums"]["contract_status"]
+          status?: Database["public"]["Enums"]["contract_state"]
+          terminated_by?: string | null
           work_schedule?: string | null
           work_shedule_interval?: string | null
         }
@@ -120,6 +123,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "contracts_terminated_by_fkey"
+            columns: ["terminated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       countries: {
@@ -148,23 +158,23 @@ export type Database = {
       }
       dashboard_stats: {
         Row: {
+          contracts: number
           created_at: string
           id: number
-          open_contracts: number
           org: number
           signed_contracts: number | null
         }
         Insert: {
+          contracts?: number
           created_at?: string
           id?: number
-          open_contracts?: number
           org: number
           signed_contracts?: number | null
         }
         Update: {
+          contracts?: number
           created_at?: string
           id?: number
-          open_contracts?: number
           org?: number
           signed_contracts?: number | null
         }
@@ -425,13 +435,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      contract_status:
+      contract_state:
         | "awaiting signatures"
-        | "awaiting approval"
-        | "active"
-        | "inactive"
         | "awaiting org signature"
         | "awaiting signature"
+        | "signed"
+        | "inactive"
+        | "terminated"
+        | "scheduled termination"
     }
     CompositeTypes: {
       [_ in never]: never
