@@ -16,7 +16,7 @@ import { useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
-import { Tables, TablesInsert } from '@/type/database.types';
+import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { useRouter } from 'next/navigation';
 
 const supabase = createClient();
@@ -35,7 +35,7 @@ const formSchema = z.object({
 	formation_date: z.string().or(z.date()).optional()
 });
 
-export const CreateOrgForm = () => {
+export const CreateOrgForm = ({ data }: { data?: TablesUpdate<'organisations'> }) => {
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
 	const [states, setStates] = useState<Tables<'states'>[]>([]);
 	const [isSubmiting, toggleSubmitState] = useState(false);
@@ -57,8 +57,8 @@ export const CreateOrgForm = () => {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			name: '',
-			website: '',
+			name: data?.name || '',
+			website: data?.website || '',
 			legal_name: '',
 			incorporation_country: '',
 			company_type: '',

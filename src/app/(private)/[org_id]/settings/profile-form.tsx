@@ -149,7 +149,7 @@ export const ProfileForm = ({ data }: { data?: TablesUpdate<'profiles'> }) => {
 						<Alert>
 							<Info size={12} />
 							<AlertDescription className="grid gap-4 text-xs">
-								<div>Your current profile detail were set by your first employee. You'd require an ID verication process to update them</div>
+								<div>Your current profile detail were set by your first employee. You&apos;d require an ID verication process to update them</div>
 								<div className="flex w-full justify-end">
 									<Button disabled className="self-end" size={'sm'}>
 										Update Personal Detail

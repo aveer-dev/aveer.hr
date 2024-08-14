@@ -4,7 +4,7 @@ import { SecurityForm } from './profile-security-form';
 import { ProfileForm } from './profile-form';
 import { createClient } from '@/utils/supabase/server';
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ params }: { params: { [key: string]: string } }) {
 	const supabase = createClient();
 
 	const {
@@ -13,8 +13,11 @@ export default async function SettingsPage() {
 	} = await supabase.auth.getUser();
 	if (!user || userError) return <div>Unable to fetch user data</div>;
 
-	const { data, error } = await supabase.from('profiles').select().eq('id', user?.id).single();
-	if (!data || error) return <div>Unable to fetch user data</div>;
+	const [profileResponse, organisationResponse, LegalEntityResponse] = await Promise.all([
+		await supabase.from('profiles').select().eq('id', 'user?.id').single(),
+		await supabase.from('organisations').select().eq('id', params.org_id).single(),
+		await supabase.from('legal_entities').select().eq('org', params.org_id)
+	]);
 
 	const updatePassword = async (password: string) => {
 		'use server';
@@ -42,14 +45,13 @@ export default async function SettingsPage() {
 					</TabsList>
 				</div>
 
-				<TabsContent value="org">
-					<CreateOrgForm />
-				</TabsContent>
+				<TabsContent value="org">{organisationResponse.data && <CreateOrgForm data={organisationResponse.data} />}</TabsContent>
 
 				<TabsContent value="personal">
 					<SecurityForm updatePassword={updatePassword} />
 
-					<ProfileForm data={data} />
+					{profileResponse.data && <ProfileForm data={profileResponse.data} />}
+					{profileResponse.error && <div className="grid w-full border-t border-t-border py-10 text-center text-xs text-muted-foreground">Unable to fetch user data</div>}
 				</TabsContent>
 			</Tabs>
 		</div>
