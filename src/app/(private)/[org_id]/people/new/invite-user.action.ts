@@ -14,7 +14,7 @@ export const inviteUser = async (contract: string, profile: string) => {
 	const {
 		error,
 		data: { user }
-	} = await supabaseAdmin.auth.admin.inviteUserByEmail(parsedProfile.email, { data: { first_name: parsedProfile.first_name, last_name: parsedProfile.last_name }, redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/set-password` });
+	} = await supabaseAdmin.auth.admin.inviteUserByEmail(parsedProfile.email, { data: { first_name: parsedProfile.first_name, last_name: parsedProfile.last_name }, redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/set-password?type=contractor` });
 	if (error && error.code !== 'email_exists') return error?.message;
 
 	const userId = error && error.code == 'email_exists' ? (await supabase.from('profiles').select('id').eq('email', parsedProfile.email).single()).data?.id : user?.id;

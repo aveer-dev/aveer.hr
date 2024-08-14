@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
+import { LoadingSpinner } from '@/components/ui/loader';
 
 interface PROPS {
 	formAction: (payload: FormData) => Promise<string>;
@@ -15,8 +16,9 @@ export const CreateOrgForm = ({ formAction }: PROPS) => {
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" size={'sm'} className="px-6 text-xs font-light">
-				{pending ? 'Creating org...' : 'Create'}
+			<Button type="submit" disabled={pending} size={'sm'} className="gap-3 px-6 text-xs font-light">
+				{pending && <LoadingSpinner />}
+				{pending ? 'Creating Org' : 'Create Org'}
 			</Button>
 		);
 	};

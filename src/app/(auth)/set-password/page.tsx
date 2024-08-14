@@ -1,10 +1,9 @@
-import { AuthError } from '@supabase/supabase-js';
 import { PasswordForm } from './form';
 import { createClientAdminServer } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
-export default function SigninPage() {
-	const setPassword = async (payload: FormData): Promise<AuthError> => {
+export default function SigninPage({ searchParams }: { searchParams: { [key: string]: string } }) {
+	const setPassword = async (payload: FormData): Promise<string> => {
 		'use server';
 		const supabase = createClientAdminServer();
 
@@ -12,9 +11,9 @@ export default function SigninPage() {
 		const password = payload.get('password') as string;
 
 		const { error } = await supabase.auth.admin.updateUserById(userId, { password });
-		if (error) return error;
+		if (error) return error.message;
 
-		return redirect('/');
+		return redirect(`/${searchParams.type}`);
 	};
 
 	return (

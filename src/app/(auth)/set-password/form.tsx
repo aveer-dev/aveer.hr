@@ -5,16 +5,16 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AuthError } from '@supabase/supabase-js';
 import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { PageLoader } from '@/components/ui/page-loader';
+import { LoadingSpinner } from '@/components/ui/loader';
 
 interface props {
-	formAction: (payload: FormData) => Promise<AuthError>;
+	formAction: (payload: FormData) => Promise<String>;
 }
 
 const supabase = createClient();
@@ -51,15 +51,16 @@ export const PasswordForm = ({ formAction }: props) => {
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" size={'sm'} className="px-6 text-xs font-light" disabled={pending || isLoading || !isFormEnabled}>
-				{pending ? 'Setting password...' : 'Set password'}
+			<Button type="submit" size={'sm'} className="gap-3 px-6 text-xs font-light" disabled={pending || isLoading || !isFormEnabled}>
+				{pending && <LoadingSpinner />}
+				{pending ? 'Setting password' : 'Set password'}
 			</Button>
 		);
 	};
 
 	const submitForm = async (formData: FormData) => {
 		const error = await formAction(formData);
-		if (error) return toast.error(error.message);
+		if (error) return toast.error(error);
 	};
 
 	return (

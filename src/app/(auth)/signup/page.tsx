@@ -1,10 +1,10 @@
 import { createClient } from '@/utils/supabase/server';
 import { SignupForm } from './form';
 import { redirect } from 'next/navigation';
-import { AuthError, SignUpWithPasswordCredentials } from '@supabase/supabase-js';
+import { SignUpWithPasswordCredentials } from '@supabase/supabase-js';
 
 export default function SignupPage() {
-	const signup = async (payload: FormData): Promise<AuthError> => {
+	const signup = async (payload: FormData): Promise<string> => {
 		'use server';
 		const supabase = createClient();
 
@@ -20,7 +20,7 @@ export default function SignupPage() {
 		};
 
 		const { error } = await supabase.auth.signUp(signupData);
-		if (error) return error;
+		if (error) return error.message;
 
 		return redirect('/create-org');
 	};

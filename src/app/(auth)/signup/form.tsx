@@ -6,11 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useFormStatus } from 'react-dom';
-import { AuthError } from '@supabase/supabase-js';
 import { toast } from 'sonner';
+import { LoadingSpinner } from '@/components/ui/loader';
 
 interface PROPS {
-	formAction: (payload: FormData) => Promise<AuthError>;
+	formAction: (payload: FormData) => Promise<string>;
 }
 
 export const SignupForm = ({ formAction }: PROPS) => {
@@ -18,7 +18,8 @@ export const SignupForm = ({ formAction }: PROPS) => {
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" size={'sm'} className="px-10 text-sm font-light">
+			<Button type="submit" size={'sm'} className="gap-3 px-10 text-sm font-light">
+				{pending && <LoadingSpinner />}
 				{pending ? 'Signing up...' : 'Sign up'}
 			</Button>
 		);
@@ -26,7 +27,7 @@ export const SignupForm = ({ formAction }: PROPS) => {
 
 	const submitForm = async (formData: FormData) => {
 		const error = await formAction(formData);
-		if (error) return toast.error(error.message);
+		if (error) return toast.error(error);
 	};
 
 	return (

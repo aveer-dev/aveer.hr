@@ -1,10 +1,10 @@
-import { AuthError, SignInWithPasswordCredentials } from '@supabase/supabase-js';
+import { SignInWithPasswordCredentials } from '@supabase/supabase-js';
 import { LoginForm } from './form';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
 export default function SigninPage() {
-	const signin = async (payload: FormData): Promise<AuthError> => {
+	const signin = async (payload: FormData): Promise<string> => {
 		'use server';
 		const supabase = createClient();
 
@@ -14,7 +14,7 @@ export default function SigninPage() {
 		};
 		const { error } = await supabase.auth.signInWithPassword(signinData);
 
-		if (error) return error;
+		if (error) return error.message;
 		return redirect('/');
 	};
 
