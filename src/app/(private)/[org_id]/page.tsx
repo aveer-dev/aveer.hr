@@ -1,11 +1,77 @@
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { ChevronsUpDown, Plus } from 'lucide-react';
 import { DashboardCharts } from './chart.component';
-import { PeopleTable } from './people.component';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
+import { createClient } from '@/utils/supabase/server';
+import { PERSON } from '@/type/person';
+import { ClientTable } from './table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
-export default function OrgPage(props: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
+export default async function OrgPage(props: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
+	const supabase = createClient();
+	const { data, error } = await supabase.from('contracts').select('profile(first_name,last_name,nationality(name)), org, id, status, job_title, employment_type, start_date').match({ org: props.params.org_id });
+
+	if (data && !data.length) {
+		const { data, error } = await supabase.from('legal_entities').select().match({ org: props.params.org_id });
+		if (error) {
+			return (
+				<div className="flex h-[50vh] flex-col items-center justify-center text-center">
+					<p className="text-xs">Unable to fetch legal entities, please refresh page to try again</p>
+					<p className="mt-6 text-xs text-muted-foreground">{error.message}</p>
+				</div>
+			);
+		}
+
+		if (data && !data.length) {
+			return (
+				<div className="flex h-[50vh] flex-col items-center justify-center gap-4 text-center">
+					<div className="grid gap-3">
+						<p className="text-base font-bold">Welcome to aveer.hr</p>
+						<p className="text-xs text-muted-foreground">How will you like to get started with your account?</p>
+					</div>
+					<div className="mx-auto mt-6 flex items-center gap-8">
+						<Card className="w-[350px] text-left">
+							<CardHeader>
+								<CardTitle className="text-sm font-semibold">Setup Legal Entity</CardTitle>
+								<CardDescription className="text-xs font-light leading-5 text-muted-foreground">This is the option for you if you have a registered legal entity, enabling you to perform subsequent actions as a legal company.</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`${props.params.org_id}/legal-entity/new`}>
+									Add legal entity
+								</Link>
+							</CardContent>
+						</Card>
+
+						<Card className="w-[350px] text-left">
+							<CardHeader>
+								<CardTitle className="text-sm font-semibold">Continue without a Legal Entity</CardTitle>
+								<CardDescription className="text-xs font-light leading-5 text-muted-foreground">
+									This is the option for you if you don't have a registered legal entity. With this option, you can still perform actions as a legal entity through Employer of Record.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`${props.params.org_id}/people/new`}>
+									Continue without a legal entity
+								</Link>
+							</CardContent>
+						</Card>
+					</div>
+				</div>
+			);
+		}
+	}
+
+	if (error)
+		return (
+			<div className="flex h-[50vh] flex-col items-center justify-center text-center">
+				<p className="text-xs">Unable to fetch organisations available to you</p>
+				<p className="mt-6 text-xs text-muted-foreground">{error.message}</p>
+			</div>
+		);
+
 	return (
 		<div className="mx-auto grid gap-20">
 			<div className="flex justify-between">
@@ -43,7 +109,7 @@ export default function OrgPage(props: { params: { [key: string]: string }; sear
 			</div>
 
 			<Suspense fallback={<Skeleton className="h-96 w-full max-w-[1200px]"></Skeleton>}>
-				<PeopleTable orgId={props.params.org_id} />
+				<ClientTable orgId={props.params.org_id} data={data as unknown as PERSON[]} />
 			</Suspense>
 		</div>
 	);

@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CreateOrgForm } from '../../(outside_org)/create-organisation/form';
+import { LegalEntityForm } from '../legal-entity/new/form';
 import { SecurityForm } from './profile-security-form';
 import { ProfileForm } from './profile-form';
 import { createClient } from '@/utils/supabase/server';
@@ -14,7 +14,7 @@ export default async function SettingsPage({ params }: { params: { [key: string]
 	if (!user || userError) return <div>Unable to fetch user data</div>;
 
 	const [profileResponse, organisationResponse, LegalEntityResponse] = await Promise.all([
-		await supabase.from('profiles').select().eq('id', 'user?.id').single(),
+		await supabase.from('profiles').select().eq('id', user?.id).single(),
 		await supabase.from('organisations').select().eq('id', params.org_id).single(),
 		await supabase.from('legal_entities').select().eq('org', params.org_id)
 	]);
@@ -45,7 +45,7 @@ export default async function SettingsPage({ params }: { params: { [key: string]
 					</TabsList>
 				</div>
 
-				<TabsContent value="org">{organisationResponse.data && <CreateOrgForm data={organisationResponse.data} />}</TabsContent>
+				<TabsContent value="org">{organisationResponse.data && <LegalEntityForm orgId={Number(params.org_id)} data={organisationResponse.data} />}</TabsContent>
 
 				<TabsContent value="personal">
 					<SecurityForm updatePassword={updatePassword} />

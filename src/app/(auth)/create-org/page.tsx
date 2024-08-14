@@ -16,6 +16,7 @@ export default function CreateOrgPage() {
 		const { error, data } = await supabase.from('organisations').insert(orgData).select('id').single();
 		if (error || !data) return error.message;
 
+		await supabase.from('profiles_roles').insert({ organisation: data.id, role: 'admin' });
 		return redirect(`/${data.id}`);
 	};
 
