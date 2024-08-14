@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-export default async function SettingsPage({ params }: { params: { [key: string]: string } }) {
+export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
 
 	const {
@@ -48,7 +48,7 @@ export default async function SettingsPage({ params }: { params: { [key: string]
 
 	return (
 		<div className="mx-auto max-w-4xl">
-			<Tabs defaultValue="personal" className="">
+			<Tabs defaultValue={searchParams.type || 'personal'} className="">
 				<div className="mb-6 flex items-center gap-4">
 					<h1 className="text-xl font-semibold">Settings</h1>
 

@@ -31,7 +31,7 @@ const formSchema = z.object({
 	address_state: z.number().optional(),
 	address_code: z.string().optional(),
 	street_address: z.string().optional(),
-	formation_date: z.string().or(z.date()).optional()
+	formation_date: z.date().optional()
 });
 
 export const LegalEntityForm = ({ data, orgId }: { data?: TablesUpdate<'legal_entities'>; orgId: number }) => {
@@ -64,11 +64,12 @@ export const LegalEntityForm = ({ data, orgId }: { data?: TablesUpdate<'legal_en
 			address_state: data?.address_state || undefined,
 			address_code: data?.address_code || '',
 			street_address: data?.street_address || '',
-			formation_date: data?.formation_date || ''
+			formation_date: data?.formation_date ? new Date(data?.formation_date) : new Date()
 		}
 	});
 
 	const createLegalEntity = async (payload: TablesInsert<'legal_entities'>) => await supabase.from('legal_entities').insert(payload).select('id').single();
+	const updateLegalEntity = async (payload: TablesUpdate<'legal_entities'>) => await supabase.from('legal_entities').update(payload).match({ org: orgId, id: data?.id });
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		toggleSubmitState(true);
@@ -82,21 +83,25 @@ export const LegalEntityForm = ({ data, orgId }: { data?: TablesUpdate<'legal_en
 			address_state: values.address_state,
 			address_code: values.address_code,
 			street_address: values.street_address,
-			formation_date: values.formation_date as string,
+			formation_date: values.formation_date as unknown as string,
 			org: orgId
 		};
 
-		const legalRes = await createLegalEntity({ ...legalData });
+		const legalRes = data ? await updateLegalEntity(legalData) : await createLegalEntity({ ...legalData });
 		if (legalRes.error) {
 			toggleSubmitState(false);
 			return toast.error(legalRes.error.message);
 		}
 
-		router.push(`/${orgId}/`);
+		if (data) toast.success('Legal entity updated successfully');
+		if (!data) router.push(`/${orgId}/`);
+		toggleSubmitState(false);
 	};
 
 	useEffect(() => {
-		getCountries();
+		getCountries().then(() => {
+			if (data?.incorporation_country) getStates();
+		});
 	}, []);
 
 	return (
@@ -174,7 +179,7 @@ export const LegalEntityForm = ({ data, orgId }: { data?: TablesUpdate<'legal_en
 								render={({ field }) => (
 									<FormItem className="flex flex-col justify-between">
 										<FormLabel>Formation date</FormLabel>
-										<DatePicker onSetDate={field.onChange} />
+										<DatePicker selected={field.value} onSetDate={field.onChange} />
 										<FormMessage />
 									</FormItem>
 								)}
@@ -322,7 +327,7 @@ export const LegalEntityForm = ({ data, orgId }: { data?: TablesUpdate<'legal_en
 				<div className="mt-16 flex justify-end border-t border-t-border pt-10">
 					<Button size={'sm'} disabled={isSubmiting} className="gap-3 px-6 text-xs font-light">
 						{isSubmiting && <LoadingSpinner />}
-						{isSubmiting ? 'Creating entity' : 'Create entity'}
+						{isSubmiting ? (data ? 'Updating entity' : 'Creating entity') : data ? 'Update entity' : 'Create entity'}
 					</Button>
 				</div>
 			</form>

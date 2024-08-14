@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AddPerson } from '../../new/form';
 import { EditContractFormComponent } from './form.component';
 
 export default async function EditContractPage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
