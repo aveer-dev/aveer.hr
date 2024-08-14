@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { CreateOrgForm } from './form';
+import { OrgForm } from './form';
 import { redirect } from 'next/navigation';
 import { TablesInsert } from '@/type/database.types';
 
@@ -27,7 +27,7 @@ export default function CreateOrgPage() {
 				<p className="text-xs font-light text-muted-foreground">You can provide your legal full name if you&apos;d like to get started as an individual</p>
 			</div>
 
-			<CreateOrgForm formAction={createOrg} />
+			<OrgForm formAction={createOrg} />
 		</div>
 	);
 }
