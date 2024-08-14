@@ -16,6 +16,7 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 
 	if (data && !data.length) {
 		const { data, error } = await supabase.from('legal_entities').select().match({ org: props.params.org_id });
+
 		if (error) {
 			return (
 				<div className="flex h-[50vh] flex-col items-center justify-center text-center">
@@ -27,34 +28,53 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 
 		if (data && !data.length) {
 			return (
-				<div className="flex h-[50vh] flex-col items-center justify-center gap-4 text-center">
+				<div className="flex min-h-[50vh] flex-col items-center justify-center gap-10 text-center">
 					<div className="grid gap-3">
 						<p className="text-base font-bold">Welcome to aveer.hr</p>
 						<p className="text-xs text-muted-foreground">How will you like to get started with your account?</p>
 					</div>
-					<div className="mx-auto mt-6 flex items-center gap-8">
+
+					<Card className="w-[350px] text-left">
+						<CardHeader>
+							<CardTitle className="text-sm font-semibold">Setup Legal Entity</CardTitle>
+							<CardDescription className="text-xs font-light leading-5 text-muted-foreground">This is the option for you if you have a registered legal entity, enabling you to perform subsequent actions with your company details.</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`${props.params.org_id}/legal-entity/new`}>
+								Add legal entity
+							</Link>
+						</CardContent>
+					</Card>
+
+					<div className="mt-10 border-t border-t-secondary pt-4">
+						<div className="mx-auto -mt-6 w-fit bg-background px-6 text-xs">Or</div>
+
+						<p className="mt-14 text-xs font-light text-muted-foreground">Get straight into hiring and managing employees, while we sort out the other legalities for you.</p>
+					</div>
+
+					<div className="mx-auto flex items-center gap-8">
 						<Card className="w-[350px] text-left">
 							<CardHeader>
-								<CardTitle className="text-sm font-semibold">Setup Legal Entity</CardTitle>
+								<CardTitle className="text-sm font-semibold">Hire a contractor</CardTitle>
 								<CardDescription className="text-xs font-light leading-5 text-muted-foreground">This is the option for you if you have a registered legal entity, enabling you to perform subsequent actions as a legal company.</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`${props.params.org_id}/legal-entity/new`}>
-									Add legal entity
+								<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`${props.params.org_id}/people/new?type=contractor`}>
+									Add Contractor
 								</Link>
 							</CardContent>
 						</Card>
 
 						<Card className="w-[350px] text-left">
 							<CardHeader>
-								<CardTitle className="text-sm font-semibold">Continue without a Legal Entity</CardTitle>
+								<CardTitle className="text-sm font-semibold">Hire an employee</CardTitle>
 								<CardDescription className="text-xs font-light leading-5 text-muted-foreground">
 									This is the option for you if you don't have a registered legal entity. With this option, you can still perform actions as a legal entity through Employer of Record.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`${props.params.org_id}/people/new`}>
-									Continue without a legal entity
+								<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`${props.params.org_id}/people/new?type=employee`}>
+									Add Employee
 								</Link>
 							</CardContent>
 						</Card>
