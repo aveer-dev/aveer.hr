@@ -22,7 +22,7 @@ export default function SignupPage() {
 		const { error } = await supabase.auth.signUp(signupData);
 		if (error) return error;
 
-		return redirect('/create-organisation');
+		return redirect('/create-org');
 	};
 
 	return (
