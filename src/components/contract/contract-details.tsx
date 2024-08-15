@@ -160,13 +160,6 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				<div className="flex gap-3">
 					{data.profile && (
 						<>
-							{signatureType === 'org' && data.status !== 'inactive' && data.status !== 'terminated' && (
-								<Link href={`/${org}/people/${id}/edit`} className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'gap-4')}>
-									Edit Contract
-									<FilePenLine size={12} />
-								</Link>
-							)}
-
 							{((signatureType === 'org' && !data.org_signed) || (signatureType === 'profile' && !data.profile_signed)) && <SignatureDrawer first_name={data.profile.first_name} job_title={data.job_title} signatureAction={signContract} />}
 
 							{signatureType === 'org' && (
@@ -177,7 +170,13 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 										</Button>
 									</PopoverTrigger>
 									<PopoverContent align="end" className="w-48 p-2">
-										<Link href={`/${org}/people/new?duplicate=${id}`} className={cn(buttonVariants({ variant: 'ghost' }), 'w-full justify-start gap-2 focus:!ring-0')}>
+										{data.status !== 'inactive' && data.status !== 'terminated' && (
+											<Link href={`/${org}/people/${id}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-2')}>
+												<FilePenLine size={12} />
+												Edit Contract
+											</Link>
+										)}
+										<Link href={`/${org}/people/new?duplicate=${id}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-2')}>
 											<Copy size={12} />
 											Duplicate
 										</Link>
