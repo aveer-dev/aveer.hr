@@ -197,7 +197,8 @@ export type Database = {
           ein: string | null
           formation_date: string | null
           id: number
-          incorporation_country: string | null
+          incorporation_country: string
+          is_eor: boolean
           name: string
           org: number
           sic: string | null
@@ -212,7 +213,8 @@ export type Database = {
           ein?: string | null
           formation_date?: string | null
           id?: number
-          incorporation_country?: string | null
+          incorporation_country: string
+          is_eor?: boolean
           name: string
           org: number
           sic?: string | null
@@ -227,7 +229,8 @@ export type Database = {
           ein?: string | null
           formation_date?: string | null
           id?: number
-          incorporation_country?: string | null
+          incorporation_country?: string
+          is_eor?: boolean
           name?: string
           org?: number
           sic?: string | null

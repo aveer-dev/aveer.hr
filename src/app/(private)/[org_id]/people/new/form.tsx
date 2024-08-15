@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Check, ChevronDown } from 'lucide-react';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 import { useParams } from 'next/navigation';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { inviteUser, updateContract } from './invite-user.action';
+import { Separator } from '@/components/ui/separator';
 
 const supabase = createClient();
 
@@ -44,12 +45,14 @@ const formSchema = z.object({
 	end_date: z.date().optional(),
 	probation_period: z.number(),
 	paid_leave: z.number(),
-	sick_leave: z.number()
+	sick_leave: z.number(),
+	entity: z.string()
 });
 
 export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'>; duplicate?: TablesUpdate<'contracts'> }) => {
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
-	const [entities, setEntities] = useState<{ id: number }[]>([]);
+	const [entities, setEntities] = useState<TablesUpdate<'legal_entities'>[]>([]);
+	const [eorEntities, setEorEntities] = useState<TablesUpdate<'legal_entities'>[]>([]);
 	const [jobTitles, updateJobTitles] = useState<string[]>([]);
 	const [jobLevels, updateJobLevels] = useState<string[]>([]);
 	const [responsibility, updateResponsibility] = useState('');
@@ -68,8 +71,11 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	};
 
 	const getEntities = useCallback(async () => {
-		const { data, error } = await supabase.from('legal_entities').select('id').eq('org', params.org_id);
+		const { data, error } = await supabase.from('legal_entities').select('id, name, incorporation_country').eq('org', params.org_id);
+		const { data: eorData, error: eorError } = await supabase.from('legal_entities').select('id, name, incorporation_country').eq('is_eor', true);
+
 		if (!error) setEntities(data);
+		if (!eorError) setEorEntities(eorData);
 	}, [params.org_id]);
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -92,7 +98,8 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			signing_bonus: data?.signing_bonus ? String(data?.signing_bonus) : duplicate?.signing_bonus ? String(duplicate?.signing_bonus) : undefined,
 			employment_type: data?.employment_type || duplicate?.employment_type || undefined,
 			level: data?.level || duplicate?.level || undefined,
-			job_title: data?.job_title || duplicate?.job_title || undefined
+			job_title: data?.job_title || duplicate?.job_title || undefined,
+			entity: data?.employment_type || duplicate?.employment_type || undefined
 		}
 	});
 
@@ -108,7 +115,6 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 		};
 		const contract: TablesInsert<'contracts'> = {
 			employment_type: values.employment_type,
-			end_date: values.end_date as unknown as string,
 			start_date: values.start_date as unknown as string,
 			salary: Number(values.salary),
 			sick_leave: values.sick_leave,
@@ -120,11 +126,12 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			level: values.level,
 			responsibilities: values.responsibilities,
 			profile: data ? (data?.profile as any).id : '',
-			entity: entities[0].id,
+			entity: Number(values.entity),
 			org: Number(params.org_id)
 		};
 		if (showSigningBonus) contract.signing_bonus = Number(values.signing_bonus);
 		if (showFixedIncome) contract.fixed_allowance = values.fixed_allowance;
+		if (!indefiniteEndDate) contract.end_date = values.end_date as any;
 
 		const responseMessage = data ? await updateContract(JSON.stringify(contract)) : await inviteUser(JSON.stringify(contract), JSON.stringify(profile));
 		toggleSubmitState(false);
@@ -166,6 +173,55 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	return (
 		<Form {...form}>
 			<form className="grid w-full gap-6" onSubmit={form.handleSubmit(onSubmit)}>
+				{/* entity details */}
+				<div className="grid grid-cols-2 border-t border-t-border pt-10">
+					<div>
+						<h2 className="font-semibold">Legal entity </h2>
+						<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">You can hire employee through one of your legal entity or through aveer.hr&apos;s, we&apos;ll sort out the compliance for you in that region automatically</p>
+					</div>
+
+					<div className="mb-10 grid gap-8">
+						<FormField
+							control={form.control}
+							name="entity"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Legal entity</FormLabel>
+									<Select onValueChange={field.onChange} defaultValue={field.value ? String(field.value) : undefined}>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder="Select legal entity you'd like to hire under" />
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											<SelectGroup>
+												{entities.length && <SelectLabel>Your Legal Entities</SelectLabel>}
+												{entities.map(entity => (
+													<SelectItem key={entity.id} value={String(entity.id)}>
+														{entity.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
+													</SelectItem>
+												))}
+											</SelectGroup>
+
+											<Separator className="my-3" />
+
+											<SelectGroup>
+												{eorEntities.length && <SelectLabel>Hire with aveer.hr</SelectLabel>}
+												{eorEntities.map(entity => (
+													<SelectItem key={entity.id} value={String(entity.id)}>
+														{entity.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
+													</SelectItem>
+												))}
+											</SelectGroup>
+										</SelectContent>
+									</Select>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+				</div>
+
 				{/* employee details */}
 				<div className="grid grid-cols-2 border-t border-t-border pt-10">
 					<div>
