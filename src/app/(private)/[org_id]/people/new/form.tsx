@@ -195,7 +195,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 										</FormControl>
 										<SelectContent>
 											<SelectGroup>
-												{entities.length && <SelectLabel>Your Legal Entities</SelectLabel>}
+												{entities.length !== 0 && <SelectLabel>Your Legal Entities</SelectLabel>}
 												{entities.map(entity => (
 													<SelectItem key={entity.id} value={String(entity.id)}>
 														{entity.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
@@ -203,7 +203,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 												))}
 											</SelectGroup>
 
-											<Separator className="my-3" />
+											{entities.length !== 0 && <Separator className="my-3" />}
 
 											<SelectGroup>
 												{eorEntities.length && <SelectLabel>Hire with aveer.hr</SelectLabel>}
