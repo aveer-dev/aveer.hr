@@ -19,7 +19,6 @@ export const LogoutButton = () => {
 		try {
 			toggleLoadingState(true);
 			const { error } = await supabase.auth.signOut();
-			toggleLoadingState(false);
 
 			if (error) return toast.error(error.message);
 			router.push('/login');
