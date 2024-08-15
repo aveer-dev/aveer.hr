@@ -20,7 +20,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { TablesInsert, TablesUpdate } from '@/type/database.types';
 import { toast } from 'sonner';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { inviteUser, updateContract } from './invite-user.action';
 import { Separator } from '@/components/ui/separator';
@@ -34,7 +34,7 @@ const formSchema = z.object({
 	nationality: z.string(),
 	job_title: z.string(),
 	level: z.string().optional(),
-	employment_type: z.string().optional(),
+	employment_type: z.enum(['full-time', 'part-time']),
 	work_schedule: z.string().optional(),
 	work_shedule_interval: z.string().optional(),
 	responsibilities: z.array(z.string()),
@@ -64,6 +64,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	const [levelQuery, setLevelQuery] = useState<string>('');
 	const [isSubmiting, toggleSubmitState] = useState(false);
 	const params = useParams<{ org_id: string }>();
+	const searchParams = useSearchParams();
 
 	const getCountries = async () => {
 		const { data, error } = await supabase.from('countries').select();
@@ -127,7 +128,8 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			responsibilities: values.responsibilities,
 			profile: data ? (data?.profile as any).id : '',
 			entity: Number(values.entity),
-			org: Number(params.org_id)
+			org: Number(params.org_id),
+			contract_type: (searchParams.get('type') as any) || data?.contract_type
 		};
 		if (showSigningBonus) contract.signing_bonus = Number(values.signing_bonus);
 		if (showFixedIncome) contract.fixed_allowance = values.fixed_allowance;

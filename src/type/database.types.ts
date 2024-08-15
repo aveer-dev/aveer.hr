@@ -11,8 +11,9 @@ export type Database = {
     Tables: {
       contracts: {
         Row: {
+          contract_type: Database["public"]["Enums"]["contract_type"]
           created_at: string
-          employment_type: string | null
+          employment_type: Database["public"]["Enums"]["employment_type"]
           end_date: string | null
           entity: number
           fixed_allowance: Json | null
@@ -39,8 +40,9 @@ export type Database = {
           work_shedule_interval: string | null
         }
         Insert: {
+          contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string
-          employment_type?: string | null
+          employment_type: Database["public"]["Enums"]["employment_type"]
           end_date?: string | null
           entity: number
           fixed_allowance?: Json | null
@@ -67,8 +69,9 @@ export type Database = {
           work_shedule_interval?: string | null
         }
         Update: {
+          contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string
-          employment_type?: string | null
+          employment_type?: Database["public"]["Enums"]["employment_type"]
           end_date?: string | null
           entity?: number
           fixed_allowance?: Json | null
@@ -446,6 +449,8 @@ export type Database = {
         | "inactive"
         | "terminated"
         | "scheduled termination"
+      contract_type: "employee" | "contractor"
+      employment_type: "full-time" | "part-time"
     }
     CompositeTypes: {
       [_ in never]: never
