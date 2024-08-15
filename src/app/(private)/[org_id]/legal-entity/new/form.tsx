@@ -13,7 +13,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
 import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
@@ -24,7 +24,7 @@ const supabase = createClient();
 
 const formSchema = z.object({
 	name: z.string(),
-	incorporation_country: z.string().optional(),
+	incorporation_country: z.string(),
 	company_type: z.string().optional(),
 	ein: z.string().optional(),
 	sic: z.string().optional(),
@@ -45,14 +45,6 @@ export const LegalEntityForm = ({ data, orgId }: { data?: TablesUpdate<'legal_en
 		if (!error) setCountries(data);
 	};
 
-	const getStates = async () => {
-		const countryCode = form.getValues('incorporation_country');
-		if (!countryCode) return;
-
-		const { data, error } = await supabase.from('states').select().eq('country_code', countryCode);
-		if (!error) setStates(data);
-	};
-
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -67,6 +59,14 @@ export const LegalEntityForm = ({ data, orgId }: { data?: TablesUpdate<'legal_en
 			formation_date: data?.formation_date ? new Date(data?.formation_date) : new Date()
 		}
 	});
+
+	const getStates = useCallback(async () => {
+		const countryCode = form.getValues('incorporation_country');
+		if (!countryCode) return;
+
+		const { data, error } = await supabase.from('states').select().eq('country_code', countryCode);
+		if (!error) setStates(data);
+	}, [form]);
 
 	const createLegalEntity = async (payload: TablesInsert<'legal_entities'>) => await supabase.from('legal_entities').insert(payload).select('id').single();
 	const updateLegalEntity = async (payload: TablesUpdate<'legal_entities'>) => await supabase.from('legal_entities').update(payload).match({ org: orgId, id: data?.id });
@@ -102,7 +102,7 @@ export const LegalEntityForm = ({ data, orgId }: { data?: TablesUpdate<'legal_en
 		getCountries().then(() => {
 			if (data?.incorporation_country) getStates();
 		});
-	}, []);
+	}, [data, getStates]);
 
 	return (
 		<Form {...form}>
@@ -246,7 +246,7 @@ export const LegalEntityForm = ({ data, orgId }: { data?: TablesUpdate<'legal_en
 				<div className="grid grid-cols-2 border-t border-t-border pt-10">
 					<div>
 						<h2 className="mb-1 font-normal">Contact details</h2>
-						<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">These should be the company's contact information as provided while registeing your company and on legal documents</p>
+						<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">These should be the company&apos;s contact information as provided while registeing your company and on legal documents</p>
 					</div>
 
 					<div className="grid gap-10">

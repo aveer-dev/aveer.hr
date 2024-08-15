@@ -69,7 +69,7 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 							<CardHeader>
 								<CardTitle className="text-sm font-semibold">Hire an employee</CardTitle>
 								<CardDescription className="text-xs font-light leading-5 text-muted-foreground">
-									This is the option for you if you don't have a registered legal entity. With this option, you can still perform actions as a legal entity through Employer of Record.
+									This is the option for you if you don&apos;t have a registered legal entity. With this option, you can still perform actions as a legal entity through Employer of Record.
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
