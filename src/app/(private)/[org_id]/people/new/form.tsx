@@ -25,6 +25,7 @@ import { LoadingSpinner } from '@/components/ui/loader';
 import { inviteUser, updateContract } from './invite-user.action';
 import { Separator } from '@/components/ui/separator';
 import { EORAgreementDrawer } from './eor-agreement';
+import { getEORAgreementByCountry } from '@/utils/api';
 
 const supabase = createClient();
 
@@ -113,11 +114,6 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 		return entity;
 	};
 
-	const isEORDocSigned = async (selectedEntityIncCountry: string) => {
-		const res = await supabase.from('org_documents').select('*, eor_entity:legal_entities!org_documents_eor_entity_fkey(incorporation_country)').not('eor_entity', 'is', null).eq('legal_entities.incorporation_country', selectedEntityIncCountry).single();
-		return res;
-	};
-
 	const createContract = async (values: z.infer<typeof formSchema>) => {
 		const profile: TablesInsert<'profiles'> = {
 			first_name: values.first_name,
@@ -186,9 +182,8 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 		if (entityData?.is_eor !== true) return createContract(values);
 
 		setFormValue(values);
-		console.log(entityData?.incorporation_country);
 
-		const eorAgreement = await isEORDocSigned(entityData?.incorporation_country as string);
+		const eorAgreement = await getEORAgreementByCountry(entityData?.incorporation_country as string);
 		if (!eorAgreement.data) {
 			await createEORAgreement({ org: Number(params.org_id) });
 			return toggleAgreementDialog(true);

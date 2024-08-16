@@ -12,8 +12,6 @@ export const signup = async (event: FormData) => {
 		last_name: event.get('last-name') as string
 	};
 
-	console.log(signupData);
-
 	const { data, error } = await supabase.auth.signUp(signupData);
 	return { data, error };
 };
