@@ -264,6 +264,84 @@ export type Database = {
           },
         ]
       }
+      org_documents: {
+        Row: {
+          created_at: string
+          entity: number | null
+          eor_entity: number | null
+          id: number
+          link: string | null
+          name: string
+          org: number | null
+          profile: string | null
+          signature_text: string | null
+          signed_by: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          entity?: number | null
+          eor_entity?: number | null
+          id?: number
+          link?: string | null
+          name: string
+          org?: number | null
+          profile?: string | null
+          signature_text?: string | null
+          signed_by?: string | null
+          type: string
+        }
+        Update: {
+          created_at?: string
+          entity?: number | null
+          eor_entity?: number | null
+          id?: number
+          link?: string | null
+          name?: string
+          org?: number | null
+          profile?: string | null
+          signature_text?: string | null
+          signed_by?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_documents_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_documents_eor_entity_fkey"
+            columns: ["eor_entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_documents_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_documents_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_documents_signed_by_fkey"
+            columns: ["signed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organisations: {
         Row: {
           created_at: string

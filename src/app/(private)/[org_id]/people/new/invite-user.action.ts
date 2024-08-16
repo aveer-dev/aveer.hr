@@ -12,6 +12,13 @@ export const inviteUser = async (contract: string, profile: string) => {
 	const parsedProfile: TablesInsert<'profiles'> = JSON.parse(profile);
 
 	const {
+		data: { user: adminUser }
+	} = await supabase.auth.getUser();
+	const role = await supabase.from('profiles_roles').select().match({ organisation: parsedContract.org, profile: adminUser?.id });
+	if (role.error) return role.error.message;
+	if (role.data && !role.data.length) return `You do not have adequate org permission to create contracts`;
+
+	const {
 		error,
 		data: { user }
 	} = await supabaseAdmin.auth.admin.inviteUserByEmail(parsedProfile.email, { data: { first_name: parsedProfile.first_name, last_name: parsedProfile.last_name }, redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/set-password?type=contractor` });
@@ -42,8 +49,12 @@ export const updateContract = async (contract: string) => {
 
 	const parsedContract: TablesInsert<'contracts'> = JSON.parse(contract);
 
-	const role = await supabase.from('profiles_roles').select().match({ organisation: parsedContract.org, profile: parsedContract.profile });
+	const {
+		data: { user }
+	} = await supabase.auth.getUser();
+	const role = await supabase.from('profiles_roles').select().match({ organisation: parsedContract.org, profile: user?.id });
 	if (role.error) return role.error.message;
+	if (role.data && !role.data.length) return `You do not have adequate org permission to sign contracts`;
 
 	const { error } = await supabase
 		.from('contracts')
