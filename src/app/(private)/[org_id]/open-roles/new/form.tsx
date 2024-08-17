@@ -51,7 +51,7 @@ const formSchema = z.object({
 	entity: z.number()
 });
 
-export const AddRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_roles'>; duplicate?: TablesUpdate<'open_roles'> }) => {
+export const OpenRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_roles'>; duplicate?: TablesUpdate<'open_roles'> }) => {
 	const [formValue, setFormValue] = useState<z.infer<typeof formSchema>>();
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
 	const [entities, setEntities] = useState<Tables<'legal_entities'>[]>([]);

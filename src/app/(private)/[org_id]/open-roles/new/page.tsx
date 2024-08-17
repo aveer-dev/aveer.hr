@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { AddRoleForm } from './form';
+import { OpenRoleForm } from './form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
 import { TablesUpdate } from '@/type/database.types';
@@ -26,7 +26,7 @@ export default async function Home({ params, searchParams }: { params: { [key: s
 						<Skeleton className="h-60 w-full max-w-4xl"></Skeleton>
 					</div>
 				}>
-				<AddRoleForm duplicate={roleDetails} />
+				<OpenRoleForm duplicate={roleDetails} />
 			</Suspense>
 		</div>
 	);
