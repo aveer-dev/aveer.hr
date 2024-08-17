@@ -46,7 +46,7 @@ const formSchema = z.object({
 	requirements: z.array(z.string()),
 	what_we_offer: z.array(z.string()),
 	state: z.string().optional(),
-	work_location: z.enum(['office', 'hybrid', 'remote']),
+	work_location: z.enum(['remote', 'hybrid', 'on-site']),
 	years_of_experience: z.string(),
 	entity: z.string()
 });
@@ -138,7 +138,8 @@ export const AddRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_rol
 			org: Number(params.org_id),
 			requirements: values.requirements,
 			what_we_offer: values.what_we_offer,
-			years_of_experience: Number(values.years_of_experience)
+			years_of_experience: Number(values.years_of_experience),
+			work_location: values.work_location
 		};
 
 		if (showSigningBonus) role.signing_bonus = Number(values.signing_bonus);
@@ -759,7 +760,7 @@ export const AddRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_rol
 								name="requirements"
 								render={() => (
 									<div className="grid w-full gap-3">
-										<FormLabel>Additional offering</FormLabel>
+										<FormLabel>Additional offerings</FormLabel>
 
 										<div className="rounded-lg bg-accent p-4">
 											{form.getValues().what_we_offer.length ? (
@@ -783,7 +784,7 @@ export const AddRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_rol
 													</FormControl>
 													<Button
 														type="button"
-														disabled={!responsibility}
+														disabled={!offering}
 														size={'sm'}
 														onClick={() => {
 															form.setValue('what_we_offer', [...form.getValues().what_we_offer, offering]);
@@ -822,7 +823,7 @@ export const AddRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_rol
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												<SelectItem value="office">Office</SelectItem>
+												<SelectItem value="on-site">On-Site</SelectItem>
 												<SelectItem value="hybrid">Hybrid</SelectItem>
 												<SelectItem value="remote">Remote</SelectItem>
 											</SelectContent>

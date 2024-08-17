@@ -287,7 +287,7 @@ export type Database = {
           state: number | null
           status: Database["public"]["Enums"]["role_status"]
           what_we_offer: Json | null
-          work_location: string | null
+          work_location: Database["public"]["Enums"]["work_locations"]
           work_schedule: number | null
           work_shedule_interval: string | null
           years_of_experience: number | null
@@ -316,7 +316,7 @@ export type Database = {
           state?: number | null
           status?: Database["public"]["Enums"]["role_status"]
           what_we_offer?: Json | null
-          work_location?: string | null
+          work_location: Database["public"]["Enums"]["work_locations"]
           work_schedule?: number | null
           work_shedule_interval?: string | null
           years_of_experience?: number | null
@@ -345,14 +345,14 @@ export type Database = {
           state?: number | null
           status?: Database["public"]["Enums"]["role_status"]
           what_we_offer?: Json | null
-          work_location?: string | null
+          work_location?: Database["public"]["Enums"]["work_locations"]
           work_schedule?: number | null
           work_shedule_interval?: string | null
           years_of_experience?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "open-roles_entity_fkey"
+            foreignKeyName: "open_roles_entity_fkey"
             columns: ["entity"]
             isOneToOne: false
             referencedRelation: "legal_entities"
@@ -640,6 +640,7 @@ export type Database = {
       contract_type: "employee" | "contractor"
       employment_type: "full-time" | "part-time"
       role_status: "open" | "close"
+      work_locations: "on-site" | "remote" | "hybrid"
     }
     CompositeTypes: {
       [_ in never]: never
