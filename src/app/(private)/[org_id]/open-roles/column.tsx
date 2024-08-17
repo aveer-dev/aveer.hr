@@ -79,10 +79,10 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 							</Button>
 						</DropdownMenuItem>
 						<DropdownMenuItem className="h-7 text-xs font-light">
-							<DropdownListItem href={`/${row.original.org}/people/${row.original.id}`}>View</DropdownListItem>
+							<DropdownListItem href={`/${row.original.org}/open-roles/${row.original.id}`}>View</DropdownListItem>
 						</DropdownMenuItem>
 						<DropdownMenuItem className="h-7 text-xs font-light">
-							<DropdownListItem href={`/${row.original.org}/people/${row.original.id}/edit`}>Edit</DropdownListItem>
+							<DropdownListItem href={`/${row.original.org}/open-roles/${row.original.id}/edit`}>Edit</DropdownListItem>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
