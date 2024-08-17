@@ -27,7 +27,10 @@ export default async function OpenRolesPage(props: { params: { [key: string]: st
 					<p className="text-xs text-muted-foreground">Will you like to create one?</p>
 				</div>
 
-				<Button>Create role</Button>
+				<Link href={'./open-roles/new'} className={cn(buttonVariants(), 'gap-4')}>
+					<Plus size={12} />
+					Create role
+				</Link>
 			</div>
 		);
 	}
@@ -61,7 +64,7 @@ export default async function OpenRolesPage(props: { params: { [key: string]: st
 						{/* </DropdownMenu> */}
 					</div>
 
-					<Link href={'/add-people'} className={cn(buttonVariants({ size: 'sm' }), 'ml-auto h-8 gap-4')}>
+					<Link href={`./open-roles/new`} className={cn(buttonVariants({ size: 'sm' }), 'ml-auto h-8 gap-4')}>
 						<Plus size={12} />
 						Create role
 					</Link>
