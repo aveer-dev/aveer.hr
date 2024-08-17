@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { DatePicker } from '@/components/ui/date-picker';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -20,20 +19,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { toast } from 'sonner';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { LoadingSpinner } from '@/components/ui/loader';
-import { inviteUser, updateContract } from './invite-user.action';
+import { createOpenRole, updateRole } from './role.action';
 import { Separator } from '@/components/ui/separator';
-import { EORAgreementDrawer } from '@/components/eor/eor-agreement';
 import { createEORAgreement, doesUserHaveAdequatePermissions, getEORAgreementByCountry } from '@/utils/api';
+import { EORAgreementDrawer } from '@/components/eor/eor-agreement';
+import { useFormStatus } from 'react-dom';
 
 const supabase = createClient();
 
 const formSchema = z.object({
-	first_name: z.string(),
-	last_name: z.string(),
-	email: z.string().email(),
-	nationality: z.string(),
 	job_title: z.string(),
 	level: z.string().optional(),
 	employment_type: z.enum(['full-time', 'part-time']),
@@ -43,15 +39,19 @@ const formSchema = z.object({
 	salary: z.string(),
 	signing_bonus: z.string().optional(),
 	fixed_allowance: z.array(z.object({ name: z.string(), amount: z.string(), frequency: z.string() })).optional(),
-	start_date: z.date(),
-	end_date: z.date().optional(),
-	probation_period: z.number(),
-	paid_leave: z.number(),
-	sick_leave: z.number(),
+	probation_period: z.string(),
+	paid_leave: z.string(),
+	sick_leave: z.string(),
+	about_us: z.string().optional(),
+	requirements: z.array(z.string()),
+	what_we_offer: z.array(z.string()),
+	state: z.string().optional(),
+	work_location: z.enum(['office', 'hybrid', 'remote']),
+	years_of_experience: z.string(),
 	entity: z.string()
 });
 
-export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'>; duplicate?: TablesUpdate<'contracts'> }) => {
+export const AddRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_roles'>; duplicate?: TablesUpdate<'open_roles'> }) => {
 	const [formValue, setFormValue] = useState<z.infer<typeof formSchema>>();
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
 	const [entities, setEntities] = useState<Tables<'legal_entities'>[]>([]);
@@ -59,17 +59,17 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	const [jobTitles, updateJobTitles] = useState<string[]>([]);
 	const [jobLevels, updateJobLevels] = useState<string[]>([]);
 	const [responsibility, updateResponsibility] = useState('');
+	const [offering, updateOffering] = useState('');
+	const [requirement, updateRequirement] = useState('');
 	const [fixedAllowance, updateFixedAllowance] = useState({ name: '', amount: '', frequency: '' });
 	const [showSigningBonus, toggleShowSigningBonus] = useState(!!data?.signing_bonus || !!duplicate?.signing_bonus);
 	const [showFixedIncome, toggleShowFixedIncome] = useState(!!data?.fixed_allowance || !!duplicate?.fixed_allowance);
-	const [indefiniteEndDate, toggleIndefiniteEndDate] = useState(!data?.end_date);
 	const [jobQuery, setJobQuery] = useState<string>('');
 	const [levelQuery, setLevelQuery] = useState<string>('');
 	const [isSubmiting, toggleSubmitState] = useState(false);
 	const params = useParams<{ org_id: string }>();
-	const searchParams = useSearchParams();
-	const [isAlertOpen, toggleAgreementDialog] = useState(false);
 	const [agreementId, setAgreementId] = useState<number>();
+	const [isAlertOpen, toggleAgreementDialog] = useState(false);
 
 	const getCountries = async () => {
 		const { data, error } = await supabase.from('countries').select();
@@ -87,66 +87,66 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			first_name: (data?.profile as any)?.first_name || '',
-			last_name: (data?.profile as any)?.last_name || '',
-			email: (data?.profile as any)?.email || '',
-			nationality: (data?.profile as any)?.nationality || '',
 			responsibilities: (data?.responsibilities as string[]) || (duplicate?.responsibilities as string[]) || [],
 			fixed_allowance: (data?.fixed_allowance as any) || (duplicate?.fixed_allowance as any) || [],
-			start_date: data?.start_date ? new Date(data?.start_date) : new Date(),
-			end_date: data?.end_date ? new Date(data?.end_date) : duplicate?.end_date ? new Date(duplicate?.end_date) : new Date(),
-			probation_period: data?.probation_period || duplicate?.probation_period || 90,
-			paid_leave: data?.paid_leave || duplicate?.paid_leave || 20,
-			sick_leave: data?.sick_leave || duplicate?.sick_leave || 20,
-			work_schedule: data?.work_schedule || duplicate?.work_schedule || '8',
+			probation_period: (data?.probation_period as any) || (duplicate?.probation_period as any) || '90',
+			paid_leave: (data?.paid_leave as any) || (duplicate?.paid_leave as any) || '20',
+			sick_leave: (data?.sick_leave as any) || (duplicate?.sick_leave as any) || '20',
+			work_schedule: String(data?.work_schedule) || String(duplicate?.work_schedule) || '8',
 			work_shedule_interval: data?.work_shedule_interval || duplicate?.work_shedule_interval || 'daily',
 			salary: data?.salary ? String(data?.salary) : duplicate?.salary ? String(duplicate?.salary) : '',
-			signing_bonus: data?.signing_bonus ? String(data?.signing_bonus) : duplicate?.signing_bonus ? String(duplicate?.signing_bonus) : undefined,
+			signing_bonus: data?.signing_bonus ? String(data?.signing_bonus) : duplicate?.signing_bonus ? String(duplicate?.signing_bonus) : '',
 			employment_type: data?.employment_type || duplicate?.employment_type || undefined,
 			level: data?.level || duplicate?.level || undefined,
 			job_title: data?.job_title || duplicate?.job_title || undefined,
-			entity: data?.employment_type || duplicate?.employment_type || undefined
+			entity: data?.employment_type || duplicate?.employment_type || undefined,
+			requirements: [],
+			what_we_offer: [],
+			years_of_experience: ''
 		}
 	});
+
+	const SubmitButton = () => {
+		const { pending } = useFormStatus();
+
+		return (
+			<Button type="submit" disabled={pending || isSubmiting} className="gap-3 px-8 text-xs font-light">
+				{(pending || isSubmiting) && <LoadingSpinner />}
+				{pending || isSubmiting ? (data ? 'Updating role' : 'Creating role') : data ? 'Update role' : 'Create role'}
+			</Button>
+		);
+	};
 
 	const isEntityEOR = async (entityId: string) => {
 		const entity = eorEntities.find(entity => entity.id === Number(entityId));
 		return entity;
 	};
 
-	const createContract = async (values: z.infer<typeof formSchema>) => {
-		const profile: TablesInsert<'profiles'> = {
-			first_name: values.first_name,
-			last_name: values.last_name,
-			nationality: values.nationality,
-			email: values.email,
-			id: ''
-		};
-		const contract: TablesInsert<'contracts'> = {
+	const createRole = async (values: z.infer<typeof formSchema>) => {
+		const role: TablesInsert<'open_roles'> = {
 			employment_type: values.employment_type,
-			start_date: values.start_date as unknown as string,
 			salary: Number(values.salary),
-			sick_leave: values.sick_leave,
-			paid_leave: values.paid_leave,
-			probation_period: values.probation_period,
-			work_schedule: values.work_schedule,
+			sick_leave: Number(values.sick_leave),
+			paid_leave: Number(values.paid_leave),
+			probation_period: Number(values.probation_period),
+			work_schedule: Number(values.work_schedule),
 			work_shedule_interval: values.work_shedule_interval,
 			job_title: values.job_title,
 			level: values.level,
 			responsibilities: values.responsibilities,
-			profile: data ? (data?.profile as any).id : '',
 			entity: Number(values.entity),
 			org: Number(params.org_id),
-			contract_type: (searchParams.get('type') as any) || data?.contract_type
+			requirements: values.requirements,
+			what_we_offer: values.what_we_offer,
+			years_of_experience: Number(values.years_of_experience)
 		};
-		if (showSigningBonus) contract.signing_bonus = Number(values.signing_bonus);
-		if (showFixedIncome) contract.fixed_allowance = values.fixed_allowance;
-		if (!indefiniteEndDate) contract.end_date = values.end_date as any;
 
-		const responseMessage = data ? await updateContract(JSON.stringify(contract)) : await inviteUser(JSON.stringify(contract), JSON.stringify(profile));
+		if (showSigningBonus) role.signing_bonus = Number(values.signing_bonus);
+		if (showFixedIncome) role.fixed_allowance = values.fixed_allowance;
 
+		const responseMessage = data ? await updateRole(role, params.org_id) : await createOpenRole(role, params.org_id);
 		toggleSubmitState(false);
-		if (responseMessage == 'update') return toast.success('Contract details updated successfully');
+		if (responseMessage == 'update') return toast.success('Role details updated successfully');
 		if (responseMessage) toast.error(responseMessage);
 	};
 
@@ -157,15 +157,26 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 		toggleSubmitState(true);
 
 		const entityData = await isEntityEOR(values.entity);
-		if (entityData?.is_eor !== true) return createContract(values);
+		if (entityData?.is_eor !== true) return createRole(values);
 
 		setFormValue(values);
 
 		const eorAgreement = await getEORAgreementByCountry(entityData?.incorporation_country as string);
-		if (eorAgreement.error) return toast.error(eorAgreement.error.message);
+		if (eorAgreement.error) {
+			toast.error(eorAgreement.error.message);
+			toggleSubmitState(false);
+
+			return;
+		}
+
 		if (!eorAgreement.data) {
 			const res = await createEORAgreement({ org: Number(params.org_id) });
-			if (typeof res !== 'number') return toast.error(res);
+			if (typeof res !== 'number') {
+				toast.error(res);
+				toggleSubmitState(false);
+
+				return;
+			}
 			setAgreementId(res);
 
 			return toggleAgreementDialog(true);
@@ -176,12 +187,10 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			return toggleAgreementDialog(true);
 		}
 
-		return createContract(values);
+		return createRole(values);
 	};
 
-	const onSignAgreement = () => {
-		if (formValue) createContract(formValue);
-	};
+	const onSignAgreement = () => (formValue ? createRole(formValue) : false);
 
 	useEffect(() => {
 		getCountries();
@@ -228,6 +237,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 					onCancel={() => toggleAgreementDialog(false)}
 				/>
 			)}
+
 			<Form {...form}>
 				<form className="grid w-full gap-6" onSubmit={form.handleSubmit(onSubmit)}>
 					{/* entity details */}
@@ -276,115 +286,31 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 									</FormItem>
 								)}
 							/>
+							<FormField
+								control={form.control}
+								name="about_us"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>About us</FormLabel>
+										<FormControl>
+											<Textarea {...field} placeholder="Exciting reasons why people should be interested in working at your company" className="resize-none text-xs font-light" />
+										</FormControl>
+										<FormDescription className="text-xs font-thin text-muted-foreground">A short description about your company, sell your company to potential hires</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 						</div>
 					</div>
 
-					{/* employee details */}
+					{/* job details */}
 					<div className="grid grid-cols-2 border-t border-t-border pt-10">
 						<div>
-							<h2 className="font-semibold">{data ? 'Employee details' : 'Personal details'}</h2>
-							<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+							<h2 className="font-semibold">Job details</h2>
+							<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">Top level details about this job offering and the responsibilities that the hired candidate will be doing in this role.</p>
 						</div>
 
-						<div className="mb-10 grid gap-8">
-							<div className="grid grid-cols-2 gap-6">
-								<FormField
-									control={form.control}
-									name="first_name"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>First name</FormLabel>
-											<FormControl>
-												<Input disabled={!!data} type="text" placeholder="Enter first name" {...field} required />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="last_name"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Last name</FormLabel>
-											<FormControl>
-												<Input disabled={!!data} type="text" placeholder="Enter last name" {...field} required />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-
-							<div className="grid grid-cols-2 gap-6">
-								<FormField
-									control={form.control}
-									name="email"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Email</FormLabel>
-											<FormControl>
-												<Input disabled={!!data} type="email" placeholder="Enter email" {...field} required />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="nationality"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Nationalty</FormLabel>
-											<Popover>
-												<PopoverTrigger asChild>
-													<FormControl>
-														<Button disabled={!!data} variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
-															{field.value ? countries.find(country => country.country_code === field.value)?.name : `Select employee's nationality`}
-															<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-														</Button>
-													</FormControl>
-												</PopoverTrigger>
-												<PopoverContent className="w-[200px] p-0">
-													<Command>
-														<CommandInput placeholder="Search countries..." />
-														<CommandList>
-															<CommandEmpty>Country not found</CommandEmpty>
-															<CommandGroup>
-																{countries.map(country => (
-																	<CommandItem
-																		value={country.name}
-																		key={country.country_code}
-																		onSelect={() => {
-																			form.setValue('nationality', country.country_code);
-																		}}>
-																		<Check className={cn('mr-2 h-4 w-4', country.country_code === field.value ? 'opacity-100' : 'opacity-0')} />
-																		{country.name}
-																	</CommandItem>
-																))}
-															</CommandGroup>
-														</CommandList>
-													</Command>
-												</PopoverContent>
-											</Popover>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-						</div>
-					</div>
-
-					{/* employment details */}
-					<div className="grid grid-cols-2 border-t border-t-border pt-10">
-						<div>
-							<h2 className="font-semibold">Employment details</h2>
-							<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
-						</div>
-
-						<div className="mb-10 grid gap-8">
+						<div className="mb-10 grid gap-10">
 							<div className="grid grid-cols-2 gap-6">
 								<FormField
 									control={form.control}
@@ -505,6 +431,135 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 								)}
 							/>
 
+							<FormField
+								control={form.control}
+								name="responsibilities"
+								render={() => (
+									<div className="grid w-full gap-3">
+										<FormLabel>Job responsibilities</FormLabel>
+										<div className="rounded-lg bg-accent p-4">
+											{form.getValues().responsibilities.length ? (
+												<ul className="ml-4 grid gap-2">
+													{form.getValues().responsibilities.map((resp, index) => (
+														<li key={index} className="list-disc text-xs text-foreground">
+															{resp}
+														</li>
+													))}
+												</ul>
+											) : (
+												<p className="text-xs font-light italic text-muted-foreground">No responsibilities added yet</p>
+											)}
+										</div>
+
+										<div className="w-full items-end gap-2">
+											<FormItem>
+												<div className="flex items-end gap-2">
+													<FormControl>
+														<Textarea rows={1} value={responsibility} onChange={event => updateResponsibility(event.target.value)} placeholder="Type job description here" className="min-h-5 py-[10px] text-xs font-light" />
+													</FormControl>
+													<Button
+														type="button"
+														disabled={!responsibility}
+														onClick={() => {
+															form.setValue('responsibilities', [...form.getValues().responsibilities, responsibility]);
+															updateResponsibility('');
+														}}>
+														Add
+													</Button>
+												</div>
+
+												<FormDescription className="text-xs font-thin text-muted-foreground">Type and add job descriptions one after the other</FormDescription>
+												<FormMessage />
+											</FormItem>
+										</div>
+									</div>
+								)}
+							/>
+						</div>
+					</div>
+
+					{/* job requirements */}
+					<div className="grid grid-cols-2 border-t border-t-border pt-10">
+						<div>
+							<h2 className="font-semibold">Job requirements</h2>
+							<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">What are the things, skills or characteristics you expect from your new hire.</p>
+						</div>
+
+						<div className="mb-10 grid gap-10">
+							<FormField
+								control={form.control}
+								name="years_of_experience"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Years of experience</FormLabel>
+										<FormControl>
+											<div className="relative h-fit w-full">
+												<Input type="number" placeholder="Enter years of experience required" {...field} />
+												<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">years</div>
+											</div>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="requirements"
+								render={() => (
+									<div className="grid w-full gap-3">
+										<FormLabel>Job requirments</FormLabel>
+
+										<div className="rounded-lg bg-accent p-4">
+											{form.getValues().requirements.length ? (
+												<ul className="ml-4 grid gap-2">
+													{form.getValues().requirements.map((requirement, index) => (
+														<li key={index} className="list-disc text-xs text-foreground">
+															{requirement}
+														</li>
+													))}
+												</ul>
+											) : (
+												<p className="text-xs font-light italic text-muted-foreground">No requirements added yet</p>
+											)}
+										</div>
+
+										<div className="w-full items-end gap-2">
+											<FormItem>
+												<div className="flex items-end gap-2">
+													<FormControl>
+														<Textarea rows={1} value={requirement} onChange={event => updateRequirement(event.target.value)} placeholder="Type job requirement here" className="min-h-5 py-[10px] text-xs font-light" />
+													</FormControl>
+													<Button
+														type="button"
+														disabled={!requirement}
+														onClick={() => {
+															form.setValue('requirements', [...form.getValues().requirements, requirement]);
+															updateRequirement('');
+														}}>
+														Add
+													</Button>
+												</div>
+												<FormDescription className="text-xs font-thin text-muted-foreground">Type and add job requirment one after the other</FormDescription>
+												<FormMessage />
+											</FormItem>
+										</div>
+									</div>
+								)}
+							/>
+						</div>
+					</div>
+
+					{/* job schedule */}
+					<div className="grid grid-cols-2 border-t border-t-border pt-10">
+						<div>
+							<h2 className="font-semibold">Job Schedule</h2>
+							<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">
+								What schedules will you like for your new hire to stick to? <br /> PTO days, sick leave days, e.t.c
+							</p>
+						</div>
+
+						<div className="mb-10 grid gap-10">
 							<div className="grid w-full gap-3">
 								<Label>Work schedule</Label>
 								<div className="grid w-full grid-cols-2 gap-6">
@@ -515,7 +570,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 											<FormItem>
 												<FormControl>
 													<div className="relative h-fit w-full">
-														<Input type="text" placeholder="40" {...field} required />
+														<Input type="number" placeholder="40" {...field} required />
 														<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">hours</div>
 													</div>
 												</FormControl>
@@ -548,40 +603,58 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 								</div>
 							</div>
 
-							<div className="grid w-full gap-6">
-								<Label htmlFor="email">Job responsibilities</Label>
-								{form.getValues().responsibilities.length ? (
-									<ul className="ml-4 grid gap-2">
-										{form.getValues().responsibilities.map((resp, index) => (
-											<li key={index} className="list-disc text-xs text-foreground">
-												{resp}
-											</li>
-										))}
-									</ul>
-								) : (
-									false
-								)}
+							<div className="grid grid-cols-2 gap-6">
+								<FormField
+									control={form.control}
+									name="paid_leave"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Paid time off</FormLabel>
+											<FormControl>
+												<div className="relative h-fit w-full">
+													<Input type="number" placeholder="20" {...field} required />
+													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days</div>
+												</div>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-								<div className="grid w-full gap-2">
-									<FormItem>
-										<FormControl>
-											<Textarea value={responsibility} onChange={event => updateResponsibility(event.target.value)} placeholder="Type job description here" className="resize-none text-xs font-light" />
-										</FormControl>
-										<FormDescription className="text-xs font-thin text-muted-foreground">Type and add job descriptions one after the other</FormDescription>
-									</FormItem>
-
-									<Button
-										type="button"
-										disabled={!responsibility}
-										size={'sm'}
-										onClick={() => {
-											form.setValue('responsibilities', [...form.getValues().responsibilities, responsibility]);
-											updateResponsibility('');
-										}}>
-										Add job description
-									</Button>
-								</div>
+								<FormField
+									control={form.control}
+									name="sick_leave"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Sick leave</FormLabel>
+											<FormControl>
+												<div className="relative h-fit w-full">
+													<Input type="number" placeholder="20" {...field} required />
+													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days</div>
+												</div>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 							</div>
+
+							<FormField
+								control={form.control}
+								name="probation_period"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Probation period</FormLabel>
+										<FormControl>
+											<div className="relative h-fit w-full">
+												<Input type="number" placeholder="90" {...field} required />
+												<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days</div>
+											</div>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 						</div>
 					</div>
 
@@ -589,10 +662,10 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 					<div className="grid grid-cols-2 border-t border-t-border pt-10">
 						<div>
 							<h2 className="font-semibold">Compensation</h2>
-							<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+							<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">What will your new hire be receiving in compensation for service rendered and job done?</p>
 						</div>
 
-						<div className="mb-10 grid gap-8">
+						<div className="mb-10 grid gap-10">
 							<FormField
 								control={form.control}
 								name="salary"
@@ -607,7 +680,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 								)}
 							/>
 
-							<div className="grid w-full gap-3 rounded-lg bg-accent p-2">
+							<div className="grid w-full gap-3 rounded-lg bg-accent px-2 py-2">
 								<FormField
 									control={form.control}
 									name="signing_bonus"
@@ -680,93 +753,80 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 									</>
 								)}
 							</div>
+
+							<FormField
+								control={form.control}
+								name="requirements"
+								render={() => (
+									<div className="grid w-full gap-3">
+										<FormLabel>Additional offering</FormLabel>
+
+										<div className="rounded-lg bg-accent p-4">
+											{form.getValues().what_we_offer.length ? (
+												<ul className="ml-4 grid gap-2">
+													{form.getValues().what_we_offer.map((resp, index) => (
+														<li key={index} className="list-disc text-xs text-foreground">
+															{resp}
+														</li>
+													))}
+												</ul>
+											) : (
+												<p className="text-xs font-light italic text-muted-foreground">No additional offering added yet</p>
+											)}
+										</div>
+
+										<div className="grid w-full gap-2">
+											<FormItem>
+												<div className="flex items-end gap-2">
+													<FormControl>
+														<Textarea rows={1} value={offering} onChange={event => updateOffering(event.target.value)} placeholder="Type additional offer" className="min-h-5 py-[10px] text-xs font-light" />
+													</FormControl>
+													<Button
+														type="button"
+														disabled={!responsibility}
+														size={'sm'}
+														onClick={() => {
+															form.setValue('what_we_offer', [...form.getValues().what_we_offer, offering]);
+															updateOffering('');
+														}}>
+														Add
+													</Button>
+												</div>
+												<FormDescription className="text-xs font-thin text-muted-foreground">Type and add additional offer one after the other</FormDescription>
+											</FormItem>
+										</div>
+									</div>
+								)}
+							/>
 						</div>
 					</div>
 
-					{/* job schedule */}
+					{/* location */}
 					<div className="grid grid-cols-2 border-t border-t-border pt-10">
 						<div>
-							<h2 className="font-semibold">Job Schedule</h2>
-							<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+							<h2 className="font-semibold">Location</h2>
+							<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">Where will your new hire be working from: remote, office, or hybrid?</p>
 						</div>
 
-						<div className="mb-10 grid gap-8">
+						<div className="mb-10 grid gap-10">
 							<FormField
 								control={form.control}
-								name="start_date"
-								render={({ field }) => (
-									<FormItem className="flex flex-col">
-										<FormLabel>Employment start date</FormLabel>
-										<DatePicker onSetDate={field.onChange} selected={field.value} />
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="end_date"
-								render={({ field }) => (
-									<FormItem className="grid gap-1">
-										<FormLabel>Employment end date</FormLabel>
-										<div className="grid w-full gap-3 rounded-lg bg-accent px-2 py-2">
-											<div className="flex items-center justify-between space-x-2">
-												<Label htmlFor="indefinite">Indefinite</Label>
-												<Switch checked={indefiniteEndDate} onCheckedChange={event => toggleIndefiniteEndDate(event)} id="indefinite" className="scale-75" />
-											</div>
-
-											{!indefiniteEndDate && <DatePicker onSetDate={field.onChange} selected={field.value} />}
-										</div>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<div className="grid grid-cols-2 gap-6">
-								<FormField
-									control={form.control}
-									name="paid_leave"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Paid time off</FormLabel>
-											<FormControl>
-												<div className="relative h-fit w-full">
-													<Input type="number" placeholder="20" {...field} required />
-													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/month</div>
-												</div>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="sick_leave"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Sick leave</FormLabel>
-											<FormControl>
-												<div className="relative h-fit w-full">
-													<Input type="number" placeholder="20" {...field} required />
-													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/month</div>
-												</div>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-
-							<FormField
-								control={form.control}
-								name="probation_period"
+								name="work_location"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Probation period</FormLabel>
-										<FormControl>
-											<Input type="number" placeholder="90" {...field} required />
-										</FormControl>
+										<FormLabel>Work location</FormLabel>
+										<Select onValueChange={field.onChange} defaultValue={field.value}>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Office, hybrid or remote" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												<SelectItem value="office">Office</SelectItem>
+												<SelectItem value="hybrid">Hybrid</SelectItem>
+												<SelectItem value="remote">Remote</SelectItem>
+											</SelectContent>
+										</Select>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -775,31 +835,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 					</div>
 
 					<div className="flex items-center justify-end border-t border-t-border pt-10">
-						<Button disabled={isSubmiting} type="submit" size={'sm'} className="gap-3 px-6 text-sm font-light">
-							{isSubmiting && <LoadingSpinner />}
-							{isSubmiting ? (data ? 'Updating contract...' : 'Adding person...') : data ? 'Update Contract' : 'Add person'}
-						</Button>
-
-						{/* <div className={cn(buttonVariants(), 'p-0')}>
-						<DropdownMenu>
-							<Button size={'sm'}>Add Person</Button>
-
-							<DropdownMenuTrigger asChild>
-								<Button size={'icon'} className="h-full !outline-none !ring-0 !ring-offset-0">
-									<ChevronDown size={16} />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<DropdownMenuGroup>
-									<DropdownMenuItem className="p-0">
-										<Button size={'sm'} variant={'ghost'} className="">
-											Add person and reset form
-										</Button>
-									</DropdownMenuItem>
-								</DropdownMenuGroup>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</div> */}
+						<SubmitButton />
 					</div>
 				</form>
 			</Form>

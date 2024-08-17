@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createClient } from '@/utils/supabase/client';
 import { LoadingSpinner } from '@/components/ui/loader';
+import { signContract } from './eor-agreement.action';
 
 const supabase = createClient();
 
@@ -60,11 +61,6 @@ export const EORAgreementDrawer = ({
 		}
 	});
 
-	const signContract = async (updateData: TablesUpdate<'org_documents'>, agreementId: number) => {
-		const res = await supabase.from('org_documents').update(updateData).eq('id', agreementId).select().single();
-		return res;
-	};
-
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		toggleSigningState(true);
 
@@ -101,7 +97,7 @@ export const EORAgreementDrawer = ({
 		};
 
 		getProfileId();
-	}, [setProfile]);
+	}, [entities, form, setProfile]);
 
 	return (
 		<>
