@@ -41,7 +41,7 @@ export const EORAgreementDrawer = ({
 	isAlertOpen: boolean;
 	toggleAgreementDialog: Dispatch<SetStateAction<boolean>>;
 	eorEntities: Tables<'legal_entities'>[];
-	eor_entity: string;
+	eor_entity: number;
 	entity: string;
 	entities: Tables<'legal_entities'>[];
 	completeContract: () => void;

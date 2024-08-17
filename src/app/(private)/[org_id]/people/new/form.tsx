@@ -48,7 +48,7 @@ const formSchema = z.object({
 	probation_period: z.number(),
 	paid_leave: z.number(),
 	sick_leave: z.number(),
-	entity: z.string()
+	entity: z.number()
 });
 
 export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'>; duplicate?: TablesUpdate<'contracts'> }) => {
@@ -105,11 +105,11 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			employment_type: data?.employment_type || duplicate?.employment_type || undefined,
 			level: data?.level || duplicate?.level || undefined,
 			job_title: data?.job_title || duplicate?.job_title || undefined,
-			entity: data?.employment_type || duplicate?.employment_type || undefined
+			entity: data?.entity || duplicate?.entity || undefined
 		}
 	});
 
-	const isEntityEOR = async (entityId: string) => {
+	const isEntityEOR = async (entityId: number) => {
 		const entity = eorEntities.find(entity => entity.id === Number(entityId));
 		return entity;
 	};

@@ -33,22 +33,22 @@ const formSchema = z.object({
 	job_title: z.string(),
 	level: z.string().optional(),
 	employment_type: z.enum(['full-time', 'part-time']),
-	work_schedule: z.string().optional(),
+	work_schedule: z.number().or(z.string()).optional(),
 	work_shedule_interval: z.string().optional(),
 	responsibilities: z.array(z.string()),
 	salary: z.string(),
 	signing_bonus: z.string().optional(),
 	fixed_allowance: z.array(z.object({ name: z.string(), amount: z.string(), frequency: z.string() })).optional(),
-	probation_period: z.string(),
-	paid_leave: z.string(),
-	sick_leave: z.string(),
+	probation_period: z.number().or(z.string()).optional(),
+	paid_leave: z.number().or(z.string()).optional(),
+	sick_leave: z.number().or(z.string()).optional(),
 	about_us: z.string().optional(),
 	requirements: z.array(z.string()),
 	what_we_offer: z.array(z.string()),
 	state: z.string().optional(),
 	work_location: z.enum(['remote', 'hybrid', 'on-site']),
-	years_of_experience: z.string(),
-	entity: z.string()
+	years_of_experience: z.number().or(z.string()),
+	entity: z.number()
 });
 
 export const AddRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_roles'>; duplicate?: TablesUpdate<'open_roles'> }) => {
@@ -89,20 +89,22 @@ export const AddRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_rol
 		defaultValues: {
 			responsibilities: (data?.responsibilities as string[]) || (duplicate?.responsibilities as string[]) || [],
 			fixed_allowance: (data?.fixed_allowance as any) || (duplicate?.fixed_allowance as any) || [],
-			probation_period: (data?.probation_period as any) || (duplicate?.probation_period as any) || '90',
-			paid_leave: (data?.paid_leave as any) || (duplicate?.paid_leave as any) || '20',
-			sick_leave: (data?.sick_leave as any) || (duplicate?.sick_leave as any) || '20',
-			work_schedule: String(data?.work_schedule) || String(duplicate?.work_schedule) || '8',
+			probation_period: data?.probation_period || duplicate?.probation_period || '90',
+			paid_leave: data?.paid_leave || duplicate?.paid_leave || '20',
+			sick_leave: data?.sick_leave || duplicate?.sick_leave || '20',
+			work_schedule: data?.work_schedule || duplicate?.work_schedule || 8,
 			work_shedule_interval: data?.work_shedule_interval || duplicate?.work_shedule_interval || 'daily',
 			salary: data?.salary ? String(data?.salary) : duplicate?.salary ? String(duplicate?.salary) : '',
 			signing_bonus: data?.signing_bonus ? String(data?.signing_bonus) : duplicate?.signing_bonus ? String(duplicate?.signing_bonus) : '',
 			employment_type: data?.employment_type || duplicate?.employment_type || undefined,
 			level: data?.level || duplicate?.level || undefined,
 			job_title: data?.job_title || duplicate?.job_title || undefined,
-			entity: data?.employment_type || duplicate?.employment_type || undefined,
-			requirements: [],
-			what_we_offer: [],
-			years_of_experience: ''
+			entity: data?.entity || duplicate?.entity || undefined,
+			requirements: (data?.requirements as string[]) || (duplicate?.requirements as string[]) || [],
+			what_we_offer: (data?.what_we_offer as string[]) || (duplicate?.what_we_offer as string[]) || [],
+			years_of_experience: (data?.years_of_experience as number) || (duplicate?.years_of_experience as number) || '',
+			about_us: data?.about_us || duplicate?.about_us || '',
+			work_location: data?.work_location || duplicate?.work_location || undefined
 		}
 	});
 
@@ -117,7 +119,7 @@ export const AddRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_rol
 		);
 	};
 
-	const isEntityEOR = async (entityId: string) => {
+	const isEntityEOR = async (entityId: number) => {
 		const entity = eorEntities.find(entity => entity.id === Number(entityId));
 		return entity;
 	};
@@ -139,13 +141,15 @@ export const AddRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_rol
 			requirements: values.requirements,
 			what_we_offer: values.what_we_offer,
 			years_of_experience: Number(values.years_of_experience),
-			work_location: values.work_location
+			work_location: values.work_location,
+			about_us: values.about_us
 		};
 
 		if (showSigningBonus) role.signing_bonus = Number(values.signing_bonus);
 		if (showFixedIncome) role.fixed_allowance = values.fixed_allowance;
 
 		const responseMessage = data ? await updateRole(role, params.org_id) : await createOpenRole(role, params.org_id);
+		console.log('🚀 ~ createRole ~ responseMessage:', responseMessage);
 		toggleSubmitState(false);
 		if (responseMessage == 'update') return toast.success('Role details updated successfully');
 		if (responseMessage) toast.error(responseMessage);
