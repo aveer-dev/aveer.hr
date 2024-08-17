@@ -1,6 +1,6 @@
 'use server';
 
-import { TablesInsert, TablesUpdate } from '@/type/database.types';
+import { Database, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
@@ -20,4 +20,11 @@ export const updateRole = async (role: TablesUpdate<'open_roles'>, orgId: string
 
 	if (error) return error.message;
 	return 'update';
+};
+
+export const toggleRoleStatus = async (status: Database['public']['Enums']['role_status'], role: string, org: string) => {
+	const supabase = createClient();
+
+	await supabase.from('open_roles').update({ status }).match({ id: role, org: org }).select();
+	return;
 };
