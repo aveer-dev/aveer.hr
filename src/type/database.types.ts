@@ -275,6 +275,7 @@ export type Database = {
           id: number
           job_title: string
           level: string | null
+          no_applicants: number
           org: number
           paid_leave: number | null
           probation_period: number | null
@@ -284,6 +285,7 @@ export type Database = {
           sick_leave: number | null
           signing_bonus: number | null
           state: number | null
+          status: Database["public"]["Enums"]["role_status"]
           what_we_offer: Json | null
           work_location: string | null
           work_schedule: number | null
@@ -302,6 +304,7 @@ export type Database = {
           id?: number
           job_title: string
           level?: string | null
+          no_applicants?: number
           org: number
           paid_leave?: number | null
           probation_period?: number | null
@@ -311,6 +314,7 @@ export type Database = {
           sick_leave?: number | null
           signing_bonus?: number | null
           state?: number | null
+          status?: Database["public"]["Enums"]["role_status"]
           what_we_offer?: Json | null
           work_location?: string | null
           work_schedule?: number | null
@@ -329,6 +333,7 @@ export type Database = {
           id?: number
           job_title?: string
           level?: string | null
+          no_applicants?: number
           org?: number
           paid_leave?: number | null
           probation_period?: number | null
@@ -338,6 +343,7 @@ export type Database = {
           sick_leave?: number | null
           signing_bonus?: number | null
           state?: number | null
+          status?: Database["public"]["Enums"]["role_status"]
           what_we_offer?: Json | null
           work_location?: string | null
           work_schedule?: number | null
@@ -633,6 +639,7 @@ export type Database = {
         | "scheduled termination"
       contract_type: "employee" | "contractor"
       employment_type: "full-time" | "part-time"
+      role_status: "open" | "close"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -1,19 +1,18 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Info, MoreHorizontal } from 'lucide-react';
-import { Button, buttonVariants } from '../ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { MoreHorizontal } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '../ui/badge';
-import { PERSON } from '@/type/person';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { format } from 'date-fns';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tables } from '@/type/database.types';
+import { Switch } from '@/components/ui/switch';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
-export const columns: ColumnDef<PERSON>[] = [
+export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 	{
 		id: 'select',
 		header: ({ table }) => (
@@ -29,40 +28,27 @@ export const columns: ColumnDef<PERSON>[] = [
 		enableHiding: false
 	},
 	{
-		id: 'name',
-		header: 'Name',
+		accessorKey: 'job_title',
+		header: 'Job title'
+	},
+	{
+		id: 'entity',
+		header: 'Legal entity',
 		cell: ({ row }) => {
 			return (
-				<div className="grid gap-1">
-					<div className="font-medium">
-						{row.original.profile.first_name} {row.original.profile.last_name}
-					</div>
-					<div>{row.original.job_title}</div>
+				<div className="flex gap-2 font-medium">
+					<span>{(row.original.entity as any)?.name}</span> • <span className="font-light text-muted-foreground">{(row.original.entity as any)?.incorporation_country}</span>
 				</div>
 			);
 		}
-	},
-	{
-		id: `nationality`,
-		header: 'Country',
-		cell: ({ row }) => <span>{row.original.profile.nationality.name}</span>
 	},
 	{
 		id: 'status',
 		header: 'Status',
 		cell: ({ row }) => (
 			<Badge className="gap-2 py-1 font-light" variant="secondary">
-				{row.original['status']}
-				<TooltipProvider>
-					<Tooltip>
-						<TooltipTrigger>
-							<Info size={12} className="stroke-1" />
-						</TooltipTrigger>
-						<TooltipContent>
-							<p className="text-xs font-thin">{row.original['status']}</p>
-						</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
+				{row.original.status}
+				<Switch defaultChecked={row.original.status == 'open'} className="scale-50" />
 			</Badge>
 		)
 	},
@@ -72,9 +58,8 @@ export const columns: ColumnDef<PERSON>[] = [
 		cell: ({ row }) => <span className="capitalize">{row.original.employment_type}</span>
 	},
 	{
-		id: 'start_date',
-		header: 'Start Date',
-		cell: ({ row }) => <span>{format(row.original.start_date, 'PP')}</span>
+		accessorKey: 'applicants',
+		header: 'Applicants'
 	},
 	{
 		id: 'actions',
@@ -88,6 +73,11 @@ export const columns: ColumnDef<PERSON>[] = [
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
+						<DropdownMenuItem className="h-7 font-light">
+							<Button variant={'ghost'} className="h-7 w-full cursor-pointer justify-start text-xs">
+								Copy link
+							</Button>
+						</DropdownMenuItem>
 						<DropdownMenuItem className="h-7 text-xs font-light">
 							<DropdownListItem href={`/${row.original.org}/people/${row.original.id}`}>View</DropdownListItem>
 						</DropdownMenuItem>
@@ -102,7 +92,7 @@ export const columns: ColumnDef<PERSON>[] = [
 ];
 
 const DropdownListItem = ({ children, href }: { children: ReactNode; href: string }) => (
-	<Link className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-7 w-full cursor-pointer justify-start')} href={href}>
+	<Link className={cn(buttonVariants({ variant: 'ghost' }), 'h-7 w-full cursor-pointer justify-start')} href={href}>
 		{children}
 	</Link>
 );

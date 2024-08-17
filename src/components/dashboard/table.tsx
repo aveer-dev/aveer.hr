@@ -6,12 +6,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '../ui/skeleton';
 import Link from 'next/link';
 import { PERSON } from '@/type/person';
+import { cn } from '@/lib/utils';
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
 	loading?: boolean;
-	orgId: string;
+	orgId?: string;
 }
 
 export function DataTable<TData, TValue>({ columns, data, orgId, loading }: DataTableProps<TData, TValue>) {
@@ -40,10 +41,14 @@ export function DataTable<TData, TValue>({ columns, data, orgId, loading }: Data
 							table.getRowModel().rows.map(row => (
 								<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
 									{row.getVisibleCells().map(cell => (
-										<TableCell key={cell.id} className="p-0">
-											<Link scroll={true} className="block p-4" href={`/${orgId}/people/${(row.original as PERSON).id}`}>
-												{flexRender(cell.column.columnDef.cell, cell.getContext())}
-											</Link>
+										<TableCell key={cell.id} className={cn(orgId && 'p-0')}>
+											{orgId ? (
+												<Link scroll={true} className="block p-4" href={`/${orgId}/people/${(row.original as PERSON).id}`}>
+													{flexRender(cell.column.columnDef.cell, cell.getContext())}
+												</Link>
+											) : (
+												<>{flexRender(cell.column.columnDef.cell, cell.getContext())}</>
+											)}
 										</TableCell>
 									))}
 								</TableRow>
