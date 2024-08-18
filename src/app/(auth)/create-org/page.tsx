@@ -10,7 +10,8 @@ export default function CreateOrgPage() {
 
 		const orgData: TablesInsert<'organisations'> = {
 			name: payload.get('org-name') as string,
-			website: payload.get('website') as string
+			website: payload.get('website') as string,
+			subdomain: payload.get('subdomain') as string
 		};
 
 		const { error, data } = await supabase.from('organisations').insert(orgData).select('id').single();

@@ -457,6 +457,7 @@ export type Database = {
           created_at: string
           id: number
           name: string
+          subdomain: string
           updated_at: string
           website: string | null
         }
@@ -464,6 +465,7 @@ export type Database = {
           created_at?: string
           id?: number
           name?: string
+          subdomain: string
           updated_at?: string
           website?: string | null
         }
@@ -471,6 +473,7 @@ export type Database = {
           created_at?: string
           id?: number
           name?: string
+          subdomain?: string
           updated_at?: string
           website?: string | null
         }
