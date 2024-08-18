@@ -1,7 +1,8 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createServerClient } from '@supabase/ssr';
 import { createClient as AdminClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { Database } from '@/type/database.types';
+import { cookieOptions } from './cookieoptions';
 
 export function createClient() {
 	const cookieStore = cookies();
@@ -20,7 +21,8 @@ export function createClient() {
 					// user sessions.
 				}
 			}
-		}
+		},
+		cookieOptions: process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? cookieOptions : {}
 	});
 }
 
