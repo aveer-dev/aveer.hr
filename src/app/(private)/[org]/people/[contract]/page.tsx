@@ -119,7 +119,7 @@ export default function ContractPage({ params }: { params: { [key: string]: stri
 					</div>
 				</div>
 			}>
-			<Contract org={params.org} id={params.contract} signatureType={'profile'} />
+			<Contract org={params.org} id={params.contract} signatureType={'org'} />
 		</Suspense>
 	);
 }

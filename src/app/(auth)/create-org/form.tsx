@@ -66,7 +66,7 @@ export const OrgForm = ({ formAction, data }: PROPS) => {
 		};
 
 		prefixCheck();
-	}, [prefixText]);
+	}, [prefixText, checkDomainPrefix, orgData, showSubdomainInput]);
 
 	const SubmitButton = () => {
 		const { pending } = useFormStatus();

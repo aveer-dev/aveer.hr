@@ -12,16 +12,18 @@ import { createClient } from '@/utils/supabase/client';
 import { PERSON } from '@/type/person';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { Database } from '@/type/database.types';
 
 interface props {
 	toggleTableLoadingState: Dispatch<SetStateAction<boolean>>;
 	updateData: Dispatch<SetStateAction<PERSON[]>>;
+	org: string;
 }
+type CONTRACT_TYPE = Database['public']['Enums']['contract_state'] | string;
 
 const supabase = createClient();
 
-export const DashboardFilters = ({ toggleTableLoadingState, updateData }: props) => {
-	const [isFilterRequestEnabled, enableFilterRequest] = useState(false);
+export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: props) => {
 	const [showStatusFilter, toggleStatusFilter] = useState(false);
 	const [showEmploymentTypeFilter, toggleEmploymentTypeFilter] = useState(false);
 	const [showCountryFilter, toggleCountryFilter] = useState(false);
@@ -29,7 +31,8 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData }: props)
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
 	const [countryFilterValue, setCountryFilterValue] = useState('');
 	const [employmentTypeFilterValue, setEmploymentTypeFilterValue] = useState('');
-	const [statusFilterValue, setStausFilterValue] = useState('');
+
+	const [statusFilterValue, setStausFilterValue] = useState<CONTRACT_TYPE>();
 
 	const getCountries = async () => {
 		const { data, error } = await supabase.from('countries').select();
@@ -37,7 +40,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData }: props)
 	};
 
 	const getContractsWithFilter = useCallback(
-		async ({ status, employment_type, nationality }: { status: string; employment_type: string; nationality: string }) => {
+		async ({ status, employment_type, nationality }: { status?: CONTRACT_TYPE; employment_type?: string; nationality?: string }) => {
 			toggleTableLoadingState(true);
 
 			let query = supabase.from('contracts').select(`
@@ -47,7 +50,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData }: props)
             employment_type,
             start_date,
             org,
-            profile:profiles!id(
+            profile:profiles!contracts_profile_fkey(
                 first_name,
                 last_name,
                 nationality(
@@ -60,26 +63,37 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData }: props)
 			if (status) query = query.eq('status', status);
 			if (employment_type) query = query.eq('employment_type', employment_type);
 
-			const { data, error } = await query;
+			const { data, error } = await query.eq('org', org);
 			toggleTableLoadingState(false);
 			if (error) toast.error(error.message);
 			updateData(data as any);
 		},
-		[toggleTableLoadingState, updateData]
+		[toggleTableLoadingState, updateData, org]
 	);
 
 	useEffect(() => {
 		getCountries();
 	}, []);
 
-	useEffect(() => {
-		if (isFilterRequestEnabled) getContractsWithFilter({ status: statusFilterValue, employment_type: employmentTypeFilterValue, nationality: countryFilterValue }).then(() => enableFilterRequest(() => true));
-	}, [statusFilterValue, employmentTypeFilterValue, countryFilterValue, isFilterRequestEnabled, getContractsWithFilter]);
+	const statusOptions = [
+		{ label: 'Awaiting signatures', value: 'awaiting signatures' },
+		{ label: 'Awaiting org signature', value: 'awaiting org signature' },
+		{ label: 'Awaiting employee signature', value: 'awaiting signature' },
+		{ label: 'Signed', value: 'signed' },
+		{ label: 'Inactive', value: 'inactive' },
+		{ label: 'Terminated', value: 'terminated' },
+		{ label: 'Scheduled termination', value: 'scheduled termination' }
+	];
 
 	return (
 		<div className="flex gap-3">
 			{showStatusFilter && (
-				<Select defaultOpen onValueChange={setStausFilterValue}>
+				<Select
+					defaultOpen
+					onValueChange={value => {
+						setStausFilterValue(value as any);
+						getContractsWithFilter({ status: value, employment_type: employmentTypeFilterValue, nationality: countryFilterValue });
+					}}>
 					<div className="relative">
 						<SelectTrigger className="h-[unset] w-fit rounded-full border-none bg-transparent p-0 [&_>_svg]:hidden">
 							<div className={cn(badgeVariants({ variant: 'secondary' }), 'flex h-fit gap-1 bg-transparent p-0 font-light hover:bg-transparent')}>
@@ -95,6 +109,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData }: props)
 								className="absolute right-3 top-1/2 -translate-y-1/2"
 								onClick={() => {
 									setStausFilterValue('');
+									getContractsWithFilter({ status: '', employment_type: employmentTypeFilterValue, nationality: countryFilterValue });
 									toggleStatusFilter(false);
 								}}>
 								<CircleX size={14} className="stroke-1" />
@@ -103,17 +118,23 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData }: props)
 					</div>
 					<SelectContent>
 						<SelectGroup>
-							<SelectItem value="awaiting signatures">Awaiting signatures</SelectItem>
-							<SelectItem value="awaiting approval">Awaiting approval</SelectItem>
-							<SelectItem value="active">Active</SelectItem>
-							<SelectItem value="inactive">Inactive</SelectItem>
+							{statusOptions.map(option => (
+								<SelectItem key={option.value} value={option.value}>
+									{option.label}
+								</SelectItem>
+							))}
 						</SelectGroup>
 					</SelectContent>
 				</Select>
 			)}
 
 			{showEmploymentTypeFilter && (
-				<Select defaultOpen onValueChange={setEmploymentTypeFilterValue}>
+				<Select
+					defaultOpen
+					onValueChange={value => {
+						setEmploymentTypeFilterValue(value);
+						getContractsWithFilter({ status: statusFilterValue, employment_type: value, nationality: countryFilterValue });
+					}}>
 					<div className="relative">
 						<SelectTrigger className="h-[unset] w-fit rounded-full border-none bg-transparent p-0 [&_>_svg]:hidden">
 							<div className={cn(badgeVariants({ variant: 'secondary' }), 'flex h-fit gap-1 bg-transparent p-0 font-light hover:bg-transparent')}>
@@ -129,6 +150,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData }: props)
 								className="absolute right-3 top-1/2 -translate-y-1/2"
 								onClick={() => {
 									setEmploymentTypeFilterValue('');
+									getContractsWithFilter({ status: statusFilterValue, employment_type: '', nationality: countryFilterValue });
 									toggleEmploymentTypeFilter(false);
 								}}>
 								<CircleX size={14} className="stroke-1" />
@@ -162,6 +184,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData }: props)
 								className="absolute right-3 top-1/2 -translate-y-1/2"
 								onClick={() => {
 									setCountryFilterValue('');
+									getContractsWithFilter({ status: statusFilterValue, employment_type: employmentTypeFilterValue, nationality: '' });
 									toggleCountryFilter(false);
 								}}>
 								<CircleX size={14} className="stroke-1" />
@@ -180,6 +203,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData }: props)
 											key={country.country_code}
 											onSelect={() => {
 												setCountryFilterValue(country.country_code);
+												getContractsWithFilter({ status: statusFilterValue, employment_type: employmentTypeFilterValue, nationality: country.country_code });
 												toggleCountryOpenState(false);
 											}}>
 											<Check className={cn('mr-2 h-4 w-4', country.country_code === countryFilterValue ? 'opacity-100' : 'opacity-0')} />

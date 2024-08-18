@@ -15,8 +15,8 @@ export default async function OrgsPage() {
 	} = await supabase.auth.getUser();
 	if (!user || userError) redirect('/login');
 
-	const { data, error } = await supabase.from('profiles_roles').select('role, organisations(id)').eq('profile', user.id);
-	if (data && data.length) redirect(`/${data[0].organisations?.id}`);
+	const { data, error } = await supabase.from('profiles_roles').select('role, organisations(subdomain)').eq('profile', user.id);
+	if (data && data.length) redirect(`/${data[0].organisations?.subdomain}`);
 
 	if (data && !data.length)
 		return (

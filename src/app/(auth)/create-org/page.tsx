@@ -14,11 +14,11 @@ export default function CreateOrgPage() {
 			subdomain: payload.get('subdomain') as string
 		};
 
-		const { error, data } = await supabase.from('organisations').insert(orgData).select('id').single();
+		const { error, data } = await supabase.from('organisations').insert(orgData).select('subdomain').single();
 		if (error || !data) return error.message;
 
-		await supabase.from('profiles_roles').insert({ organisation: data.id, role: 'admin' });
-		return redirect(`/${data.id}`);
+		await supabase.from('profiles_roles').insert({ organisation: data.subdomain, role: 'admin' });
+		return redirect(`/${data.subdomain}`);
 	};
 
 	return (

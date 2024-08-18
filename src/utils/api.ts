@@ -21,7 +21,7 @@ export const doesUserHaveAdequatePermissions = async ({ orgId }: { orgId: number
 	return true;
 };
 
-export const createEORAgreement = async ({ org }: { org: number }) => {
+export const createEORAgreement = async ({ org }: { org: string }) => {
 	const supabase = createClient();
 	const { data, error } = await supabase.from('org_documents').insert({ name: 'EOR Contract', org, type: 'eor' }).select('id').single();
 	if (error) return error.message;

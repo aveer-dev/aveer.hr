@@ -12,10 +12,10 @@ interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
 	loading?: boolean;
-	orgId?: string;
+	org?: string;
 }
 
-export function DataTable<TData, TValue>({ columns, data, orgId, loading }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, org, loading }: DataTableProps<TData, TValue>) {
 	const table = useReactTable({
 		data,
 		columns,
@@ -41,9 +41,9 @@ export function DataTable<TData, TValue>({ columns, data, orgId, loading }: Data
 							table.getRowModel().rows.map(row => (
 								<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
 									{row.getVisibleCells().map(cell => (
-										<TableCell key={cell.id} className={cn(orgId && 'p-0')}>
-											{orgId ? (
-												<Link scroll={true} className="block p-4" href={`/${orgId}/people/${(row.original as PERSON).id}`}>
+										<TableCell key={cell.id} className={cn(org && 'p-0')}>
+											{org ? (
+												<Link scroll={true} className="block p-4" href={`/${org}/people/${(row.original as PERSON).id}`}>
 													{flexRender(cell.column.columnDef.cell, cell.getContext())}
 												</Link>
 											) : (

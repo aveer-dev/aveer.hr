@@ -20,7 +20,7 @@ export type Database = {
           id: number
           job_title: string
           level: string | null
-          org: number
+          org: string | null
           org_signature_string: string | null
           org_signed: string | null
           paid_leave: number | null
@@ -49,7 +49,7 @@ export type Database = {
           id?: number
           job_title: string
           level?: string | null
-          org: number
+          org?: string | null
           org_signature_string?: string | null
           org_signed?: string | null
           paid_leave?: number | null
@@ -78,7 +78,7 @@ export type Database = {
           id?: number
           job_title?: string
           level?: string | null
-          org?: number
+          org?: string | null
           org_signature_string?: string | null
           org_signed?: string | null
           paid_leave?: number | null
@@ -110,7 +110,7 @@ export type Database = {
             columns: ["org"]
             isOneToOne: false
             referencedRelation: "organisations"
-            referencedColumns: ["id"]
+            referencedColumns: ["subdomain"]
           },
           {
             foreignKeyName: "contracts_profile_fkey"
@@ -164,21 +164,21 @@ export type Database = {
           contracts: number
           created_at: string
           id: number
-          org: number
+          org: string
           signed_contracts: number | null
         }
         Insert: {
           contracts?: number
           created_at?: string
           id?: number
-          org: number
+          org: string
           signed_contracts?: number | null
         }
         Update: {
           contracts?: number
           created_at?: string
           id?: number
-          org?: number
+          org?: string
           signed_contracts?: number | null
         }
         Relationships: [
@@ -187,7 +187,7 @@ export type Database = {
             columns: ["org"]
             isOneToOne: false
             referencedRelation: "organisations"
-            referencedColumns: ["id"]
+            referencedColumns: ["subdomain"]
           },
         ]
       }
@@ -203,7 +203,7 @@ export type Database = {
           incorporation_country: string
           is_eor: boolean
           name: string
-          org: number
+          org: string
           sic: string | null
           street_address: string | null
           updated_at: string
@@ -219,7 +219,7 @@ export type Database = {
           incorporation_country: string
           is_eor?: boolean
           name: string
-          org: number
+          org: string
           sic?: string | null
           street_address?: string | null
           updated_at?: string
@@ -235,7 +235,7 @@ export type Database = {
           incorporation_country?: string
           is_eor?: boolean
           name?: string
-          org?: number
+          org?: string
           sic?: string | null
           street_address?: string | null
           updated_at?: string
@@ -260,7 +260,7 @@ export type Database = {
             columns: ["org"]
             isOneToOne: false
             referencedRelation: "organisations"
-            referencedColumns: ["id"]
+            referencedColumns: ["subdomain"]
           },
         ]
       }
@@ -276,7 +276,7 @@ export type Database = {
           job_title: string
           level: string | null
           no_applicants: number
-          org: number
+          org: string
           paid_leave: number | null
           probation_period: number | null
           requirements: Json | null
@@ -305,7 +305,7 @@ export type Database = {
           job_title: string
           level?: string | null
           no_applicants?: number
-          org: number
+          org: string
           paid_leave?: number | null
           probation_period?: number | null
           requirements?: Json | null
@@ -334,7 +334,7 @@ export type Database = {
           job_title?: string
           level?: string | null
           no_applicants?: number
-          org?: number
+          org?: string
           paid_leave?: number | null
           probation_period?: number | null
           requirements?: Json | null
@@ -359,11 +359,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "open-roles_org_fkey"
+            foreignKeyName: "open_roles_org_fkey"
             columns: ["org"]
             isOneToOne: false
             referencedRelation: "organisations"
-            referencedColumns: ["id"]
+            referencedColumns: ["subdomain"]
           },
           {
             foreignKeyName: "open-roles_state_fkey"
@@ -382,7 +382,7 @@ export type Database = {
           id: number
           link: string | null
           name: string
-          org: number | null
+          org: string | null
           profile: string | null
           signature_text: string | null
           signed_by: string | null
@@ -395,7 +395,7 @@ export type Database = {
           id?: number
           link?: string | null
           name: string
-          org?: number | null
+          org?: string | null
           profile?: string | null
           signature_text?: string | null
           signed_by?: string | null
@@ -408,7 +408,7 @@ export type Database = {
           id?: number
           link?: string | null
           name?: string
-          org?: number | null
+          org?: string | null
           profile?: string | null
           signature_text?: string | null
           signed_by?: string | null
@@ -434,7 +434,7 @@ export type Database = {
             columns: ["org"]
             isOneToOne: false
             referencedRelation: "organisations"
-            referencedColumns: ["id"]
+            referencedColumns: ["subdomain"]
           },
           {
             foreignKeyName: "org_documents_profile_fkey"
@@ -486,7 +486,7 @@ export type Database = {
           id: string
           last_name: string
           nationality: string | null
-          org: number | null
+          org: string | null
         }
         Insert: {
           email: string
@@ -494,7 +494,7 @@ export type Database = {
           id: string
           last_name: string
           nationality?: string | null
-          org?: number | null
+          org?: string | null
         }
         Update: {
           email?: string
@@ -502,7 +502,7 @@ export type Database = {
           id?: string
           last_name?: string
           nationality?: string | null
-          org?: number | null
+          org?: string | null
         }
         Relationships: [
           {
@@ -524,7 +524,7 @@ export type Database = {
             columns: ["org"]
             isOneToOne: false
             referencedRelation: "organisations"
-            referencedColumns: ["id"]
+            referencedColumns: ["subdomain"]
           },
         ]
       }
@@ -532,21 +532,21 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          organisation: number
+          organisation: string | null
           profile: string
           role: string
         }
         Insert: {
           created_at?: string
           id?: number
-          organisation: number
+          organisation?: string | null
           profile?: string
           role: string
         }
         Update: {
           created_at?: string
           id?: number
-          organisation?: number
+          organisation?: string | null
           profile?: string
           role?: string
         }
@@ -556,7 +556,7 @@ export type Database = {
             columns: ["organisation"]
             isOneToOne: false
             referencedRelation: "organisations"
-            referencedColumns: ["id"]
+            referencedColumns: ["subdomain"]
           },
           {
             foreignKeyName: "profiles_roles_profile_fkey"
