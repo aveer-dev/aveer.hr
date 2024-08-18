@@ -4,7 +4,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { Database } from '@/type/database.types';
-import { toggleRoleStatus } from '../new/role.action';
+import { toggleRoleStatus } from '../../../app/(private)/[org_id]/open-roles/new/role.action';
 import { useState } from 'react';
 
 export const ToggleRoleStatus = ({ status, org, role }: { status: Database['public']['Enums']['role_status']; org: string; role: string }) => {

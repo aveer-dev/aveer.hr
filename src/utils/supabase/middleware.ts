@@ -55,7 +55,7 @@ export async function updateSession(request: NextRequest) {
 	const user = await supabase.auth.getUser();
 
 	// validate access, logout if needed
-	if (!user.data.user && !request.nextUrl.pathname.includes('login') && !request.nextUrl.pathname.includes('signup') && !request.nextUrl.pathname.includes('password')) {
+	if (!user.data.user && !request.nextUrl.pathname.includes('login') && !request.nextUrl.pathname.includes('signup') && !request.nextUrl.pathname.includes('password') && !request.nextUrl.pathname.includes('job')) {
 		return NextResponse.redirect(new URL('/login', request.url));
 	}
 
