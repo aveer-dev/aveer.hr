@@ -36,7 +36,7 @@ export function ContractorTable<TData, TValue>({ columns, data }: DataTableProps
 							<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
 								{row.getVisibleCells().map(cell => (
 									<TableCell key={cell.id} className="p-0">
-										<Link className="block p-4" href={`/contractor/${(row.original as CONTRACT).org.subdomain}/${(row.original as CONTRACT).id}`}>
+										<Link className="block p-4" href={`/${(row.original as CONTRACT).org.subdomain}/${(row.original as CONTRACT).id}`} as={`/contractor/${(row.original as CONTRACT).org.subdomain}/${(row.original as CONTRACT).id}`}>
 											{flexRender(cell.column.columnDef.cell, cell.getContext())}
 										</Link>
 									</TableCell>

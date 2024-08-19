@@ -43,7 +43,7 @@ export function DataTable<TData, TValue>({ columns, data, org, loading }: DataTa
 									{row.getVisibleCells().map(cell => (
 										<TableCell key={cell.id} className={cn(org && 'p-0')}>
 											{org ? (
-												<Link scroll={true} className="block p-4" href={`/${org}/people/${(row.original as PERSON).id}`}>
+												<Link scroll={true} className="block p-4" href={`/${org}/people/${(row.original as PERSON).id}`} as={`/${org}/people/${(row.original as PERSON).id}`}>
 													{flexRender(cell.column.columnDef.cell, cell.getContext())}
 												</Link>
 											) : (
