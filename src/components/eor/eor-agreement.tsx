@@ -87,10 +87,10 @@ export const EORAgreementDrawer = ({
 
 	useEffect(() => {
 		const getProfileId = async () => {
-			const { data, error } = await supabase.auth.getUser();
-			if (error || !data.user) return;
+			const { data, error } = await supabase.auth.getSession();
+			if (error || !data.session?.user) return;
 
-			const { data: profileData, error: profileError } = await supabase.from('profiles').select().eq('id', data.user.id).single();
+			const { data: profileData, error: profileError } = await supabase.from('profiles').select().eq('id', data.session.user.id).single();
 			if (profileError) return;
 			if (profileData) setProfile(profileData);
 			if (entities.length == 0) form.setValue('profile', profileData.id);
