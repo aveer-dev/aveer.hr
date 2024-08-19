@@ -25,7 +25,7 @@ export const AccountTypeToggle = ({ orgId }: { orgId?: string }) => {
 						<p className="text-xs text-muted-foreground">How will you like to operate your account:</p>
 					</div>
 					<div className="grid gap-2">
-						<Link href={`/`} onClick={() => toggleOpen(!isOpen)} className={cn(buttonVariants({ variant: orgId ? 'secondary' : 'ghost' }), 'justify-between')}>
+						<Link href={process.env.NEXT_PUBLIC_URL || '/'} passHref={true} onClick={() => toggleOpen(!isOpen)} className={cn(buttonVariants({ variant: orgId ? 'secondary' : 'ghost' }), 'justify-between')}>
 							<div className="flex items-center gap-4">
 								<Building2 size={12} />
 								Client
