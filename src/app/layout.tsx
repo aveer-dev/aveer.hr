@@ -14,7 +14,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 	return (
 		<html lang="en">
 			<body className={karla.className}>
-				<Toaster />
+				<Toaster toastOptions={{ className: '!font-thin bg-background text-foreground border-none text-xs font-karla' }} />
 
 				{children}
 			</body>

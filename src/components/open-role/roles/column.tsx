@@ -11,6 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tables } from '@/type/database.types';
 import { Switch } from '@/components/ui/switch';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
+
+const jobLink = (jobId: number, org: string) => `${location.protocol}//${location.host}/${org}/jobs/${jobId}`;
 
 export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 	{
@@ -67,21 +70,27 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 			return (
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" className="h-8 w-8 p-0 !ring-0 !ring-offset-0">
+						<Button variant="ghost" className="h-8 w-8 p-0">
 							<span className="sr-only">Open menu</span>
 							<MoreHorizontal className="h-4 w-4" />
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuItem className="h-7 font-light">
-							<Button variant={'ghost'} className="h-7 w-full cursor-pointer justify-start text-xs">
+						<DropdownMenuItem className="h-7 p-0 font-light">
+							<Button
+								variant={'ghost'}
+								onClick={() => {
+									navigator.clipboard.writeText(jobLink(row.original.id, row.original.org));
+									toast.message('👋🏾 Hey there', { description: 'Public link to role application has been copied to clipboard' });
+								}}
+								className="h-7 w-full cursor-pointer justify-start text-xs">
 								Copy link
 							</Button>
 						</DropdownMenuItem>
-						<DropdownMenuItem className="h-7 text-xs font-light">
+						<DropdownMenuItem className="h-7 p-0 text-xs font-light">
 							<DropdownListItem href={`/${row.original.org}/open-roles/${row.original.id}`}>View</DropdownListItem>
 						</DropdownMenuItem>
-						<DropdownMenuItem className="h-7 text-xs font-light">
+						<DropdownMenuItem className="h-7 p-0 text-xs font-light">
 							<DropdownListItem href={`/${row.original.org}/open-roles/${row.original.id}/edit`}>Edit</DropdownListItem>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
