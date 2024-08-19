@@ -56,7 +56,12 @@ export async function updateSession(request: NextRequest) {
 	// for contractor subdomains, rewrite to contractor pages
 	if (subdomain && subdomain === 'contractor') return NextResponse.rewrite(new URL(`/contractor${path}`, request.url));
 	// for other pages, rewrite to org pages
-	if (subdomain && subdomain !== 'contractor' && subdomain !== 'app') return NextResponse.rewrite(new URL(`/${subdomain}${path}`, request.url));
+	if (subdomain && subdomain !== 'contractor' && subdomain !== 'app') {
+		console.log(path.split('/')[1], subdomain);
+
+		if (path.split('/')[1] == subdomain) return NextResponse.rewrite(new URL(`/${path}`, request.url));
+		return NextResponse.rewrite(new URL(`/${subdomain}${path}`, request.url));
+	}
 
 	return supabaseResponse;
 }
