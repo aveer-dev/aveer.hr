@@ -27,6 +27,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 		return (
 			<div>
 				<p className="text-center text-xs text-muted-foreground">Unable to fetch contract details. Please refresh page</p>
+				<p className="mx-auto mt-3 w-fit rounded-sm bg-accent p-1 text-center text-xs font-thin text-muted-foreground">{error.message}</p>
 			</div>
 		);
 	}
