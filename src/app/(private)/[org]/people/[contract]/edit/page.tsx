@@ -1,11 +1,15 @@
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EditContractFormComponent } from './form.component';
+import { BackButton } from '@/components/ui/back-button';
 
 export default async function EditContractPage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	return (
 		<div className="mx-auto max-w-4xl">
-			<h1 className="mb-6 text-xl font-semibold">Edit Contract</h1>
+			<div className="relative mb-6 flex items-center">
+				<BackButton className="absolute -left-16" />
+				<h1 className="text-xl font-semibold">Edit Contract</h1>
+			</div>
 
 			<Suspense
 				fallback={

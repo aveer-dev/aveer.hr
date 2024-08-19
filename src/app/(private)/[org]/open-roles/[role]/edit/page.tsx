@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
 import { OpenRoleForm } from '../../new/form';
+import { BackButton } from '@/components/ui/back-button';
 
 export default async function EditContractPage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -18,7 +19,10 @@ export default async function EditContractPage({ params }: { params: { [key: str
 
 	return (
 		<div className="mx-auto max-w-4xl">
-			<h1 className="mb-6 text-xl font-semibold">Edit Open Role</h1>
+			<div className="relative">
+				<BackButton className="absolute -left-16" />
+				<h1 className="mb-6 text-xl font-semibold">Edit Open Role</h1>
+			</div>
 
 			<Suspense
 				fallback={

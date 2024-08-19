@@ -2,13 +2,14 @@
 
 import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
-import { Building2, ChevronLeft, Copy, EllipsisVertical, FilePenLine, House } from 'lucide-react';
+import { Building2, Copy, EllipsisVertical, FilePenLine, House } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ToggleRoleStatus } from './toggleRoleStatus';
 import { redirect } from 'next/navigation';
 import { TerminateOpening } from './delete-role-dialog';
+import { BackButton } from '@/components/ui/back-button';
 
 interface props {
 	role: string;
@@ -56,10 +57,8 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 	return (
 		<section className="mx-auto -mt-6 grid max-w-4xl gap-10 p-6 pt-0">
 			<div className="flex justify-between">
-				<div className="flex gap-8">
-					<Link href={`./`} className={cn(buttonVariants({ variant: 'outline', size: 'icon' }), 'rounded-full')}>
-						<ChevronLeft size={12} />
-					</Link>
+				<div className="relative flex">
+					<BackButton className="absolute -left-16" />
 
 					<div className="grid gap-2">
 						<h1 className="flex items-center gap-4 text-2xl font-bold">{data?.job_title}</h1>

@@ -3,6 +3,7 @@ import { OpenRoleForm } from './form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
 import { TablesUpdate } from '@/type/database.types';
+import { BackButton } from '@/components/ui/back-button';
 
 export default async function Home({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	let roleDetails: TablesUpdate<'open_roles'> = {};
@@ -15,7 +16,10 @@ export default async function Home({ params, searchParams }: { params: { [key: s
 
 	return (
 		<div className="mx-auto max-w-4xl">
-			<h1 className="mb-6 text-xl font-semibold">Create a role</h1>
+			<div className="relative">
+				<BackButton className="absolute -left-16" />
+				<h1 className="mb-6 text-xl font-semibold">Create a role</h1>
+			</div>
 
 			<Suspense
 				fallback={

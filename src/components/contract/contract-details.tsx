@@ -3,7 +3,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
 import { format } from 'date-fns';
-import { ChevronLeft, Copy, EllipsisVertical, FilePenLine, InfoIcon } from 'lucide-react';
+import { Copy, EllipsisVertical, FilePenLine, InfoIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -12,6 +12,7 @@ import { SignatureDrawer } from './signature-drawer';
 import { redirect } from 'next/navigation';
 import { ScheduleTermination } from './schedule-termination';
 import { TerminateContract } from './terminate-contract';
+import { BackButton } from '../ui/back-button';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -133,10 +134,8 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 	return (
 		<section className="mx-auto -mt-6 grid max-w-4xl gap-10 p-6 pt-0">
 			<div className="flex justify-between">
-				<div className="flex gap-8">
-					<Link href={`/${signatureType == 'org' ? org : 'contractor'}`} className={cn(buttonVariants({ variant: 'outline', size: 'icon' }), 'rounded-full')}>
-						<ChevronLeft size={12} />
-					</Link>
+				<div className="relative flex gap-8">
+					<BackButton className="absolute -left-16" />
 
 					<div className="grid gap-2">
 						<h1 className="flex items-center gap-4 text-2xl font-bold">
