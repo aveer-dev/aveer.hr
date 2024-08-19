@@ -21,7 +21,7 @@ export const LogoutButton = () => {
 			const { error } = await supabase.auth.signOut();
 
 			if (error) return toast.error(error.message);
-			router.push('/login');
+			router.push(`${process.env.NEXT_PUBLIC_URL}/login`);
 		} catch (error) {
 			toast.error('Error logging you out, check your network and try again');
 		}
