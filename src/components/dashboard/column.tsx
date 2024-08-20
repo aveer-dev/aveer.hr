@@ -88,14 +88,19 @@ export const columns: ColumnDef<PERSON>[] = [
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuItem className="h-7 text-xs font-light">
+						<DropdownMenuItem className="h-7 p-0 text-xs font-light">
 							<DropdownListItem org={row.original.org} href={`/people/${row.original.id}`}>
 								View
 							</DropdownListItem>
 						</DropdownMenuItem>
-						<DropdownMenuItem className="h-7 text-xs font-light">
+						<DropdownMenuItem className="h-7 p-0 text-xs font-light">
 							<DropdownListItem org={row.original.org} href={`/people/${row.original.id}/edit`}>
 								Edit
+							</DropdownListItem>
+						</DropdownMenuItem>
+						<DropdownMenuItem className="h-7 p-0 text-xs font-light">
+							<DropdownListItem org={row.original.org} href={`/people/new?duplicate=${row.original.id}`}>
+								Duplicate
 							</DropdownListItem>
 						</DropdownMenuItem>
 					</DropdownMenuContent>

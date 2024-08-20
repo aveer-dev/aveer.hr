@@ -155,7 +155,7 @@ export const OpenRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_ro
 	};
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
-		const userHasPermission = await doesUserHaveAdequatePermissions({ orgId: Number(params.org) });
+		const userHasPermission = await doesUserHaveAdequatePermissions({ orgId: params.org });
 		if (userHasPermission !== true) return toast.error(userHasPermission);
 
 		toggleSubmitState(true);
@@ -186,8 +186,8 @@ export const OpenRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_ro
 			return toggleAgreementDialog(true);
 		}
 
-		if (!eorAgreement.data.signed_by) {
-			setAgreementId(eorAgreement.data.id);
+		if (!eorAgreement.data[0].signed_by) {
+			setAgreementId(eorAgreement.data[0].id);
 			return toggleAgreementDialog(true);
 		}
 

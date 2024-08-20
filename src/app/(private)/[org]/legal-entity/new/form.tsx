@@ -109,7 +109,7 @@ export const LegalEntityForm = ({ data, org }: { data?: TablesUpdate<'legal_enti
 		US: { tax_no: { label: 'EIN', placeholder: 'Enter EIN here', description: `EIN is a nine-digit number assigned by the IRS to identify businesses for tax purposes. It's like a Social Security number for a business.` } },
 		CA: { tax_no: { label: 'BN', placeholder: 'Enter BN here', description: `Business Number (BN) is the Canadian equivalent of an EIN. It's a nine-digit number assigned by the Canada Revenue Agency (CRA) to identify businesses.` } },
 		GB: {
-			tax_no: { label: 'UTR', placeholder: 'Enter URL here', description: `UTR is a unique 10-digit number assigned by HMRC to identify individuals and businesses for tax purposes in the UK.` },
+			tax_no: { label: 'UTR', placeholder: 'Enter UTL here', description: `UTR is a unique 10-digit number assigned by HMRC to identify individuals and businesses for tax purposes in the UK.` },
 			rn: { label: 'Company Registration Number', placeholder: 'Enter CRN here', description: `Company Registration Number (CRN) is a unique number assigned to a UK company upon incorporation for identification purposes.` }
 		},
 		NG: {
@@ -137,7 +137,7 @@ export const LegalEntityForm = ({ data, org }: { data?: TablesUpdate<'legal_enti
 						<div>
 							<ul className="grid max-w-xs gap-4 text-xs font-light text-muted-foreground">
 								<li className="text-balance leading-5">
-									*<span className="font-medium">{companyRequiredIds[form.getValues('incorporation_country')]?.tax_no?.label} - </span> {companyRequiredIds[form.getValues('incorporation_country')]?.tax_no?.description}
+									*<span className="font-medium text-foreground">{companyRequiredIds[form.getValues('incorporation_country')]?.tax_no?.label} - </span> {companyRequiredIds[form.getValues('incorporation_country')]?.tax_no?.description}
 								</li>
 								{companyRequiredIds[form.getValues('incorporation_country')]?.rn && (
 									<li className="text-balance leading-5">

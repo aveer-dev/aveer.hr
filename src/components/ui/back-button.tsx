@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
-export const BackButton = async (props: ButtonHTMLAttributes<HTMLButtonElement>) => {
+export const BackButton = (props: ButtonHTMLAttributes<HTMLButtonElement>) => {
 	const router = useRouter();
 
 	return (

@@ -194,6 +194,51 @@ export type Database = {
           },
         ]
       }
+      employee_levels: {
+        Row: {
+          created_at: string
+          entity: number | null
+          id: number
+          level: string
+          org: string
+          role: string | null
+          salary: number
+        }
+        Insert: {
+          created_at?: string
+          entity?: number | null
+          id?: number
+          level: string
+          org: string
+          role?: string | null
+          salary: number
+        }
+        Update: {
+          created_at?: string
+          entity?: number | null
+          id?: number
+          level?: string
+          org?: string
+          role?: string | null
+          salary?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_levels_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_levels_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       legal_entities: {
         Row: {
           address_code: string | null

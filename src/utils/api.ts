@@ -5,11 +5,11 @@ import { createClient } from './supabase/server';
 export const getEORAgreementByCountry = async (selectedEntityIncCountry: string) => {
 	const supabase = createClient();
 
-	const res = await supabase.from('org_documents').select('*, eor_entity:legal_entities!org_documents_eor_entity_fkey(incorporation_country)').not('eor_entity', 'is', null).eq('legal_entities.incorporation_country', selectedEntityIncCountry).single();
+	const res = await supabase.from('org_documents').select('*, eor_entity:legal_entities!org_documents_eor_entity_fkey(incorporation_country)').not('eor_entity', 'is', null).eq('legal_entities.incorporation_country', selectedEntityIncCountry);
 	return res;
 };
 
-export const doesUserHaveAdequatePermissions = async ({ orgId }: { orgId: number }) => {
+export const doesUserHaveAdequatePermissions = async ({ orgId }: { orgId: string }) => {
 	const supabase = createClient();
 
 	const {
@@ -17,7 +17,7 @@ export const doesUserHaveAdequatePermissions = async ({ orgId }: { orgId: number
 	} = await supabase.auth.getUser();
 	const role = await supabase.from('profiles_roles').select().match({ organisation: orgId, profile: user?.id });
 	if (role.error) return role.error.message;
-	if (role.data && !role.data.length) return `You do not have adequate org permission to sign contracts`;
+	if (role.data && !role.data.length) return `You do not have adequate org permission for this action`;
 	return true;
 };
 

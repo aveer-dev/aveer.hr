@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, Info } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,10 +22,12 @@ import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { toast } from 'sonner';
 import { useParams, useSearchParams } from 'next/navigation';
 import { LoadingSpinner } from '@/components/ui/loader';
-import { inviteUser, updateContract } from './invite-user.action';
+import { createLevel, inviteUser, updateContract } from './invite-user.action';
 import { Separator } from '@/components/ui/separator';
 import { EORAgreementDrawer } from '@/components/eor/eor-agreement';
 import { createEORAgreement, doesUserHaveAdequatePermissions, getEORAgreementByCountry } from '@/utils/api';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { NewContractDialog } from './new-contract-dialog';
 
 const supabase = createClient();
 
@@ -35,7 +37,7 @@ const formSchema = z.object({
 	email: z.string().email(),
 	nationality: z.string(),
 	job_title: z.string(),
-	level: z.string().optional(),
+	level: z.object({ level: z.string(), role: z.string().optional(), salary: z.number() }).optional(),
 	employment_type: z.enum(['full-time', 'part-time']),
 	work_schedule: z.string().optional(),
 	work_shedule_interval: z.string().optional(),
@@ -48,16 +50,16 @@ const formSchema = z.object({
 	probation_period: z.number(),
 	paid_leave: z.number(),
 	sick_leave: z.number(),
-	entity: z.number()
+	entity: z.string()
 });
 
 export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'>; duplicate?: TablesUpdate<'contracts'> }) => {
-	const [formValue, setFormValue] = useState<z.infer<typeof formSchema>>();
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
 	const [entities, setEntities] = useState<Tables<'legal_entities'>[]>([]);
 	const [eorEntities, setEorEntities] = useState<Tables<'legal_entities'>[]>([]);
 	const [jobTitles, updateJobTitles] = useState<string[]>([]);
-	const [jobLevels, updateJobLevels] = useState<string[]>([]);
+	const [jobLevels, updateJobLevels] = useState<{ level: string; role: string; salary: number }[]>(levels);
+	const [orgJobLevels, updateOrgJobLevels] = useState<{ level: string; role: string; salary: number }[]>([]);
 	const [responsibility, updateResponsibility] = useState('');
 	const [fixedAllowance, updateFixedAllowance] = useState({ name: '', amount: '', frequency: '' });
 	const [showSigningBonus, toggleShowSigningBonus] = useState(!!data?.signing_bonus || !!duplicate?.signing_bonus);
@@ -70,19 +72,17 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	const searchParams = useSearchParams();
 	const [isAlertOpen, toggleAgreementDialog] = useState(false);
 	const [agreementId, setAgreementId] = useState<number>();
+	const [isLevelsOpen, toggleLevelsDropdown] = useState(false);
+	const [isTitlesOpen, toggleTitlesDropdown] = useState(false);
+	const [isNationalityOpen, toggleNationalityDropdown] = useState(false);
+	const [isNewContractDialogOpen, toggleNewContractDialog] = useState(false);
+	const [newContractId, setNewContractId] = useState(0);
+	const [isLevelCreated, setLevelCreationState] = useState(false);
 
 	const getCountries = async () => {
 		const { data, error } = await supabase.from('countries').select();
 		if (!error) setCountries(data);
 	};
-
-	const getEntities = useCallback(async () => {
-		const { data, error } = await supabase.from('legal_entities').select().eq('org', params.org);
-		const { data: eorData, error: eorError } = await supabase.from('legal_entities').select().eq('is_eor', true);
-
-		if (!error) setEntities(data);
-		if (!eorError) setEorEntities(eorData);
-	}, [params.org]);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -103,18 +103,60 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			salary: data?.salary ? String(data?.salary) : duplicate?.salary ? String(duplicate?.salary) : '',
 			signing_bonus: data?.signing_bonus ? String(data?.signing_bonus) : duplicate?.signing_bonus ? String(duplicate?.signing_bonus) : undefined,
 			employment_type: data?.employment_type || duplicate?.employment_type || undefined,
-			level: data?.level || duplicate?.level || undefined,
 			job_title: data?.job_title || duplicate?.job_title || undefined,
-			entity: data?.entity || duplicate?.entity || undefined
+			entity: data?.entity ? String(data?.entity) : duplicate?.entity ? String(duplicate?.entity) : undefined
 		}
 	});
+
+	const checkLevels = useCallback(
+		(levels: any[] | null) => {
+			if (!data?.level && !duplicate?.level) return;
+
+			const newOrgJobLevel = levels?.find(title => title.level == data?.level || title.level == duplicate?.level);
+			if (!newOrgJobLevel) return;
+			form.setValue('level', newOrgJobLevel);
+		},
+		[data, duplicate, form]
+	);
+
+	const getOrgLevels = useCallback(async () => {
+		const { data, error } = await supabase.from('employee_levels').select().match({ org: params.org });
+		if (error) toast.error('🫤 Error', { description: `Unable to fetch existing org levels ${error.message}` });
+		if (data?.length) updateOrgJobLevels(data?.map(level => ({ level: level.level as string, role: level.role as string, salary: level.salary as number })) || []);
+		checkLevels(data);
+	}, [checkLevels, params]);
+
+	const getEntities = useCallback(async () => {
+		const { data, error } = await supabase.from('legal_entities').select().eq('org', params.org);
+		const { data: eorData, error: eorError } = await supabase.from('legal_entities').select().eq('is_eor', true);
+
+		if (!error) setEntities(data);
+		if (!eorError) setEorEntities(eorData);
+	}, [params.org]);
 
 	const isEntityEOR = async (entityId: number) => {
 		const entity = eorEntities.find(entity => entity.id === Number(entityId));
 		return entity;
 	};
 
+	const createEmployeeLevel = async (level: TablesInsert<'employee_levels'>) => {
+		const response = await createLevel(level);
+		if (response) {
+			toggleSubmitState(false);
+			return toast.error('😔 Error', { description: response });
+		}
+		setLevelCreationState(true);
+		return true;
+	};
+
 	const createContract = async (values: z.infer<typeof formSchema>) => {
+		const orgHasExistingLevel = orgJobLevels.length > 0 ? !!orgJobLevels.find(level => level.level == values.level?.level && level.salary == level.salary) : false;
+
+		if (!orgHasExistingLevel && values.level) {
+			const level: TablesInsert<'employee_levels'> = { ...values.level, org: params.org };
+			await createEmployeeLevel(level);
+		}
+
 		const profile: TablesInsert<'profiles'> = {
 			first_name: values.first_name,
 			last_name: values.last_name,
@@ -132,7 +174,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			work_schedule: values.work_schedule,
 			work_shedule_interval: values.work_shedule_interval,
 			job_title: values.job_title,
-			level: values.level,
+			level: values.level?.level,
 			responsibilities: values.responsibilities,
 			profile: data ? (data?.profile as any).id : '',
 			entity: Number(values.entity),
@@ -147,23 +189,33 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 
 		toggleSubmitState(false);
 		if (responseMessage == 'update') return toast.success('Contract details updated successfully');
-		if (responseMessage) toast.error(responseMessage);
+		if (typeof responseMessage == 'number') {
+			setNewContractId(responseMessage);
+			return toggleNewContractDialog(true);
+		}
+		if (responseMessage) return toast.error(responseMessage);
 	};
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
-		const userHasPermission = await doesUserHaveAdequatePermissions({ orgId: Number(params.org) });
+		// does user have adequate permission for this?
+		const userHasPermission = await doesUserHaveAdequatePermissions({ orgId: params.org });
 		if (userHasPermission !== true) return toast.error(userHasPermission);
 
 		toggleSubmitState(true);
 
-		const entityData = await isEntityEOR(values.entity);
+		// does contract require EOR?
+		const entityData = await isEntityEOR(Number(values.entity));
 		if (entityData?.is_eor !== true) return createContract(values);
 
-		setFormValue(values);
-
+		// if the contract requires EOR contract, does the or have an existing contract
 		const eorAgreement = await getEORAgreementByCountry(entityData?.incorporation_country as string);
-		if (eorAgreement.error) return toast.error(eorAgreement.error.message);
-		if (!eorAgreement.data) {
+		if (eorAgreement.error) {
+			toggleSubmitState(false);
+			return toast.error(eorAgreement.error.message);
+		}
+
+		// if org does not have an existing contract, create one and prompt to sign
+		if (!eorAgreement.data.length) {
 			const res = await createEORAgreement({ org: params.org });
 			if (typeof res !== 'number') return toast.error(res);
 			setAgreementId(res);
@@ -171,16 +223,19 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			return toggleAgreementDialog(true);
 		}
 
-		if (!eorAgreement.data.signed_by) {
-			setAgreementId(eorAgreement.data.id);
+		// if org has a contract and hasn't signed, prompt to sign contract
+		if (!eorAgreement.data[0].signed_by) {
+			setAgreementId(eorAgreement.data[0].id);
 			return toggleAgreementDialog(true);
 		}
 
+		// if contract exists and signed, create contract
 		return createContract(values);
 	};
 
 	const onSignAgreement = () => {
-		if (formValue) createContract(formValue);
+		const values = form.getValues();
+		if (values) createContract(values);
 	};
 
 	useEffect(() => {
@@ -199,19 +254,12 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			if (title) updateJobTitles([...jobTitles, title]);
 		};
 
-		const checkLevel = () => {
-			if (!data?.level && !duplicate?.level) return;
+		const entity = data?.entity || duplicate?.entity;
+		if (entity) form.setValue('entity', String(entity));
 
-			const newJobLevel = jobTitles.find(title => title == data?.level || title == duplicate?.level);
-			if (newJobLevel) return;
-
-			const level = data?.level || duplicate?.level;
-			if (level) updateJobLevels([...jobTitles, level]);
-		};
-
+		getOrgLevels();
 		checkTitle();
-		checkLevel();
-	}, [data, duplicate, jobTitles]);
+	}, [data, duplicate, jobTitles, jobLevels, form, getOrgLevels]);
 
 	return (
 		<>
@@ -222,12 +270,15 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 					eorEntities={eorEntities}
 					entities={entities}
 					entity={String(entities[0]?.id)}
-					eor_entity={form.getValues('entity')}
+					eor_entity={Number(form.getValues('entity'))}
 					isAlertOpen={isAlertOpen}
 					toggleAgreementDialog={toggleAgreementDialog}
 					onCancel={() => toggleAgreementDialog(false)}
 				/>
 			)}
+
+			<NewContractDialog isAlertOpen={isNewContractDialogOpen} toggleDialog={toggleNewContractDialog} contractId={newContractId} isLevelCreated={isLevelCreated} />
+
 			<Form {...form}>
 				<form className="grid w-full gap-6" onSubmit={form.handleSubmit(onSubmit)}>
 					{/* entity details */}
@@ -244,7 +295,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Legal entity</FormLabel>
-										<Select onValueChange={field.onChange} defaultValue={field.value ? String(field.value) : undefined}>
+										<Select onValueChange={field.onChange} defaultValue={field.value ? field.value : undefined}>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue placeholder="Select legal entity you'd like to hire under" />
@@ -338,7 +389,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>Nationalty</FormLabel>
-											<Popover>
+											<Popover open={isNationalityOpen} onOpenChange={toggleNationalityDropdown}>
 												<PopoverTrigger asChild>
 													<FormControl>
 														<Button disabled={!!data} variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
@@ -359,6 +410,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 																		key={country.country_code}
 																		onSelect={() => {
 																			form.setValue('nationality', country.country_code);
+																			toggleNationalityDropdown(false);
 																		}}>
 																		<Check className={cn('mr-2 h-4 w-4', country.country_code === field.value ? 'opacity-100' : 'opacity-0')} />
 																		{country.name}
@@ -392,7 +444,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>Job title</FormLabel>
-											<Popover>
+											<Popover open={isTitlesOpen} onOpenChange={toggleTitlesDropdown}>
 												<PopoverTrigger asChild>
 													<FormControl>
 														<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
@@ -410,6 +462,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 																	updateJobTitles([...jobTitles, jobQuery]);
 																	form.setValue('job_title', jobQuery);
 																	setJobQuery('');
+																	toggleTitlesDropdown(false);
 																}}
 																className="p-1">
 																<div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs font-light outline-none">
@@ -419,7 +472,13 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 															</CommandEmpty>
 															<CommandGroup>
 																{jobTitles.map(title => (
-																	<CommandItem value={title} key={title} onSelect={() => form.setValue('job_title', title)}>
+																	<CommandItem
+																		value={title}
+																		key={title}
+																		onSelect={() => {
+																			form.setValue('job_title', title);
+																			toggleTitlesDropdown(false);
+																		}}>
 																		<Check className={cn('mr-2 h-4 w-4', title === field.value ? 'opacity-100' : 'opacity-0')} />
 																		{title}
 																	</CommandItem>
@@ -440,11 +499,11 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>Level</FormLabel>
-											<Popover>
+											<Popover open={isLevelsOpen} onOpenChange={toggleLevelsDropdown}>
 												<PopoverTrigger asChild>
 													<FormControl>
 														<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
-															{field.value || `Select seniority level`}
+															{field.value?.level || `Select seniority level`}
 															<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 														</Button>
 													</FormControl>
@@ -455,21 +514,54 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 														<CommandList>
 															<CommandEmpty
 																onClick={() => {
-																	updateJobLevels([...jobLevels, levelQuery]);
-																	form.setValue('level', levelQuery);
+																	updateOrgJobLevels([...orgJobLevels, { level: levelQuery, role: '', salary: 0 }]);
+																	form.setValue('level', { level: levelQuery, role: '', salary: 0 });
 																	setLevelQuery('');
+																	toggleLevelsDropdown(false);
 																}}
 																className="p-1">
 																<div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs font-light outline-none">
-																	<Check className={cn('mr-2 h-4 w-4', levelQuery && levelQuery === field.value ? 'opacity-100' : 'opacity-0')} />
+																	<Check className={cn('mr-2 h-4 w-4', levelQuery && levelQuery === field.value?.level ? 'opacity-100' : 'opacity-0')} />
 																	{levelQuery}
 																</div>
 															</CommandEmpty>
-															<CommandGroup>
+															{orgJobLevels.length > 0 && (
+																<CommandGroup heading="Active Org Levels">
+																	{orgJobLevels.map(level => (
+																		<CommandItem
+																			className="gap-2"
+																			value={level.level}
+																			key={level.level}
+																			onSelect={() => {
+																				form.setValue('level', level);
+																				toggleLevelsDropdown(false);
+																				form.setValue('salary', String(level.salary));
+																			}}>
+																			<div className="flex items-center">
+																				<Check className={cn('mr-2 h-3 w-3', level.level === field.value?.level ? 'opacity-100' : 'opacity-0')} />
+																				{level.level}
+																			</div>
+																			• <div className="text-left text-xs text-muted-foreground">{level.role}</div>
+																		</CommandItem>
+																	))}
+																</CommandGroup>
+															)}
+															<CommandGroup heading="Suggested Org Levels">
 																{jobLevels.map(level => (
-																	<CommandItem value={level} key={level} onSelect={() => form.setValue('level', level)}>
-																		<Check className={cn('mr-2 h-4 w-4', level === field.value ? 'opacity-100' : 'opacity-0')} />
-																		{level}
+																	<CommandItem
+																		className="gap-2"
+																		value={level.level}
+																		key={level.level}
+																		onSelect={() => {
+																			form.setValue('level', level);
+																			toggleLevelsDropdown(false);
+																			form.setValue('salary', String(level.salary));
+																		}}>
+																		<div className="flex items-center">
+																			<Check className={cn('mr-2 h-3 w-3', level.level === field.value?.level ? 'opacity-100' : 'opacity-0')} />
+																			{level.level}
+																		</div>
+																		• <div className="text-left text-xs text-muted-foreground">{level.role}</div>
 																	</CommandItem>
 																))}
 															</CommandGroup>
@@ -598,7 +690,33 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 								name="salary"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Salary</FormLabel>
+										<FormLabel className="flex items-center justify-between">
+											Salary
+											<div className="">
+												{field.value ? (
+													<div className="flex gap-1">
+														{new Intl.NumberFormat('en-US', {
+															style: 'currency',
+															currency: 'USD'
+														}).format(Number(field.value))}
+														<TooltipProvider>
+															<Tooltip>
+																<TooltipTrigger asChild>
+																	<button>
+																		<Info size={12} />
+																	</button>
+																</TooltipTrigger>
+																<TooltipContent side="left">
+																	<p className="max-w-40 text-wrap text-xs text-muted-foreground">Formated to fit default currency</p>
+																</TooltipContent>
+															</Tooltip>
+														</TooltipProvider>
+													</div>
+												) : (
+													''
+												)}
+											</div>
+										</FormLabel>
 										<FormControl>
 											<Input type="number" placeholder="Employee gross annual salary" {...field} required />
 										</FormControl>
@@ -779,30 +897,22 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 							{isSubmiting && <LoadingSpinner />}
 							{isSubmiting ? (data ? 'Updating contract...' : 'Adding person...') : data ? 'Update Contract' : 'Add person'}
 						</Button>
-
-						{/* <div className={cn(buttonVariants(), 'p-0')}>
-						<DropdownMenu>
-							<Button size={'sm'}>Add Person</Button>
-
-							<DropdownMenuTrigger asChild>
-								<Button size={'icon'} className="h-full !outline-none !ring-0 !ring-offset-0">
-									<ChevronDown size={16} />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<DropdownMenuGroup>
-									<DropdownMenuItem className="p-0">
-										<Button size={'sm'} variant={'ghost'} className="">
-											Add person and reset form
-										</Button>
-									</DropdownMenuItem>
-								</DropdownMenuGroup>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</div> */}
 					</div>
 				</form>
 			</Form>
 		</>
 	);
 };
+
+const levels = [
+	{ level: 'IC Level 1', role: 'Entry', salary: 50000 },
+	{ level: 'IC Level 2', role: 'Mid I', salary: 72000 },
+	{ level: 'IC Level 3', role: 'Mid II', salary: 92000 },
+	{ level: 'IC Level 4', role: 'Mid II', salary: 110000 },
+	{ level: 'IC Level 5', role: 'Senior I', salary: 160000 },
+	{ level: 'IC Level 6', role: 'Senior II', salary: 180000 },
+	{ level: 'IC Level 7', role: 'Staff', salary: 240000 },
+	{ level: 'IC Level 8', role: 'Principal', salary: 280000 },
+	{ level: 'IC Level 9', role: 'VP', salary: 350000 },
+	{ level: 'IC Level 10', role: 'Executive', salary: 400000 }
+];

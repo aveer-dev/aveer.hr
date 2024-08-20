@@ -1,6 +1,7 @@
 'use server';
 
 import { TablesInsert } from '@/type/database.types';
+import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { createClient, createClientAdminServer } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
@@ -41,7 +42,7 @@ export const inviteUser = async (contract: string, profile: string) => {
 	]);
 
 	if (contractRes.error) return contractRes.error.message;
-	if (!contractRes.error) return redirect(`/${parsedContract.org}/people/${contractRes.data.id}`);
+	if (!contractRes.error) return contractRes.data.id;
 };
 
 export const updateContract = async (contract: string) => {
@@ -63,4 +64,16 @@ export const updateContract = async (contract: string) => {
 
 	if (error) return error.message;
 	return 'update';
+};
+
+export const createLevel = async (level: TablesInsert<'employee_levels'>) => {
+	const supabase = createClient();
+
+	const role = await doesUserHaveAdequatePermissions({ orgId: level.org });
+	if (role !== true) return role;
+
+	const { error } = await supabase.from('employee_levels').insert(level);
+
+	if (error) return error.message;
+	return;
 };
