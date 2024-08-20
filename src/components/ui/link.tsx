@@ -14,7 +14,7 @@ export const NavLink = ({
 	LinkProps & {
 		children?: React.ReactNode;
 	} & React.RefAttributes<HTMLAnchorElement>) => {
-	let path = process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN !== 'true' && props.org ? `/${props.org}${props.href}` : `.${props.href}`;
+	let path = process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN !== 'true' && props.org ? `/${props.org}${props.href}` : `${props.href}`;
 
 	return (
 		<Link {...props} href={path}>
