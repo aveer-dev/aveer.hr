@@ -137,6 +137,7 @@ export type Database = {
       }
       countries: {
         Row: {
+          can_legal_entity: boolean
           country_code: string
           created_at: string
           dial_code: string
@@ -144,6 +145,7 @@ export type Database = {
           name: string
         }
         Insert: {
+          can_legal_entity?: boolean
           country_code: string
           created_at?: string
           dial_code: string
@@ -151,6 +153,7 @@ export type Database = {
           name: string
         }
         Update: {
+          can_legal_entity?: boolean
           country_code?: string
           created_at?: string
           dial_code?: string
@@ -197,15 +200,16 @@ export type Database = {
           address_state: number
           company_type: string | null
           created_at: string
-          ein: string | null
           formation_date: string | null
           id: number
           incorporation_country: string
           is_eor: boolean
           name: string
           org: string
+          rn: string | null
           sic: string | null
           street_address: string | null
+          tax_no: string | null
           updated_at: string
         }
         Insert: {
@@ -213,15 +217,16 @@ export type Database = {
           address_state?: number
           company_type?: string | null
           created_at?: string
-          ein?: string | null
           formation_date?: string | null
           id?: number
           incorporation_country: string
           is_eor?: boolean
           name: string
           org: string
+          rn?: string | null
           sic?: string | null
           street_address?: string | null
+          tax_no?: string | null
           updated_at?: string
         }
         Update: {
@@ -229,15 +234,16 @@ export type Database = {
           address_state?: number
           company_type?: string | null
           created_at?: string
-          ein?: string | null
           formation_date?: string | null
           id?: number
           incorporation_country?: string
           is_eor?: boolean
           name?: string
           org?: string
+          rn?: string | null
           sic?: string | null
           street_address?: string | null
+          tax_no?: string | null
           updated_at?: string
         }
         Relationships: [

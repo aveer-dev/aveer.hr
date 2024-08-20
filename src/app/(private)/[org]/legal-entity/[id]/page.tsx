@@ -1,8 +1,9 @@
+import { BackButton } from '@/components/ui/back-button';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
 import { format } from 'date-fns';
-import { ChevronLeft, FilePenLine } from 'lucide-react';
+import { FilePenLine } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function ViewEntityPage(props: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
@@ -18,13 +19,24 @@ export default async function ViewEntityPage(props: { params: { [key: string]: s
 		);
 	}
 
+	const companyRequiredIds: { [key: string]: { tax_no: string; rn?: string } } = {
+		US: { tax_no: 'Employer Indentification Number (EIN)' },
+		CA: { tax_no: 'Business Number (BN)' },
+		GB: {
+			tax_no: 'Unique Tax Reference (UTR)',
+			rn: 'Company Registration Number (CRN)'
+		},
+		NG: {
+			tax_no: 'Tax Indentification Number (TIN)',
+			rn: 'Registration Number (RC) '
+		}
+	};
+
 	return (
 		<section className="mx-auto -mt-6 grid max-w-4xl gap-10 p-6 pt-0">
 			<div className="flex justify-between">
-				<div className="flex gap-8">
-					<Link href={`../settings?type=org`} className={cn(buttonVariants({ variant: 'outline', size: 'icon' }), 'rounded-full')}>
-						<ChevronLeft size={12} />
-					</Link>
+				<div className="relative flex">
+					<BackButton className="absolute -left-16" />
 
 					<div className="">
 						<h1 className="flex items-center gap-4 text-2xl font-bold">{data?.name}</h1> <p className="flex gap-2 text-xs font-light">{data?.incorporation_country}</p>
@@ -47,7 +59,7 @@ export default async function ViewEntityPage(props: { params: { [key: string]: s
 						</li>
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">Organisation website</p>
-							<p className="text-sm font-light">{data?.org?.website}</p>
+							<p className="text-sm font-light">{data?.org?.website || '--'}</p>
 						</li>
 					</ul>
 				</div>
@@ -72,13 +84,15 @@ export default async function ViewEntityPage(props: { params: { [key: string]: s
 							<p className="text-sm font-light uppercase">{data?.company_type}</p>
 						</li>
 						<li className="grid gap-2">
-							<p className="text-sm font-medium">EIN</p>
-							<p className="text-sm font-light">{data?.ein}</p>
+							<p className="text-sm font-medium">{companyRequiredIds[data?.incorporation_country].tax_no}</p>
+							<p className="text-sm font-light">{data?.tax_no}</p>
 						</li>
-						<li className="grid gap-2">
-							<p className="text-sm font-medium">SIC</p>
-							<p className="text-sm font-light">{data?.sic}</p>
-						</li>
+						{data?.rn && (
+							<li className="grid gap-2">
+								<p className="text-sm font-medium">{companyRequiredIds[data?.incorporation_country].rn}</p>
+								<p className="text-sm font-light">{data?.rn}</p>
+							</li>
+						)}
 					</ul>
 				</div>
 
