@@ -7,7 +7,7 @@ import { TablesUpdate } from '@/type/database.types';
 import { Card } from '@/components/ui/card';
 import { ChevronRight, ChevronRightIcon } from 'lucide-react';
 import Link from 'next/link';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
@@ -143,9 +143,7 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 											</button>
 										</Card>
 									))}
-									<Link href="./legal-entity/new" className={cn(buttonVariants(), 'w-full text-xs')}>
-										Add new band
-									</Link>
+									<Button className={cn('w-full text-xs')}>Add new band</Button>
 								</div>
 							</div>
 						</div>
