@@ -31,13 +31,13 @@ export const ClientTable = ({ org, data }: { org: string; data: PERSON[] }) => {
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
 						<DropdownMenuItem className="p-0">
-							<NavLink org={org} href={`people/new?type=employee`} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-8 justify-end gap-4')}>
+							<NavLink org={org} href={`/people/new?type=employee`} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-8 justify-end gap-4')}>
 								<Briefcase size={12} />
 								App employee
 							</NavLink>
 						</DropdownMenuItem>
 						<DropdownMenuItem className="p-0">
-							<NavLink org={org} href={`people/new?type=contractor`} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-8 justify-end gap-4')}>
+							<NavLink org={org} href={`/people/new?type=contractor`} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-8 justify-end gap-4')}>
 								<HardHat size={12} />
 								App contractor
 							</NavLink>
