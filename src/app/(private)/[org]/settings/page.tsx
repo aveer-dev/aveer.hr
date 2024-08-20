@@ -98,7 +98,7 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 										<Card key={entity.id} className="w-full text-left">
 											<Link className="flex items-center justify-between p-4 text-xs" href={`./legal-entity/${entity.id}`}>
 												<div>
-													{entity.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
+													{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
 												</div>
 												<ChevronRightIcon className="text-muted-foreground" size={14} />
 											</Link>

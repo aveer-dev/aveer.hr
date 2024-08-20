@@ -306,7 +306,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 													{entities.length !== 0 && <SelectLabel>Your Legal Entities</SelectLabel>}
 													{entities.map(entity => (
 														<SelectItem key={entity.id} value={String(entity.id)}>
-															{entity.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
+															{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
 														</SelectItem>
 													))}
 												</SelectGroup>
@@ -317,7 +317,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 													{eorEntities.length && <SelectLabel>Hire with aveer.hr</SelectLabel>}
 													{eorEntities.map(entity => (
 														<SelectItem key={entity.id} value={String(entity.id)}>
-															{entity.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
+															{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
 														</SelectItem>
 													))}
 												</SelectGroup>
@@ -406,14 +406,14 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 															<CommandGroup>
 																{countries.map(country => (
 																	<CommandItem
-																		value={country.name}
+																		value={country?.name}
 																		key={country.country_code}
 																		onSelect={() => {
 																			form.setValue('nationality', country.country_code);
 																			toggleNationalityDropdown(false);
 																		}}>
 																		<Check className={cn('mr-2 h-4 w-4', country.country_code === field.value ? 'opacity-100' : 'opacity-0')} />
-																		{country.name}
+																		{country?.name}
 																	</CommandItem>
 																))}
 															</CommandGroup>
@@ -760,7 +760,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 												{form.getValues().fixed_allowance?.map((allowance, index) => (
 													<li key={index} className="flex list-disc items-center justify-between p-1 text-xs font-light">
 														<div>
-															{allowance.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
+															{allowance?.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
 														</div>
 														<div className="text-muted-foreground">{allowance.frequency}</div>
 													</li>
@@ -771,7 +771,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 										)}
 
 										<div className="grid grid-cols-3 gap-3">
-											<Input type="text" placeholder="Enter name" value={fixedAllowance.name} onChange={event => updateFixedAllowance({ ...fixedAllowance, name: event.target.value })} />
+											<Input type="text" placeholder="Enter name" value={fixedAllowance?.name} onChange={event => updateFixedAllowance({ ...fixedAllowance, name: event.target.value })} />
 											<Input type="number" placeholder="Enter amount" value={fixedAllowance.amount} onChange={event => updateFixedAllowance({ ...fixedAllowance, amount: event.target.value })} />
 
 											<Select onValueChange={event => updateFixedAllowance({ ...fixedAllowance, frequency: event })}>
@@ -788,7 +788,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 										</div>
 										<Button
 											type="button"
-											disabled={!fixedAllowance.amount || !fixedAllowance.name || !fixedAllowance.frequency}
+											disabled={!fixedAllowance.amount || !fixedAllowance?.name || !fixedAllowance.frequency}
 											onClick={() => {
 												form.setValue('fixed_allowance', [...(form.getValues()?.fixed_allowance || []), fixedAllowance]);
 												updateFixedAllowance({ name: '', amount: '', frequency: '' });

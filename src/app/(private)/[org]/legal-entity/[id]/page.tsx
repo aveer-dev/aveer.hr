@@ -101,7 +101,7 @@ export default async function ViewEntityPage(props: { params: { [key: string]: s
 					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">State</p>
-							<p className="text-sm font-light">{data?.address_state.name}</p>
+							<p className="text-sm font-light">{data?.address_state?.name}</p>
 						</li>
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">Post / Zip Code</p>

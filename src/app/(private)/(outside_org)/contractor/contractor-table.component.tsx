@@ -17,9 +17,7 @@ export const ContractorTableComponent = async () => {
 	if (user) {
 		const { data, error } = await supabase
 			.from('contracts')
-			.select(
-				'id, profile_signed, org:organisations!contracts_org_fkey(name, id, subdomain), entity:legal_entities!contracts_entity_fkey(name, id, incorporation_country:countries!legal_entities_incorporation_country_fkey(country_code, name)), salary, start_date, employment_type, job_title, level, status'
-			)
+			.select('*, org:organisations!contracts_org_fkey(name, id, subdomain), entity:legal_entities!contracts_entity_fkey(name, id, incorporation_country:countries!legal_entities_incorporation_country_fkey(country_code, name))')
 			.eq('profile', user?.id);
 		if (error) toast.error(error.message);
 		if (data) tableData = data as any;

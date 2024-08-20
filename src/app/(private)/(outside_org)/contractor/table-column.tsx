@@ -30,8 +30,8 @@ export const columns: ColumnDef<CONTRACT>[] = [
 		cell: ({ row }) => {
 			return (
 				<div className="grid gap-1">
-					<div className="font-medium">{row.original.org.name}</div>
-					<div>{row.original.entity.incorporation_country.name}</div>
+					<div className="font-medium">{row.original.org?.name}</div>
+					<div>{row.original.entity.incorporation_country?.name}</div>
 				</div>
 			);
 		}

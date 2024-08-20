@@ -80,7 +80,7 @@ export const LegalEntityForm = ({ data, org }: { data?: TablesUpdate<'legal_enti
 		toggleSubmitState(true);
 
 		const legalData: TablesInsert<'legal_entities'> = {
-			name: values.name,
+			name: values?.name,
 			incorporation_country: values.incorporation_country,
 			company_type: values.company_type,
 			tax_no: values.tax_no,
@@ -101,7 +101,7 @@ export const LegalEntityForm = ({ data, org }: { data?: TablesUpdate<'legal_enti
 
 		if (legalRes.status == 204) toast.success('🥂 Cheers', { description: 'Legal entity updated successfully' });
 		if (legalRes.status == 201) toast.success('🎉 Yaay', { description: 'Legal entity created successfully' });
-		if (!data) router.push(`/${org}/`);
+		if (!data) router.push(`/`);
 		toggleSubmitState(false);
 	};
 
@@ -187,7 +187,7 @@ export const LegalEntityForm = ({ data, org }: { data?: TablesUpdate<'legal_enti
 														<CommandGroup>
 															{countries.map(country => (
 																<CommandItem
-																	value={country.name}
+																	value={country?.name}
 																	key={country.country_code}
 																	onSelect={() => {
 																		form.setValue('incorporation_country', country.country_code);
@@ -195,7 +195,7 @@ export const LegalEntityForm = ({ data, org }: { data?: TablesUpdate<'legal_enti
 																		toggleCountryState(false);
 																	}}>
 																	<Check className={cn('mr-2 h-4 w-4', country.country_code === field.value ? 'opacity-100' : 'opacity-0')} />
-																	{country.name}
+																	{country?.name}
 																</CommandItem>
 															))}
 														</CommandGroup>
@@ -232,14 +232,14 @@ export const LegalEntityForm = ({ data, org }: { data?: TablesUpdate<'legal_enti
 															<CommandGroup>
 																{states.map(state => (
 																	<CommandItem
-																		value={String(state.name)}
+																		value={String(state?.name)}
 																		key={state.id}
 																		onSelect={() => {
 																			form.setValue('address_state', state.id);
 																			toggleStateState(false);
 																		}}>
 																		<Check className={cn('mr-2 h-4 w-4', state.id === field.value ? 'opacity-100' : 'opacity-0')} />
-																		{state.name}
+																		{state?.name}
 																	</CommandItem>
 																))}
 															</CommandGroup>
@@ -357,14 +357,14 @@ export const LegalEntityForm = ({ data, org }: { data?: TablesUpdate<'legal_enti
 															<CommandGroup>
 																{states.map(state => (
 																	<CommandItem
-																		value={String(state.name)}
+																		value={String(state?.name)}
 																		key={state.id}
 																		onSelect={() => {
 																			form.setValue('address_state', state.id);
 																			toggleStateState(false);
 																		}}>
 																		<Check className={cn('mr-2 h-4 w-4', state.id === field.value ? 'opacity-100' : 'opacity-0')} />
-																		{state.name}
+																		{state?.name}
 																	</CommandItem>
 																))}
 															</CommandGroup>

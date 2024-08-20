@@ -133,7 +133,7 @@ export const EORAgreementDrawer = ({
 																		<SelectLabel>Your Legal Entities</SelectLabel>
 																		{entities.map(entity => (
 																			<SelectItem key={entity.id} value={String(entity.id)}>
-																				{entity.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
+																				{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
 																			</SelectItem>
 																		))}
 																	</SelectGroup>
@@ -167,7 +167,7 @@ export const EORAgreementDrawer = ({
 																	<SelectLabel>Aveer.hr Entities</SelectLabel>
 																	{eorEntities.map(entity => (
 																		<SelectItem key={entity.id} value={String(entity.id)}>
-																			{entity.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
+																			{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
 																		</SelectItem>
 																	))}
 																</SelectGroup>

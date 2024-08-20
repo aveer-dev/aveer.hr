@@ -269,7 +269,7 @@ export const OpenRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_ro
 													{entities.length !== 0 && <SelectLabel>Your Legal Entities</SelectLabel>}
 													{entities.map(entity => (
 														<SelectItem key={entity.id} value={String(entity.id)}>
-															{entity.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
+															{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
 														</SelectItem>
 													))}
 												</SelectGroup>
@@ -280,7 +280,7 @@ export const OpenRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_ro
 													{eorEntities.length && <SelectLabel>Hire with aveer.hr</SelectLabel>}
 													{eorEntities.map(entity => (
 														<SelectItem key={entity.id} value={String(entity.id)}>
-															{entity.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
+															{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
 														</SelectItem>
 													))}
 												</SelectGroup>
@@ -719,7 +719,7 @@ export const OpenRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_ro
 												{form.getValues().fixed_allowance?.map((allowance, index) => (
 													<li key={index} className="flex list-disc items-center justify-between p-1 text-xs font-light">
 														<div>
-															{allowance.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
+															{allowance?.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
 														</div>
 														<div className="text-muted-foreground">{allowance.frequency}</div>
 													</li>
@@ -730,7 +730,7 @@ export const OpenRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_ro
 										)}
 
 										<div className="grid grid-cols-3 gap-3">
-											<Input type="text" placeholder="Enter name" value={fixedAllowance.name} onChange={event => updateFixedAllowance({ ...fixedAllowance, name: event.target.value })} />
+											<Input type="text" placeholder="Enter name" value={fixedAllowance?.name} onChange={event => updateFixedAllowance({ ...fixedAllowance, name: event.target.value })} />
 											<Input type="number" placeholder="Enter amount" value={fixedAllowance.amount} onChange={event => updateFixedAllowance({ ...fixedAllowance, amount: event.target.value })} />
 
 											<Select onValueChange={event => updateFixedAllowance({ ...fixedAllowance, frequency: event })}>
@@ -747,7 +747,7 @@ export const OpenRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_ro
 										</div>
 										<Button
 											type="button"
-											disabled={!fixedAllowance.amount || !fixedAllowance.name || !fixedAllowance.frequency}
+											disabled={!fixedAllowance.amount || !fixedAllowance?.name || !fixedAllowance.frequency}
 											onClick={() => {
 												form.setValue('fixed_allowance', [...(form.getValues()?.fixed_allowance || []), fixedAllowance]);
 												updateFixedAllowance({ name: '', amount: '', frequency: '' });

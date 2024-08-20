@@ -94,7 +94,7 @@ export const OrgForm = ({ formAction, data }: PROPS) => {
 				<Label htmlFor="org-name">Organisation name</Label>
 				<Input
 					id="org-name"
-					value={orgData.name}
+					value={orgData?.name}
 					onChange={event => {
 						const newData = { ...orgData, name: event.target.value };
 						if (!showSubdomainInput) {

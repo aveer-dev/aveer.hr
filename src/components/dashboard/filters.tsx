@@ -199,7 +199,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
 								<CommandGroup>
 									{countries.map(country => (
 										<CommandItem
-											value={country.name}
+											value={country?.name}
 											key={country.country_code}
 											onSelect={() => {
 												setCountryFilterValue(country.country_code);
@@ -207,7 +207,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
 												toggleCountryOpenState(false);
 											}}>
 											<Check className={cn('mr-2 h-4 w-4', country.country_code === countryFilterValue ? 'opacity-100' : 'opacity-0')} />
-											{country.name}
+											{country?.name}
 										</CommandItem>
 									))}
 								</CommandGroup>

@@ -126,13 +126,13 @@ export const ProfileForm = ({ data }: { data?: TablesUpdate<'profiles'> }) => {
 														<CommandGroup>
 															{countries.map(country => (
 																<CommandItem
-																	value={country.name}
+																	value={country?.name}
 																	key={country.country_code}
 																	onSelect={() => {
 																		form.setValue('nationality', country.country_code);
 																	}}>
 																	<Check className={cn('mr-2 h-4 w-4', country.country_code === field.value ? 'opacity-100' : 'opacity-0')} />
-																	{country.name}
+																	{country?.name}
 																</CommandItem>
 															))}
 														</CommandGroup>

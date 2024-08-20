@@ -63,7 +63,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 					<div className="grid gap-2">
 						<h1 className="flex items-center gap-4 text-2xl font-bold">{data?.job_title}</h1>
 						<p className="flex gap-4 text-xs font-light">
-							<span className="capitalize">{(data?.entity as any).name}</span> • <span className="capitalize">{data?.employment_type}</span> •{' '}
+							<span className="capitalize">{(data?.entity as any)?.name}</span> • <span className="capitalize">{data?.employment_type}</span> •{' '}
 							<span className="flex items-center gap-1">
 								{data.work_location === 'remote' && <House className="text-muted-foreground" size={10} />}
 								{data.work_location === 'on-site' && <Building2 className="text-muted-foreground" size={12} />}
@@ -183,7 +183,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 									<li key={index}>
 										<div className="flex items-baseline justify-between p-1 font-light">
 											<div>
-												{allowance.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
+												{allowance?.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
 											</div>
 											<div className="text-xs text-muted-foreground">{allowance.frequency}</div>
 										</div>
