@@ -3,7 +3,7 @@ import { ChevronsUpDown, Plus } from 'lucide-react';
 import { DashboardCharts } from './chart.component';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import Link from 'next/link';
+import { NavLink } from '@/components/ui/link';
 import { createClient } from '@/utils/supabase/server';
 import { PERSON } from '@/type/person';
 import { ClientTable } from './table';
@@ -40,9 +40,9 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 							<CardDescription className="text-xs font-light leading-5 text-muted-foreground">This is the option for you if you have a registered legal entity, enabling you to perform subsequent actions with your company details.</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`${props.params.org}/legal-entity/new`}>
+							<NavLink className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} org={props.params.org} href={`/legal-entity/new`}>
 								Add legal entity
-							</Link>
+							</NavLink>
 						</CardContent>
 					</Card>
 
@@ -59,9 +59,9 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 								<CardDescription className="text-xs font-light leading-5 text-muted-foreground">This is the option for you if you have a registered legal entity, enabling you to perform subsequent actions as a legal company.</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`${props.params.org}/people/new?type=contractor`}>
+								<NavLink className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} org={props.params.org} href={`/people/new?type=contractor`}>
 									Add Contractor
-								</Link>
+								</NavLink>
 							</CardContent>
 						</Card>
 
@@ -73,9 +73,9 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`${props.params.org}/people/new?type=employee`}>
+								<NavLink className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} org={props.params.org} href={`/people/new?type=employee`}>
 									Add Employee
-								</Link>
+								</NavLink>
 							</CardContent>
 						</Card>
 					</div>

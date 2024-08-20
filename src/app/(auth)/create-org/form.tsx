@@ -12,6 +12,7 @@ import { CircleX, Pencil } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { useDebounce } from 'use-debounce';
 import { generateRandomString } from '@/utils/generate-string';
+import { useRouter } from 'next/navigation';
 
 interface PROPS {
 	formAction: (payload: FormData) => Promise<string>;
@@ -21,25 +22,26 @@ interface PROPS {
 export const OrgForm = ({ formAction, data }: PROPS) => {
 	const supabase = createClient();
 	const [orgData, updateOrgData] = useState({ name: data?.name || '', website: data?.website || '', subdomain: data?.subdomain });
-	const [showSubdomainInput, toggleShowDomain] = useState(false);
+	const [showSubdomainInput, toggleShowDomain] = useState(!!data);
 	const [prefixText] = useDebounce(orgData.subdomain, 700);
-	const [prefixExists, setPrefixState] = useState(true);
+	const [prefixExists, setPrefixState] = useState(data ? !data : false);
 	const [isCheckingPrefix, togglePrefixLoader] = useState(false);
+	const router = useRouter();
 
 	const checkDomainPrefix = useCallback(
 		async (prefix: string) => {
+			if (prefix == data?.subdomain) return;
 			if (prefix == 'contractor' || prefix == 'contractors' || prefix == 'app' || prefix == 'apps' || prefix == 'client' || prefix == 'clients') return true;
 
 			togglePrefixLoader(true);
 			setPrefixState(false);
 
-			const { data, error } = await supabase.from('organisations').select('subdomain').eq('subdomain', prefix);
+			const { data: orgsRes, error } = await supabase.from('organisations').select('subdomain').eq('subdomain', prefix);
+			if (!orgsRes || error) return;
 
-			if (!data || error) return;
-
-			// Filter the data manually in case-insensitive manner
+			// Filter the orgsRes manually in case-insensitive manner
 			const lowerCaseValue = prefix.toLowerCase();
-			const filteredData = data.filter(item => item.subdomain.toLowerCase() === lowerCaseValue);
+			const filteredData = orgsRes.filter(item => item.subdomain.toLowerCase() === lowerCaseValue);
 
 			if (filteredData && filteredData.length) {
 				setPrefixState(true);
@@ -81,7 +83,9 @@ export const OrgForm = ({ formAction, data }: PROPS) => {
 
 	const submitForm = async (formData: FormData) => {
 		const error = await formAction(formData);
-		if (error) return toast.error(error);
+		if (error) toast.error(error);
+		const isSubdomainChanged = data?.subdomain !== formData.get('subdomain');
+		if (isSubdomainChanged) process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? (location.href = `http://${prefixText}.${process.env.NEXT_PUBLIC_DOMAIN}/settings?type=org`) : router.replace(`../${prefixText}/settings?type=org`);
 	};
 
 	return (
@@ -124,7 +128,7 @@ export const OrgForm = ({ formAction, data }: PROPS) => {
 
 			{showSubdomainInput && (
 				<div className="grid gap-3">
-					<Label htmlFor="org-name">Organisation url</Label>
+					<Label htmlFor="subdomain">Organisation url</Label>
 					<div className="relative text-xs text-muted-foreground">
 						<div className="absolute left-2 top-1/2 -translate-y-1/2">https://</div>
 						<Input

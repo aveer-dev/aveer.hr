@@ -21,7 +21,7 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 
 	const [profileResponse, organisationResponse, legalEntityResponse] = await Promise.all([
 		await supabase.from('profiles').select().eq('id', user?.id).single(),
-		await supabase.from('organisations').select().eq('id', params.org).single(),
+		await supabase.from('organisations').select().eq('subdomain', params.org).single(),
 		await supabase.from('legal_entities').select().eq('org', params.org)
 	]);
 
@@ -39,8 +39,8 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 		'use server';
 		const supabase = createClient();
 
-		const orgData: TablesUpdate<'organisations'> = { name: payload.get('org-name') as string, website: payload.get('website') as string };
-		const { error } = await supabase.from('organisations').update(orgData).eq('id', params.org);
+		const orgData: TablesUpdate<'organisations'> = { name: payload.get('org-name') as string, website: payload.get('website') as string, subdomain: payload.get('subdomain') as string };
+		const { error } = await supabase.from('organisations').update(orgData).eq('subdomain', params.org);
 
 		if (error) return error?.message;
 		return 'Organisation updated successfully';

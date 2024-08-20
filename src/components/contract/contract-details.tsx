@@ -171,12 +171,12 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 									</PopoverTrigger>
 									<PopoverContent align="end" className="w-48 p-2">
 										{data.status !== 'inactive' && data.status !== 'terminated' && (
-											<Link href={`/${org}/people/${id}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-2')}>
+											<Link href={`./${id}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-2')}>
 												<FilePenLine size={12} />
 												Edit Contract
 											</Link>
 										)}
-										<Link href={`/${org}/people/new?duplicate=${id}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-2')}>
+										<Link href={`./new?duplicate=${id}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-2')}>
 											<Copy size={12} />
 											Duplicate
 										</Link>

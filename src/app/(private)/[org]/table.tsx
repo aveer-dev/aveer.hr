@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from '@/lib/utils';
 import { PERSON } from '@/type/person';
 import { Briefcase, HardHat, Plus } from 'lucide-react';
-import Link from 'next/link';
+import { NavLink } from '@/components/ui/link';
 import { useState } from 'react';
 import { DashboardFilters } from '@/components/dashboard/filters';
 
@@ -31,16 +31,16 @@ export const ClientTable = ({ org, data }: { org: string; data: PERSON[] }) => {
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
 						<DropdownMenuItem className="p-0">
-							<Link href={`${org}/people/new?type=employee`} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-8 justify-end gap-4')}>
+							<NavLink org={org} href={`people/new?type=employee`} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-8 justify-end gap-4')}>
 								<Briefcase size={12} />
 								App employee
-							</Link>
+							</NavLink>
 						</DropdownMenuItem>
 						<DropdownMenuItem className="p-0">
-							<Link href={`${org}/people/new?type=contractor`} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-8 justify-end gap-4')}>
+							<NavLink org={org} href={`people/new?type=contractor`} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-8 justify-end gap-4')}>
 								<HardHat size={12} />
 								App contractor
-							</Link>
+							</NavLink>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

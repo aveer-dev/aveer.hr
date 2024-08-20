@@ -9,7 +9,7 @@ import { Badge } from '../ui/badge';
 import { PERSON } from '@/type/person';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
-import Link from 'next/link';
+import { NavLink } from '../ui/link';
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
 
@@ -89,10 +89,14 @@ export const columns: ColumnDef<PERSON>[] = [
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
 						<DropdownMenuItem className="h-7 text-xs font-light">
-							<DropdownListItem href={`/${row.original.org}/people/${row.original.id}`}>View</DropdownListItem>
+							<DropdownListItem org={row.original.org} href={`/people/${row.original.id}`}>
+								View
+							</DropdownListItem>
 						</DropdownMenuItem>
 						<DropdownMenuItem className="h-7 text-xs font-light">
-							<DropdownListItem href={`/${row.original.org}/people/${row.original.id}/edit`}>Edit</DropdownListItem>
+							<DropdownListItem org={row.original.org} href={`/people/${row.original.id}/edit`}>
+								Edit
+							</DropdownListItem>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
@@ -101,8 +105,8 @@ export const columns: ColumnDef<PERSON>[] = [
 	}
 ];
 
-const DropdownListItem = ({ children, href }: { children: ReactNode; href: string }) => (
-	<Link className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-7 w-full cursor-pointer justify-start')} href={href}>
+const DropdownListItem = ({ children, href, org }: { children: ReactNode; href: string; org?: string }) => (
+	<NavLink org={org} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-7 w-full cursor-pointer justify-start')} href={href}>
 		{children}
-	</Link>
+	</NavLink>
 );

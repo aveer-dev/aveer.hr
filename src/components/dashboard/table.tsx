@@ -4,9 +4,9 @@ import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '../ui/skeleton';
-import Link from 'next/link';
 import { PERSON } from '@/type/person';
 import { cn } from '@/lib/utils';
+import { NavLink } from '../ui/link';
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
@@ -43,9 +43,9 @@ export function DataTable<TData, TValue>({ columns, data, org, loading }: DataTa
 									{row.getVisibleCells().map(cell => (
 										<TableCell key={cell.id} className={cn(org && 'p-0')}>
 											{org ? (
-												<Link scroll={true} className="block p-4" href={`/${org}/people/${(row.original as PERSON).id}`} as={`/${org}/people/${(row.original as PERSON).id}`}>
+												<NavLink org={org} scroll={true} className="block p-4" href={`/people/${(row.original as PERSON).id}`}>
 													{flexRender(cell.column.columnDef.cell, cell.getContext())}
-												</Link>
+												</NavLink>
 											) : (
 												<>{flexRender(cell.column.columnDef.cell, cell.getContext())}</>
 											)}

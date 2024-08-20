@@ -149,7 +149,6 @@ export const OpenRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_ro
 		if (showFixedIncome) role.fixed_allowance = values.fixed_allowance;
 
 		const responseMessage = data ? await updateRole(role, params.org) : await createOpenRole(role, params.org);
-		console.log('🚀 ~ createRole ~ responseMessage:', responseMessage);
 		toggleSubmitState(false);
 		if (responseMessage == 'update') return toast.success('Role details updated successfully');
 		if (responseMessage) toast.error(responseMessage);
