@@ -21,7 +21,7 @@ interface PROPS {
 
 export const OrgForm = ({ formAction, data }: PROPS) => {
 	const supabase = createClient();
-	const [orgData, updateOrgData] = useState({ name: data?.name || '', website: data?.website || '', subdomain: data?.subdomain });
+	const [orgData, updateOrgData] = useState({ name: data?.name || '', website: data?.website || 'https://', subdomain: data?.subdomain });
 	const [showSubdomainInput, toggleShowDomain] = useState(!!data);
 	const [prefixText] = useDebounce(orgData.subdomain, 700);
 	const [prefixExists, setPrefixState] = useState(data ? !data : false);
@@ -166,7 +166,7 @@ export const OrgForm = ({ formAction, data }: PROPS) => {
 
 			<div className="grid gap-3">
 				<Label htmlFor="website">Website</Label>
-				<Input id="website" defaultValue={orgData.website} onChange={event => updateOrgData({ ...orgData, website: event.target.value })} type="url" name="website" placeholder="https://aveer.hr" />
+				<Input id="website" value={orgData.website} onChange={event => updateOrgData({ ...orgData, website: event.target.value })} type="url" name="website" placeholder="https://aveer.hr" />
 			</div>
 
 			<div className="flex w-full items-center justify-end gap-4">
