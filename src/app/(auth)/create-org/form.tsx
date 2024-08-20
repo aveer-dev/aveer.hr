@@ -53,7 +53,7 @@ export const OrgForm = ({ formAction, data }: PROPS) => {
 
 			togglePrefixLoader(false);
 		},
-		[supabase]
+		[data?.subdomain, supabase]
 	);
 
 	useEffect(() => {
