@@ -849,7 +849,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 											<FormLabel>Paid time off</FormLabel>
 											<FormControl>
 												<div className="relative h-fit w-full">
-													<Input type="number" placeholder="20" {...field} required />
+													<Input type="number" placeholder="20" {...field} onChange={event => form.setValue('paid_leave', Number(event.target.value))} required />
 													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/month</div>
 												</div>
 											</FormControl>
@@ -866,7 +866,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 											<FormLabel>Sick leave</FormLabel>
 											<FormControl>
 												<div className="relative h-fit w-full">
-													<Input type="number" placeholder="20" {...field} required />
+													<Input type="number" placeholder="20" {...field} onChange={event => form.setValue('sick_leave', Number(event.target.value))} required />
 													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/month</div>
 												</div>
 											</FormControl>
@@ -883,7 +883,10 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 									<FormItem>
 										<FormLabel>Probation period</FormLabel>
 										<FormControl>
-											<Input type="number" placeholder="90" {...field} required />
+											<div className="relative h-fit w-full">
+												<Input type="number" placeholder="90" {...field} onChange={event => form.setValue('probation_period', Number(event.target.value))} required />
+												<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/month</div>
+											</div>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
