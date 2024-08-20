@@ -702,7 +702,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 														<TooltipProvider>
 															<Tooltip>
 																<TooltipTrigger asChild>
-																	<button>
+																	<button type="button">
 																		<Info size={12} />
 																	</button>
 																</TooltipTrigger>
