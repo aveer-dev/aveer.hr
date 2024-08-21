@@ -53,7 +53,7 @@ export async function updateSession(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams.toString();
 	const path = `${url.pathname}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
 
-	if (subdomain && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/login`, request.url));
+	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/login`, request.url));
 
 	// for contractor subdomains, rewrite to contractor pages
 	if (subdomain && subdomain === 'contractor') return NextResponse.rewrite(new URL(`/contractor${path}`, request.url));
