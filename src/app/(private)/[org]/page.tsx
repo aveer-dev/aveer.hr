@@ -1,5 +1,5 @@
 import { Button, buttonVariants } from '@/components/ui/button';
-import { ChevronsUpDown, Plus } from 'lucide-react';
+import { ChevronRight, ChevronsUpDown, Info, Plus } from 'lucide-react';
 import { DashboardCharts } from './chart.component';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -7,7 +7,7 @@ import { NavLink } from '@/components/ui/link';
 import { createClient } from '@/utils/supabase/server';
 import { PERSON } from '@/type/person';
 import { ClientTable } from './table';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 export default async function OrgPage(props: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
@@ -27,6 +27,11 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 		}
 
 		if (data && !data.length) {
+			const options = [
+				{ link: '/legal-entity/new', label: 'Add legal entity', description: 'This is the option for you if you have a registered legal entity, enabling you to perform subsequent actions with your company details.' },
+				{ link: '/people/new', label: 'Add Employee', description: 'This is the option for you if you don&apos;t have a registered legal entity. With this option, you can still perform actions as a legal entity through Employer of Record.' }
+			];
+
 			return (
 				<div className="flex min-h-[50vh] flex-col items-center justify-center gap-10 text-center">
 					<div className="grid gap-3">
@@ -34,38 +39,26 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 						<p className="text-xs text-muted-foreground">How will you like to get started with your account?</p>
 					</div>
 
-					<Card className="w-[350px] text-left">
-						<CardHeader>
-							<CardTitle className="text-sm font-semibold">Setup Legal Entity</CardTitle>
-							<CardDescription className="text-xs font-light leading-5 text-muted-foreground">This is the option for you if you have a registered legal entity, enabling you to perform subsequent actions with your company details.</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<NavLink className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} org={props.params.org} href={`/legal-entity/new`}>
-								Add legal entity
+					<div className="mx-auto grid items-center gap-6">
+						{options.map((option, index) => (
+							<NavLink href={option.link} key={index} org={props.params.org} className={cn(buttonVariants({ variant: 'outline' }), 'flex h-12 w-[350px] items-center gap-2 rounded-xl px-4 text-left text-xs')}>
+								{option.label}
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<button className="text-muted-foreground">
+												<Info size={12} />
+											</button>
+										</TooltipTrigger>
+										<TooltipContent>
+											<p className="max-w-72 whitespace-break-spaces text-left">{option.description}</p>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+
+								<ChevronRight size={12} className="ml-auto" />
 							</NavLink>
-						</CardContent>
-					</Card>
-
-					<div className="mt-10 border-t border-t-secondary pt-4">
-						<div className="mx-auto -mt-6 w-fit bg-background px-6 text-xs">Or</div>
-
-						<p className="mt-14 text-xs font-light text-muted-foreground">Get straight into hiring and managing employees, while we sort out the other legalities for you.</p>
-					</div>
-
-					<div className="mx-auto flex items-center gap-8">
-						<Card className="w-[350px] text-left">
-							<CardHeader>
-								<CardTitle className="text-sm font-semibold">Hire an employee</CardTitle>
-								<CardDescription className="text-xs font-light leading-5 text-muted-foreground">
-									This is the option for you if you don&apos;t have a registered legal entity. With this option, you can still perform actions as a legal entity through Employer of Record.
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<NavLink className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} org={props.params.org} href={`/people/new?type=employee`}>
-									Add Employee
-								</NavLink>
-							</CardContent>
-						</Card>
+						))}
 					</div>
 				</div>
 			);
