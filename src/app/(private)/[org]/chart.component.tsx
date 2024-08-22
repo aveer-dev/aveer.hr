@@ -1,3 +1,4 @@
+import { Card } from '@/components/ui/card';
 import { createClient } from '@/utils/supabase/server';
 
 export const DashboardCharts = async ({ org }: { org: string }) => {
@@ -7,7 +8,7 @@ export const DashboardCharts = async ({ org }: { org: string }) => {
 
 	return (
 		<>
-			<div className="flex w-full max-w-72 flex-wrap items-start justify-between gap-6">
+			<Card className="relative flex w-full max-w-72 flex-wrap items-start justify-between gap-6 p-4 before:absolute before:-left-px before:bottom-4 before:h-24 before:w-1 before:bg-foreground">
 				<div className="grid gap-2">
 					<h3 className="text-sm font-medium">People</h3>
 					<p className="text-8xl font-bold">
@@ -15,9 +16,9 @@ export const DashboardCharts = async ({ org }: { org: string }) => {
 						{data?.signed_contracts || 0}
 					</p>
 				</div>
-			</div>
+			</Card>
 
-			<div className="flex w-full max-w-72 flex-wrap items-start justify-between gap-4">
+			<Card className="relative flex w-full max-w-72 flex-wrap items-start justify-between gap-6 p-4 before:absolute before:-left-px before:bottom-4 before:h-24 before:w-1 before:bg-foreground">
 				<div className="grid gap-2">
 					<h3 className="text-sm font-medium">Open roles</h3>
 					<p className="text-8xl font-bold">
@@ -25,7 +26,7 @@ export const DashboardCharts = async ({ org }: { org: string }) => {
 						{data?.contracts || 0}
 					</p>
 				</div>
-			</div>
+			</Card>
 		</>
 	);
 };
