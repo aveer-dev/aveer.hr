@@ -41,11 +41,11 @@ export async function updateSession(request: NextRequest) {
 	// if on localhost or user disable/unset subdomain, cancel mapping
 	if (domain?.includes('localhost') || process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'false' || !process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN) return;
 
-	// if user nevigates to contractor page, redirect to contractor subdomain
-	if (url.pathname.includes('/contractor')) {
+	// if user nevigates to employee page, redirect to employee subdomain
+	if (url.pathname.includes('/employee')) {
 		const searchParams = request.nextUrl.searchParams.toString();
-		const path = `${url.pathname.split('/contractor')[1]}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
-		return NextResponse.redirect(`${url.protocol}//contractor.${process.env.NEXT_PUBLIC_DOMAIN}${path}`);
+		const path = `${url.pathname.split('/employee')[1]}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
+		return NextResponse.redirect(`${url.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}${path}`);
 	}
 
 	// get subdomain and path url for remaping other routes
@@ -55,10 +55,10 @@ export async function updateSession(request: NextRequest) {
 
 	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/login`, request.url));
 
-	// for contractor subdomains, rewrite to contractor pages
-	if (subdomain && subdomain === 'contractor') return NextResponse.rewrite(new URL(`/contractor${path}`, request.url));
+	// for employee subdomains, rewrite to employee pages
+	if (subdomain && subdomain === 'employee') return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
 	// for other pages, rewrite to org pages
-	if (subdomain && subdomain !== 'contractor' && subdomain !== 'app') {
+	if (subdomain && subdomain !== 'employee' && subdomain !== 'app') {
 		if (path.split('/')[1] == subdomain) return NextResponse.rewrite(new URL(`${path}`, request.url));
 		return NextResponse.rewrite(new URL(`/${subdomain}${path}`, request.url));
 	}

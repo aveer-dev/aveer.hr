@@ -31,7 +31,7 @@ export const OrgForm = ({ formAction, data }: PROPS) => {
 	const checkDomainPrefix = useCallback(
 		async (prefix: string) => {
 			if (prefix == data?.subdomain) return;
-			if (prefix == 'contractor' || prefix == 'contractors' || prefix == 'app' || prefix == 'apps' || prefix == 'client' || prefix == 'clients') return true;
+			if (prefix == 'contractor' || prefix == 'contractors' || prefix == 'employee' || prefix == 'employees' || prefix == 'app' || prefix == 'apps' || prefix == 'client' || prefix == 'clients') return true;
 
 			togglePrefixLoader(true);
 			setPrefixState(false);

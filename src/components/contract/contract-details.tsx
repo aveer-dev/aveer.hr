@@ -64,7 +64,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 		const { error: contractError } = await supabase.from('contracts').update(signatureDetails).match({ org, id });
 
 		if (contractError) return contractError.message;
-		return redirect(`/contractor/${org}/${id}`);
+		return redirect(`/employee/${org}/${id}`);
 	};
 
 	const scheduleTermination = async (date: Date): Promise<string> => {

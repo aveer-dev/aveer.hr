@@ -26,11 +26,11 @@ export default async function OrgsPage() {
 			<div className="flex h-[50vh] flex-col items-center justify-center gap-4 text-center">
 				<div className="grid gap-3">
 					<p className="font-medium">You do not have any organisation, yet. </p>
-					<p className="text-xs text-muted-foreground">Or did you mean to access your account as a contractor?</p>
+					<p className="text-xs text-muted-foreground">Or did you mean to access your account as an employee?</p>
 				</div>
 				<div className="mx-auto mt-6 flex items-center gap-4">
-					<Link className={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'gap-4 text-xs')} href={'/contractor'}>
-						<UserRound size={12} /> Contractor Contractor Portal
+					<Link className={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'gap-4 text-xs')} href={'/employee'}>
+						<UserRound size={12} /> Employee Portal
 					</Link>
 					<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={'/create-org'}>
 						<Building2 size={12} />
@@ -45,7 +45,7 @@ export default async function OrgsPage() {
 			<div className="flex h-[50vh] flex-col items-center justify-center text-center">
 				<p className="text-xs">Unable to fetch organisations available to you</p>
 				<div className="mt-6">
-					<Link className={cn(buttonVariants({ size: 'sm', variant: 'secondary' }), 'text-xs')} href={'/contractor'}>
+					<Link className={cn(buttonVariants({ size: 'sm', variant: 'secondary' }), 'text-xs')} href={'/employee'}>
 						Employee Portal
 					</Link>
 				</div>

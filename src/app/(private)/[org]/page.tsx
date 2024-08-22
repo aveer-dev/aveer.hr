@@ -55,18 +55,6 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 					<div className="mx-auto flex items-center gap-8">
 						<Card className="w-[350px] text-left">
 							<CardHeader>
-								<CardTitle className="text-sm font-semibold">Hire a contractor</CardTitle>
-								<CardDescription className="text-xs font-light leading-5 text-muted-foreground">This is the option for you if you have a registered legal entity, enabling you to perform subsequent actions as a legal company.</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<NavLink className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} org={props.params.org} href={`/people/new?type=contractor`}>
-									Add Contractor
-								</NavLink>
-							</CardContent>
-						</Card>
-
-						<Card className="w-[350px] text-left">
-							<CardHeader>
 								<CardTitle className="text-sm font-semibold">Hire an employee</CardTitle>
 								<CardDescription className="text-xs font-light leading-5 text-muted-foreground">
 									This is the option for you if you don&apos;t have a registered legal entity. With this option, you can still perform actions as a legal entity through Employer of Record.
