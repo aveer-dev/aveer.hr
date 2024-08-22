@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       contracts: {
         Row: {
+          additional_offerings: Json[] | null
           contract_type: Database["public"]["Enums"]["contract_type"]
           created_at: string
           employment_type: Database["public"]["Enums"]["employment_type"]
@@ -40,6 +41,7 @@ export type Database = {
           work_shedule_interval: string | null
         }
         Insert: {
+          additional_offerings?: Json[] | null
           contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string
           employment_type: Database["public"]["Enums"]["employment_type"]
@@ -69,6 +71,7 @@ export type Database = {
           work_shedule_interval?: string | null
         }
         Update: {
+          additional_offerings?: Json[] | null
           contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string
           employment_type?: Database["public"]["Enums"]["employment_type"]
@@ -196,31 +199,46 @@ export type Database = {
       }
       employee_levels: {
         Row: {
+          additional_offerings: Json[] | null
           created_at: string
           entity: number | null
+          fixed_allowance: Json[] | null
           id: number
           level: string
+          max_salary: number
+          max_signing_bonus: number | null
+          min_salary: number
+          min_signing_bonus: number | null
           org: string
           role: string | null
-          salary: number
         }
         Insert: {
+          additional_offerings?: Json[] | null
           created_at?: string
           entity?: number | null
+          fixed_allowance?: Json[] | null
           id?: number
           level: string
+          max_salary?: number
+          max_signing_bonus?: number | null
+          min_salary: number
+          min_signing_bonus?: number | null
           org: string
           role?: string | null
-          salary: number
         }
         Update: {
+          additional_offerings?: Json[] | null
           created_at?: string
           entity?: number | null
+          fixed_allowance?: Json[] | null
           id?: number
           level?: string
+          max_salary?: number
+          max_signing_bonus?: number | null
+          min_salary?: number
+          min_signing_bonus?: number | null
           org?: string
           role?: string | null
-          salary?: number
         }
         Relationships: [
           {

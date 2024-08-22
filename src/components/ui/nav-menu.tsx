@@ -10,7 +10,7 @@ export function NavMenu({ orgId }: { orgId: string }) {
 		<NavigationMenu>
 			<NavigationMenuList className="group-hover:text-accent">
 				<NavigationMenuItem>
-					<NavLink org={orgId} href={``} legacyBehavior passHref>
+					<NavLink org={orgId} href={`/`} legacyBehavior passHref>
 						<NavigationMenuLink className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
 							<Users size={16} />
 							People

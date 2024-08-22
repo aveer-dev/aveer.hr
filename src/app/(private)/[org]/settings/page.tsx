@@ -5,10 +5,13 @@ import { createClient } from '@/utils/supabase/server';
 import { OrgForm } from '@/app/(auth)/create-org/form';
 import { TablesUpdate } from '@/type/database.types';
 import { Card } from '@/components/ui/card';
-import { ChevronRight, ChevronRightIcon } from 'lucide-react';
+import { ChevronRightIcon } from 'lucide-react';
 import Link from 'next/link';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { EmployeeBand } from '@/components/band/employee-band';
+import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -19,11 +22,10 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 	} = await supabase.auth.getUser();
 	if (!user || userError) return <div>Unable to fetch user data</div>;
 
-	const [profileResponse, organisationResponse, legalEntityResponse, salaryBands] = await Promise.all([
+	const [profileResponse, organisationResponse, legalEntityResponse] = await Promise.all([
 		await supabase.from('profiles').select().eq('id', user?.id).single(),
 		await supabase.from('organisations').select().eq('subdomain', params.org).single(),
-		await supabase.from('legal_entities').select().eq('org', params.org),
-		await supabase.from('employee_levels').select().eq('org', params.org)
+		await supabase.from('legal_entities').select().eq('org', params.org)
 	]);
 
 	const updatePassword = async (password: string) => {
@@ -118,36 +120,9 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 						</div>
 					)}
 
-					{salaryBands.data && (
-						<div className="grid w-full gap-6">
-							<div className="grid grid-cols-2 border-t border-t-border pt-10">
-								<div>
-									<h2 className="mb-1 font-normal">Employee Bands</h2>
-									<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">We automatically create a band for your every hire&apos;s contract, so help keep things organised. You can manage them all here.</p>
-								</div>
-
-								<div className="mb-10 grid gap-8">
-									{salaryBands.data.map(band => (
-										<Card key={band.id} className="w-full text-left">
-											<button className="flex w-full items-center justify-between p-4 text-xs">
-												<div>
-													{band.level} • <span className="text-muted-foreground">{band.role}</span>
-												</div>
-												<div className="flex items-center gap-2">
-													{new Intl.NumberFormat('en-US', {
-														style: 'currency',
-														currency: 'USD'
-													}).format(band.salary)}
-													<ChevronRight size={14} />
-												</div>
-											</button>
-										</Card>
-									))}
-									<Button className={cn('w-full text-xs')}>Add new band</Button>
-								</div>
-							</div>
-						</div>
-					)}
+					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
+						<EmployeeBand org={params.org} />
+					</Suspense>
 				</TabsContent>
 
 				<TabsContent value="personal">

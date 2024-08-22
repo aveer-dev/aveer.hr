@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Check, ChevronDown, Info } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,8 +26,10 @@ import { createLevel, inviteUser, updateContract } from './invite-user.action';
 import { Separator } from '@/components/ui/separator';
 import { EORAgreementDrawer } from '@/components/eor/eor-agreement';
 import { createEORAgreement, doesUserHaveAdequatePermissions, getEORAgreementByCountry } from '@/utils/api';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { NewContractDialog } from './new-contract-dialog';
+import { PayInput } from '@/components/forms/pay-input';
+import { FixedAllowance } from '@/components/forms/fixed-allowance';
+import { AdditionalOffering } from '@/components/forms/additional-offering';
 
 const supabase = createClient();
 
@@ -37,7 +39,7 @@ const formSchema = z.object({
 	email: z.string().email(),
 	nationality: z.string(),
 	job_title: z.string(),
-	level: z.object({ level: z.string(), role: z.string().optional(), salary: z.number() }).optional(),
+	level: z.string(),
 	employment_type: z.enum(['full-time', 'part-time']),
 	work_schedule: z.string().optional(),
 	work_shedule_interval: z.string().optional(),
@@ -50,6 +52,7 @@ const formSchema = z.object({
 	probation_period: z.number(),
 	paid_leave: z.number(),
 	sick_leave: z.number(),
+	additional_offerings: z.array(z.string()),
 	entity: z.string()
 });
 
@@ -58,12 +61,13 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	const [entities, setEntities] = useState<Tables<'legal_entities'>[]>([]);
 	const [eorEntities, setEorEntities] = useState<Tables<'legal_entities'>[]>([]);
 	const [jobTitles, updateJobTitles] = useState<string[]>([]);
-	const [jobLevels, updateJobLevels] = useState<{ level: string; role: string; salary: number }[]>(levels);
-	const [orgJobLevels, updateOrgJobLevels] = useState<{ level: string; role: string; salary: number }[]>([]);
+	const [jobLevels] = useState(levels);
+	const [orgJobLevels, updateOrgJobLevels] = useState<TablesInsert<'employee_levels'>[]>([]);
 	const [responsibility, updateResponsibility] = useState('');
 	const [fixedAllowance, updateFixedAllowance] = useState({ name: '', amount: '', frequency: '' });
 	const [showSigningBonus, toggleShowSigningBonus] = useState(!!data?.signing_bonus || !!duplicate?.signing_bonus);
 	const [showFixedIncome, toggleShowFixedIncome] = useState(!!data?.fixed_allowance || !!duplicate?.fixed_allowance);
+	const [showAdditionalOffering, toggleAdditionalOffering] = useState(!!data?.additional_offerings || !!duplicate?.additional_offerings);
 	const [indefiniteEndDate, toggleIndefiniteEndDate] = useState(!data?.end_date);
 	const [jobQuery, setJobQuery] = useState<string>('');
 	const [levelQuery, setLevelQuery] = useState<string>('');
@@ -78,6 +82,8 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	const [isNewContractDialogOpen, toggleNewContractDialog] = useState(false);
 	const [newContractId, setNewContractId] = useState(0);
 	const [isLevelCreated, setLevelCreationState] = useState(false);
+	const [showSalaryCostomError, toggleSalaryCustomError] = useState(false);
+	const [showSigningCostomError, toggleSigningCustomError] = useState(false);
 
 	const getCountries = async () => {
 		const { data, error } = await supabase.from('countries').select();
@@ -90,6 +96,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			first_name: (data?.profile as any)?.first_name || '',
 			last_name: (data?.profile as any)?.last_name || '',
 			email: (data?.profile as any)?.email || '',
+			additional_offerings: (data?.additional_offerings as string[]) || (duplicate?.additional_offerings as string[]) || [],
 			nationality: (data?.profile as any)?.nationality || '',
 			responsibilities: (data?.responsibilities as string[]) || (duplicate?.responsibilities as string[]) || [],
 			fixed_allowance: (data?.fixed_allowance as any) || (duplicate?.fixed_allowance as any) || [],
@@ -112,7 +119,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 		(levels: any[] | null) => {
 			if (!data?.level && !duplicate?.level) return;
 
-			const newOrgJobLevel = levels?.find(title => title.level == data?.level || title.level == duplicate?.level);
+			const newOrgJobLevel = levels?.find(level => level.id == data?.id || level.id == duplicate?.id);
 			if (!newOrgJobLevel) return;
 			form.setValue('level', newOrgJobLevel);
 		},
@@ -122,7 +129,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	const getOrgLevels = useCallback(async () => {
 		const { data, error } = await supabase.from('employee_levels').select().match({ org: params.org });
 		if (error) toast.error('🫤 Error', { description: `Unable to fetch existing org levels ${error.message}` });
-		if (data?.length) updateOrgJobLevels(data?.map(level => ({ level: level.level as string, role: level.role as string, salary: level.salary as number })) || []);
+		if (data?.length) updateOrgJobLevels(data);
 		checkLevels(data);
 	}, [checkLevels, params]);
 
@@ -150,10 +157,19 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	};
 
 	const createContract = async (values: z.infer<typeof formSchema>) => {
-		const orgHasExistingLevel = orgJobLevels.length > 0 ? !!orgJobLevels.find(level => level.level == values.level?.level && level.salary == level.salary) : false;
+		const orgHasExistingLevel = orgJobLevels.length > 0 ? !!orgJobLevels.find(level => level.id == Number(values.level)) : false;
 
 		if (!orgHasExistingLevel && values.level) {
-			const level: TablesInsert<'employee_levels'> = { ...values.level, org: params.org };
+			const level: TablesInsert<'employee_levels'> = {
+				level: values.level,
+				org: params.org,
+				min_salary: Number(values.salary),
+				max_salary: Number(values.salary) + 1,
+				max_signing_bonus: Number(values.signing_bonus) + 1,
+				min_signing_bonus: Number(values.signing_bonus),
+				fixed_allowance: values.fixed_allowance,
+				additional_offerings: values.additional_offerings
+			};
 			await createEmployeeLevel(level);
 		}
 
@@ -174,7 +190,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			work_schedule: values.work_schedule,
 			work_shedule_interval: values.work_shedule_interval,
 			job_title: values.job_title,
-			level: values.level?.level,
+			level: values.level,
 			responsibilities: values.responsibilities,
 			profile: data ? (data?.profile as any).id : '',
 			entity: Number(values.entity),
@@ -183,6 +199,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 		};
 		if (showSigningBonus) contract.signing_bonus = Number(values.signing_bonus);
 		if (showFixedIncome) contract.fixed_allowance = values.fixed_allowance;
+		if (showAdditionalOffering) contract.additional_offerings = values.additional_offerings;
 		if (!indefiniteEndDate) contract.end_date = values.end_date as any;
 
 		const responseMessage = data ? await updateContract(JSON.stringify(contract)) : await inviteUser(JSON.stringify(contract), JSON.stringify(profile));
@@ -260,6 +277,33 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 		getOrgLevels();
 		checkTitle();
 	}, [data, duplicate, jobTitles, jobLevels, form, getOrgLevels]);
+
+	const validateSalary = (salary: number) => {
+		const level = orgJobLevels.find(level => level.id == Number(form.getValues('level')));
+
+		if (!level?.min_salary || !level?.max_salary) return;
+		if (salary < level?.min_salary || salary > level?.max_salary) toggleSalaryCustomError(true);
+		else toggleSalaryCustomError(false);
+	};
+
+	const validateBonus = (bonus: number) => {
+		const level = orgJobLevels.find(level => level.id == Number(form.getValues('level')));
+
+		if (!level?.min_signing_bonus || !level?.min_signing_bonus) return;
+		if (bonus < level?.min_signing_bonus || bonus > level?.min_signing_bonus) toggleSigningCustomError(true);
+		else toggleSigningCustomError(false);
+	};
+
+	const onSelectLevelFromOrgLevels = (level: TablesInsert<'employee_levels'>) => {
+		form.setValue('level', String(level.id));
+		toggleLevelsDropdown(false);
+
+		toggleAdditionalOffering(!!level.additional_offerings?.length);
+		form.setValue('additional_offerings', level.additional_offerings as string[]);
+
+		toggleShowFixedIncome(!!level.fixed_allowance?.length);
+		form.setValue('fixed_allowance', level.fixed_allowance as any[]);
+	};
 
 	return (
 		<>
@@ -503,7 +547,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 												<PopoverTrigger asChild>
 													<FormControl>
 														<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
-															{field.value?.level || `Select seniority level`}
+															{orgJobLevels.find(level => level.id == Number(field.value))?.level || jobLevels.find(level => level.id == field.value)?.level || `Select seniority level`}
 															<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 														</Button>
 													</FormControl>
@@ -514,31 +558,24 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 														<CommandList>
 															<CommandEmpty
 																onClick={() => {
-																	updateOrgJobLevels([...orgJobLevels, { level: levelQuery, role: '', salary: 0 }]);
-																	form.setValue('level', { level: levelQuery, role: '', salary: 0 });
+																	const newId = orgJobLevels.length + 12;
+																	updateOrgJobLevels([...orgJobLevels, { level: levelQuery, min_salary: 0, max_salary: 0, org: '', id: newId }]);
+																	form.setValue('level', String(newId));
 																	setLevelQuery('');
 																	toggleLevelsDropdown(false);
 																}}
 																className="p-1">
 																<div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs font-light outline-none">
-																	<Check className={cn('mr-2 h-4 w-4', levelQuery && levelQuery === field.value?.level ? 'opacity-100' : 'opacity-0')} />
+																	<Check className={cn('mr-2 h-4 w-4', levelQuery && levelQuery === field.value ? 'opacity-100' : 'opacity-0')} />
 																	{levelQuery}
 																</div>
 															</CommandEmpty>
 															{orgJobLevels.length > 0 && (
 																<CommandGroup heading="Active Org Levels">
 																	{orgJobLevels.map(level => (
-																		<CommandItem
-																			className="gap-2"
-																			value={level.level}
-																			key={level.level}
-																			onSelect={() => {
-																				form.setValue('level', level);
-																				toggleLevelsDropdown(false);
-																				form.setValue('salary', String(level.salary));
-																			}}>
+																		<CommandItem className="gap-2" value={String(level.id)} key={level.level} onSelect={() => onSelectLevelFromOrgLevels(level)}>
 																			<div className="flex items-center">
-																				<Check className={cn('mr-2 h-3 w-3', level.level === field.value?.level ? 'opacity-100' : 'opacity-0')} />
+																				<Check className={cn('mr-2 h-3 w-3', String(level.id) === field.value ? 'opacity-100' : 'opacity-0')} />
 																				{level.level}
 																			</div>
 																			• <div className="text-left text-xs text-muted-foreground">{level.role}</div>
@@ -546,19 +583,19 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 																	))}
 																</CommandGroup>
 															)}
+
 															<CommandGroup heading="Suggested Org Levels">
 																{jobLevels.map(level => (
 																	<CommandItem
 																		className="gap-2"
-																		value={level.level}
-																		key={level.level}
+																		value={level.id}
+																		key={level.id}
 																		onSelect={() => {
-																			form.setValue('level', level);
+																			form.setValue('level', level.id);
 																			toggleLevelsDropdown(false);
-																			form.setValue('salary', String(level.salary));
 																		}}>
 																		<div className="flex items-center">
-																			<Check className={cn('mr-2 h-3 w-3', level.level === field.value?.level ? 'opacity-100' : 'opacity-0')} />
+																			<Check className={cn('mr-2 h-3 w-3', level.id === field.value ? 'opacity-100' : 'opacity-0')} />
 																			{level.level}
 																		</div>
 																		• <div className="text-left text-xs text-muted-foreground">{level.role}</div>
@@ -685,119 +722,26 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 						</div>
 
 						<div className="mb-10 grid gap-8">
+							<PayInput form={form} name="salary" label="Base salary" minIndexString="min_salary" maxIndexString="max_salary" orgJobLevels={orgJobLevels} jobLevels={jobLevels} validateSalary={validateSalary} salaryInvalid={showSalaryCostomError} />
+
 							<FormField
 								control={form.control}
-								name="salary"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel className="flex items-center justify-between">
-											Salary
-											<div className="">
-												{field.value ? (
-													<div className="flex gap-1">
-														{new Intl.NumberFormat('en-US', {
-															style: 'currency',
-															currency: 'USD'
-														}).format(Number(field.value))}
-														<TooltipProvider>
-															<Tooltip>
-																<TooltipTrigger asChild>
-																	<button type="button">
-																		<Info size={12} />
-																	</button>
-																</TooltipTrigger>
-																<TooltipContent side="left">
-																	<p className="max-w-40 text-wrap text-xs text-muted-foreground">Formated to fit default currency</p>
-																</TooltipContent>
-															</Tooltip>
-														</TooltipProvider>
-													</div>
-												) : (
-													''
-												)}
-											</div>
-										</FormLabel>
-										<FormControl>
-											<Input type="number" placeholder="Employee gross annual salary" {...field} required />
-										</FormControl>
-										<FormMessage />
+								name="signing_bonus"
+								render={() => (
+									<FormItem className="grid w-full gap-3 rounded-lg bg-accent p-2">
+										<div className="flex items-center justify-between space-x-2">
+											<FormLabel>Add signing bonus</FormLabel>
+											<Switch checked={showSigningBonus} onCheckedChange={event => toggleShowSigningBonus(event)} id="signin-bonus" className="scale-75" />
+										</div>
+
+										{showSigningBonus && <PayInput form={form} name="signing_bonus" minIndexString="min_signing_bonus" maxIndexString="max_signing_bonus" orgJobLevels={orgJobLevels} validateSalary={validateBonus} salaryInvalid={showSigningCostomError} />}
 									</FormItem>
 								)}
 							/>
 
-							<div className="grid w-full gap-3 rounded-lg bg-accent p-2">
-								<FormField
-									control={form.control}
-									name="signing_bonus"
-									render={({ field }) => (
-										<FormItem>
-											<div className="flex items-center justify-between space-x-2">
-												<FormLabel>Add signing bonus</FormLabel>
-												<Switch checked={showSigningBonus} onCheckedChange={event => toggleShowSigningBonus(event)} id="signin-bonus" className="scale-75" />
-											</div>
+							<FixedAllowance toggle={toggleShowFixedIncome} isToggled={showFixedIncome} form={form} />
 
-											{showSigningBonus && (
-												<FormControl>
-													<Input type="number" placeholder="Enter employee's signing bonus" {...field} />
-												</FormControl>
-											)}
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-
-							<div className="grid w-full gap-3 rounded-lg bg-accent px-2 py-2">
-								<div className="flex items-center justify-between space-x-2">
-									<Label htmlFor="signin-bonus">Fixed allowances</Label>
-									<Switch id="fixed-allowance" checked={showFixedIncome} onCheckedChange={event => toggleShowFixedIncome(event)} className="scale-75" />
-								</div>
-
-								{showFixedIncome && (
-									<>
-										{form.getValues().fixed_allowance?.length ? (
-											<ul className="grid list-disc gap-2 py-2">
-												{form.getValues().fixed_allowance?.map((allowance, index) => (
-													<li key={index} className="flex list-disc items-center justify-between p-1 text-xs font-light">
-														<div>
-															{allowance?.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
-														</div>
-														<div className="text-muted-foreground">{allowance.frequency}</div>
-													</li>
-												))}
-											</ul>
-										) : (
-											false
-										)}
-
-										<div className="grid grid-cols-3 gap-3">
-											<Input type="text" placeholder="Enter name" value={fixedAllowance?.name} onChange={event => updateFixedAllowance({ ...fixedAllowance, name: event.target.value })} />
-											<Input type="number" placeholder="Enter amount" value={fixedAllowance.amount} onChange={event => updateFixedAllowance({ ...fixedAllowance, amount: event.target.value })} />
-
-											<Select onValueChange={event => updateFixedAllowance({ ...fixedAllowance, frequency: event })}>
-												<SelectTrigger className="w-full">
-													<SelectValue className="text-left" placeholder="Frequency" />
-												</SelectTrigger>
-												<SelectContent>
-													<SelectGroup>
-														<SelectItem value="one-off">One off</SelectItem>
-														<SelectItem value="monthly">Monthly</SelectItem>
-													</SelectGroup>
-												</SelectContent>
-											</Select>
-										</div>
-										<Button
-											type="button"
-											disabled={!fixedAllowance.amount || !fixedAllowance?.name || !fixedAllowance.frequency}
-											onClick={() => {
-												form.setValue('fixed_allowance', [...(form.getValues()?.fixed_allowance || []), fixedAllowance]);
-												updateFixedAllowance({ name: '', amount: '', frequency: '' });
-											}}>
-											Add allowance
-										</Button>
-									</>
-								)}
-							</div>
+							<AdditionalOffering toggle={toggleAdditionalOffering} isToggled={showAdditionalOffering} form={form} />
 						</div>
 					</div>
 
@@ -850,7 +794,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 											<FormControl>
 												<div className="relative h-fit w-full">
 													<Input type="number" placeholder="20" {...field} onChange={event => form.setValue('paid_leave', Number(event.target.value))} required />
-													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/month</div>
+													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/year</div>
 												</div>
 											</FormControl>
 											<FormMessage />
@@ -867,7 +811,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 											<FormControl>
 												<div className="relative h-fit w-full">
 													<Input type="number" placeholder="20" {...field} onChange={event => form.setValue('sick_leave', Number(event.target.value))} required />
-													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/month</div>
+													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/year</div>
 												</div>
 											</FormControl>
 											<FormMessage />
@@ -885,7 +829,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 										<FormControl>
 											<div className="relative h-fit w-full">
 												<Input type="number" placeholder="90" {...field} onChange={event => form.setValue('probation_period', Number(event.target.value))} required />
-												<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/month</div>
+												<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/year</div>
 											</div>
 										</FormControl>
 										<FormMessage />
@@ -908,14 +852,14 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 };
 
 const levels = [
-	{ level: 'IC Level 1', role: 'Entry', salary: 50000 },
-	{ level: 'IC Level 2', role: 'Mid I', salary: 72000 },
-	{ level: 'IC Level 3', role: 'Mid II', salary: 92000 },
-	{ level: 'IC Level 4', role: 'Mid II', salary: 110000 },
-	{ level: 'IC Level 5', role: 'Senior I', salary: 160000 },
-	{ level: 'IC Level 6', role: 'Senior II', salary: 180000 },
-	{ level: 'IC Level 7', role: 'Staff', salary: 240000 },
-	{ level: 'IC Level 8', role: 'Principal', salary: 280000 },
-	{ level: 'IC Level 9', role: 'VP', salary: 350000 },
-	{ level: 'IC Level 10', role: 'Executive', salary: 400000 }
+	{ id: 'fks', level: 'IC Level 1', role: 'Entry', min_salary: 50000, max_salary: 50000 },
+	{ id: 'ldb', level: 'IC Level 2', role: 'Mid I', min_salary: 72000, max_salary: 50000 },
+	{ id: 'jff', level: 'IC Level 3', role: 'Mid II', min_salary: 92000, max_salary: 50000 },
+	{ id: 'dfu', level: 'IC Level 4', role: 'Mid II', min_salary: 110000, max_salary: 50000 },
+	{ id: 'oia', level: 'IC Level 5', role: 'Senior I', min_salary: 160000, max_salary: 50000 },
+	{ id: 'ejd', level: 'IC Level 6', role: 'Senior II', min_salary: 180000, max_salary: 50000 },
+	{ id: 'fou', level: 'IC Level 7', role: 'Staff', min_salary: 240000, max_salary: 50000 },
+	{ id: 'elj', level: 'IC Level 8', role: 'Principal', min_salary: 280000, max_salary: 50000 },
+	{ id: 'euw', level: 'IC Level 9', role: 'VP', min_salary: 350000, max_salary: 50000 },
+	{ id: 'ale', level: 'IC Level 10', role: 'Executive', min_salary: 400000, max_salary: 50000 }
 ];
