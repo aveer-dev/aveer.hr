@@ -51,7 +51,7 @@ export const PasswordForm = ({ formAction }: props) => {
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" size={'sm'} className="gap-3 px-6 text-xs font-light" disabled={pending || isLoading || !isFormEnabled}>
+			<Button type="submit" size={'sm'} className="gap-3 px-4 text-xs font-light" disabled={pending || isLoading || !isFormEnabled}>
 				{pending && <LoadingSpinner />}
 				{pending ? 'Setting password' : 'Set password'}
 			</Button>

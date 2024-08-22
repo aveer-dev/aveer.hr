@@ -74,7 +74,7 @@ export const OrgForm = ({ formAction, data }: PROPS) => {
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" disabled={pending || isCheckingPrefix || prefixExists || !prefixText} size={'sm'} className="gap-3 px-6 text-xs font-light">
+			<Button type="submit" disabled={pending || isCheckingPrefix || prefixExists || !prefixText} size={'sm'} className="gap-3 px-4 text-xs font-light">
 				{pending && <LoadingSpinner />}
 				{pending ? (data ? 'Updating Org' : 'Creating Org') : data ? 'Update Org' : 'Create Org'}
 			</Button>

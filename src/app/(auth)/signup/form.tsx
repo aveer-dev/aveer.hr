@@ -18,7 +18,7 @@ export const SignupForm = ({ formAction }: PROPS) => {
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" size={'sm'} className="gap-3 px-10 text-sm font-light">
+			<Button type="submit" size={'sm'} className="gap-3 px-4 text-sm font-light">
 				{pending && <LoadingSpinner />}
 				{pending ? 'Signing up...' : 'Sign up'}
 			</Button>

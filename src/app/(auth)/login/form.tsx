@@ -18,7 +18,7 @@ export const LoginForm = ({ formAction }: props) => {
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" disabled={pending} size={'sm'} className="gap-3 px-8 text-xs font-light">
+			<Button type="submit" disabled={pending} size={'sm'} className="gap-3 px-4 text-xs font-light">
 				{pending && <LoadingSpinner />}
 				{pending ? 'Logging in' : 'Login'}
 			</Button>
