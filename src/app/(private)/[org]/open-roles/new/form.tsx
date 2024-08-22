@@ -760,7 +760,7 @@ export const OpenRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_ro
 
 							<FormField
 								control={form.control}
-								name="requirements"
+								name="what_we_offer"
 								render={() => (
 									<div className="grid w-full gap-3">
 										<FormLabel>Additional offerings</FormLabel>
