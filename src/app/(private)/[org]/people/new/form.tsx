@@ -40,7 +40,7 @@ const formSchema = z.object({
 	nationality: z.string(),
 	job_title: z.string(),
 	level: z.string(),
-	employment_type: z.enum(['full-time', 'part-time']),
+	employment_type: z.enum(['full-time', 'part-time', 'contract']),
 	work_schedule: z.string().optional(),
 	work_shedule_interval: z.string().optional(),
 	responsibilities: z.array(z.string()),
@@ -56,7 +56,7 @@ const formSchema = z.object({
 	entity: z.string()
 });
 
-export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'>; duplicate?: TablesUpdate<'contracts'> }) => {
+export const AddPerson = ({ data, duplicate, orgBenefits }: { orgBenefits?: Tables<'org_settings'> | null; data?: TablesUpdate<'contracts'>; duplicate?: TablesUpdate<'contracts'> }) => {
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
 	const [entities, setEntities] = useState<Tables<'legal_entities'>[]>([]);
 	const [eorEntities, setEorEntities] = useState<Tables<'legal_entities'>[]>([]);
@@ -64,12 +64,10 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	const [jobLevels] = useState(levels);
 	const [orgJobLevels, updateOrgJobLevels] = useState<TablesInsert<'employee_levels'>[]>([]);
 	const [responsibility, updateResponsibility] = useState('');
-	const [fixedAllowance, updateFixedAllowance] = useState({ name: '', amount: '', frequency: '' });
 	const [showSigningBonus, toggleShowSigningBonus] = useState(!!data?.signing_bonus || !!duplicate?.signing_bonus);
 	const [showFixedIncome, toggleShowFixedIncome] = useState(!!data?.fixed_allowance || !!duplicate?.fixed_allowance);
-	const [showAdditionalOffering, toggleAdditionalOffering] = useState(!!data?.additional_offerings || !!duplicate?.additional_offerings);
+	const [showAdditionalOffering, toggleAdditionalOffering] = useState(!!data?.additional_offerings?.length || !!duplicate?.additional_offerings?.length || !!orgBenefits?.additional_offerings?.length);
 	const [indefiniteEndDate, toggleIndefiniteEndDate] = useState(!data?.end_date);
-	const [jobQuery, setJobQuery] = useState<string>('');
 	const [levelQuery, setLevelQuery] = useState<string>('');
 	const [isSubmiting, toggleSubmitState] = useState(false);
 	const params = useParams<{ org: string }>();
@@ -77,7 +75,6 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	const [isAlertOpen, toggleAgreementDialog] = useState(false);
 	const [agreementId, setAgreementId] = useState<number>();
 	const [isLevelsOpen, toggleLevelsDropdown] = useState(false);
-	const [isTitlesOpen, toggleTitlesDropdown] = useState(false);
 	const [isNationalityOpen, toggleNationalityDropdown] = useState(false);
 	const [isNewContractDialogOpen, toggleNewContractDialog] = useState(false);
 	const [newContractId, setNewContractId] = useState(0);
@@ -96,17 +93,17 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			first_name: (data?.profile as any)?.first_name || '',
 			last_name: (data?.profile as any)?.last_name || '',
 			email: (data?.profile as any)?.email || '',
-			additional_offerings: (data?.additional_offerings as string[]) || (duplicate?.additional_offerings as string[]) || [],
+			additional_offerings: (data?.additional_offerings as string[]) || (duplicate?.additional_offerings as string[]) || (orgBenefits?.additional_offerings as string[]) || [],
 			nationality: (data?.profile as any)?.nationality || '',
 			responsibilities: (data?.responsibilities as string[]) || (duplicate?.responsibilities as string[]) || [],
 			fixed_allowance: (data?.fixed_allowance as any) || (duplicate?.fixed_allowance as any) || [],
 			start_date: data?.start_date ? new Date(data?.start_date) : new Date(),
 			end_date: data?.end_date ? new Date(data?.end_date) : duplicate?.end_date ? new Date(duplicate?.end_date) : new Date(),
-			probation_period: data?.probation_period || duplicate?.probation_period || 90,
-			paid_leave: data?.paid_leave || duplicate?.paid_leave || 20,
-			sick_leave: data?.sick_leave || duplicate?.sick_leave || 20,
-			work_schedule: data?.work_schedule || duplicate?.work_schedule || '8',
-			work_shedule_interval: data?.work_shedule_interval || duplicate?.work_shedule_interval || 'daily',
+			probation_period: data?.probation_period || duplicate?.probation_period || orgBenefits?.probation || 90,
+			paid_leave: data?.paid_leave || duplicate?.paid_leave || orgBenefits?.paid_time_off || 20,
+			sick_leave: data?.sick_leave || duplicate?.sick_leave || orgBenefits?.sick_leave || 20,
+			work_schedule: data?.work_schedule || duplicate?.work_schedule || orgBenefits?.work_schedule || '8',
+			work_shedule_interval: data?.work_shedule_interval || duplicate?.work_shedule_interval || orgBenefits?.work_shedule_interval || 'daily',
 			salary: data?.salary ? String(data?.salary) : duplicate?.salary ? String(duplicate?.salary) : '',
 			signing_bonus: data?.signing_bonus ? String(data?.signing_bonus) : duplicate?.signing_bonus ? String(duplicate?.signing_bonus) : undefined,
 			employment_type: data?.employment_type || duplicate?.employment_type || undefined,
@@ -160,15 +157,17 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 		const orgHasExistingLevel = orgJobLevels.length > 0 ? !!orgJobLevels.find(level => level.id == Number(values.level)) : false;
 
 		if (!orgHasExistingLevel && values.level) {
+			const localLevelSelected = jobLevels.find(level => level.id == values.level);
+
 			const level: TablesInsert<'employee_levels'> = {
-				level: values.level,
+				level: localLevelSelected?.level || 'New rand',
+				role: localLevelSelected?.role,
 				org: params.org,
 				min_salary: Number(values.salary),
 				max_salary: Number(values.salary) + 1,
 				max_signing_bonus: Number(values.signing_bonus) + 1,
 				min_signing_bonus: Number(values.signing_bonus),
-				fixed_allowance: values.fixed_allowance,
-				additional_offerings: values.additional_offerings
+				fixed_allowance: values.fixed_allowance
 			};
 			await createEmployeeLevel(level);
 		}
@@ -194,8 +193,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 			responsibilities: values.responsibilities,
 			profile: data ? (data?.profile as any).id : '',
 			entity: Number(values.entity),
-			org: params.org,
-			contract_type: (searchParams.get('type') as any) || data?.contract_type
+			org: params.org
 		};
 		if (showSigningBonus) contract.signing_bonus = Number(values.signing_bonus);
 		if (showFixedIncome) contract.fixed_allowance = values.fixed_allowance;
@@ -214,11 +212,13 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 	};
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+		toggleSubmitState(true);
 		// does user have adequate permission for this?
 		const userHasPermission = await doesUserHaveAdequatePermissions({ orgId: params.org });
-		if (userHasPermission !== true) return toast.error(userHasPermission);
-
-		toggleSubmitState(true);
+		if (userHasPermission !== true) {
+			toggleSubmitState(false);
+			return toast.error(userHasPermission);
+		}
 
 		// does contract require EOR?
 		const entityData = await isEntityEOR(Number(values.entity));
@@ -298,11 +298,24 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 		form.setValue('level', String(level.id));
 		toggleLevelsDropdown(false);
 
-		toggleAdditionalOffering(!!level.additional_offerings?.length);
-		form.setValue('additional_offerings', level.additional_offerings as string[]);
-
+		// update fixed income with level's value
 		toggleShowFixedIncome(!!level.fixed_allowance?.length);
-		form.setValue('fixed_allowance', level.fixed_allowance as any[]);
+		const formFixedAllowance = form.getValues('fixed_allowance');
+		let fixedAllowance: any[] = [];
+		if (formFixedAllowance) fixedAllowance = [...formFixedAllowance];
+		if (level?.fixed_allowance) fixedAllowance = [...level.fixed_allowance];
+		form.setValue('fixed_allowance', fixedAllowance as any[]);
+
+		// set salary, if salary is empty
+		const salary = form.getValues('salary');
+		if (!salary) form.setValue('salary', String(level?.min_salary));
+
+		// set signing bonus if empty
+		const signingBonus = form.getValues('signing_bonus');
+		if (!signingBonus) {
+			form.setValue('signing_bonus', String(level.min_signing_bonus));
+			toggleShowSigningBonus(true);
+		}
 	};
 
 	return (
@@ -432,7 +445,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 									name="nationality"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Nationalty</FormLabel>
+											<FormLabel>Country</FormLabel>
 											<Popover open={isNationalityOpen} onOpenChange={toggleNationalityDropdown}>
 												<PopoverTrigger asChild>
 													<FormControl>
@@ -488,50 +501,9 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>Job title</FormLabel>
-											<Popover open={isTitlesOpen} onOpenChange={toggleTitlesDropdown}>
-												<PopoverTrigger asChild>
-													<FormControl>
-														<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
-															{field.value || `Enter job title`}
-															<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-														</Button>
-													</FormControl>
-												</PopoverTrigger>
-												<PopoverContent className="w-[200px] p-0">
-													<Command>
-														<CommandInput placeholder="Enter job title..." value={jobQuery} onValueChange={(value: string) => setJobQuery(value)} />
-														<CommandList>
-															<CommandEmpty
-																onClick={() => {
-																	updateJobTitles([...jobTitles, jobQuery]);
-																	form.setValue('job_title', jobQuery);
-																	setJobQuery('');
-																	toggleTitlesDropdown(false);
-																}}
-																className="p-1">
-																<div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs font-light outline-none">
-																	<Check className={cn('mr-2 h-4 w-4', jobQuery && jobQuery === field.value ? 'opacity-100' : 'opacity-0')} />
-																	{jobQuery}
-																</div>
-															</CommandEmpty>
-															<CommandGroup>
-																{jobTitles.map(title => (
-																	<CommandItem
-																		value={title}
-																		key={title}
-																		onSelect={() => {
-																			form.setValue('job_title', title);
-																			toggleTitlesDropdown(false);
-																		}}>
-																		<Check className={cn('mr-2 h-4 w-4', title === field.value ? 'opacity-100' : 'opacity-0')} />
-																		{title}
-																	</CommandItem>
-																))}
-															</CommandGroup>
-														</CommandList>
-													</Command>
-												</PopoverContent>
-											</Popover>
+											<FormControl>
+												<Input type="text" placeholder="Enter job title" {...field} />
+											</FormControl>
 											<FormMessage />
 										</FormItem>
 									)}
@@ -627,6 +599,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 											<SelectContent>
 												<SelectItem value="full-time">Full-time</SelectItem>
 												<SelectItem value="part-time">Part-time</SelectItem>
+												<SelectItem value="contract">Contract</SelectItem>
 											</SelectContent>
 										</Select>
 										<FormMessage />
@@ -790,7 +763,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 									name="paid_leave"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Paid time off</FormLabel>
+											<FormLabel>Leave</FormLabel>
 											<FormControl>
 												<div className="relative h-fit w-full">
 													<Input type="number" placeholder="20" {...field} onChange={event => form.setValue('paid_leave', Number(event.target.value))} required />
@@ -829,7 +802,7 @@ export const AddPerson = ({ data, duplicate }: { data?: TablesUpdate<'contracts'
 										<FormControl>
 											<div className="relative h-fit w-full">
 												<Input type="number" placeholder="90" {...field} onChange={event => form.setValue('probation_period', Number(event.target.value))} required />
-												<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/year</div>
+												<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days</div>
 											</div>
 										</FormControl>
 										<FormMessage />

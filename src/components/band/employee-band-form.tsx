@@ -13,7 +13,6 @@ import { Check, ChevronDown, ChevronRight, Info, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MinMaxPay } from '@/components/forms/min-max-pay';
-import { AdditionalOffering } from '@/components/forms/additional-offering';
 import { FixedAllowance } from '@/components/forms/fixed-allowance';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -41,7 +40,6 @@ const formSchema = z.object({
 		.refine(bonus => (bonus.min && bonus.max ? bonus.min < bonus.max : true), { message: 'Max bonus must be higher than min bonus' })
 		.optional(),
 	org: z.string(),
-	additional_offerings: z.array(z.string()),
 	fixed_allowance: z
 		.array(z.object({ name: z.string(), amount: z.string(), frequency: z.string() }))
 		.optional()
@@ -59,7 +57,6 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 	const [isDialogOpen, openDialog] = useState(false);
 	const [showSigningBonus, toggleShowSigningBonus] = useState(false);
 	const [showFixedAllowance, toggleShowFixedAllowance] = useState(false);
-	const [showAdditionalOffering, toggleShowAdditionalOffering] = useState(false);
 	const [isLevelsOpen, toggleLevelsDropdown] = useState(false);
 	const [jobLevels] = useState<string[]>(levels);
 	const [orgJobLevels, updateOrgJobLevels] = useState<string[]>([]);
@@ -72,7 +69,6 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			additional_offerings: [],
 			level: undefined,
 			role: '',
 			org: '',
@@ -97,13 +93,11 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 				min: activeBand.min_signing_bonus || undefined,
 				max: activeBand.max_signing_bonus || undefined
 			},
-			fixed_allowance: activeBand.fixed_allowance as any,
-			additional_offerings: (activeBand.additional_offerings as string[]) || []
+			fixed_allowance: activeBand.fixed_allowance as any
 		});
 		setActiveBandId(activeBand.id);
 		toggleShowSigningBonus(!!(activeBand?.min_signing_bonus || activeBand?.max_signing_bonus));
 		toggleShowFixedAllowance(!!activeBand?.fixed_allowance?.length);
-		toggleShowAdditionalOffering(!!activeBand?.additional_offerings?.length);
 
 		openDialog(true);
 	};
@@ -118,8 +112,7 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 			max_salary: values.salary.max,
 			min_signing_bonus: values.signing_bonus?.min,
 			max_signing_bonus: values.signing_bonus?.max,
-			fixed_allowance: values.fixed_allowance,
-			additional_offerings: values.additional_offerings
+			fixed_allowance: values.fixed_allowance
 		};
 
 		const response = activeBandId ? await updateBand({ ...band, id: activeBandId }) : await createBand(band);
@@ -326,8 +319,6 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 								/>
 
 								<FixedAllowance toggle={toggleShowFixedAllowance} isToggled={showFixedAllowance} form={form} />
-
-								<AdditionalOffering toggle={toggleShowAdditionalOffering} isToggled={showAdditionalOffering} form={form} />
 
 								<SubmitButton />
 							</form>

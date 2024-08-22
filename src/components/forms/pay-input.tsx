@@ -84,6 +84,7 @@ export const PayInput = ({ form, orgJobLevels, salaryInvalid, jobLevels, name, l
 								validateSalary(Number(event.target.value));
 							}}
 							type="number"
+							autoComplete="off"
 							placeholder="Employee gross annual salary"
 							required
 						/>

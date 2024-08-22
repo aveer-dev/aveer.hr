@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { EmployeeBand } from '@/components/band/employee-band';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmployeeBenefits } from '@/components/employee-benefits/employee-benefits';
 
 export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -122,6 +123,10 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 
 					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
 						<EmployeeBand org={params.org} />
+					</Suspense>
+
+					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
+						<EmployeeBenefits org={params.org} />
 					</Suspense>
 				</TabsContent>
 

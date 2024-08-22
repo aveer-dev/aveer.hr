@@ -7,12 +7,14 @@ import { BackButton } from '@/components/ui/back-button';
 
 export default async function Home({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	let contractDetails: TablesUpdate<'contracts'> = {};
+	const supabase = createClient();
 
 	if (searchParams.duplicate) {
-		const supabase = createClient();
 		const { data } = await supabase.from('contracts').select().match({ id: searchParams.duplicate, org: params.org }).single();
 		if (data) contractDetails = data;
 	}
+
+	const { data, error } = await supabase.from('org_settings').select().eq('org', params.org).single();
 
 	return (
 		<div className="mx-auto max-w-4xl">
@@ -31,7 +33,7 @@ export default async function Home({ params, searchParams }: { params: { [key: s
 						<Skeleton className="h-60 w-full max-w-4xl"></Skeleton>
 					</div>
 				}>
-				<AddPerson duplicate={contractDetails} />
+				<AddPerson orgBenefits={data} duplicate={contractDetails} />
 			</Suspense>
 		</div>
 	);

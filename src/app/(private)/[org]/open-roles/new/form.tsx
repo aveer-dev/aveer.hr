@@ -32,7 +32,7 @@ const supabase = createClient();
 const formSchema = z.object({
 	job_title: z.string(),
 	level: z.string().optional(),
-	employment_type: z.enum(['full-time', 'part-time']),
+	employment_type: z.enum(['full-time', 'part-time', 'contract']),
 	work_schedule: z.number().or(z.string()).optional(),
 	work_shedule_interval: z.string().optional(),
 	responsibilities: z.array(z.string()),
@@ -613,7 +613,7 @@ export const OpenRoleForm = ({ data, duplicate }: { data?: TablesUpdate<'open_ro
 									name="paid_leave"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Paid time off</FormLabel>
+											<FormLabel>Leave</FormLabel>
 											<FormControl>
 												<div className="relative h-fit w-full">
 													<Input type="number" placeholder="20" {...field} required />

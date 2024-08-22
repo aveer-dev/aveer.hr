@@ -199,7 +199,6 @@ export type Database = {
       }
       employee_levels: {
         Row: {
-          additional_offerings: Json[] | null
           created_at: string
           entity: number | null
           fixed_allowance: Json[] | null
@@ -213,7 +212,6 @@ export type Database = {
           role: string | null
         }
         Insert: {
-          additional_offerings?: Json[] | null
           created_at?: string
           entity?: number | null
           fixed_allowance?: Json[] | null
@@ -227,7 +225,6 @@ export type Database = {
           role?: string | null
         }
         Update: {
-          additional_offerings?: Json[] | null
           created_at?: string
           entity?: number | null
           fixed_allowance?: Json[] | null
@@ -521,6 +518,50 @@ export type Database = {
           },
         ]
       }
+      org_settings: {
+        Row: {
+          additional_offerings: Json[] | null
+          created_at: string
+          id: number
+          org: string
+          paid_time_off: number | null
+          probation: number | null
+          sick_leave: number | null
+          work_schedule: string | null
+          work_shedule_interval: string | null
+        }
+        Insert: {
+          additional_offerings?: Json[] | null
+          created_at?: string
+          id?: number
+          org: string
+          paid_time_off?: number | null
+          probation?: number | null
+          sick_leave?: number | null
+          work_schedule?: string | null
+          work_shedule_interval?: string | null
+        }
+        Update: {
+          additional_offerings?: Json[] | null
+          created_at?: string
+          id?: number
+          org?: string
+          paid_time_off?: number | null
+          probation?: number | null
+          sick_leave?: number | null
+          work_schedule?: string | null
+          work_shedule_interval?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_settings_org_fkey"
+            columns: ["org"]
+            isOneToOne: true
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       organisations: {
         Row: {
           created_at: string
@@ -710,7 +751,7 @@ export type Database = {
         | "terminated"
         | "scheduled termination"
       contract_type: "employee" | "contractor"
-      employment_type: "full-time" | "part-time"
+      employment_type: "full-time" | "part-time" | "contract"
       role_status: "open" | "close"
       work_locations: "on-site" | "remote" | "hybrid"
     }
