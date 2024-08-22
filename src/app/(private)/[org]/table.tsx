@@ -2,14 +2,13 @@
 
 import { columns } from '@/components/dashboard/column';
 import { DataTable } from '@/components/dashboard/table';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
 import { PERSON } from '@/type/person';
-import { Briefcase, HardHat, Plus } from 'lucide-react';
-import { NavLink } from '@/components/ui/link';
+import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { DashboardFilters } from '@/components/dashboard/filters';
+import { cn } from '@/lib/utils';
+import { NavLink } from '@/components/ui/link';
 
 export const ClientTable = ({ org, data }: { org: string; data: PERSON[] }) => {
 	const [tableData, updateData] = useState<PERSON[]>(data);
@@ -22,28 +21,10 @@ export const ClientTable = ({ org, data }: { org: string; data: PERSON[] }) => {
 
 				<DashboardFilters org={org} toggleTableLoadingState={toggleTableLoadingState} updateData={updateData} />
 
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button className="ml-auto h-8 gap-4">
-							<Plus size={12} />
-							App person
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuItem className="p-0">
-							<NavLink org={org} href={`/people/new?type=employee`} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-8 justify-end gap-4')}>
-								<Briefcase size={12} />
-								App employee
-							</NavLink>
-						</DropdownMenuItem>
-						<DropdownMenuItem className="p-0">
-							<NavLink org={org} href={`/people/new?type=contractor`} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-8 justify-end gap-4')}>
-								<HardHat size={12} />
-								App contractor
-							</NavLink>
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
+				<NavLink org={org} href={`/people/new`} className={cn(buttonVariants(), 'ml-auto h-8 justify-end gap-4')}>
+					<Plus size={12} />
+					Add person
+				</NavLink>
 			</div>
 
 			<DataTable columns={columns} org={org} data={tableData} loading={tableLoading} />
