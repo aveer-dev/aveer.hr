@@ -4,15 +4,11 @@ import { ProfileForm } from './profile-form';
 import { createClient } from '@/utils/supabase/server';
 import { OrgForm } from '@/app/(auth)/create-org/form';
 import { TablesUpdate } from '@/type/database.types';
-import { Card } from '@/components/ui/card';
-import { ChevronRightIcon } from 'lucide-react';
-import Link from 'next/link';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { EmployeeBand } from '@/components/band/employee-band';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmployeeBenefits } from '@/components/employee-benefits/employee-benefits';
+import { LegalEntities } from '@/components/legal-entities/legal-entities';
 
 export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -23,11 +19,7 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 	} = await supabase.auth.getUser();
 	if (!user || userError) return <div>Unable to fetch user data</div>;
 
-	const [profileResponse, organisationResponse, legalEntityResponse] = await Promise.all([
-		await supabase.from('profiles').select().eq('id', user?.id).single(),
-		await supabase.from('organisations').select().eq('subdomain', params.org).single(),
-		await supabase.from('legal_entities').select().eq('org', params.org)
-	]);
+	const [profileResponse, organisationResponse] = await Promise.all([await supabase.from('profiles').select().eq('id', user?.id).single(), await supabase.from('organisations').select().eq('subdomain', params.org).single()]);
 
 	const updatePassword = async (password: string) => {
 		'use server';
@@ -88,38 +80,9 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 						</div>
 					)}
 
-					{legalEntityResponse.data && (
-						<div className="grid w-full gap-6">
-							<div className="grid grid-cols-2 border-t border-t-border pt-10">
-								<div>
-									<h2 className="mb-1 font-normal">Legal Entities</h2>
-									<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">These are the legal details you provided while registering your company at the time of setup.</p>
-								</div>
-
-								<div className="mb-10 grid gap-8">
-									{legalEntityResponse.data.map(entity => (
-										<Card key={entity.id} className="w-full text-left">
-											<Link className="flex items-center justify-between p-4 text-xs" href={`./legal-entity/${entity.id}`}>
-												<div>
-													{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
-												</div>
-												<ChevronRightIcon className="text-muted-foreground" size={14} />
-											</Link>
-										</Card>
-									))}
-									<Link href="./legal-entity/new" className={cn(buttonVariants(), 'w-full text-xs')}>
-										Add Legal Entity
-									</Link>
-								</div>
-							</div>
-						</div>
-					)}
-
-					{legalEntityResponse.error && (
-						<div className="grid w-full border-t border-t-border py-10 text-center text-xs text-muted-foreground">
-							Unable to fetch user data <p>{legalEntityResponse.error.message}</p>
-						</div>
-					)}
+					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
+						<LegalEntities org={params.org} />
+					</Suspense>
 
 					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
 						<EmployeeBand org={params.org} />

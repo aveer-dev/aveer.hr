@@ -141,7 +141,7 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 
 	return (
 		<>
-			<div className="mb-10 grid gap-8">
+			<div className="grid gap-8">
 				{data.map(band => (
 					<Card key={band.id} className="relative w-full text-left">
 						<Button

@@ -14,8 +14,9 @@ export const EmployeeBand = async ({ org }: props) => {
 
 	if (error) {
 		return (
-			<div className="grid w-full border-t border-t-border py-10 text-center text-xs text-muted-foreground">
-				Unable to fetch employee band data <p>{error.message}</p>
+			<div className="grid w-full gap-2 border-t border-t-border py-10 text-center text-xs text-muted-foreground">
+				<p>Unable to fetch employee band data</p>
+				<p>{error.message}</p>
 			</div>
 		);
 	}
@@ -64,15 +65,13 @@ export const EmployeeBand = async ({ org }: props) => {
 	};
 
 	return (
-		<div className="grid w-full gap-6">
-			<div className="grid grid-cols-2 border-t border-t-border pt-10">
-				<div>
-					<h2 className="mb-1 font-normal">Employee Bands</h2>
-					<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">Creating employee bands makes it super easy to manage employees and their benefits. Set them once and connect them to employees once.</p>
-				</div>
-
-				<EmployeeBandDialog createBand={createBand} deleteBand={deleteBand} updateBand={updateBand} data={data} />
+		<div className="grid grid-cols-2 border-t border-t-border py-10">
+			<div>
+				<h2 className="mb-1 font-normal">Employee Bands</h2>
+				<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">Creating employee bands makes it super easy to manage employees and their benefits. Set them once and connect them to employees once.</p>
 			</div>
+
+			<EmployeeBandDialog createBand={createBand} deleteBand={deleteBand} updateBand={updateBand} data={data} />
 		</div>
 	);
 };
