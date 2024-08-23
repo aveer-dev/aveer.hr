@@ -312,12 +312,13 @@ export const AddPerson = ({ data, duplicate, orgBenefits }: { orgBenefits?: Tabl
 
 		// set salary, if salary is empty
 		const salary = form.getValues('salary');
-		if (!salary) form.setValue('salary', String(level?.min_salary));
+		if (!salary && level?.min_salary) form.setValue('salary', String(level?.min_salary));
 
 		// set signing bonus if empty
 		const signingBonus = form.getValues('signing_bonus');
-		if (!signingBonus) {
-			form.setValue('signing_bonus', String(level.min_signing_bonus));
+		const signingBonusFromLevel = level.min_signing_bonus;
+		if (!signingBonus && signingBonusFromLevel) {
+			form.setValue('signing_bonus', String(signingBonusFromLevel));
 			toggleShowSigningBonus(true);
 		}
 	};
