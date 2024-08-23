@@ -108,7 +108,8 @@ export const AddPerson = ({ data, duplicate, orgBenefits }: { orgBenefits?: Tabl
 			signing_bonus: data?.signing_bonus ? String(data?.signing_bonus) : duplicate?.signing_bonus ? String(duplicate?.signing_bonus) : undefined,
 			employment_type: data?.employment_type || duplicate?.employment_type || undefined,
 			job_title: data?.job_title || duplicate?.job_title || undefined,
-			entity: data?.entity ? String(data?.entity) : duplicate?.entity ? String(duplicate?.entity) : undefined
+			entity: data?.entity ? String(data?.entity) : duplicate?.entity ? String(duplicate?.entity) : undefined,
+			level: data?.level ? String(data?.level) : duplicate?.level ? String(duplicate?.level) : undefined
 		}
 	});
 
@@ -145,11 +146,13 @@ export const AddPerson = ({ data, duplicate, orgBenefits }: { orgBenefits?: Tabl
 
 	const createEmployeeLevel = async (level: TablesInsert<'employee_levels'>) => {
 		const response = await createLevel(level);
-		if (response) {
+		if (typeof response == 'string') {
 			toggleSubmitState(false);
 			return toast.error('😔 Error', { description: response });
 		}
+
 		setLevelCreationState(true);
+		form.setValue('level', String(response));
 		return true;
 	};
 
@@ -169,7 +172,8 @@ export const AddPerson = ({ data, duplicate, orgBenefits }: { orgBenefits?: Tabl
 				min_signing_bonus: Number(values.signing_bonus),
 				fixed_allowance: values.fixed_allowance
 			};
-			await createEmployeeLevel(level);
+			const response = await createEmployeeLevel(level);
+			if (response !== true) return;
 		}
 
 		const profile: TablesInsert<'profiles'> = {
@@ -189,7 +193,7 @@ export const AddPerson = ({ data, duplicate, orgBenefits }: { orgBenefits?: Tabl
 			work_schedule: values.work_schedule,
 			work_shedule_interval: values.work_shedule_interval,
 			job_title: values.job_title,
-			level: values.level,
+			level: form.getValues('level'),
 			responsibilities: values.responsibilities,
 			profile: data ? (data?.profile as any).id : '',
 			entity: Number(values.entity),

@@ -72,8 +72,8 @@ export const createLevel = async (level: TablesInsert<'employee_levels'>) => {
 	const role = await doesUserHaveAdequatePermissions({ orgId: level.org });
 	if (role !== true) return role;
 
-	const { error } = await supabase.from('employee_levels').insert(level);
+	const { data, error } = await supabase.from('employee_levels').insert(level).select('id').single();
 
 	if (error) return error.message;
-	return;
+	return data.id;
 };

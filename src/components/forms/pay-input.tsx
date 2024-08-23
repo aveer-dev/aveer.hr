@@ -22,6 +22,7 @@ interface props {
 export const PayInput = ({ form, orgJobLevels, salaryInvalid, jobLevels, name, label, minIndexString, maxIndexString, validateSalary }: props) => {
 	const EmployeeBandSalaryRange = (data: any) => {
 		const level = data.level;
+		if (!level) return;
 
 		return (
 			<>
