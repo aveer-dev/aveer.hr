@@ -22,9 +22,9 @@ export const updateRole = async (role: TablesUpdate<'open_roles'>, orgId: string
 	return 'update';
 };
 
-export const toggleRoleStatus = async (status: Database['public']['Enums']['role_status'], role: string, org: string) => {
+export const toggleRoleStatus = async (status: Database['public']['Enums']['is_open'], role: string, org: string) => {
 	const supabase = createClient();
 
-	await supabase.from('open_roles').update({ status }).match({ id: role, org: org }).select();
+	await supabase.from('open_roles').update({ state: status }).match({ id: role, org: org }).select();
 	return;
 };

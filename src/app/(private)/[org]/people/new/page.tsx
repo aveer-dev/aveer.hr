@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { AddPerson } from './form';
+import { ContractForm } from '@/components/forms/contract/form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
 import { TablesUpdate } from '@/type/database.types';
@@ -33,7 +33,7 @@ export default async function Home({ params, searchParams }: { params: { [key: s
 						<Skeleton className="h-60 w-full max-w-4xl"></Skeleton>
 					</div>
 				}>
-				<AddPerson orgBenefits={data} duplicate={contractDetails} />
+				<ContractForm orgBenefits={data} contractDuplicate={contractDetails} />
 			</Suspense>
 		</div>
 	);

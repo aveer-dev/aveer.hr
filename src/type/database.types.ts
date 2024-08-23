@@ -12,7 +12,6 @@ export type Database = {
       contracts: {
         Row: {
           additional_offerings: Json[] | null
-          contract_type: Database["public"]["Enums"]["contract_type"]
           created_at: string
           employment_type: Database["public"]["Enums"]["employment_type"]
           end_date: string | null
@@ -20,7 +19,7 @@ export type Database = {
           fixed_allowance: Json | null
           id: number
           job_title: string
-          level: string | null
+          level: number | null
           org: string | null
           org_signature_string: string | null
           org_signed: string | null
@@ -29,20 +28,23 @@ export type Database = {
           profile: string | null
           profile_signature_string: string | null
           profile_signed: string | null
+          requirements: Json[] | null
           responsibilities: Json | null
           salary: number | null
           sick_leave: number | null
           signed_by: string | null
           signing_bonus: number | null
           start_date: string | null
+          state: Database["public"]["Enums"]["is_open"] | null
           status: Database["public"]["Enums"]["contract_state"]
           terminated_by: string | null
+          work_location: Database["public"]["Enums"]["work_locations"] | null
           work_schedule: string | null
           work_shedule_interval: string | null
+          years_of_experience: number | null
         }
         Insert: {
           additional_offerings?: Json[] | null
-          contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string
           employment_type: Database["public"]["Enums"]["employment_type"]
           end_date?: string | null
@@ -50,7 +52,7 @@ export type Database = {
           fixed_allowance?: Json | null
           id?: number
           job_title: string
-          level?: string | null
+          level?: number | null
           org?: string | null
           org_signature_string?: string | null
           org_signed?: string | null
@@ -59,20 +61,23 @@ export type Database = {
           profile?: string | null
           profile_signature_string?: string | null
           profile_signed?: string | null
+          requirements?: Json[] | null
           responsibilities?: Json | null
           salary?: number | null
           sick_leave?: number | null
           signed_by?: string | null
           signing_bonus?: number | null
           start_date?: string | null
+          state?: Database["public"]["Enums"]["is_open"] | null
           status?: Database["public"]["Enums"]["contract_state"]
           terminated_by?: string | null
+          work_location?: Database["public"]["Enums"]["work_locations"] | null
           work_schedule?: string | null
           work_shedule_interval?: string | null
+          years_of_experience?: number | null
         }
         Update: {
           additional_offerings?: Json[] | null
-          contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string
           employment_type?: Database["public"]["Enums"]["employment_type"]
           end_date?: string | null
@@ -80,7 +85,7 @@ export type Database = {
           fixed_allowance?: Json | null
           id?: number
           job_title?: string
-          level?: string | null
+          level?: number | null
           org?: string | null
           org_signature_string?: string | null
           org_signed?: string | null
@@ -89,16 +94,20 @@ export type Database = {
           profile?: string | null
           profile_signature_string?: string | null
           profile_signed?: string | null
+          requirements?: Json[] | null
           responsibilities?: Json | null
           salary?: number | null
           sick_leave?: number | null
           signed_by?: string | null
           signing_bonus?: number | null
           start_date?: string | null
+          state?: Database["public"]["Enums"]["is_open"] | null
           status?: Database["public"]["Enums"]["contract_state"]
           terminated_by?: string | null
+          work_location?: Database["public"]["Enums"]["work_locations"] | null
           work_schedule?: string | null
           work_shedule_interval?: string | null
+          years_of_experience?: number | null
         }
         Relationships: [
           {
@@ -106,6 +115,13 @@ export type Database = {
             columns: ["entity"]
             isOneToOne: false
             referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_level_fkey"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "employee_levels"
             referencedColumns: ["id"]
           },
           {
@@ -332,111 +348,95 @@ export type Database = {
       }
       open_roles: {
         Row: {
-          about_us: string | null
-          country: string | null
+          additional_offerings: Json[] | null
           created_at: string
-          employment_type: Database["public"]["Enums"]["employment_type"] | null
-          entity: number | null
-          fixed_allowance: Json[] | null
+          employment_type: Database["public"]["Enums"]["employment_type"]
+          entity: number
+          fixed_allowance: Json | null
           id: number
           job_title: string
-          level: string | null
-          no_applicants: number
+          level: number | null
           org: string
           paid_leave: number | null
           probation_period: number | null
-          requirements: Json | null
+          requirements: Json[] | null
           responsibilities: Json | null
           salary: number | null
           sick_leave: number | null
           signing_bonus: number | null
-          state: number | null
-          status: Database["public"]["Enums"]["role_status"]
-          what_we_offer: Json | null
-          work_location: Database["public"]["Enums"]["work_locations"]
-          work_schedule: number | null
+          state: Database["public"]["Enums"]["is_open"]
+          work_location: Database["public"]["Enums"]["work_locations"] | null
+          work_schedule: string | null
           work_shedule_interval: string | null
           years_of_experience: number | null
         }
         Insert: {
-          about_us?: string | null
-          country?: string | null
+          additional_offerings?: Json[] | null
           created_at?: string
-          employment_type?:
-            | Database["public"]["Enums"]["employment_type"]
-            | null
-          entity?: number | null
-          fixed_allowance?: Json[] | null
+          employment_type: Database["public"]["Enums"]["employment_type"]
+          entity: number
+          fixed_allowance?: Json | null
           id?: number
           job_title: string
-          level?: string | null
-          no_applicants?: number
+          level?: number | null
           org: string
           paid_leave?: number | null
           probation_period?: number | null
-          requirements?: Json | null
+          requirements?: Json[] | null
           responsibilities?: Json | null
           salary?: number | null
           sick_leave?: number | null
           signing_bonus?: number | null
-          state?: number | null
-          status?: Database["public"]["Enums"]["role_status"]
-          what_we_offer?: Json | null
-          work_location: Database["public"]["Enums"]["work_locations"]
-          work_schedule?: number | null
+          state: Database["public"]["Enums"]["is_open"]
+          work_location?: Database["public"]["Enums"]["work_locations"] | null
+          work_schedule?: string | null
           work_shedule_interval?: string | null
           years_of_experience?: number | null
         }
         Update: {
-          about_us?: string | null
-          country?: string | null
+          additional_offerings?: Json[] | null
           created_at?: string
-          employment_type?:
-            | Database["public"]["Enums"]["employment_type"]
-            | null
-          entity?: number | null
-          fixed_allowance?: Json[] | null
+          employment_type?: Database["public"]["Enums"]["employment_type"]
+          entity?: number
+          fixed_allowance?: Json | null
           id?: number
           job_title?: string
-          level?: string | null
-          no_applicants?: number
+          level?: number | null
           org?: string
           paid_leave?: number | null
           probation_period?: number | null
-          requirements?: Json | null
+          requirements?: Json[] | null
           responsibilities?: Json | null
           salary?: number | null
           sick_leave?: number | null
           signing_bonus?: number | null
-          state?: number | null
-          status?: Database["public"]["Enums"]["role_status"]
-          what_we_offer?: Json | null
-          work_location?: Database["public"]["Enums"]["work_locations"]
-          work_schedule?: number | null
+          state?: Database["public"]["Enums"]["is_open"]
+          work_location?: Database["public"]["Enums"]["work_locations"] | null
+          work_schedule?: string | null
           work_shedule_interval?: string | null
           years_of_experience?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "open_roles_entity_fkey"
+            foreignKeyName: "profile_contract_entity_fkey"
             columns: ["entity"]
             isOneToOne: false
             referencedRelation: "legal_entities"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "open_roles_org_fkey"
+            foreignKeyName: "profile_contract_level_fkey"
+            columns: ["level"]
+            isOneToOne: false
+            referencedRelation: "employee_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_contract_org_fkey"
             columns: ["org"]
             isOneToOne: false
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
-          },
-          {
-            foreignKeyName: "open-roles_state_fkey"
-            columns: ["state"]
-            isOneToOne: false
-            referencedRelation: "states"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -520,6 +520,7 @@ export type Database = {
       }
       org_settings: {
         Row: {
+          about_us: string | null
           additional_offerings: Json[] | null
           created_at: string
           id: number
@@ -531,6 +532,7 @@ export type Database = {
           work_shedule_interval: string | null
         }
         Insert: {
+          about_us?: string | null
           additional_offerings?: Json[] | null
           created_at?: string
           id?: number
@@ -542,6 +544,7 @@ export type Database = {
           work_shedule_interval?: string | null
         }
         Update: {
+          about_us?: string | null
           additional_offerings?: Json[] | null
           created_at?: string
           id?: number
@@ -752,6 +755,7 @@ export type Database = {
         | "scheduled termination"
       contract_type: "employee" | "contractor"
       employment_type: "full-time" | "part-time" | "contract"
+      is_open: "open" | "closed" | "partial"
       role_status: "open" | "close"
       work_locations: "on-site" | "remote" | "hybrid"
     }

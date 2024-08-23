@@ -1,7 +1,6 @@
 import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '../ui/form';
 import { Input } from '../ui/input';
-import { TablesUpdate } from '@/type/database.types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArrowUpRight, Info } from 'lucide-react';
 import Link from 'next/link';
@@ -11,35 +10,32 @@ interface props {
 	form: UseFormReturn<any>;
 	name: string;
 	label?: string;
-	minIndexString: string;
-	maxIndexString: string;
-	orgJobLevels: TablesUpdate<'employee_levels'>[];
+	minValue: number;
+	maxValue: number;
 	salaryInvalid: boolean;
-	jobLevels?: any[];
 	validateSalary: (salary: number) => void;
 }
 
-export const PayInput = ({ form, orgJobLevels, salaryInvalid, jobLevels, name, label, minIndexString, maxIndexString, validateSalary }: props) => {
-	const EmployeeBandSalaryRange = (data: any) => {
-		const level = data.level;
-		if (!level) return;
+export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue, validateSalary }: props) => {
+	const EmployeeBandSalaryRange = () => {
+		if (!minValue || !maxValue) return;
 
 		return (
 			<>
-				{level[minIndexString] && level[maxIndexString] ? (
+				{minValue && maxValue ? (
 					<div className="flex gap-1">
 						<div>
 							{new Intl.NumberFormat('en-US', {
 								style: 'currency',
 								currency: 'USD'
-							}).format(Number(level[minIndexString]))}
+							}).format(minValue)}
 						</div>
 						-
 						<div>
 							{new Intl.NumberFormat('en-US', {
 								style: 'currency',
 								currency: 'USD'
-							}).format(Number(level[maxIndexString]))}
+							}).format(maxValue)}
 						</div>
 						<TooltipProvider>
 							<Tooltip>
@@ -75,7 +71,7 @@ export const PayInput = ({ form, orgJobLevels, salaryInvalid, jobLevels, name, l
 				<FormItem>
 					<FormLabel className={cn('flex items-center', label ? 'justify-between' : 'justify-end')}>
 						{label}
-						{form.getValues('level') && <EmployeeBandSalaryRange level={orgJobLevels.find(level => level.id == Number(form.getValues('level'))) || jobLevels?.find(level => level.id == form.getValues('level'))} />}
+						{form.getValues('level') && <EmployeeBandSalaryRange />}
 					</FormLabel>
 					<FormControl>
 						<Input

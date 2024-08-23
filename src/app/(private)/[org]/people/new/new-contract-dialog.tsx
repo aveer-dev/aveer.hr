@@ -19,11 +19,12 @@ export const NewContractDialog = ({ isAlertOpen, toggleDialog, contractId, isLev
 				<AlertDialogHeader>
 					<AlertDialogTitle>🎉 Yey!</AlertDialogTitle>
 
-					<AlertDialogDescription className="grid gap-4 text-xs font-light text-foreground">
-						<p className="leading-6">New contract has been created successfully and we&apos;ve set the necessary contract details to your new employee.</p>
-
-						{isLevelCreated && <p className="leading-6">To help you keep things organised, we created a salary band from the details provided for this contract. You can always reuse it for for subsequent contracts.</p>}
-					</AlertDialogDescription>
+					<AlertDialogDescription className="grid gap-4 text-xs font-light leading-6 text-foreground">New contract has been created successfully and we&apos;ve set the necessary contract details to your new employee.</AlertDialogDescription>
+					{isLevelCreated && (
+						<AlertDialogDescription className="grid gap-4 text-xs font-light leading-6 text-foreground">
+							To help you keep things organised, we created a salary band from the details provided for this contract. You can always reuse it for for subsequent contracts.
+						</AlertDialogDescription>
+					)}
 				</AlertDialogHeader>
 
 				<AlertDialogFooter>

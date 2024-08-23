@@ -3,7 +3,6 @@
 import { TablesInsert } from '@/type/database.types';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { createClient, createClientAdminServer } from '@/utils/supabase/server';
-import { redirect } from 'next/navigation';
 
 export const inviteUser = async (contract: string, profile: string) => {
 	const supabase = createClient();

@@ -14,7 +14,7 @@ interface props {
 
 export const Roles = async ({ orgId, type }: props) => {
 	const supabase = createClient();
-	const { data, error } = await supabase.from('open_roles').select('*, entity:legal_entities!open_roles_entity_fkey(id, name, incorporation_country)').match({ org: orgId });
+	const { data, error } = await supabase.from('open_roles').select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country)').match({ org: orgId });
 
 	if (error) {
 		return (
@@ -46,29 +46,6 @@ export const Roles = async ({ orgId, type }: props) => {
 			<div className="container mx-auto p-0">
 				<div className="mb-6 flex w-full items-center gap-6">
 					<h1 className="text-2xl font-medium">Open roles</h1>
-
-					<div>
-						{/* <DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant={'ghost'} className="h-fit p-0">
-									<Badge variant={'secondary'} className="gap-4 px-2 py-1 text-xs font-normal">
-										<PlusIcon size={12} />
-										Add Filter
-									</Badge>
-								</Button>
-							</DropdownMenuTrigger> */}
-						{/* <DropdownMenuContent className="w-56">
-								<DropdownMenuItem>
-									<Button>Profile</Button>
-									 <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-								</DropdownMenuItem>
-								<DropdownMenuItem>
-									<span>Billing</span>
-									<DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-								</DropdownMenuItem>
-							</DropdownMenuContent> */}
-						{/* </DropdownMenu> */}
-					</div>
 
 					{type == 'role' && (
 						<Link href={`./open-roles/new`} className={cn(buttonVariants({ size: 'sm' }), 'ml-auto h-8 gap-4')}>

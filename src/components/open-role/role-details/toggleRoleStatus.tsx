@@ -4,15 +4,15 @@ import { buttonVariants } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { Database } from '@/type/database.types';
-import { toggleRoleStatus } from '../../../app/(private)/[org]/open-roles/new/role.action';
+import { toggleRoleStatus } from '../../forms/contract/role.action';
 import { useState } from 'react';
 
-export const ToggleRoleStatus = ({ status, org, role }: { status: Database['public']['Enums']['role_status']; org: string; role: string }) => {
+export const ToggleRoleStatus = ({ status, org, role }: { status: Database['public']['Enums']['is_open']; org: string; role: string }) => {
 	const [state, setState] = useState(status);
 
 	const toggleStatus = async (checked: boolean) => {
-		await toggleRoleStatus(checked ? 'open' : 'close', role, org);
-		setState(checked ? 'open' : 'close');
+		await toggleRoleStatus(checked ? 'open' : 'closed', role, org);
+		setState(checked ? 'open' : 'closed');
 	};
 
 	return (

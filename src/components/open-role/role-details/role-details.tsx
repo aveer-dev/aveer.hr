@@ -19,7 +19,7 @@ interface props {
 
 export const RoleDetails = async ({ role, orgId, type }: props) => {
 	const supabase = createClient();
-	let { data, error } = await supabase.from('open_roles').select('*, entity:legal_entities!open_roles_entity_fkey(id, name, incorporation_country)').match({ id: role, org: orgId }).single();
+	let { data, error } = await supabase.from('open_roles').select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country)').match({ id: role, org: orgId }).single();
 	const {
 		data: { user },
 		error: authError
@@ -76,7 +76,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 				<div className="flex gap-3">
 					{user && type == 'role' && (
 						<>
-							<ToggleRoleStatus status={data?.status} org={orgId} role={role} />
+							<ToggleRoleStatus status={data?.state} org={orgId} role={role} />
 
 							<Popover>
 								<PopoverTrigger asChild>
@@ -128,14 +128,14 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 					<h1 className="mb-4 text-xl font-semibold">Job Requirements</h1>
 					<ul className="grid grid-cols-2 items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
 						<li className="grid gap-2">
+							<h3 className="text-sm font-medium">Job Requirements</h3>
+							<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.requirements as string[])?.map((requirement, index) => <li key={index}>{requirement}</li>)}</ul>
+						</li>
+						<li className="grid gap-2">
 							<p className="text-sm font-medium">Experience</p>
 							<p className="text-sm font-light">{data?.years_of_experience} years</p>
 						</li>
 					</ul>
-					<div className="mt-10 grid gap-2">
-						<h3 className="text-sm font-medium">Job Requirements</h3>
-						<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.requirements as string[])?.map((requirement, index) => <li key={index}>{requirement}</li>)}</ul>
-					</div>
 				</div>
 
 				<div>
@@ -161,37 +161,36 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 									: '--'}
 							</p>
 						</li>
-					</ul>
-					{(data.what_we_offer as string[])?.length > 0 && (
-						<div className="mt-10 grid gap-3">
-							<h3 className="text-sm font-medium">Additional offerings</h3>
-							<ul className="ml-3 grid list-disc gap-4 text-sm font-light">
-								{(data.what_we_offer as string[])?.map((offer, index) => (
-									<li key={index} className="text-sm font-light">
-										{offer}
-									</li>
-								))}
-							</ul>
-						</div>
-					)}
+						{(data.additional_offerings as string[])?.length > 0 && (
+							<li className="grid items-start gap-4">
+								<h3 className="h-fit text-sm font-medium">Additional offerings</h3>
+								<ul className="ml-3 grid list-disc gap-4 text-sm font-light">
+									{(data.additional_offerings as string[])?.map((offer, index) => (
+										<li key={index} className="text-sm font-light">
+											{offer}
+										</li>
+									))}
+								</ul>
+							</li>
+						)}
 
-					{data?.fixed_allowance && (
-						<div className="mt-10 grid grid-cols-2 gap-4">
-							<p className="text-sm font-medium">Fixed Allowances</p>
-							<ul className="grid list-disc gap-4 pl-3 text-sm font-light">
-								{(data?.fixed_allowance as { name: string; frequency: string; amount: string }[])?.map((allowance, index) => (
-									<li key={index}>
-										<div className="flex items-baseline justify-between p-1 font-light">
-											<div>
-												{allowance?.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
+						{(data?.fixed_allowance as []).length > 0 && (
+							<li className="grid gap-4">
+								<h3 className="text-sm font-medium">Fixed Allowances</h3>
+								<ul className="grid list-disc gap-2 pl-3 text-sm font-light">
+									{(data?.fixed_allowance as { name: string; frequency: string; amount: string }[])?.map((allowance, index) => (
+										<li key={index}>
+											<div className="flex items-baseline justify-between p-1 font-light">
+												<div>
+													{allowance?.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span> • <span className="text-xs text-muted-foreground">{allowance.frequency}</span>
+												</div>
 											</div>
-											<div className="text-xs text-muted-foreground">{allowance.frequency}</div>
-										</div>
-									</li>
-								))}
-							</ul>
-						</div>
-					)}
+										</li>
+									))}
+								</ul>
+							</li>
+						)}
+					</ul>
 				</div>
 
 				<div>

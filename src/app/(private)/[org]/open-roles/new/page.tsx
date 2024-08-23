@@ -1,9 +1,9 @@
 import { Suspense } from 'react';
-import { OpenRoleForm } from './form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
 import { TablesUpdate } from '@/type/database.types';
 import { BackButton } from '@/components/ui/back-button';
+import { ContractForm } from '@/components/forms/contract/form';
 
 export default async function Home({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	let roleDetails: TablesUpdate<'open_roles'> = {};
@@ -30,7 +30,7 @@ export default async function Home({ params, searchParams }: { params: { [key: s
 						<Skeleton className="h-60 w-full max-w-4xl"></Skeleton>
 					</div>
 				}>
-				<OpenRoleForm duplicate={roleDetails} />
+				<ContractForm formType="role" openRoleDuplicate={roleDetails} />
 			</Suspense>
 		</div>
 	);

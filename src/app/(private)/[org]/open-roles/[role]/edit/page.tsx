@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
-import { OpenRoleForm } from '../../new/form';
 import { BackButton } from '@/components/ui/back-button';
+import { ContractForm } from '@/components/forms/contract/form';
 
 export default async function EditContractPage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -33,7 +33,7 @@ export default async function EditContractPage({ params }: { params: { [key: str
 						<Skeleton className="h-60 w-full max-w-4xl"></Skeleton>
 					</div>
 				}>
-				<OpenRoleForm data={data} />
+				<ContractForm formType="role" openRoleData={data} />
 			</Suspense>
 		</div>
 	);

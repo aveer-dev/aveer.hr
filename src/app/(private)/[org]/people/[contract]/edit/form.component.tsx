@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { AddPerson } from '../../new/form';
+import { ContractForm } from '@/components/forms/contract/form';
 
 export const EditContractFormComponent = async ({ org, id }: { org: string; id: string }) => {
 	const supabase = createClient();
@@ -13,5 +13,5 @@ export const EditContractFormComponent = async ({ org, id }: { org: string; id: 
 		);
 	}
 
-	return <AddPerson data={data} />;
+	return <ContractForm contractData={data} />;
 };

@@ -9,7 +9,6 @@ import { ReactNode } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tables } from '@/type/database.types';
-import { Switch } from '@/components/ui/switch';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
@@ -50,8 +49,7 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 		header: 'Status',
 		cell: ({ row }) => (
 			<Badge className="gap-2 py-1 font-light" variant="secondary">
-				{row.original.status}
-				<Switch defaultChecked={row.original.status == 'open'} className="scale-50" />
+				{row.original.state}
 			</Badge>
 		)
 	},
@@ -80,7 +78,7 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 							<Button
 								variant={'ghost'}
 								onClick={() => {
-									navigator.clipboard.writeText(jobLink(row.original.id, row.original.org));
+									navigator.clipboard.writeText(jobLink(row.original.id, row.original?.org));
 									toast.message('👋🏾 Hey there', { description: 'Public link to role application has been copied to clipboard' });
 								}}
 								className="h-7 w-full cursor-pointer justify-start text-xs">
