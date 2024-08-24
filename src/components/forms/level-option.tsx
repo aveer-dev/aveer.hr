@@ -30,7 +30,7 @@ export const SelectLevel = ({ form, org, setLevelDetails }: props) => {
 
 		const activeLevel = data?.find(level => level.id == form.getValues('level'));
 		if (activeLevel) setLevelDetails({ level: activeLevel, isOrgs: true });
-	}, [org]);
+	}, [org, form, setLevelDetails]);
 
 	useEffect(() => {
 		getOrgLevels();

@@ -14,7 +14,28 @@ import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import { createClient } from '@/utils/supabase/client';
 
-const supabase = createClient();
+const BadgeSwitch = ({ row }: any) => {
+	const supabase = createClient();
+
+	const [state, setState] = useState(row.original.state);
+	const onCheckChange = async (state: boolean) => {
+		const { data, error } = await supabase
+			.from('open_roles')
+			.update({ state: state ? 'open' : 'closed' })
+			.eq('id', row.original.id)
+			.select('state')
+			.single();
+		if (data) setState(data.state);
+		if (error) toast('😭 Unable to update role', { description: error.message });
+	};
+
+	return (
+		<Badge className="w-fit gap-2 py-1 font-light" variant="secondary">
+			<span className="w-9">{state}</span>
+			<Switch checked={state == 'open'} className="scale-50" onCheckedChange={onCheckChange} />
+		</Badge>
+	);
+};
 
 const jobLink = (jobId: number, org: string) => `${location.protocol}//${location.host}/${process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? '' : org + '/'}jobs/${jobId}`;
 
@@ -51,26 +72,7 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 	{
 		id: 'status',
 		header: 'Status',
-		cell: ({ row }) => {
-			const [state, setState] = useState(row.original.state);
-			const onCheckChange = async (state: boolean) => {
-				const { data, error } = await supabase
-					.from('open_roles')
-					.update({ state: state ? 'open' : 'closed' })
-					.eq('id', row.original.id)
-					.select('state')
-					.single();
-				if (data) setState(data.state);
-				if (error) toast('😭 Unable to update role', { description: error.message });
-			};
-
-			return (
-				<Badge className="w-fit gap-2 py-1 font-light" variant="secondary">
-					<span className="w-9">{state}</span>
-					<Switch checked={state == 'open'} className="scale-50" onCheckedChange={onCheckChange} />
-				</Badge>
-			);
-		}
+		cell: ({ row }) => <BadgeSwitch row={row} />
 	},
 	{
 		id: 'employment_type',
