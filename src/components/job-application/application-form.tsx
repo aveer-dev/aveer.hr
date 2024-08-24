@@ -150,7 +150,7 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 		<section className="mx-auto mt-16 grid max-w-4xl gap-4 p-6 pt-24" id="application-form">
 			<h1 className="text-2xl font-bold">Application Form</h1>
 
-			<ApplicationSuccessDialog applicationId={applicationId} isOpen={showSuccessDialog} toggle={toggleSuccessDialog} />
+			<ApplicationSuccessDialog org={org} applicationId={applicationId} isOpen={showSuccessDialog} toggle={toggleSuccessDialog} />
 
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)}>

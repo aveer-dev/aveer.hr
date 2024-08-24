@@ -3,14 +3,16 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { Dispatch, SetStateAction } from 'react';
+import { NavLink } from '@/components/ui/link';
 
 interface props {
 	isOpen?: boolean;
 	toggle: Dispatch<SetStateAction<boolean>>;
 	applicationId?: number;
+	org: string;
 }
 
-export const ApplicationSuccessDialog = ({ isOpen, toggle, applicationId }: props) => {
+export const ApplicationSuccessDialog = ({ isOpen, toggle, applicationId, org }: props) => {
 	return (
 		<AlertDialog open={isOpen} onOpenChange={toggle}>
 			<AlertDialogContent className="gap-10">
@@ -23,9 +25,9 @@ export const ApplicationSuccessDialog = ({ isOpen, toggle, applicationId }: prop
 				</AlertDialogHeader>
 
 				<AlertDialogFooter>
-					<Link href={`/tracking/${applicationId}`} className={cn(buttonVariants())}>
+					<NavLink org={org} href={`/tracking/${applicationId}`} className={cn(buttonVariants())}>
 						Track application
-					</Link>
+					</NavLink>
 				</AlertDialogFooter>
 			</AlertDialogContent>
 		</AlertDialog>
