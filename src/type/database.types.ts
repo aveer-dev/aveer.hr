@@ -450,6 +450,7 @@ export type Database = {
       open_roles: {
         Row: {
           additional_offerings: Json[] | null
+          applicants: number
           created_at: string
           employment_type: Database["public"]["Enums"]["employment_type"]
           entity: number
@@ -473,6 +474,7 @@ export type Database = {
         }
         Insert: {
           additional_offerings?: Json[] | null
+          applicants?: number
           created_at?: string
           employment_type: Database["public"]["Enums"]["employment_type"]
           entity: number
@@ -496,6 +498,7 @@ export type Database = {
         }
         Update: {
           additional_offerings?: Json[] | null
+          applicants?: number
           created_at?: string
           employment_type?: Database["public"]["Enums"]["employment_type"]
           entity?: number

@@ -45,7 +45,7 @@ export const jobColumns: ColumnDef<Tables<'open_roles'>>[] = [
 		cell: ({ row }) => {
 			return (
 				<Link href={`./jobs/${row.original.id}`} className={cn(buttonVariants(), 'px-4')}>
-					Apply
+					More details
 				</Link>
 			);
 		}

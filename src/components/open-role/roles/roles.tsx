@@ -2,7 +2,7 @@ import { DataTable } from '@/components/dashboard/table';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
-import { Plus } from 'lucide-react';
+import { ArrowUpRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { columns } from './column';
 import { jobColumns } from './job-column';
@@ -14,7 +14,11 @@ interface props {
 
 export const Roles = async ({ orgId, type }: props) => {
 	const supabase = createClient();
-	const { data, error } = await supabase.from('open_roles').select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country)').match({ org: orgId });
+
+	const query: { org: string; state?: string } = { org: orgId };
+	if (type == 'job') query.state = 'open';
+
+	const { data, error } = await supabase.from('open_roles').select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country)').match(query);
 
 	if (error) {
 		return (
@@ -48,10 +52,16 @@ export const Roles = async ({ orgId, type }: props) => {
 					<h1 className="text-2xl font-medium">Open roles</h1>
 
 					{type == 'role' && (
-						<Link href={`./open-roles/new`} className={cn(buttonVariants({ size: 'sm' }), 'ml-auto h-8 gap-4')}>
-							<Plus size={12} />
-							Create role
-						</Link>
+						<div className="ml-auto flex gap-4">
+							<Link href={'./jobs'} className={cn(buttonVariants({ variant: 'secondary' }), 'gap-4')}>
+								Jobs page
+								<ArrowUpRight size={12} />
+							</Link>
+							<Link href={`./open-roles/new`} className={cn(buttonVariants({ size: 'sm' }), 'h-8 gap-4')}>
+								<Plus size={12} />
+								Create role
+							</Link>
+						</div>
 					)}
 				</div>
 
