@@ -12,7 +12,7 @@ import { Tables } from '@/type/database.types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
-const jobLink = (jobId: number, org: string) => `${location.protocol}//${location.host}/${org}/jobs/${jobId}`;
+const jobLink = (jobId: number, org: string) => `${location.protocol}//${location.host}/${process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? '' : org + '/'}jobs/${jobId}`;
 
 export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 	{

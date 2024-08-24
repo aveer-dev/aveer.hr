@@ -3,14 +3,10 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Check, ChevronDown } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,6 +29,7 @@ import { SelectLevel } from '@/components/forms/level-option';
 import { JobResponsibilities } from '@/components/forms/job-responsibilities';
 import { JobRequirements } from '@/components/forms/job-requirements';
 import { createOpenRole, updateRole } from './role.action';
+import { SelectCountry } from '../countries-option';
 
 const supabase = createClient();
 
@@ -46,7 +43,6 @@ interface props {
 }
 
 export const ContractForm = ({ contractData, openRoleData, contractDuplicate, openRoleDuplicate, orgBenefits, formType = 'contract' }: props) => {
-	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
 	const [entities, setEntities] = useState<Tables<'legal_entities'>[]>([]);
 	const [eorEntities, setEorEntities] = useState<Tables<'legal_entities'>[]>([]);
 	const [showSigningBonus, toggleShowSigningBonus] = useState(!!contractData?.signing_bonus || !!contractDuplicate?.signing_bonus || !!openRoleData?.signing_bonus || !!openRoleDuplicate?.signing_bonus);
@@ -59,7 +55,6 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	const params = useParams<{ org: string }>();
 	const [isAlertOpen, toggleAgreementDialog] = useState(false);
 	const [agreementId, setAgreementId] = useState<number>();
-	const [isNationalityOpen, toggleNationalityDropdown] = useState(false);
 	const [isNewContractDialogOpen, toggleNewContractDialog] = useState(false);
 	const [newContractId, setNewContractId] = useState(0);
 	const [isLevelCreated, setLevelCreationState] = useState(false);
@@ -93,17 +88,12 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		entity: z.string()
 	});
 
-	const getCountries = async () => {
-		const { data, error } = await supabase.from('countries').select();
-		if (!error) setCountries(data);
-	};
-
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			first_name: (contractData?.profile as any)?.first_name || formType == 'contract' ? '' : undefined,
-			last_name: (contractData?.profile as any)?.last_name || formType == 'contract' ? '' : undefined,
-			email: (contractData?.profile as any)?.email || formType == 'contract' ? '' : undefined,
+			first_name: formType == 'contract' ? (contractData?.profile as any)?.first_name || '' : undefined,
+			last_name: formType == 'contract' ? (contractData?.profile as any)?.last_name || '' : undefined,
+			email: formType == 'contract' ? (contractData?.profile as any)?.email || '' : undefined,
 			additional_offerings:
 				(contractData?.additional_offerings as string[]) ||
 				(contractDuplicate?.additional_offerings as string[]) ||
@@ -111,7 +101,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 				(openRoleDuplicate?.additional_offerings as string[]) ||
 				(orgBenefits?.additional_offerings as string[]) ||
 				[],
-			nationality: (contractData?.profile as any)?.nationality || formType == 'contract' ? '' : undefined,
+			nationality: formType == 'contract' ? (contractData?.profile as any)?.nationality || '' : undefined,
 			responsibilities: (contractData?.responsibilities as string[]) || (contractDuplicate?.responsibilities as string[]) || (openRoleData?.responsibilities as string[]) || (openRoleDuplicate?.responsibilities as string[]) || [],
 			fixed_allowance: (contractData?.fixed_allowance as any) || (contractDuplicate?.fixed_allowance as any) || (openRoleData?.fixed_allowance as any) || (openRoleDuplicate?.fixed_allowance as any) || [],
 			start_date: contractData?.start_date ? new Date(contractData?.start_date) : new Date(),
@@ -340,9 +330,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	};
 
 	useEffect(() => {
-		if (formType == 'contract') getCountries();
 		getEntities();
-	}, [getEntities, formType]);
+	}, [getEntities]);
 
 	const validateSalary = (salary: number) => {
 		const level = selectedLevel?.level;
@@ -451,48 +440,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 										)}
 									/>
 
-									<FormField
-										control={form.control}
-										name="nationality"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Country</FormLabel>
-												<Popover open={isNationalityOpen} onOpenChange={toggleNationalityDropdown}>
-													<PopoverTrigger asChild>
-														<FormControl>
-															<Button disabled={!!contractData} variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
-																{field.value ? countries.find(country => country.country_code === field.value)?.name : `Select employee's nationality`}
-																<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-															</Button>
-														</FormControl>
-													</PopoverTrigger>
-													<PopoverContent className="w-[200px] p-0">
-														<Command>
-															<CommandInput placeholder="Search countries..." />
-															<CommandList>
-																<CommandEmpty>Country not found</CommandEmpty>
-																<CommandGroup>
-																	{countries.map(country => (
-																		<CommandItem
-																			value={country?.name}
-																			key={country.country_code}
-																			onSelect={() => {
-																				form.setValue('nationality', country.country_code);
-																				toggleNationalityDropdown(false);
-																			}}>
-																			<Check className={cn('mr-2 h-4 w-4', country.country_code === field.value ? 'opacity-100' : 'opacity-0')} />
-																			{country?.name}
-																		</CommandItem>
-																	))}
-																</CommandGroup>
-															</CommandList>
-														</Command>
-													</PopoverContent>
-												</Popover>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+									{formType == 'contract' && <SelectCountry name="nationality" label="Country" form={form} disabled={!!contractData} />}
 								</div>
 							</div>
 						</div>

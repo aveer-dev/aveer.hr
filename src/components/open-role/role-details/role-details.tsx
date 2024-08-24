@@ -98,6 +98,12 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 							</Popover>
 						</>
 					)}
+
+					{type == 'job' && (
+						<Link href={'#application-form'} className={cn(buttonVariants())}>
+							Apply to role
+						</Link>
+					)}
 				</div>
 			</div>
 

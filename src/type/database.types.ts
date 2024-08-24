@@ -270,6 +270,107 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          country_location: string | null
+          cover_letter: string | null
+          cover_letter_url: string | null
+          created_at: string
+          disability: string | null
+          email: string
+          first_name: string
+          gender: string | null
+          id: number
+          last_name: string
+          links: Json | null
+          org: string
+          phone_number: string | null
+          race_ethnicity: string
+          require_sponsorship: boolean
+          resume: string | null
+          resume_url: string | null
+          role: number
+          state_location: number
+          veterian_status: string | null
+          work_authorization: boolean
+        }
+        Insert: {
+          country_location?: string | null
+          cover_letter?: string | null
+          cover_letter_url?: string | null
+          created_at?: string
+          disability?: string | null
+          email: string
+          first_name: string
+          gender?: string | null
+          id?: number
+          last_name: string
+          links?: Json | null
+          org: string
+          phone_number?: string | null
+          race_ethnicity: string
+          require_sponsorship: boolean
+          resume?: string | null
+          resume_url?: string | null
+          role: number
+          state_location: number
+          veterian_status?: string | null
+          work_authorization: boolean
+        }
+        Update: {
+          country_location?: string | null
+          cover_letter?: string | null
+          cover_letter_url?: string | null
+          created_at?: string
+          disability?: string | null
+          email?: string
+          first_name?: string
+          gender?: string | null
+          id?: number
+          last_name?: string
+          links?: Json | null
+          org?: string
+          phone_number?: string | null
+          race_ethnicity?: string
+          require_sponsorship?: boolean
+          resume?: string | null
+          resume_url?: string | null
+          role?: number
+          state_location?: number
+          veterian_status?: string | null
+          work_authorization?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_country_location_fkey"
+            columns: ["country_location"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["country_code"]
+          },
+          {
+            foreignKeyName: "job_applications_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "job_applications_role_fkey"
+            columns: ["role"]
+            isOneToOne: false
+            referencedRelation: "open_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_state_location_fkey"
+            columns: ["state_location"]
+            isOneToOne: false
+            referencedRelation: "states"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_entities: {
         Row: {
           address_code: string | null

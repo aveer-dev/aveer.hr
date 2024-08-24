@@ -14,7 +14,7 @@ export default async function Home({ params, searchParams }: { params: { [key: s
 		if (data) contractDetails = data;
 	}
 
-	const { data, error } = await supabase.from('org_settings').select().eq('org', params.org).single();
+	const { data } = await supabase.from('org_settings').select().eq('org', params.org).single();
 
 	return (
 		<div className="mx-auto max-w-4xl">
