@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 export const DashboardCharts = async ({ org, contracts }: { org: string; contracts: number | null }) => {
 	const supabase = createClient();
 
-	const { count } = await supabase.from('open_roles').select('*', { count: 'estimated', head: true }).eq('org', org).single();
+	const { count } = await supabase.from('open_roles').select('*', { count: 'exact', head: true }).eq('org', org);
 
 	return (
 		<>
