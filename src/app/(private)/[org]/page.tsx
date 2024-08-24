@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 export default async function OrgPage(props: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
-	const { data, error } = await supabase.from('contracts').select('profile(first_name,last_name,nationality(name)), org, id, status, job_title, employment_type, start_date').match({ org: props.params.org });
+	const { data, error, count } = await supabase.from('contracts').select('profile(first_name,last_name,nationality(name)), org, id, status, job_title, employment_type, start_date', { count: 'estimated' }).match({ org: props.params.org });
 
 	if (data && !data.length) {
 		const { data, error } = await supabase.from('legal_entities').select().match({ org: props.params.org });
@@ -83,7 +83,7 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 							<Skeleton className="h-32 w-full max-w-80" />
 						</>
 					}>
-					<DashboardCharts org={props.params.org} />
+					<DashboardCharts contracts={count} org={props.params.org} />
 				</Suspense>
 
 				<div className="grid w-full max-w-80 gap-2">
