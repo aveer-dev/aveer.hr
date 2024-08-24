@@ -5,12 +5,16 @@ import { MoreHorizontal } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tables } from '@/type/database.types';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
+import { createClient } from '@/utils/supabase/client';
+
+const supabase = createClient();
 
 const jobLink = (jobId: number, org: string) => `${location.protocol}//${location.host}/${process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? '' : org + '/'}jobs/${jobId}`;
 
@@ -47,11 +51,26 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 	{
 		id: 'status',
 		header: 'Status',
-		cell: ({ row }) => (
-			<Badge className="gap-2 py-1 font-light" variant="secondary">
-				{row.original.state}
-			</Badge>
-		)
+		cell: ({ row }) => {
+			const [state, setState] = useState(row.original.state);
+			const onCheckChange = async (state: boolean) => {
+				const { data, error } = await supabase
+					.from('open_roles')
+					.update({ state: state ? 'open' : 'closed' })
+					.eq('id', row.original.id)
+					.select('state')
+					.single();
+				if (data) setState(data.state);
+				if (error) toast('😭 Unable to update role', { description: error.message });
+			};
+
+			return (
+				<Badge className="w-fit gap-2 py-1 font-light" variant="secondary">
+					<span className="w-9">{state}</span>
+					<Switch checked={state == 'open'} className="scale-50" onCheckedChange={onCheckChange} />
+				</Badge>
+			);
+		}
 	},
 	{
 		id: 'employment_type',
@@ -82,7 +101,7 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 									toast.message('👋🏾 Hey there', { description: 'Public link to role application has been copied to clipboard' });
 								}}
 								className="h-7 w-full cursor-pointer justify-start text-xs">
-								Copy link
+								Copy job link
 							</Button>
 						</DropdownMenuItem>
 						<DropdownMenuItem className="h-7 p-0 text-xs font-light">
@@ -90,6 +109,9 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 						</DropdownMenuItem>
 						<DropdownMenuItem className="h-7 p-0 text-xs font-light">
 							<DropdownListItem href={`./open-roles/${row.original.id}/edit`}>Edit</DropdownListItem>
+						</DropdownMenuItem>
+						<DropdownMenuItem className="h-7 p-0 text-xs font-light">
+							<DropdownListItem href={`./open-roles/new?duplicate=${row.original.id}`}>Duplicate</DropdownListItem>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
