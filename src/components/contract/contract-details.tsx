@@ -19,7 +19,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 	const { data, error } = await supabase
 		.from('contracts')
 		.select(
-			'*, organisations(id, name), entity:legal_entities!contracts_entity_fkey(incorporation_country, address_state, street_address, address_code), profile:profiles!contracts_profile_fkey(first_name, last_name, email, nationality), signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email), terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email)'
+			'*, organisations(id, name), level:employee_levels!contracts_level_fkey(level, role), entity:legal_entities!contracts_entity_fkey(incorporation_country, address_state, street_address, address_code), profile:profiles!contracts_profile_fkey(first_name, last_name, email, nationality), signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email), terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email)'
 		)
 		.match({ org, id })
 		.single();
@@ -137,21 +137,21 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				<div className="relative flex gap-8">
 					<BackButton className="absolute -left-16" />
 
-					<div className="grid gap-2">
+					<div className="grid gap-3">
 						<h1 className="flex items-center gap-4 text-2xl font-bold">
 							{data?.job_title}
 							<div className="flex gap-1">
-								<Badge className="h-fit gap-2 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
+								<Badge className="h-fit gap-3 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
 									{data?.status}
 								</Badge>
 								{data?.status == 'scheduled termination' && data?.end_date && (
-									<Badge className="h-fit gap-2 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
+									<Badge className="h-fit gap-3 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
 										{format(data?.end_date, 'PP')}
 									</Badge>
 								)}
 							</div>
 						</h1>
-						<p className="flex gap-2 text-xs font-light">
+						<p className="flex gap-3 text-xs font-light">
 							<span className="capitalize">{data?.organisations?.name}</span> • <span className="capitalize">{data?.employment_type}</span>
 						</p>
 					</div>
@@ -171,12 +171,12 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 									</PopoverTrigger>
 									<PopoverContent align="end" className="w-48 p-2">
 										{data.status !== 'inactive' && data.status !== 'terminated' && (
-											<Link href={`./${id}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-2')}>
+											<Link href={`./${id}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
 												<FilePenLine size={12} />
 												Edit Contract
 											</Link>
 										)}
-										<Link href={`./new?duplicate=${id}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-2')}>
+										<Link href={`./new?duplicate=${id}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
 											<Copy size={12} />
 											Duplicate
 										</Link>
@@ -193,7 +193,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 			</div>
 
 			{signatureType === 'profile' && (
-				<div className="flex w-fit items-center gap-2 rounded-sm border border-accent bg-accent px-3 py-2 text-xs font-thin">
+				<div className="flex w-fit items-center gap-3 rounded-sm border border-accent bg-accent px-3 py-2 text-xs font-thin">
 					<InfoIcon size={12} />
 					{`You can not edit your contract details. You'd need to reachout to your contact or manager to request an edit/change`}
 				</div>
@@ -205,7 +205,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					<ul className="grid grid-cols-2 gap-x-5 gap-y-20 border-t border-t-border pt-6">
 						<li>
 							<h2 className="text-sm text-muted-foreground">Employer</h2>
-							<div className="mt-4 grid gap-2 text-xs font-light">
+							<div className="mt-4 grid gap-3 text-xs font-light">
 								<p className="text-xl font-bold">{data?.organisations?.name}</p>
 								{!data?.org_signed && <p className="mt-4 text-xs">Pending signature from company</p>}
 								{data?.org_signed && (
@@ -225,7 +225,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 						<li>
 							<h2 className="text-sm text-muted-foreground">Employee</h2>
 
-							<div className="mt-4 grid gap-2 text-xs font-light">
+							<div className="mt-4 grid gap-3 text-xs font-light">
 								<p className="text-xl font-bold">
 									{data?.profile?.first_name} {data?.profile?.last_name}
 								</p>
@@ -245,7 +245,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 							<li>
 								<h2 className="text-sm text-muted-foreground">Terminated by</h2>
 
-								<div className="mt-4 grid gap-2 text-xs font-light">
+								<div className="mt-4 grid gap-3 text-xs font-light">
 									<p className="text-xl font-bold">
 										{data?.terminated_by?.first_name} {data?.terminated_by?.last_name}
 									</p>
@@ -259,19 +259,21 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				<div>
 					<h1 className="mb-4 text-xl font-semibold">Employment Details</h1>
 					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-						<li className="grid gap-2">
+						<li className="grid gap-3">
 							<p className="text-sm font-medium">Job Title</p>
 							<p className="text-sm font-light">{data?.job_title}</p>
 						</li>
-						<li className="grid gap-2">
+						<li className="grid gap-3">
 							<p className="text-sm font-medium">Seniority Level</p>
-							<p className="text-sm font-light">{data?.level}</p>
+							<p className="text-sm font-light">
+								{data?.level?.level} {data?.level?.role ? '•' : ''} {data?.level?.role}
+							</p>
 						</li>
-						<li className="grid gap-2">
+						<li className="grid gap-3">
 							<p className="text-sm font-medium">Employment Type</p>
-							<p className="text-sm font-light">{data?.employment_type}</p>
+							<p className="text-sm font-light capitalize">{data?.employment_type}</p>
 						</li>
-						<li className="grid gap-2">
+						<li className="grid gap-3">
 							<p className="text-sm font-medium">Work Schedule</p>
 							<p className="text-sm font-light">
 								{data?.work_schedule}hrs, {data?.work_shedule_interval}

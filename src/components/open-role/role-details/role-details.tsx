@@ -19,7 +19,7 @@ interface props {
 
 export const RoleDetails = async ({ role, orgId, type }: props) => {
 	const supabase = createClient();
-	let { data, error } = await supabase.from('open_roles').select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country)').match({ id: role, org: orgId }).single();
+	let { data, error } = await supabase.from('open_roles').select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country), level:employee_levels!profile_contract_level_fkey(level, role)').match({ id: role, org: orgId }).single();
 	const {
 		data: { user },
 		error: authError
@@ -60,7 +60,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 				<div className="relative flex">
 					<BackButton className="absolute -left-16" />
 
-					<div className="grid gap-2">
+					<div className="grid gap-3">
 						<h1 className="flex items-center gap-4 text-2xl font-bold">{data?.job_title}</h1>
 						<p className="flex gap-4 text-xs font-light">
 							<span className="capitalize">{(data?.entity as any)?.name}</span> • <span className="capitalize">{data?.employment_type}</span> •{' '}
@@ -85,11 +85,11 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 									</Button>
 								</PopoverTrigger>
 								<PopoverContent align="end" className="w-48 p-2">
-									<Link href={`./${role}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-2')}>
+									<Link href={`./${role}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
 										<FilePenLine size={12} />
 										Edit Role
 									</Link>
-									<Link href={`./new?duplicate=${role}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-2')}>
+									<Link href={`./new?duplicate=${role}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
 										<Copy size={12} />
 										Duplicate
 									</Link>
@@ -111,20 +111,22 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 				<div>
 					<h1 className="mb-4 text-xl font-semibold">Job Details</h1>
 					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-						<li className="grid gap-2">
+						<li className="grid gap-3">
 							<p className="text-sm font-medium">Job Title</p>
 							<p className="text-sm font-light">{data?.job_title}</p>
 						</li>
-						<li className="grid gap-2">
+						<li className="grid gap-3">
 							<p className="text-sm font-medium">Seniority Level</p>
-							<p className="text-sm font-light">{data?.level}</p>
+							<p className="text-sm font-light">
+								{data?.level?.level} {data?.level?.role ? '•' : ''} {data?.level?.role}
+							</p>
 						</li>
-						<li className="grid gap-2">
+						<li className="grid gap-3">
 							<p className="text-sm font-medium">Employment Type</p>
-							<p className="text-sm font-light">{data?.employment_type}</p>
+							<p className="text-sm font-light capitalize">{data?.employment_type}</p>
 						</li>
 					</ul>
-					<div className="mt-10 grid gap-2">
+					<div className="mt-10 grid gap-3">
 						<p className="text-sm font-medium">Job Responsibilities</p>
 						<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.responsibilities as string[])?.map((responsibility, index) => <li key={index}>{responsibility}</li>)}</ul>
 					</div>
@@ -133,11 +135,11 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 				<div>
 					<h1 className="mb-4 text-xl font-semibold">Job Requirements</h1>
 					<ul className="grid grid-cols-2 items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
-						<li className="grid gap-2">
+						<li className="grid gap-3">
 							<h3 className="text-sm font-medium">Job Requirements</h3>
 							<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.requirements as string[])?.map((requirement, index) => <li key={index}>{requirement}</li>)}</ul>
 						</li>
-						<li className="grid gap-2">
+						<li className="grid gap-3">
 							<p className="text-sm font-medium">Experience</p>
 							<p className="text-sm font-light">{data?.years_of_experience} years</p>
 						</li>
@@ -180,10 +182,10 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 							</li>
 						)}
 
-						{(data?.fixed_allowance as []).length > 0 && (
+						{(data?.fixed_allowance as [])?.length > 0 && (
 							<li className="grid gap-4">
 								<h3 className="text-sm font-medium">Fixed Allowances</h3>
-								<ul className="grid list-disc gap-2 pl-3 text-sm font-light">
+								<ul className="grid list-disc gap-3 pl-3 text-sm font-light">
 									{(data?.fixed_allowance as { name: string; frequency: string; amount: string }[])?.map((allowance, index) => (
 										<li key={index}>
 											<div className="flex items-baseline justify-between p-1 font-light">
