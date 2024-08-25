@@ -27,7 +27,7 @@ export const ClientTable = ({ org, data }: { org: string; data: PERSON[] }) => {
 				</NavLink>
 			</div>
 
-			<DataTable columns={columns} org={org} data={tableData} loading={tableLoading} />
+			<DataTable link={`/people`} columns={columns} org={org} data={tableData} loading={tableLoading} />
 		</div>
 	);
 };

@@ -427,7 +427,7 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
-													<SelectItem value="make">Male</SelectItem>
+													<SelectItem value="male">Male</SelectItem>
 													<SelectItem value="female">Female</SelectItem>
 													<SelectItem value="decline">Decline to self identify</SelectItem>
 												</SelectContent>

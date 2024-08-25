@@ -6,6 +6,7 @@ import { ArrowUpRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { columns } from './column';
 import { jobColumns } from './job-column';
+import { ApplicantsColumn } from './applicants-column';
 
 interface props {
 	orgId: string;
@@ -65,7 +66,7 @@ export const Roles = async ({ orgId, type }: props) => {
 					)}
 				</div>
 
-				<DataTable columns={type == 'job' ? jobColumns : columns} data={data} />
+				<DataTable org={orgId} subColumns={ApplicantsColumn} columns={type == 'job' ? jobColumns : columns} data={data} />
 			</div>
 		</div>
 	);
