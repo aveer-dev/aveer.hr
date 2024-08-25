@@ -32,7 +32,7 @@ const BadgeSwitch = ({ row }: any) => {
 	return (
 		<Badge className="w-fit gap-2 py-1 font-light" variant="secondary">
 			<span className="w-9">{state}</span>
-			<Switch checked={state == 'open'} className="scale-50" onCheckedChange={onCheckChange} />
+			<Switch checked={state == 'open'} className="scale-50" onClick={event => event.stopPropagation()} onCheckedChange={onCheckChange} />
 		</Badge>
 	);
 };
@@ -95,7 +95,7 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end">
-						<DropdownMenuItem className="h-7 p-0 font-light">
+						<DropdownMenuItem className="h-7 p-0 font-light" onClick={event => event.stopPropagation()}>
 							<Button
 								variant={'ghost'}
 								onClick={() => {
@@ -106,13 +106,13 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 								Copy job link
 							</Button>
 						</DropdownMenuItem>
-						<DropdownMenuItem className="h-7 p-0 text-xs font-light">
+						<DropdownMenuItem onClick={event => event.stopPropagation()} className="h-7 p-0 text-xs font-light">
 							<DropdownListItem href={`./open-roles/${row.original.id}`}>View</DropdownListItem>
 						</DropdownMenuItem>
-						<DropdownMenuItem className="h-7 p-0 text-xs font-light">
+						<DropdownMenuItem onClick={event => event.stopPropagation()} className="h-7 p-0 text-xs font-light">
 							<DropdownListItem href={`./open-roles/${row.original.id}/edit`}>Edit</DropdownListItem>
 						</DropdownMenuItem>
-						<DropdownMenuItem className="h-7 p-0 text-xs font-light">
+						<DropdownMenuItem onClick={event => event.stopPropagation()} className="h-7 p-0 text-xs font-light">
 							<DropdownListItem href={`./open-roles/new?duplicate=${row.original.id}`}>Duplicate</DropdownListItem>
 						</DropdownMenuItem>
 					</DropdownMenuContent>

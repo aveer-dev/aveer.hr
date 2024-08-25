@@ -27,9 +27,11 @@
 		"@supabase/ssr": "^0.4.0",
 		"@supabase/supabase-js": "^2.45.1",
 		"@tanstack/react-table": "^8.20.1",
+		"@wojtekmaj/react-hooks": "^1.21.0",
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.1.1",
 		"cmdk": "^1.0.0",
+		"core-js": "^3.38.1",
 		"date-fns": "^3.6.0",
 		"lucide-react": "^0.424.0",
 		"next": "14.2.5",
@@ -38,6 +40,7 @@
 		"react-day-picker": "^8.10.1",
 		"react-dom": "^18",
 		"react-hook-form": "^7.52.2",
+		"react-pdf": "^9.1.0",
 		"recharts": "^2.13.0-alpha.4",
 		"sass": "^1.77.8",
 		"sonner": "^1.5.0",
@@ -48,6 +51,7 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
+		"@types/core-js": "^2.5.8",
 		"@types/node": "^20",
 		"@types/react": "^18",
 		"@types/react-dom": "^18",

@@ -1,10 +1,11 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Maximize2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Tables } from '@/type/database.types';
+import { ApplicantDetails } from './applicant-details';
+import { Badge } from '@/components/ui/badge';
 
 export const ApplicantsColumn: ColumnDef<Tables<'job_applications'>>[] = [
 	{
@@ -26,18 +27,26 @@ export const ApplicantsColumn: ColumnDef<Tables<'job_applications'>>[] = [
 		header: 'Full name',
 		cell: ({ row }) => (
 			<>
-				<span>{row.original.first_name}</span> <span>{row.original.last_name}</span>
+				<div>
+					<span>{row.original.first_name}</span> <span>{row.original.last_name}</span>
+				</div>
+				<div className="text-muted-foreground">{row.original.email}</div>
 			</>
 		)
-	},
-	{
-		accessorKey: 'email',
-		header: 'Email'
 	},
 	{
 		id: 'country',
 		header: 'Country',
 		cell: ({ row }) => <span>{(row.original.country_location as any)?.name}</span>
+	},
+	{
+		id: 'stage',
+		header: 'Stage',
+		cell: ({ row }) => (
+			<Badge className="font-light" variant={'secondary'}>
+				{row.original.stage}
+			</Badge>
+		)
 	},
 	{
 		accessorKey: 'require_sponsorship',
@@ -59,10 +68,6 @@ export const ApplicantsColumn: ColumnDef<Tables<'job_applications'>>[] = [
 	},
 	{
 		id: 'open',
-		cell: ({ row }) => (
-			<Button variant={'ghost'} size={'icon'}>
-				<Maximize2 size={14} className="" />
-			</Button>
-		)
+		cell: ({ row }) => <ApplicantDetails data={row.original} />
 	}
 ];

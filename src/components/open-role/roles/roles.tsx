@@ -66,7 +66,7 @@ export const Roles = async ({ orgId, type }: props) => {
 					)}
 				</div>
 
-				<DataTable org={orgId} subColumns={ApplicantsColumn} columns={type == 'job' ? jobColumns : columns} data={data} />
+				<DataTable org={orgId} subColumns={type == 'role' ? ApplicantsColumn : undefined} columns={type == 'job' ? jobColumns : columns} data={data} />
 			</div>
 		</div>
 	);

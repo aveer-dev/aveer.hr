@@ -215,7 +215,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		if (showFixedIncome) role.fixed_allowance = values.fixed_allowance;
 		if (showAdditionalOffering) role.additional_offerings = values.additional_offerings;
 
-		const responseMessage = openRoleData ? await updateRole(role, params.org) : await createOpenRole(role, params.org);
+		const responseMessage = openRoleData ? await updateRole(role, params.org, openRoleData.id as number) : await createOpenRole(role, params.org);
 
 		toggleSubmitState(false);
 		if (responseMessage == 'update') return toast.success('Role details updated successfully');

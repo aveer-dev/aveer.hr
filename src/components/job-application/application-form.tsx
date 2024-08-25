@@ -13,7 +13,7 @@ import { ChangeEvent, useState } from 'react';
 import { SelectCountry } from '@/components/forms/countries-option';
 import { SelectCountryState } from '@/components/forms/states-option';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TablesInsert } from '@/type/database.types';
+import { Json, TablesInsert } from '@/type/database.types';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
 import { useFormStatus } from 'react-dom';
@@ -25,9 +25,7 @@ const formSchema = z.object({
 	last_name: z.string().min(1, 'Please enter last name'),
 	email: z.string().email(),
 	phone_number: z.string().min(8, 'Please enter mobile number'),
-	resume_url: z.string().optional(),
 	resume: z.string().optional(),
-	cover_letter_url: z.string().optional(),
 	cover_letter: z.string().optional(),
 	country_location: z.string().min(1, 'Please select your country'),
 	state_location: z.number(),
@@ -37,7 +35,8 @@ const formSchema = z.object({
 	veterian_status: z.string(),
 	gender: z.string().optional(),
 	disability: z.string().optional(),
-	links: z.array(z.object({ name: z.string(), link: z.string() }))
+	links: z.array(z.object({ name: z.string(), link: z.string() })),
+	documents: z.array(z.object({ name: z.string(), path: z.string(), file: z.any() }))
 });
 const supabase = createClient();
 
@@ -54,7 +53,7 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 	const [isSubmiting, toggleSubmitState] = useState(false);
 	const [showManualCoverLetter, toggleManualCoverLetterState] = useState(false);
 	const [applicationId, setApplicationId] = useState<number>();
-	const [filesToUpload, updateFilesToUpload] = useState<{ name: string; path: string; file: File }[]>([]);
+	// const [filesToUpload, updateFilesToUpload] = useState<{ name: string; path: string; file: File }[]>([]);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -63,10 +62,8 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 			last_name: '',
 			email: '',
 			phone_number: '',
-			resume_url: '',
 			resume: '',
 			cover_letter: '',
-			cover_letter_url: '',
 			country_location: '',
 			state_location: undefined,
 			work_authorization: undefined,
@@ -75,23 +72,25 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 			veterian_status: '',
 			disability: '',
 			links: [],
-			gender: ''
+			gender: '',
+			documents: []
 		}
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		try {
 			toggleSubmitState(true);
-			await uploadFiles();
+			const files = await uploadFiles();
 
 			const application: TablesInsert<'job_applications'> = {
 				...form.getValues(),
 				role: roleId,
 				require_sponsorship: values.require_sponsorship,
-				org
+				org,
+				documents: files as Json[]
 			};
 
-			if (!application.resume && !application.resume_url) return toast('😬 One more thing', { description: 'Please be sure you provided you attached your resume' });
+			if (!application.resume && !application.documents?.length) return toast('😬 One more thing', { description: 'Please be sure you provided you attached your resume' });
 
 			const response = await submit(application);
 			toggleSubmitState(false);
@@ -107,19 +106,21 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 	};
 
 	const uploadFiles = async () => {
-		return await new Promise<void>(async (resolve, reject) => {
+		const uploadedFiles: { name: string; path: string }[] = [];
+		return await new Promise<{ name: string; path: string }[] | void>(async (resolve, reject) => {
+			const filesToUpload = form.getValues('documents');
 			if (!filesToUpload.length) return resolve();
 
 			for (let i = 0; i < filesToUpload.length; i++) {
 				const { data, error } = await supabase.storage.from('job-applications').upload(filesToUpload[i].path, filesToUpload[i].file, { upsert: true });
 				if (error) {
 					toast('🗂️ Error', { description: error.message });
-					return reject();
+					return reject(error);
 				}
-				form.setValue(filesToUpload[i].name as any, data.path);
+				uploadedFiles.push({ name: filesToUpload[i].name, path: data.path });
 			}
 
-			return resolve();
+			return resolve(uploadedFiles);
 		});
 	};
 
@@ -140,7 +141,8 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 		const reader = new FileReader();
 		reader.onloadend = async () => {
 			const path = `applications/${org}/${roleId}/${file.name}`;
-			updateFilesToUpload([...filesToUpload, { name, file, path }]);
+			// updateFilesToUpload([...filesToUpload, { name, file, path }]);
+			form.setValue('documents', [...form.getValues('documents'), { name, file, path }]);
 		};
 
 		if (file) reader.readAsDataURL(file);
@@ -233,12 +235,12 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 								{!showManualResume && (
 									<FormField
 										control={form.control}
-										name="resume_url"
-										render={({ field }) => (
+										name="documents"
+										render={() => (
 											<FormItem>
 												<FormLabel>Resume</FormLabel>
 												<FormControl>
-													<Input accept="application/pdf,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={event => pickFile(event, 'resume_url')} type="file" />
+													<Input accept="application/pdf,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={event => pickFile(event, 'resume')} type="file" />
 												</FormControl>
 												<FormDescription>
 													Or{' '}
@@ -277,12 +279,12 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 								{!showManualCoverLetter && (
 									<FormField
 										control={form.control}
-										name="cover_letter_url"
+										name="documents"
 										render={() => (
 											<FormItem>
 												<FormLabel>Cover letter</FormLabel>
 												<FormControl>
-													<Input accept="application/pdf,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={event => pickFile(event, 'cover_letter_url')} type="file" />
+													<Input accept="application/pdf,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={event => pickFile(event, 'cover letter')} type="file" />
 												</FormControl>
 												<FormDescription>
 													Or{' '}

@@ -164,7 +164,7 @@ const TableContent = ({ row, org, subColumns, link }: { row: Row<any>; org?: str
 	const [showSubColumn, setSubColumnState] = useState(false);
 	return (
 		<>
-			<TableRow data-state={row.getIsSelected() && 'selected'} onClick={() => setSubColumnState(!showSubColumn)}>
+			<TableRow className={cn(subColumns && 'cursor-pointer', showSubColumn && 'bg-muted')} data-state={row.getIsSelected() && 'selected'} onClick={() => setSubColumnState(!showSubColumn)}>
 				{row.getVisibleCells().map((cell, index) => (
 					<TableCell key={cell.id} className={cn(link && 'p-0')}>
 						{link ? (
@@ -197,7 +197,7 @@ function SubTable<TData, TValue>({ columns, org, roleId }: { columns: ColumnDef<
 	useEffect(() => {
 		const getApplicants = async (org: string, roleId: number) => {
 			setLoadingState(true);
-			const { data, error } = await supabase.from('job_applications').select('*, country_location:countries!job_applications_country_location_fkey(name)').match({ org, role: roleId });
+			const { data, error } = await supabase.from('job_applications').select('*, country_location:countries!job_applications_country_location_fkey(name, country_code), role:open_roles!job_applications_role_fkey(job_title, id)').match({ org, role: roleId });
 			setLoadingState(false);
 			if (data) setData(data as any);
 		};
@@ -233,7 +233,7 @@ function SubTable<TData, TValue>({ columns, org, roleId }: { columns: ColumnDef<
 							table.getRowModel().rows?.length ? (
 								// table has data
 								table.getRowModel().rows.map(row => (
-									<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+									<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className="cursor-pointer">
 										{row.getVisibleCells().map(cell => (
 											<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
 										))}

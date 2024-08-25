@@ -277,6 +277,7 @@ export type Database = {
           cover_letter_url: string | null
           created_at: string
           disability: string | null
+          documents: Json[]
           email: string
           first_name: string
           gender: string | null
@@ -290,6 +291,7 @@ export type Database = {
           resume: string | null
           resume_url: string | null
           role: number
+          stage: string
           state_location: number
           veterian_status: string | null
           work_authorization: boolean
@@ -300,6 +302,7 @@ export type Database = {
           cover_letter_url?: string | null
           created_at?: string
           disability?: string | null
+          documents?: Json[]
           email: string
           first_name: string
           gender?: string | null
@@ -313,6 +316,7 @@ export type Database = {
           resume?: string | null
           resume_url?: string | null
           role: number
+          stage?: string
           state_location: number
           veterian_status?: string | null
           work_authorization: boolean
@@ -323,6 +327,7 @@ export type Database = {
           cover_letter_url?: string | null
           created_at?: string
           disability?: string | null
+          documents?: Json[]
           email?: string
           first_name?: string
           gender?: string | null
@@ -336,6 +341,7 @@ export type Database = {
           resume?: string | null
           resume_url?: string | null
           role?: number
+          stage?: string
           state_location?: number
           veterian_status?: string | null
           work_authorization?: boolean

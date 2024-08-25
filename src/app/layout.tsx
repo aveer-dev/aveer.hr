@@ -3,6 +3,11 @@ import { Karla } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 
+// to fix Promise.withResolvers issue
+import { polyfillPromiseWithResolvers } from '@/utils/polyfilsResolver';
+import 'core-js/full/promise/with-resolvers.js';
+polyfillPromiseWithResolvers();
+
 const karla = Karla({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
