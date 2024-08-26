@@ -18,11 +18,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface props {
 	data: Tables<'job_applications'>;
 }
+
+const options = {
+	cMapUrl: '/cmaps/',
+	standardFontDataUrl: '/standard_fonts/'
+};
 
 const supabase = createClient();
 const resizeObserverOptions = {};
@@ -54,7 +59,7 @@ export const ApplicantDetails = ({ data }: props) => {
 		}
 	}, []);
 
-	useEffect(() => {
+	const gatherDocuments = () => {
 		const allDocuments: DOCUMENT[] = [...documents];
 
 		const resumeWithURL = data.documents.find((doc: any) => doc.name == 'resume');
@@ -68,7 +73,6 @@ export const ApplicantDetails = ({ data }: props) => {
 			const breakDownString = data.publicUrl.split('.');
 			return { url: data.publicUrl, format: breakDownString[breakDownString.length - 1] };
 		};
-		console.log(allDocuments);
 
 		if (data.documents.length) {
 			data.documents.forEach((doc: any) => {
@@ -77,10 +81,13 @@ export const ApplicantDetails = ({ data }: props) => {
 				setDocuments(allDocuments);
 			});
 		} else {
-			console.log('🚀 ~ useEffect ~ allDocuments:', allDocuments);
 			setDocuments(allDocuments);
 		}
-	}, [data.resume_url, setDocuments]);
+	};
+
+	useEffect(() => {
+		gatherDocuments();
+	}, []);
 
 	useResizeObserver(containerRef, resizeObserverOptions, onResize);
 
@@ -100,12 +107,12 @@ export const ApplicantDetails = ({ data }: props) => {
 					<AlertDialogTitle className="text-xl">
 						<span className="font-normal text-muted-foreground">Role:</span> {(data.role as any).job_title}
 					</AlertDialogTitle>
-					<AlertDialogDescription>
-						Stage:{' '}
+					<div className="flex gap-2">
+						<AlertDialogDescription>Stage: </AlertDialogDescription>
 						<Badge className="font-light" variant={'secondary'}>
 							{data.stage}
 						</Badge>
-					</AlertDialogDescription>
+					</div>
 				</AlertDialogHeader>
 
 				<section className="flex justify-between pt-10">
@@ -204,7 +211,7 @@ export const ApplicantDetails = ({ data }: props) => {
 									{document.format == 'pdf' && (
 										<div className="group relative h-fit">
 											<div ref={setContainerRef}>
-												<Document loading={<Skeleton className="h-[554px] w-[448px]" />} className={'drop-shadow-2xl'} file={document.url} onLoadSuccess={onDocumentLoadSuccess}>
+												<Document options={options} loading={<Skeleton className="h-[554px] w-[448px]" />} className={'drop-shadow-2xl'} file={document.url} onLoadSuccess={onDocumentLoadSuccess}>
 													<Page pageNumber={activePageNumber} loading={<Skeleton className="h-[554px] w-[448px]" />} width={containerWidth ? Math.min(containerWidth, maxWidth) : maxWidth} />
 												</Document>
 
@@ -234,7 +241,7 @@ export const ApplicantDetails = ({ data }: props) => {
 
 									{document.format !== 'png' && document.format !== 'jpg' && document.format !== 'jpeg' && document.format !== 'pdf' && document.url && (
 										<div className="flex w-full max-w-[350px] flex-col items-center justify-center gap-4 text-center text-xs">
-											<p>Unable to open preview of this document format, sorry for the inconvinience, we're working on it.</p>
+											<p>Unable to open preview of this document format, sorry for the inconvinience, we&apos;re working on it.</p>
 											<p>Please download document to preview</p>
 
 											<div className="flex w-full items-center justify-center">
