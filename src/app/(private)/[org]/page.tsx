@@ -29,7 +29,8 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 		if (data && !data.length) {
 			const options = [
 				{ link: '/legal-entity/new', label: 'Add legal entity', description: 'This is the option for you if you have a registered legal entity, enabling you to perform subsequent actions with your company details.' },
-				{ link: '/people/new', label: 'Add Employee', description: 'This is the option for you if you don&apos;t have a registered legal entity. With this option, you can still perform actions as a legal entity through Employer of Record.' }
+				{ link: '/open-roles/new', label: 'Create a role for application', description: 'Get started quickly by opening job application for an open role. No entity yet, you can hire with Aveer as your Employer of Record.' },
+				{ link: '/people/new', label: 'Add Employee', description: 'It&apos;s not a problem if you don&apos;t have a registered legal entity. You can hire with Aveer as your Employer of Record.' }
 			];
 
 			return (
