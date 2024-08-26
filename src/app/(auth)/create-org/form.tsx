@@ -84,8 +84,9 @@ export const OrgForm = ({ formAction, data }: PROPS) => {
 	const submitForm = async (formData: FormData) => {
 		const error = await formAction(formData);
 		if (error) toast.error(error);
-		const isSubdomainChanged = data?.subdomain !== formData.get('subdomain');
-		if (isSubdomainChanged) process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? (location.href = `http://${prefixText}.${process.env.NEXT_PUBLIC_DOMAIN}/settings?type=org`) : router.replace(`../${prefixText}/settings?type=org`);
+		const isSubdomainChanged = data ? data?.subdomain !== formData.get('subdomain') : false;
+		if (isSubdomainChanged) return process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? (location.href = `http://${prefixText}.${process.env.NEXT_PUBLIC_DOMAIN}/settings?type=org`) : router.replace(`../${prefixText}/settings?type=org`);
+		router.push('/');
 	};
 
 	return (
