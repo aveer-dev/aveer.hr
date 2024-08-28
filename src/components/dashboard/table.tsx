@@ -164,7 +164,7 @@ const TableContent = ({ row, org, subColumns, link }: { row: Row<any>; org?: str
 	const [showSubColumn, setSubColumnState] = useState(false);
 	return (
 		<>
-			<TableRow className={cn(subColumns && 'cursor-pointer', showSubColumn && 'bg-muted')} data-state={row.getIsSelected() && 'selected'} onClick={() => setSubColumnState(!showSubColumn)}>
+			<TableRow className={cn(subColumns && 'cursor-pointer', showSubColumn && 'bg-muted/50')} data-state={row.getIsSelected() && 'selected'} onClick={() => setSubColumnState(!showSubColumn)}>
 				{row.getVisibleCells().map((cell, index) => (
 					<TableCell key={cell.id} className={cn(link && 'p-0')}>
 						{link ? (
