@@ -3,7 +3,6 @@ import { NavMenu } from '../ui/nav-menu';
 import { LogoutButton } from './logout-button';
 import { AccountTypeToggle } from './account-type-toggle';
 import { createClient } from '@/utils/supabase/server';
-import Link from 'next/link';
 import { NavLink } from '@/components/ui/link';
 
 export const Header = async ({ orgId }: { orgId?: string }) => {
