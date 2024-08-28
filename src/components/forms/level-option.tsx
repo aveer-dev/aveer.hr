@@ -13,11 +13,12 @@ import { toast } from 'sonner';
 interface props {
 	form: UseFormReturn<any>;
 	org: string;
+	selectedLevelId: string;
 	setLevelDetails: Dispatch<SetStateAction<{ level: TablesInsert<'employee_levels'>; isOrgs: boolean } | undefined>>;
 }
 const supabase = createClient();
 
-export const SelectLevel = ({ form, org, setLevelDetails }: props) => {
+export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: props) => {
 	const [isLevelsOpen, toggleLevelsDropdown] = useState(false);
 	const [levelQuery, setLevelQuery] = useState('');
 	const [jobLevels] = useState(levels);
@@ -28,9 +29,16 @@ export const SelectLevel = ({ form, org, setLevelDetails }: props) => {
 		if (error) toast.error('🫤 Error', { description: `Unable to fetch existing org levels ${error.message}` });
 		if (data?.length) updateOrgJobLevels(data);
 
-		const activeLevel = data?.find(level => level.id == form.getValues('level'));
-		if (activeLevel) setLevelDetails({ level: activeLevel, isOrgs: true });
-	}, [org, form, setLevelDetails]);
+		const activeLevel = data?.find(level => level.id == Number(selectedLevelId));
+		if (activeLevel) {
+			setLevelDetails(prevDetails => {
+				if (prevDetails?.level?.id !== activeLevel.id) {
+					return { level: activeLevel, isOrgs: true };
+				}
+				return prevDetails;
+			});
+		}
+	}, [org, selectedLevelId, setLevelDetails]);
 
 	useEffect(() => {
 		getOrgLevels();

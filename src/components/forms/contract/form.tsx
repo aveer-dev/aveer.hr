@@ -472,6 +472,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 								<SelectLevel
 									form={form}
 									org={params.org}
+									selectedLevelId={form.getValues('level')}
 									setLevelDetails={event => {
 										setActiveLevel(event);
 										onSetLevel();
