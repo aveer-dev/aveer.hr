@@ -44,7 +44,7 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 		getOrgLevels();
 	}, [getOrgLevels]);
 
-	const onSelectLevelFromOrgLevels = (level: TablesInsert<'employee_levels'>) => {
+	const onSelectLevelFromOrgLevels = (level: TablesInsert<'employee_levels'>, isOrgs: boolean = true) => {
 		form.setValue('level', String(level.id));
 		toggleLevelsDropdown(false);
 
@@ -64,7 +64,7 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 		const signingBonusFromLevel = level.min_signing_bonus;
 		if (!signingBonus && signingBonusFromLevel) form.setValue('signing_bonus', String(signingBonusFromLevel));
 
-		setLevelDetails({ level: level, isOrgs: true });
+		setLevelDetails({ level: level, isOrgs });
 	};
 
 	return (
@@ -101,6 +101,7 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 											{levelQuery}
 										</div>
 									</CommandEmpty>
+
 									{orgJobLevels.length > 0 && (
 										<CommandGroup heading="Active Org Levels">
 											{orgJobLevels.map(level => (
@@ -117,14 +118,7 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 
 									<CommandGroup heading="Suggested Org Levels">
 										{jobLevels.map(level => (
-											<CommandItem
-												className="gap-2"
-												value={level.id}
-												key={level.id}
-												onSelect={() => {
-													form.setValue('level', level.id);
-													toggleLevelsDropdown(false);
-												}}>
+											<CommandItem className="gap-2" value={level.id} key={level.id} onSelect={() => onSelectLevelFromOrgLevels(level as any, false)}>
 												<div className="flex items-center">
 													<Check className={cn('mr-2 h-3 w-3', level.id === field.value ? 'opacity-100' : 'opacity-0')} />
 													{level.level}
@@ -145,14 +139,14 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 };
 
 const levels = [
-	{ id: 'fks', level: 'IC Level 1', role: 'Entry', min_salary: 50000, max_salary: 50000 },
-	{ id: 'ldb', level: 'IC Level 2', role: 'Mid I', min_salary: 72000, max_salary: 50000 },
-	{ id: 'jff', level: 'IC Level 3', role: 'Mid II', min_salary: 92000, max_salary: 50000 },
-	{ id: 'dfu', level: 'IC Level 4', role: 'Mid II', min_salary: 110000, max_salary: 50000 },
-	{ id: 'oia', level: 'IC Level 5', role: 'Senior I', min_salary: 160000, max_salary: 50000 },
-	{ id: 'ejd', level: 'IC Level 6', role: 'Senior II', min_salary: 180000, max_salary: 50000 },
-	{ id: 'fou', level: 'IC Level 7', role: 'Staff', min_salary: 240000, max_salary: 50000 },
-	{ id: 'elj', level: 'IC Level 8', role: 'Principal', min_salary: 280000, max_salary: 50000 },
-	{ id: 'euw', level: 'IC Level 9', role: 'VP', min_salary: 350000, max_salary: 50000 },
-	{ id: 'ale', level: 'IC Level 10', role: 'Executive', min_salary: 400000, max_salary: 50000 }
+	{ id: 'fks', level: 'IC Level 1', role: 'Entry', min_salary: 40000, max_salary: 50000 },
+	{ id: 'ldb', level: 'IC Level 2', role: 'Mid I', min_salary: 50000, max_salary: 72000 },
+	{ id: 'jff', level: 'IC Level 3', role: 'Mid II', min_salary: 72000, max_salary: 92000 },
+	{ id: 'dfu', level: 'IC Level 4', role: 'Mid II', min_salary: 92000, max_salary: 110000 },
+	{ id: 'oia', level: 'IC Level 5', role: 'Senior I', min_salary: 110000, max_salary: 160000 },
+	{ id: 'ejd', level: 'IC Level 6', role: 'Senior II', min_salary: 160000, max_salary: 180000 },
+	{ id: 'fou', level: 'IC Level 7', role: 'Staff', min_salary: 240000, max_salary: 240000 },
+	{ id: 'elj', level: 'IC Level 8', role: 'Principal', min_salary: 240000, max_salary: 280000 },
+	{ id: 'euw', level: 'IC Level 9', role: 'VP', min_salary: 280000, max_salary: 350000 },
+	{ id: 'ale', level: 'IC Level 10', role: 'Executive', min_salary: 350000, max_salary: 400000 }
 ];
