@@ -13,6 +13,10 @@ import { redirect } from 'next/navigation';
 import { ScheduleTermination } from './schedule-termination';
 import { TerminateContract } from './terminate-contract';
 import { BackButton } from '../ui/back-button';
+import { doesUserHaveAdequatePermissions } from '@/utils/api';
+import { sendEmail } from '@/api/email';
+import { TerminateContractEmail } from '@/components/emails/terminated-contract-email';
+import { ScheduleTerminationContractEmail } from '../emails/schedule-terminate-contract-email';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -67,48 +71,76 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 		return redirect(`/employee/${org}/${id}`);
 	};
 
+	const sendTerminationScheduleEmail = async (endDate: string) => {
+		'use server';
+
+		if (!data.profile) return;
+
+		await sendEmail({
+			from: 'Aveer.hr <contract@notification.aveer.hr>',
+			to: [data.profile?.email],
+			subject: `Contract terminated`,
+			react: <ScheduleTerminationContractEmail orgName={data.organisations?.name} endDate={endDate} />
+		});
+
+		return;
+	};
+
 	const scheduleTermination = async (date: Date): Promise<string> => {
 		'use server';
 		if (!date) return 'Termination date not provided';
 		const supabase = createClient();
 
-		const {
-			data: { user },
-			error: authError
-		} = await supabase.auth.getUser();
-		if (authError) return authError.message;
-		if (!user) return 'User auth not found';
+		const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
+		if (hasPermission !== true) return hasPermission;
 
-		const { data, error } = await supabase.from('profiles_roles').select().match({ organisation: org, profile: user.id });
-		if (error || !data.length) return `You do not have adequate org permission to terminate contracts`;
+		const {
+			data: { user }
+		} = await supabase.auth.getUser();
 
 		const { error: contractError } = await supabase
 			.from('contracts')
-			.update({ terminated_by: user.id, end_date: date as any, status: 'scheduled termination' })
+			.update({ terminated_by: user?.id, end_date: date as any, status: 'scheduled termination' })
 			.match({ org, id });
 		if (contractError) return contractError.message;
+
+		sendTerminationScheduleEmail(date as any);
 		return redirect(`/${org}/people/${id}`);
+	};
+
+	const sendTerminationEmail = async () => {
+		'use server';
+
+		if (!data.profile) return;
+
+		await sendEmail({
+			from: 'Aveer.hr <contract@notification.aveer.hr>',
+			to: [data.profile?.email],
+			subject: `Contract terminated`,
+			react: <TerminateContractEmail orgName={data.organisations?.name} />
+		});
+
+		return;
 	};
 
 	const terminateContract = async (): Promise<string> => {
 		'use server';
 		const supabase = createClient();
 
-		const {
-			data: { user },
-			error: authError
-		} = await supabase.auth.getUser();
-		if (authError) return authError.message;
-		if (!user) return 'User auth not found';
+		const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
+		if (hasPermission !== true) return hasPermission;
 
-		const { data, error } = await supabase.from('profiles_roles').select().match({ organisation: org, profile: user.id });
-		if (error || !data.length) return `You do not have adequate org permission to terminate contracts`;
+		const {
+			data: { user }
+		} = await supabase.auth.getUser();
 
 		const { error: contractError } = await supabase
 			.from('contracts')
-			.update({ terminated_by: user.id, end_date: new Date() as any, status: 'terminated' })
+			.update({ terminated_by: user?.id, end_date: new Date() as any, status: 'terminated' })
 			.match({ org, id });
 		if (contractError) return contractError.message;
+
+		sendTerminationEmail();
 		return redirect(`/${org}/people/${id}`);
 	};
 
@@ -169,6 +201,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 											<EllipsisVertical size={14} />
 										</Button>
 									</PopoverTrigger>
+
 									<PopoverContent align="end" className="w-48 p-2">
 										{data.status !== 'inactive' && data.status !== 'terminated' && (
 											<Link href={`./${id}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
