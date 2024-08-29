@@ -145,14 +145,15 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 
 					<div>
 						<h1 className="mb-4 text-xl font-semibold">Job Requirements</h1>
-						<ul className="grid grid-cols-2 items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
-							<li className="grid gap-3">
-								<h3 className="text-sm font-medium">Job Requirements</h3>
-								<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.requirements as string[])?.map((requirement, index) => <li key={index}>{requirement}</li>)}</ul>
-							</li>
+						<ul className="grid items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
 							<li className="grid gap-3">
 								<p className="text-sm font-medium">Experience</p>
 								<p className="text-sm font-light">{data?.years_of_experience} years</p>
+							</li>
+
+							<li className="grid gap-3">
+								<h3 className="text-sm font-medium">Job Requirements</h3>
+								<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.requirements as string[])?.map((requirement, index) => <li key={index}>{requirement}</li>)}</ul>
 							</li>
 						</ul>
 					</div>
@@ -169,6 +170,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 									}).format(Number(data?.salary))}
 								</p>
 							</li>
+
 							<li className="grid gap-3">
 								<p className="text-sm font-medium">Signing Bonus</p>
 								<p className="text-sm font-light">
@@ -180,8 +182,9 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 										: '--'}
 								</p>
 							</li>
+
 							{(data.additional_offerings as string[])?.length > 0 && (
-								<li className="grid items-start gap-4">
+								<li className="grid h-fit items-start gap-4">
 									<h3 className="h-fit text-sm font-medium">Additional offerings</h3>
 									<ul className="ml-3 grid list-disc gap-4 text-sm font-light">
 										{(data.additional_offerings as string[])?.map((offer, index) => (
@@ -194,7 +197,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 							)}
 
 							{(data?.fixed_allowance as [])?.length > 0 && (
-								<li className="grid gap-4">
+								<li className="grid h-fit gap-4">
 									<h3 className="text-sm font-medium">Fixed Allowances</h3>
 									<ul className="grid list-disc gap-3 pl-3 text-sm font-light">
 										{(data?.fixed_allowance as { name: string; frequency: string; amount: string }[])?.map((allowance, index) => (
