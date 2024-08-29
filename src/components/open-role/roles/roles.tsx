@@ -54,7 +54,7 @@ export const Roles = async ({ orgId, type }: props) => {
 
 					{type == 'role' && (
 						<div className="ml-auto flex gap-4">
-							<Link href={'./jobs'} className={cn(buttonVariants({ variant: 'secondary' }), 'gap-4')}>
+							<Link href={'./jobs'} target="_blank" className={cn(buttonVariants({ variant: 'secondary' }), 'gap-4')}>
 								Jobs page
 								<ArrowUpRight size={12} />
 							</Link>
