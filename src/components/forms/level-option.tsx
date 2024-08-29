@@ -36,7 +36,7 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 			setLevelDetails({ level: activeLevel, isOrgs: true });
 			setInitialActiveLevel(true);
 		}
-	}, [org, selectedLevelId, setLevelDetails]);
+	}, [isInitialActiveLevelSet, org, selectedLevelId, setLevelDetails]);
 
 	useEffect(() => {
 		if (!orgJobLevels.length) getOrgLevels();

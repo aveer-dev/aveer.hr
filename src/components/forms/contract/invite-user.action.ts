@@ -1,8 +1,31 @@
 'use server';
 
+import { sendEmail } from '@/api/email';
 import { TablesInsert } from '@/type/database.types';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { createClient, createClientAdminServer } from '@/utils/supabase/server';
+import { NewContractEmail } from '@/components/emails/new-contract-email';
+
+const sendContractEmail = async (email: string) => {
+	await sendEmail({
+		from: 'Aveer.hr <contract@notification.aveer.hr>',
+		to: [email],
+		subject: `New contract on aveer`,
+		react: NewContractEmail()
+	});
+
+	return;
+};
+
+const getExistingUserAccount = async (email: string) => {
+	const supabase = createClient();
+
+	const { data, error } = await supabase.from('profiles').select('id').eq('email', email).single();
+	if (error) return;
+
+	sendContractEmail(email);
+	return data.id;
+};
 
 export const inviteUser = async (contract: string, profile: string) => {
 	const supabase = createClient();
@@ -24,7 +47,7 @@ export const inviteUser = async (contract: string, profile: string) => {
 	} = await supabaseAdmin.auth.admin.inviteUserByEmail(parsedProfile.email, { data: { first_name: parsedProfile.first_name, last_name: parsedProfile.last_name }, redirectTo: `${process.env.NEXT_PUBLIC_URL}/set-password?type=employee` });
 	if (error && error.code !== 'email_exists') return error?.message;
 
-	const userId = error && error.code == 'email_exists' ? (await supabase.from('profiles').select('id').eq('email', parsedProfile.email).single()).data?.id : user?.id;
+	const userId = error && error.code == 'email_exists' ? await getExistingUserAccount(parsedProfile.email) : user?.id;
 
 	const [_profileRes, contractRes] = await Promise.all([
 		error?.code == 'email_exists'
