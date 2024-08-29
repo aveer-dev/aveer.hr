@@ -4,17 +4,11 @@ import { redirect } from 'next/navigation';
 import { TablesInsert } from '@/type/database.types';
 
 export default function CreateOrgPage() {
-	const createOrg = async (payload: FormData): Promise<string> => {
+	const createOrg = async (payload: TablesInsert<'organisations'>): Promise<string> => {
 		'use server';
 		const supabase = createClient();
 
-		const orgData: TablesInsert<'organisations'> = {
-			name: payload.get('org-name') as string,
-			website: payload.get('website') as string,
-			subdomain: payload.get('subdomain') as string
-		};
-
-		const { error, data } = await supabase.from('organisations').insert(orgData).select('subdomain').single();
+		const { error, data } = await supabase.from('organisations').insert(payload).select('subdomain').single();
 		if (error || !data) return error.message;
 
 		await supabase.from('profiles_roles').insert({ organisation: data.subdomain, role: 'admin' });

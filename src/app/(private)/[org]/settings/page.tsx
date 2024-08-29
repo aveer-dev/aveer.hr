@@ -31,12 +31,11 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 		if (data.user) return 'Password updated successfully';
 	};
 
-	const updateOrg = async (payload: FormData) => {
+	const updateOrg = async (payload: TablesUpdate<'organisations'>) => {
 		'use server';
 		const supabase = createClient();
 
-		const orgData: TablesUpdate<'organisations'> = { name: payload.get('org-name') as string, website: payload.get('website') as string, subdomain: payload.get('subdomain') as string };
-		const { error } = await supabase.from('organisations').update(orgData).eq('subdomain', params.org);
+		const { error } = await supabase.from('organisations').update(payload).eq('subdomain', params.org);
 
 		if (error) return error?.message;
 		return 'Organisation updated successfully';
