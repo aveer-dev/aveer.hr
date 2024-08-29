@@ -23,6 +23,7 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 	const [levelQuery, setLevelQuery] = useState('');
 	const [jobLevels] = useState(levels);
 	const [orgJobLevels, updateOrgJobLevels] = useState<TablesInsert<'employee_levels'>[]>([]);
+	const [isInitialActiveLevelSet, setInitialActiveLevel] = useState(false);
 
 	const getOrgLevels = useCallback(async () => {
 		const { data, error } = await supabase.from('employee_levels').select().match({ org: org });
@@ -30,8 +31,10 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 		if (data?.length) updateOrgJobLevels(data);
 
 		const activeLevel = data?.find(level => level.id == Number(selectedLevelId));
-		if (activeLevel && String(activeLevel.id) !== selectedLevelId) {
+
+		if (!isInitialActiveLevelSet && activeLevel) {
 			setLevelDetails({ level: activeLevel, isOrgs: true });
+			setInitialActiveLevel(true);
 		}
 	}, [org, selectedLevelId, setLevelDetails]);
 
@@ -99,8 +102,8 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 
 									{orgJobLevels.length > 0 && (
 										<CommandGroup heading="Active Org Levels">
-											{orgJobLevels.map(level => (
-												<CommandItem className="gap-2" value={String(level.id)} key={level.level} onSelect={() => onSelectLevelFromOrgLevels(level)}>
+											{orgJobLevels.map((level, index) => (
+												<CommandItem className="gap-2" value={String(level.id)} key={index} onSelect={() => onSelectLevelFromOrgLevels(level)}>
 													<div className="flex items-center">
 														<Check className={cn('mr-2 h-3 w-3', String(level.id) === field.value ? 'opacity-100' : 'opacity-0')} />
 														{level.level}
@@ -112,8 +115,8 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 									)}
 
 									<CommandGroup heading="Suggested Org Levels">
-										{jobLevels.map(level => (
-											<CommandItem className="gap-2" value={level.id} key={level.id} onSelect={() => onSelectLevelFromOrgLevels(level as any, false)}>
+										{jobLevels.map((level, index) => (
+											<CommandItem className="gap-2" value={level.id} key={index} onSelect={() => onSelectLevelFromOrgLevels(level as any, false)}>
 												<div className="flex items-center">
 													<Check className={cn('mr-2 h-3 w-3', level.id === field.value ? 'opacity-100' : 'opacity-0')} />
 													{level.level}
