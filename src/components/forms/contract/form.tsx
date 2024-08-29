@@ -20,7 +20,7 @@ import { LoadingSpinner } from '@/components/ui/loader';
 import { createLevel, inviteUser, updateContract } from './invite-user.action';
 import { EORAgreementDrawer } from '@/components/eor/eor-agreement';
 import { createEORAgreement, doesUserHaveAdequatePermissions, getEORAgreementByCountry } from '@/utils/api';
-import { NewContractDialog } from '../../../app/(private)/[org]/people/new/new-contract-dialog';
+import { NewContractDialog } from './new-contract-dialog';
 import { PayInput } from '@/components/forms/pay-input';
 import { FixedAllowance } from '@/components/forms/fixed-allowance';
 import { AdditionalOffering } from '@/components/forms/additional-offering';
@@ -30,6 +30,7 @@ import { JobResponsibilities } from '@/components/forms/job-responsibilities';
 import { JobRequirements } from '@/components/forms/job-requirements';
 import { createOpenRole, updateRole } from './role.action';
 import { SelectCountry } from '../countries-option';
+import { NewRoleDialog } from './new-role-dialog';
 
 const supabase = createClient();
 
@@ -56,7 +57,9 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	const [isAlertOpen, toggleAgreementDialog] = useState(false);
 	const [agreementId, setAgreementId] = useState<number>();
 	const [isNewContractDialogOpen, toggleNewContractDialog] = useState(false);
+	const [showNewRoleDialog, toggleNewRoleDialog] = useState(false);
 	const [newContractId, setNewContractId] = useState(0);
+	const [newRoleId, setNewRoleId] = useState(0);
 	const [isLevelCreated, setLevelCreationState] = useState(false);
 	const [showSalaryCostomError, toggleSalaryCustomError] = useState(false);
 	const [showSigningCostomError, toggleSigningCustomError] = useState(false);
@@ -211,14 +214,19 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			years_of_experience: values.years_of_experience,
 			state: 'open'
 		};
+
 		if (showSigningBonus) role.signing_bonus = Number(values.signing_bonus);
 		if (showFixedIncome) role.fixed_allowance = values.fixed_allowance;
 		if (showAdditionalOffering) role.additional_offerings = values.additional_offerings;
 
-		const responseMessage = openRoleData ? await updateRole(role, params.org, openRoleData.id as number) : await createOpenRole(role, params.org);
+		const responseMessage = openRoleData ? await updateRole(role, params.org, openRoleData.id as number) : await createOpenRole(role);
 
 		toggleSubmitState(false);
 		if (responseMessage == 'update') return toast.success('Role details updated successfully');
+		if (typeof responseMessage == 'number') {
+			setNewRoleId(responseMessage);
+			return toggleNewRoleDialog(true);
+		}
 		if (responseMessage) return toast.error(responseMessage);
 	};
 
@@ -349,9 +357,13 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		else toggleSigningCustomError(false);
 	};
 
-	const onSetLevel = () => {
-		toggleShowFixedIncome(!!form.getValues('fixed_allowance')?.length);
-		toggleShowSigningBonus(!!form.getValues('signing_bonus')?.length);
+	const onSetLevel = (event: { level: TablesInsert<'employee_levels'>; isOrgs: boolean } | undefined) => {
+		setActiveLevel(event);
+		toggleShowFixedIncome(() => !!form.getValues('fixed_allowance')?.length);
+		toggleShowSigningBonus(() => !!form.getValues('signing_bonus')?.length);
+		form.setValue('salary', String(event?.level.min_salary));
+		form.setValue('signing_bonus', event?.level.min_signing_bonus ? String(event?.level.min_signing_bonus) : undefined);
+		form.setValue('fixed_allowance', event?.level.fixed_allowance ? (event?.level.fixed_allowance as any) : undefined);
 	};
 
 	return (
@@ -371,6 +383,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			)}
 
 			<NewContractDialog isAlertOpen={isNewContractDialogOpen} toggleDialog={toggleNewContractDialog} contractId={newContractId} isLevelCreated={isLevelCreated} />
+			<NewRoleDialog isAlertOpen={showNewRoleDialog} toggleDialog={toggleNewRoleDialog} roleId={newRoleId} />
 
 			<Form {...form}>
 				<form className="grid w-full gap-6" onSubmit={form.handleSubmit(onSubmit)}>
@@ -469,15 +482,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 									)}
 								/>
 
-								<SelectLevel
-									form={form}
-									org={params.org}
-									selectedLevelId={form.getValues('level')}
-									setLevelDetails={event => {
-										setActiveLevel(event);
-										onSetLevel();
-									}}
-								/>
+								<SelectLevel form={form} org={params.org} selectedLevelId={form.getValues('level')} setLevelDetails={onSetLevel} />
 							</div>
 
 							<FormField
@@ -757,16 +762,3 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		</>
 	);
 };
-
-const levels = [
-	{ id: 'fks', level: 'IC Level 1', role: 'Entry', min_salary: 50000, max_salary: 50000 },
-	{ id: 'ldb', level: 'IC Level 2', role: 'Mid I', min_salary: 72000, max_salary: 50000 },
-	{ id: 'jff', level: 'IC Level 3', role: 'Mid II', min_salary: 92000, max_salary: 50000 },
-	{ id: 'dfu', level: 'IC Level 4', role: 'Mid II', min_salary: 110000, max_salary: 50000 },
-	{ id: 'oia', level: 'IC Level 5', role: 'Senior I', min_salary: 160000, max_salary: 50000 },
-	{ id: 'ejd', level: 'IC Level 6', role: 'Senior II', min_salary: 180000, max_salary: 50000 },
-	{ id: 'fou', level: 'IC Level 7', role: 'Staff', min_salary: 240000, max_salary: 50000 },
-	{ id: 'elj', level: 'IC Level 8', role: 'Principal', min_salary: 280000, max_salary: 50000 },
-	{ id: 'euw', level: 'IC Level 9', role: 'VP', min_salary: 350000, max_salary: 50000 },
-	{ id: 'ale', level: 'IC Level 10', role: 'Executive', min_salary: 400000, max_salary: 50000 }
-];

@@ -2,7 +2,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { TablesInsert } from '@/type/database.types';
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Check, ChevronDown } from 'lucide-react';
@@ -14,7 +14,7 @@ interface props {
 	form: UseFormReturn<any>;
 	org: string;
 	selectedLevelId: string;
-	setLevelDetails: Dispatch<SetStateAction<{ level: TablesInsert<'employee_levels'>; isOrgs: boolean } | undefined>>;
+	setLevelDetails: (data: { level: TablesInsert<'employee_levels'>; isOrgs: boolean } | undefined) => void;
 }
 const supabase = createClient();
 
@@ -30,19 +30,14 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 		if (data?.length) updateOrgJobLevels(data);
 
 		const activeLevel = data?.find(level => level.id == Number(selectedLevelId));
-		if (activeLevel) {
-			setLevelDetails(prevDetails => {
-				if (prevDetails?.level?.id !== activeLevel.id) {
-					return { level: activeLevel, isOrgs: true };
-				}
-				return prevDetails;
-			});
+		if (activeLevel && String(activeLevel.id) !== selectedLevelId) {
+			setLevelDetails({ level: activeLevel, isOrgs: true });
 		}
 	}, [org, selectedLevelId, setLevelDetails]);
 
 	useEffect(() => {
-		getOrgLevels();
-	}, [getOrgLevels]);
+		if (!orgJobLevels.length) getOrgLevels();
+	}, [getOrgLevels, orgJobLevels]);
 
 	const onSelectLevelFromOrgLevels = (level: TablesInsert<'employee_levels'>, isOrgs: boolean = true) => {
 		form.setValue('level', String(level.id));
