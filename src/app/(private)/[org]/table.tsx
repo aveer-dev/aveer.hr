@@ -2,17 +2,21 @@
 
 import { columns } from '@/components/dashboard/column';
 import { DataTable } from '@/components/dashboard/table';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { PERSON } from '@/type/person';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { DashboardFilters } from '@/components/dashboard/filters';
-import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
+import { FirstContractDialog } from './first-contract-dialog';
 import { NavLink } from '@/components/ui/link';
+import { cn } from '@/lib/utils';
 
 export const ClientTable = ({ org, data }: { org: string; data: PERSON[] }) => {
 	const [tableData, updateData] = useState<PERSON[]>(data);
 	const [tableLoading, toggleTableLoadingState] = useState(false);
+	const [isFirstContractModalOpen, toggleFirstContractModal] = useState(false);
+	const router = useRouter();
 
 	return (
 		<div className="container mx-auto p-0">
@@ -21,10 +25,23 @@ export const ClientTable = ({ org, data }: { org: string; data: PERSON[] }) => {
 
 				<DashboardFilters org={org} toggleTableLoadingState={toggleTableLoadingState} updateData={updateData} />
 
-				<NavLink org={org} href={`/people/new`} className={cn(buttonVariants(), 'ml-auto h-8 justify-end gap-4')}>
-					<Plus size={12} />
-					Add person
-				</NavLink>
+				{data.length > 0 && (
+					<NavLink org={org} href={`/people/new`} className={cn(buttonVariants(), 'ml-auto h-8 justify-end gap-4')}>
+						<Plus size={12} />
+						Add person
+					</NavLink>
+				)}
+
+				{data.length == 0 && (
+					<>
+						<Button onClick={() => (data.length > 0 ? router.push(`/${org}/people/new`) : toggleFirstContractModal(true))} className={'ml-auto h-8 justify-end gap-4'}>
+							<Plus size={12} />
+							Add person
+						</Button>
+
+						<FirstContractDialog org={org} toggle={toggleFirstContractModal} isOpen={isFirstContractModalOpen} />
+					</>
+				)}
 			</div>
 
 			<DataTable link={`/people`} columns={columns} org={org} data={tableData} loading={tableLoading} />

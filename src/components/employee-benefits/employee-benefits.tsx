@@ -25,10 +25,10 @@ export const EmployeeBenefits = async ({ org }: props) => {
 	};
 
 	return (
-		<div className="grid w-full gap-6">
+		<div id="employee-policies" className="grid w-full gap-6">
 			<div className="grid grid-cols-2 border-t border-t-border pt-10">
 				<div>
-					<h2 className="mb-1 font-normal">Employee Benefits</h2>
+					<h2 className="mb-1 font-normal">Employee Policies</h2>
 					<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">These are generic policies, schedule and benefits available company wide. They get automatically populated when filling employee contract forms.</p>
 				</div>
 

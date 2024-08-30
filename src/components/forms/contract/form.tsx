@@ -87,8 +87,10 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		years_of_experience: z.number().optional(),
 		additional_offerings: z.array(z.string()),
 		requirements: z.array(z.string()).optional(),
-		work_location: z.enum(['remote', 'hybrid', 'on-site']),
-		entity: z.string()
+		work_location: z.enum(['remote', 'hybrid', 'on-site']).optional(),
+		entity: z.string(),
+		manager: z.string().optional(),
+		department: z.string().optional()
 	});
 
 	const form = useForm<z.infer<typeof formSchema>>({
