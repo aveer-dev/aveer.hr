@@ -1,17 +1,16 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Info, MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { Button, buttonVariants } from '../ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '../ui/badge';
 import { PERSON } from '@/type/person';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
 import { NavLink } from '../ui/link';
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
+import { ContractStatus } from '@/components/ui/status-badge';
 
 export const columns: ColumnDef<PERSON>[] = [
 	{
@@ -50,21 +49,7 @@ export const columns: ColumnDef<PERSON>[] = [
 	{
 		id: 'status',
 		header: 'Status',
-		cell: ({ row }) => (
-			<Badge className="gap-2 py-1 font-light" variant="secondary">
-				{row.original['status']}
-				<TooltipProvider>
-					<Tooltip>
-						<TooltipTrigger>
-							<Info size={12} className="stroke-1" />
-						</TooltipTrigger>
-						<TooltipContent>
-							<p className="text-xs font-thin">{row.original['status']}</p>
-						</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-			</Badge>
-		)
+		cell: ({ row }) => <ContractStatus state={row.original.status} start_date={row.original.start_date} end_date={row.original.end_date} />
 	},
 	{
 		id: 'employment_type',

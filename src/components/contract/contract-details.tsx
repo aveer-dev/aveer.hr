@@ -16,7 +16,8 @@ import { BackButton } from '../ui/back-button';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { sendEmail } from '@/api/email';
 import { TerminateContractEmail } from '@/components/emails/terminated-contract-email';
-import { ScheduleTerminationContractEmail } from '../emails/schedule-terminate-contract-email';
+import { ScheduleTerminationContractEmail } from '@/components/emails/schedule-terminate-contract-email';
+import { ContractStatus } from '@/components/ui/status-badge';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -173,9 +174,8 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 						<h1 className="flex items-center gap-4 text-2xl font-bold">
 							{data?.job_title}
 							<div className="flex gap-1">
-								<Badge className="h-fit gap-3 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
-									{data?.status}
-								</Badge>
+								<ContractStatus state={data.status} start_date={data.start_date || ''} end_date={data?.end_date} />
+
 								{data?.status == 'scheduled termination' && data?.end_date && (
 									<Badge className="h-fit gap-3 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
 										{format(data?.end_date, 'PP')}

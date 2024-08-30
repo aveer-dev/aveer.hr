@@ -1,13 +1,12 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { ChevronRight, Info } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CONTRACT } from '@/type/contract.types';
+import { ContractStatus } from '@/components/ui/status-badge';
 
 export const columns: ColumnDef<CONTRACT>[] = [
 	{
@@ -51,21 +50,7 @@ export const columns: ColumnDef<CONTRACT>[] = [
 	{
 		id: 'status',
 		header: 'Status',
-		cell: ({ row }) => (
-			<Badge className="gap-2 py-1 font-light" variant="secondary">
-				{row.original.profile_signed ? row.original.status : 'awaiting your signature'}
-				<TooltipProvider>
-					<Tooltip>
-						<TooltipTrigger>
-							<Info size={12} className="stroke-1" />
-						</TooltipTrigger>
-						<TooltipContent>
-							<p className="text-xs font-thin">{row.original.profile_signed ? row.original.status : `Your required to review and execute the contract if it's fine by you`}</p>
-						</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-			</Badge>
-		)
+		cell: ({ row }) => <ContractStatus state={row.original.status} start_date={row.original.start_date} end_date={row.original.end_date} />
 	},
 	{
 		id: 'employment_type',
