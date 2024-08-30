@@ -59,8 +59,8 @@ export const ApplicantDetails = ({ data }: props) => {
 		}
 	}, []);
 
-	const gatherDocuments = () => {
-		const allDocuments: DOCUMENT[] = [...documents];
+	const gatherDocuments = useCallback(() => {
+		const allDocuments: DOCUMENT[] = [];
 
 		const resumeWithURL = data.documents.find((doc: any) => doc.name == 'resume');
 		if (!resumeWithURL && data.resume) allDocuments.push({ name: 'resume', text: data.resume });
@@ -83,11 +83,11 @@ export const ApplicantDetails = ({ data }: props) => {
 		} else {
 			setDocuments(allDocuments);
 		}
-	};
+	}, [data]);
 
 	useEffect(() => {
 		gatherDocuments();
-	}, []);
+	}, [gatherDocuments]);
 
 	useResizeObserver(containerRef, resizeObserverOptions, onResize);
 
