@@ -192,8 +192,8 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 			<Sheet open={isDialogOpen} onOpenChange={openDialog}>
 				<SheetContent className="overflow-auto pb-24">
 					<SheetHeader className="mb-6">
-						<SheetTitle>Employee Band</SheetTitle>
-						<SheetDescription className="text-xs">This enables you to categorize employee benefits once, in a band.</SheetDescription>
+						<SheetTitle>Employee Level</SheetTitle>
+						<SheetDescription className="text-xs">This enables you to categorize employee benefits once, in a level.</SheetDescription>
 					</SheetHeader>
 
 					<div className="grid gap-4 py-6">

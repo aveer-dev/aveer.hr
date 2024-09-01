@@ -1,6 +1,6 @@
 import { UseFormReturn } from 'react-hook-form';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '../ui/form';
-import { Input } from '../ui/input';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArrowUpRight, Info } from 'lucide-react';
 import Link from 'next/link';
@@ -47,9 +47,9 @@ export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue,
 
 								<TooltipContent side="left">
 									<p className="flex text-xs text-muted-foreground">
-										Range from{' '}
+										Range from selected{' '}
 										<Link href={`../settings?type=org`} className="ml-1 flex items-center rounded-sm bg-accent px-1 text-foreground">
-											employee band <ArrowUpRight size={10} />
+											employee levels <ArrowUpRight size={10} />
 										</Link>
 									</p>
 								</TooltipContent>

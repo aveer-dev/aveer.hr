@@ -14,7 +14,7 @@ interface props {
 	disabled?: boolean;
 	name: string;
 	label: string;
-	onSelectCountry?: (countryCode: string) => void;
+	onSelectCountry?: (country: Tables<'countries'>) => void;
 }
 
 const supabase = createClient();
@@ -61,7 +61,7 @@ export const SelectCountry = ({ form, disabled, name, label, onSelectCountry }: 
 												onSelect={() => {
 													form.setValue(name, country.country_code);
 													toggleOptionDropdown(false);
-													if (onSelectCountry) onSelectCountry(country.country_code);
+													if (onSelectCountry) onSelectCountry(country);
 												}}>
 												<Check className={cn('mr-2 h-4 w-4', country.country_code === field.value ? 'opacity-100' : 'opacity-0')} />
 												{country?.name}

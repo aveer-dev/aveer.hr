@@ -1,46 +1,40 @@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { TablesInsert } from '@/type/database.types';
-import { useCallback, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { Check, ChevronDown } from 'lucide-react';
+import { ArrowUpRight, Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { createClient } from '@/utils/supabase/client';
-import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface props {
 	form: UseFormReturn<any>;
-	org: string;
 	selectedLevelId: string;
 	setLevelDetails: (data: { level: TablesInsert<'employee_levels'>; isOrgs: boolean } | undefined) => void;
+	orgJobLevels: TablesInsert<'employee_levels'>[];
+	updateOrgJobLevels: Dispatch<SetStateAction<TablesInsert<'employee_levels'>[]>>;
 }
-const supabase = createClient();
 
-export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: props) => {
+export const SelectLevel = ({ form, setLevelDetails, selectedLevelId, orgJobLevels, updateOrgJobLevels }: props) => {
 	const [isLevelsOpen, toggleLevelsDropdown] = useState(false);
 	const [levelQuery, setLevelQuery] = useState('');
 	const [jobLevels] = useState(levels);
-	const [orgJobLevels, updateOrgJobLevels] = useState<TablesInsert<'employee_levels'>[]>([]);
 	const [isInitialActiveLevelSet, setInitialActiveLevel] = useState(false);
 
 	const getOrgLevels = useCallback(async () => {
-		const { data, error } = await supabase.from('employee_levels').select().match({ org: org });
-		if (error) toast.error('🫤 Error', { description: `Unable to fetch existing org levels ${error.message}` });
-		if (data?.length) updateOrgJobLevels(data);
-
-		const activeLevel = data?.find(level => level.id == Number(selectedLevelId));
+		const activeLevel = orgJobLevels?.find(level => level.id == Number(selectedLevelId));
 
 		if (!isInitialActiveLevelSet && activeLevel) {
 			setLevelDetails({ level: activeLevel, isOrgs: true });
 			setInitialActiveLevel(true);
 		}
-	}, [isInitialActiveLevelSet, org, selectedLevelId, setLevelDetails]);
+	}, [isInitialActiveLevelSet, selectedLevelId, setLevelDetails]);
 
 	useEffect(() => {
-		if (!orgJobLevels.length) getOrgLevels();
-	}, [getOrgLevels, orgJobLevels]);
+		getOrgLevels();
+	}, [getOrgLevels, orgJobLevels, form]);
 
 	const onSelectLevelFromOrgLevels = (level: TablesInsert<'employee_levels'>, isOrgs: boolean = true) => {
 		form.setValue('level', String(level.id));
@@ -62,7 +56,8 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 		const signingBonusFromLevel = level.min_signing_bonus;
 		if (!signingBonus && signingBonusFromLevel) form.setValue('signing_bonus', String(signingBonusFromLevel));
 
-		setLevelDetails({ level: level, isOrgs });
+		// while updating active level details, make sure to use updated fixed allowance
+		setLevelDetails({ level: { ...level, fixed_allowance: fixedAllowance }, isOrgs });
 	};
 
 	return (
@@ -81,17 +76,18 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 								</Button>
 							</FormControl>
 						</PopoverTrigger>
-						<PopoverContent className="w-[200px] p-0">
+
+						<PopoverContent align="start" className="w-[200px] p-0">
 							<Command>
 								<CommandInput placeholder="Enter seniority level..." value={levelQuery} onValueChange={(value: string) => setLevelQuery(value)} />
+
 								<CommandList>
 									<CommandEmpty
 										onClick={() => {
-											const newId = orgJobLevels.length + 12;
-											updateOrgJobLevels([...orgJobLevels, { level: levelQuery, min_salary: 0, max_salary: 0, org: '', id: newId }]);
-											form.setValue('level', String(newId));
+											const level = { level: levelQuery, min_salary: 0, max_salary: 0, org: '', id: (orgJobLevels.length + 1) * 1000000 };
+											updateOrgJobLevels([...orgJobLevels, level]);
 											setLevelQuery('');
-											toggleLevelsDropdown(false);
+											onSelectLevelFromOrgLevels(level, false);
 										}}
 										className="p-1">
 										<div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs font-light outline-none">
@@ -129,6 +125,14 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 							</Command>
 						</PopoverContent>
 					</Popover>
+
+					<FormDescription>
+						Create and edit levels{' '}
+						<Link className="inline-flex items-center rounded-md bg-accent px-1" href={'../settings?type=org#levels'}>
+							here <ArrowUpRight size={12} />
+						</Link>
+					</FormDescription>
+
 					<FormMessage />
 				</FormItem>
 			)}
@@ -137,14 +141,14 @@ export const SelectLevel = ({ form, org, setLevelDetails, selectedLevelId }: pro
 };
 
 const levels = [
-	{ id: 'fks', level: 'IC Level 1', role: 'Entry', min_salary: 40000, max_salary: 50000 },
-	{ id: 'ldb', level: 'IC Level 2', role: 'Mid I', min_salary: 50000, max_salary: 72000 },
-	{ id: 'jff', level: 'IC Level 3', role: 'Mid II', min_salary: 72000, max_salary: 92000 },
-	{ id: 'dfu', level: 'IC Level 4', role: 'Mid II', min_salary: 92000, max_salary: 110000 },
-	{ id: 'oia', level: 'IC Level 5', role: 'Senior I', min_salary: 110000, max_salary: 160000 },
-	{ id: 'ejd', level: 'IC Level 6', role: 'Senior II', min_salary: 160000, max_salary: 180000 },
-	{ id: 'fou', level: 'IC Level 7', role: 'Staff', min_salary: 240000, max_salary: 240000 },
-	{ id: 'elj', level: 'IC Level 8', role: 'Principal', min_salary: 240000, max_salary: 280000 },
-	{ id: 'euw', level: 'IC Level 9', role: 'VP', min_salary: 280000, max_salary: 350000 },
-	{ id: 'ale', level: 'IC Level 10', role: 'Executive', min_salary: 350000, max_salary: 400000 }
+	{ id: 'fks', level: 'IC Level 1', role: 'Entry', min_salary: 0, max_salary: 0 },
+	{ id: 'ldb', level: 'IC Level 2', role: 'Mid I', min_salary: 0, max_salary: 0 },
+	{ id: 'jff', level: 'IC Level 3', role: 'Mid II', min_salary: 0, max_salary: 0 },
+	{ id: 'dfu', level: 'IC Level 4', role: 'Mid II', min_salary: 0, max_salary: 0 },
+	{ id: 'oia', level: 'IC Level 5', role: 'Senior I', min_salary: 0, max_salary: 0 },
+	{ id: 'ejd', level: 'IC Level 6', role: 'Senior II', min_salary: 0, max_salary: 0 },
+	{ id: 'fou', level: 'IC Level 7', role: 'Staff', min_salary: 0, max_salary: 0 },
+	{ id: 'elj', level: 'IC Level 8', role: 'Principal', min_salary: 0, max_salary: 0 },
+	{ id: 'euw', level: 'IC Level 9', role: 'VP', min_salary: 0, max_salary: 0 },
+	{ id: 'ale', level: 'IC Level 10', role: 'Executive', min_salary: 0, max_salary: 0 }
 ];

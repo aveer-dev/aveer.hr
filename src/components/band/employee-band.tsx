@@ -65,10 +65,10 @@ export const EmployeeBand = async ({ org }: props) => {
 	};
 
 	return (
-		<div className="grid grid-cols-2 border-t border-t-border py-10">
+		<div id="levels" className="grid grid-cols-2 border-t border-t-border py-10">
 			<div>
-				<h2 className="mb-1 font-normal">Employee Bands</h2>
-				<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">Creating employee bands makes it super easy to manage employees and their benefits. Set them once and connect them to employees once.</p>
+				<h2 className="mb-1 font-normal">Employee Levels</h2>
+				<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">Creating employee levels makes it super easy to manage employees and their benefits. Set them once and connect them to employees once.</p>
 			</div>
 
 			<EmployeeBandDialog createBand={createBand} deleteBand={deleteBand} updateBand={updateBand} data={data} />

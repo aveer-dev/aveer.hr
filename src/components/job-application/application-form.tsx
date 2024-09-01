@@ -13,7 +13,7 @@ import { ChangeEvent, useState } from 'react';
 import { SelectCountry } from '@/components/forms/countries-option';
 import { SelectCountryState } from '@/components/forms/states-option';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Json, TablesInsert } from '@/type/database.types';
+import { Json, Tables, TablesInsert } from '@/type/database.types';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
 import { useFormStatus } from 'react-dom';
@@ -47,7 +47,7 @@ interface props {
 }
 
 export function JobApplicationForm({ org, roleId, submit }: props) {
-	const [selectedCountry, selectCountry] = useState('');
+	const [selectedCountry, selectCountry] = useState<Tables<'countries'>>();
 	const [showManualResume, toggleManualResumeState] = useState(false);
 	const [showSuccessDialog, toggleSuccessDialog] = useState(false);
 	const [isSubmiting, toggleSubmitState] = useState(false);
@@ -333,7 +333,7 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 							<div className="grid gap-x-6 gap-y-8">
 								<SelectCountry onSelectCountry={event => selectCountry(event)} name="country_location" label="Where do you reside?" form={form} />
 
-								<SelectCountryState country={selectedCountry} form={form} name="state_location" label="State / City / Province" />
+								<SelectCountryState country={selectedCountry?.country_code} form={form} name="state_location" label="State / City / Province" />
 
 								<FormField
 									control={form.control}

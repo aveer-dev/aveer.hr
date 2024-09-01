@@ -30,6 +30,7 @@ export type Database = {
           profile_signed: string | null
           requirements: Json[] | null
           responsibilities: Json | null
+          role: number | null
           salary: number | null
           sick_leave: number | null
           signed_by: string | null
@@ -63,6 +64,7 @@ export type Database = {
           profile_signed?: string | null
           requirements?: Json[] | null
           responsibilities?: Json | null
+          role?: number | null
           salary?: number | null
           sick_leave?: number | null
           signed_by?: string | null
@@ -96,6 +98,7 @@ export type Database = {
           profile_signed?: string | null
           requirements?: Json[] | null
           responsibilities?: Json | null
+          role?: number | null
           salary?: number | null
           sick_leave?: number | null
           signed_by?: string | null
@@ -136,6 +139,13 @@ export type Database = {
             columns: ["profile"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_role_fkey"
+            columns: ["role"]
+            isOneToOne: false
+            referencedRelation: "open_roles"
             referencedColumns: ["id"]
           },
           {

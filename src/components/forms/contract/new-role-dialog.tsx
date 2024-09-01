@@ -2,6 +2,7 @@ import { AlertDialogHeader, AlertDialogFooter, AlertDialog, AlertDialogContent, 
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Dispatch, SetStateAction } from 'react';
 
 interface props {
@@ -10,6 +11,8 @@ interface props {
 	roleId: number;
 }
 export const NewRoleDialog = ({ isAlertOpen, toggleDialog, roleId }: props) => {
+	const router = useRouter();
+
 	return (
 		<AlertDialog open={isAlertOpen} onOpenChange={toggleDialog}>
 			<AlertDialogContent className="gap-10">
@@ -24,7 +27,13 @@ export const NewRoleDialog = ({ isAlertOpen, toggleDialog, roleId }: props) => {
 						Create another role
 					</Link>
 
-					<Link href={`./${roleId}`} onClick={() => toggleDialog(false)} className={cn(buttonVariants())}>
+					<Link
+						href={`./${roleId}`}
+						onClick={() => {
+							toggleDialog(false);
+							router.refresh();
+						}}
+						className={cn(buttonVariants())}>
 						View role
 					</Link>
 				</AlertDialogFooter>

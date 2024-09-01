@@ -1,17 +1,17 @@
 import { FormField, FormLabel } from '@/components/ui/form';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Switch } from '@/components/ui/switch';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { Info } from 'lucide-react';
-import { Input } from '../ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface props {
 	form: UseFormReturn<any>;
 	isToggled?: boolean;
-	toggle: Dispatch<SetStateAction<boolean>>;
+	toggle: (action: boolean) => void;
 }
 
 export const FixedAllowance = ({ form, isToggled, toggle }: props) => {

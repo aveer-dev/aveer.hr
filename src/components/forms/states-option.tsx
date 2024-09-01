@@ -14,7 +14,7 @@ interface props {
 	disabled?: boolean;
 	name: string;
 	label: string;
-	country: string;
+	country?: string;
 }
 
 const supabase = createClient();
@@ -24,6 +24,8 @@ export const SelectCountryState = ({ form, disabled, name, label, country }: pro
 	const [states, setStates] = useState<Tables<'states'>[]>([]);
 
 	const getStates = useCallback(async () => {
+		if (!country) return;
+
 		const { data, error } = await supabase.from('states').select().eq('country_code', country);
 		if (!error) setStates(data);
 	}, [country]);
