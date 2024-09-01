@@ -27,16 +27,18 @@ export const ContractStatus = ({ state, start_date, end_date }: { state: Databas
 	return (
 		<Badge className="gap-2 py-1 font-light" variant={stateData.state.includes('term') ? 'secondary-destructive' : stateData.state == 'active' || stateData.state == 'signed' ? 'success-secondary' : 'secondary'}>
 			{stateData.state}
-			<TooltipProvider>
+			{/* <TooltipProvider>
 				<Tooltip>
-					<TooltipTrigger>
-						<Info size={12} className="stroke-1" />
+					<TooltipTrigger asChild>
+						<div>
+							<Info size={12} className="stroke-1" />
+						</div>
 					</TooltipTrigger>
 					<TooltipContent className="max-w-52">
 						<p className="text-xs font-thin">{stateData.description}</p>
 					</TooltipContent>
 				</Tooltip>
-			</TooltipProvider>
+			</TooltipProvider> */}
 		</Badge>
 	);
 };

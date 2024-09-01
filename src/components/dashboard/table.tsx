@@ -17,7 +17,6 @@ interface DataTableProps<TData, TValue, TSubData, TSubValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
 	subColumns?: ColumnDef<TSubData, TSubValue>[];
-	subData?: TData[];
 	loading?: boolean;
 	org?: string;
 	link?: string;
@@ -25,7 +24,7 @@ interface DataTableProps<TData, TValue, TSubData, TSubValue> {
 
 const supabase = createClient();
 
-export function DataTable<TData, TValue, TSubData, TSubValue>({ columns, data, org, loading, subColumns, subData, link }: DataTableProps<TData, TValue, TSubData, TSubValue>) {
+export function DataTable<TData, TValue, TSubData, TSubValue>({ columns, data, org, loading, subColumns, link }: DataTableProps<TData, TValue, TSubData, TSubValue>) {
 	const table = useReactTable({
 		data,
 		columns,
@@ -164,7 +163,7 @@ const TableContent = ({ row, org, subColumns, link }: { row: Row<any>; org?: str
 	const [showSubColumn, setSubColumnState] = useState(false);
 	return (
 		<>
-			<TableRow className={cn(subColumns && 'cursor-pointer', showSubColumn && 'bg-muted/50')} data-state={row.getIsSelected() && 'selected'} onClick={() => setSubColumnState(!showSubColumn)}>
+			<TableRow className={cn(subColumns && 'cursor-pointer', showSubColumn && 'bg-muted/50')} data-state={row.getIsSelected() && 'selected'} onClick={() => showSubColumn && setSubColumnState(!showSubColumn)}>
 				{row.getVisibleCells().map((cell, index) => (
 					<TableCell key={cell.id} className={cn(link && 'p-0')}>
 						{link ? (

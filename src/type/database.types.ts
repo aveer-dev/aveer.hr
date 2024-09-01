@@ -20,29 +20,29 @@ export type Database = {
           id: number
           job_title: string
           level: number | null
-          org: string | null
+          org: string
           org_signature_string: string | null
           org_signed: string | null
           paid_leave: number | null
+          paid_leave_used: number
+          paternity_maternity_used: number
           probation_period: number | null
           profile: string | null
           profile_signature_string: string | null
           profile_signed: string | null
-          requirements: Json[] | null
           responsibilities: Json | null
           role: number | null
-          salary: number | null
+          salary: number
           sick_leave: number | null
+          sick_leave_used: number
           signed_by: string | null
           signing_bonus: number | null
           start_date: string | null
-          state: Database["public"]["Enums"]["is_open"] | null
           status: Database["public"]["Enums"]["contract_state"]
           terminated_by: string | null
           work_location: Database["public"]["Enums"]["work_locations"] | null
           work_schedule: string | null
           work_shedule_interval: string | null
-          years_of_experience: number | null
         }
         Insert: {
           additional_offerings?: Json[] | null
@@ -54,29 +54,29 @@ export type Database = {
           id?: number
           job_title: string
           level?: number | null
-          org?: string | null
+          org: string
           org_signature_string?: string | null
           org_signed?: string | null
           paid_leave?: number | null
+          paid_leave_used?: number
+          paternity_maternity_used?: number
           probation_period?: number | null
           profile?: string | null
           profile_signature_string?: string | null
           profile_signed?: string | null
-          requirements?: Json[] | null
           responsibilities?: Json | null
           role?: number | null
-          salary?: number | null
+          salary?: number
           sick_leave?: number | null
+          sick_leave_used?: number
           signed_by?: string | null
           signing_bonus?: number | null
           start_date?: string | null
-          state?: Database["public"]["Enums"]["is_open"] | null
           status?: Database["public"]["Enums"]["contract_state"]
           terminated_by?: string | null
           work_location?: Database["public"]["Enums"]["work_locations"] | null
           work_schedule?: string | null
           work_shedule_interval?: string | null
-          years_of_experience?: number | null
         }
         Update: {
           additional_offerings?: Json[] | null
@@ -88,29 +88,29 @@ export type Database = {
           id?: number
           job_title?: string
           level?: number | null
-          org?: string | null
+          org?: string
           org_signature_string?: string | null
           org_signed?: string | null
           paid_leave?: number | null
+          paid_leave_used?: number
+          paternity_maternity_used?: number
           probation_period?: number | null
           profile?: string | null
           profile_signature_string?: string | null
           profile_signed?: string | null
-          requirements?: Json[] | null
           responsibilities?: Json | null
           role?: number | null
-          salary?: number | null
+          salary?: number
           sick_leave?: number | null
+          sick_leave_used?: number
           signed_by?: string | null
           signing_bonus?: number | null
           start_date?: string | null
-          state?: Database["public"]["Enums"]["is_open"] | null
           status?: Database["public"]["Enums"]["contract_state"]
           terminated_by?: string | null
           work_location?: Database["public"]["Enums"]["work_locations"] | null
           work_schedule?: string | null
           work_shedule_interval?: string | null
-          years_of_experience?: number | null
         }
         Relationships: [
           {
@@ -857,6 +857,80 @@ export type Database = {
           },
         ]
       }
+      time_off: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          contract_id: number
+          created_at: string | null
+          employee_id: string
+          end_date: string
+          id: number
+          leave_type: Database["public"]["Enums"]["leave_type_enum"]
+          org: string
+          start_date: string
+          status: Database["public"]["Enums"]["leave_status_enum"]
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          contract_id: number
+          created_at?: string | null
+          employee_id: string
+          end_date: string
+          id?: never
+          leave_type: Database["public"]["Enums"]["leave_type_enum"]
+          org: string
+          start_date: string
+          status: Database["public"]["Enums"]["leave_status_enum"]
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          contract_id?: number
+          created_at?: string | null
+          employee_id?: string
+          end_date?: string
+          id?: never
+          leave_type?: Database["public"]["Enums"]["leave_type_enum"]
+          org?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["leave_status_enum"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_off_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_off_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_off_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_off_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -876,6 +950,13 @@ export type Database = {
       contract_type: "employee" | "contractor"
       employment_type: "full-time" | "part-time" | "contract"
       is_open: "open" | "closed" | "partial"
+      leave_status_enum:
+        | "pending"
+        | "denied"
+        | "approved"
+        | "more"
+        | "cancelled"
+      leave_type_enum: "paid" | "sick" | "maternity" | "paternity" | "unpaid"
       role_status: "open" | "close"
       work_locations: "on-site" | "remote" | "hybrid"
     }

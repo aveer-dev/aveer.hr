@@ -1,8 +1,21 @@
 import { Suspense } from 'react';
 import { Contract } from '@/components/contract/contract-details';
 import { Skeleton } from '@/components/ui/skeleton';
+import { createClient } from '@/utils/supabase/server';
+import { Details } from '@/components/ui/details';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { InfoIcon } from 'lucide-react';
 
-export default function ContractPage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
+export default async function ContractPage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
+	const supabase = createClient();
+	const { data, error } = await supabase
+		.from('contracts')
+		.select(
+			'*, organisations(id, name), level:employee_levels!contracts_level_fkey(level, role), entity:legal_entities!contracts_entity_fkey(incorporation_country, address_state, street_address, address_code), profile:profiles!contracts_profile_fkey(first_name, last_name, email, nationality), signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email), terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email)'
+		)
+		.match({ org: params.org, id: params.contract })
+		.single();
+
 	return (
 		<Suspense
 			fallback={
@@ -120,6 +133,26 @@ export default function ContractPage({ params }: { params: { [key: string]: stri
 				</div>
 			}>
 			<Contract org={params.org} id={params.contract} signatureType={'profile'} />
+
+			{/* <section className="mx-auto mt-6 grid max-w-4xl gap-10 p-6 pt-0">
+				<Tabs defaultValue="overview" className="grid gap-6">
+					<TabsList className="grid w-fit grid-cols-2">
+						<TabsTrigger value="overview">Overview</TabsTrigger>
+						<TabsTrigger value="contract">Contract</TabsTrigger>
+					</TabsList>
+
+					<TabsContent value="overview"></TabsContent>
+
+					<TabsContent value="contract" className="grid gap-10">
+						<div className="flex w-fit items-center gap-3 rounded-sm border border-accent bg-accent px-3 py-2 text-xs font-thin">
+							<InfoIcon size={12} />
+							{`You can not edit your contract details. You'd need to reachout to your contact or manager to request an edit/change`}
+						</div>
+
+						<Details formType="contract" data={data} />
+					</TabsContent>
+				</Tabs>
+			</section> */}
 		</Suspense>
 	);
 }

@@ -174,7 +174,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 							? String(openRoleDuplicate?.level)
 							: undefined,
 			work_location: contractData?.work_location || contractDuplicate?.work_location || openRoleData?.work_location || openRoleDuplicate?.work_location || undefined,
-			requirements: (contractData?.requirements as string[]) || (contractDuplicate?.requirements as string[]) || (openRoleData?.requirements as string[]) || (openRoleDuplicate?.requirements as string[]) || [],
+			requirements: (openRoleData?.requirements as string[]) || (openRoleDuplicate?.requirements as string[]) || [],
 			years_of_experience: openRoleData?.years_of_experience || openRoleDuplicate?.years_of_experience || Number('')
 		}
 	});
