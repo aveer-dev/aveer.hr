@@ -30,11 +30,11 @@ export const SelectLevel = ({ form, setLevelDetails, selectedLevelId, orgJobLeve
 			setLevelDetails({ level: activeLevel, isOrgs: true });
 			setInitialActiveLevel(true);
 		}
-	}, [isInitialActiveLevelSet, selectedLevelId, setLevelDetails]);
+	}, [isInitialActiveLevelSet, selectedLevelId, setLevelDetails, orgJobLevels]);
 
 	useEffect(() => {
 		getOrgLevels();
-	}, [getOrgLevels, orgJobLevels, form]);
+	}, [getOrgLevels]);
 
 	const onSelectLevelFromOrgLevels = (level: TablesInsert<'employee_levels'>, isOrgs: boolean = true) => {
 		form.setValue('level', String(level.id));

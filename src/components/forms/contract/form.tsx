@@ -63,7 +63,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	const [newContractId, setNewContractId] = useState(0);
 	const [newRoleId, setNewRoleId] = useState(0);
 	const [isLevelCreated, setLevelCreationState] = useState(false);
-	const [showRolesOption, toggleRoleOption] = useState(formType == 'contract' ? true : false);
+	const [showRolesOption, toggleRoleOption] = useState(formType == 'contract' ? !!(contractData || contractDuplicate)?.role : false);
 	const [showFormDetails, toggleFormDetails] = useState(false);
 	const [showCompensationDialog, toggleCompensationDialog] = useState(false);
 	const [showBenefitsDialog, toggleBenefitsDialog] = useState(false);
@@ -196,7 +196,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		const { data, error } = await supabase.from('employee_levels').select().match({ org: params.org });
 		if (error) toast.error('🫤 Error', { description: `Unable to fetch existing org levels ${error.message}` });
 		if (data?.length) updateOrgJobLevels(data);
-	}, []);
+	}, [params]);
 
 	const isEntityEOR = async (entityId: number) => {
 		const entity = eorEntities.find(entity => entity.id === Number(entityId));

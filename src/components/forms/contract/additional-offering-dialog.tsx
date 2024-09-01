@@ -24,7 +24,7 @@ export const AdditionalOfferingDialog = ({ isDialogOpen, openDialog, form, orgBe
 	useEffect(() => {
 		const filteredBenefits = form.getValues('additional_offerings').filter((benefit: string) => orgBenefits?.find(ben => ben == benefit));
 		setBenefitsFromOrg(filteredBenefits);
-	}, [form]);
+	}, [form, orgBenefits]);
 
 	return (
 		<Sheet open={isDialogOpen} onOpenChange={openDialog}>
