@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart, XAxis } from 'recharts';
 import { Separator } from '@/components/ui/separator';
-import { EllipsisVertical } from 'lucide-react';
+import { EllipsisVertical, FileDown, FilePlus, FileText, Pencil, Trash2 } from 'lucide-react';
 import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/client';
 import { useCallback, useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { LeaveRequestDialog } from './leave-request-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const chartConfig = {
 	days: {
@@ -65,7 +66,7 @@ export const ContractOverview = ({ isOpen, toggle, data }: props) => {
 		const { data, error } = await supabase
 			.from('time_off')
 			.select()
-			.match({ org: (contract.org as any).subdomain, employee_id: contract.profile, status: 'pending' });
+			.match({ org: (contract.org as any).subdomain, employee_id: (contract.profile as any).id, status: 'pending' });
 
 		if (error) return toast('😬 Ooops', { description: 'Unable to fetch your requests' });
 
@@ -168,7 +169,7 @@ export const ContractOverview = ({ isOpen, toggle, data }: props) => {
 										? new Intl.NumberFormat('en-US', {
 												style: 'currency',
 												currency: 'USD'
-											}).format(data?.salary)
+											}).format(data?.salary / 12)
 										: '00'}
 								</h2>
 
@@ -179,6 +180,140 @@ export const ContractOverview = ({ isOpen, toggle, data }: props) => {
 							</CardContent>
 						</Card>
 					</div>
+
+					<Card className="grad h-fit w-[350px] border-none drop-shadow-sm backdrop-blur-md">
+						<CardHeader>
+							<CardTitle className="flex items-center justify-between text-base">
+								Personal details
+								<Button size={'icon'} className="h-8 w-8" variant={'secondary'}>
+									<Pencil size={12} />
+								</Button>
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="grid gap-10 p-6 pt-0">
+							<ul className="grid gap-6 text-sm font-light">
+								<li className="grid gap-1">
+									First name <div className="font-medium">{(data?.profile as any)?.first_name}</div>
+								</li>
+								<li className="grid gap-1">
+									Last name <div className="font-medium">{(data?.profile as any)?.last_name}</div>
+								</li>
+								<li className="grid gap-1">
+									Gender <div className="font-medium"></div>
+								</li>
+								<li className="grid gap-1 !border-b-0">
+									Email <div className="font-medium">{(data?.profile as any)?.email}</div>
+								</li>
+								<li className="!border-b-0">
+									Country <div className="font-medium">{(data?.profile as any)?.nationality.name}</div>
+								</li>
+							</ul>
+						</CardContent>
+					</Card>
+
+					<Card className="grad w-[350px] border-none drop-shadow-sm backdrop-blur-md">
+						<CardHeader>
+							<CardTitle className="flex items-center justify-between text-base">
+								Documents
+								<Button size={'icon'} className="h-8 w-8" variant={'secondary'}>
+									<FilePlus size={12} />
+								</Button>
+							</CardTitle>
+						</CardHeader>
+
+						<CardContent className="grid gap-10 px-2 pb-6 pt-0">
+							<ul className="grid gap-2 text-sm font-light">
+								<li className="flex items-center justify-between gap-1 rounded-lg px-4 py-2 text-sm transition-all hover:bg-accent">
+									<div className="flex items-center gap-2">
+										<FileText size={12} className="text-muted-foreground" />
+										NYSC certtificate.pdf
+									</div>
+									<div className="text-muted-foreground">
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<Button variant="ghost" className="h-8 w-8" size={'icon'}>
+													<EllipsisVertical size={12} />
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent className="w-fit" align="end">
+												<DropdownMenuItem asChild>
+													<Button variant={'ghost'} className="flex w-full items-center justify-start gap-2">
+														<FileDown size={14} />
+														<span>Download</span>
+													</Button>
+												</DropdownMenuItem>
+
+												<DropdownMenuItem asChild>
+													<Button variant={'ghost'} className="flex w-full items-center justify-start gap-2 text-destructive hover:text-destructive">
+														<Trash2 size={14} />
+														<span>Delete</span>
+													</Button>
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</div>
+								</li>
+
+								<li className="flex items-center justify-between gap-1 rounded-lg px-4 py-2 text-sm transition-all hover:bg-accent">
+									<div className="flex items-center gap-2">
+										<FileText size={12} className="text-muted-foreground" />
+										NYSC certtificate.pdf
+									</div>
+									<div className="text-muted-foreground">
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<Button variant="ghost" className="h-8 w-8" size={'icon'}>
+													<EllipsisVertical size={12} />
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent className="w-fit" align="end">
+												<DropdownMenuItem asChild>
+													<Button variant={'ghost'} className="flex w-full items-center justify-start gap-2">
+														<FileDown size={14} />
+														<span>Download</span>
+													</Button>
+												</DropdownMenuItem>
+
+												<DropdownMenuItem asChild>
+													<Button variant={'ghost'} className="flex w-full items-center justify-start gap-2 text-destructive hover:text-destructive">
+														<Trash2 size={14} />
+														<span>Delete</span>
+													</Button>
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</div>
+								</li>
+
+								<li className="flex items-center justify-between gap-1 rounded-lg px-4 py-2 text-sm transition-all hover:bg-accent">
+									<div className="flex items-center gap-2">
+										<FileText size={12} className="text-muted-foreground" />
+										NYSC certtificate.pdf
+									</div>
+									<div className="text-muted-foreground">
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<Button variant="ghost" className="h-8 w-8" size={'icon'}>
+													<EllipsisVertical size={12} />
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent className="w-fit" align="end">
+												<DropdownMenuItem className="flex w-full items-center justify-start gap-2">
+													<FileDown size={14} />
+													<span>Download</span>
+												</DropdownMenuItem>
+
+												<DropdownMenuItem className="flex w-full items-center justify-start gap-2 text-destructive hover:text-destructive">
+													<Trash2 size={14} />
+													<span>Delete</span>
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</div>
+								</li>
+							</ul>
+						</CardContent>
+					</Card>
 				</section>
 			</AlertDialogContent>
 		</AlertDialog>
