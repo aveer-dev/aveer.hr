@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { LeaveRequestDialog } from './leave-request-dialog';
 
 const chartConfig = {
 	days: {
@@ -88,6 +89,7 @@ export const ContractOverview = ({ isOpen, toggle, data }: props) => {
 							{(data?.entity as any).incorporation_country.name}
 						</Badge>
 					</AlertDialogTitle>
+
 					<AlertDialogDescription>Role: {data?.job_title}</AlertDialogDescription>
 				</AlertDialogHeader>
 
@@ -97,7 +99,8 @@ export const ContractOverview = ({ isOpen, toggle, data }: props) => {
 							<CardTitle className="flex items-center justify-between text-2xl">
 								Leave Days
 								<div className="flex items-center gap-2">
-									<Button variant={'secondary'}>Request leave</Button>
+									<LeaveRequestDialog profileId={data?.profile} contractId={data?.id} onCreateLeave={() => getRequests(data as any)} org={(data?.org as any).subdomain} />
+
 									<Button variant={'secondary'} size={'icon'}>
 										<EllipsisVertical size={12} />
 									</Button>
@@ -109,7 +112,7 @@ export const ContractOverview = ({ isOpen, toggle, data }: props) => {
 							<div className="grid gap-2 py-4">
 								<div className="flex w-full justify-between px-4">
 									{chartData.map((_data, index) => (
-										<div key={index} className="w-20 text-center text-xs text-green-500 text-muted-foreground">
+										<div key={index} className="w-20 text-center text-xs text-green-500">
 											{chartData[index]?.total - chartData[index]?.days} days left
 										</div>
 									))}

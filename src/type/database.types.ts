@@ -864,12 +864,15 @@ export type Database = {
           contract_id: number
           created_at: string | null
           employee_id: string
-          end_date: string
+          from: string
+          hand_over: string | null
+          hand_over_note: string | null
           id: number
           leave_type: Database["public"]["Enums"]["leave_type_enum"]
+          note: string | null
           org: string
-          start_date: string
           status: Database["public"]["Enums"]["leave_status_enum"]
+          to: string
           updated_at: string | null
         }
         Insert: {
@@ -878,12 +881,15 @@ export type Database = {
           contract_id: number
           created_at?: string | null
           employee_id: string
-          end_date: string
+          from: string
+          hand_over?: string | null
+          hand_over_note?: string | null
           id?: never
           leave_type: Database["public"]["Enums"]["leave_type_enum"]
+          note?: string | null
           org: string
-          start_date: string
           status: Database["public"]["Enums"]["leave_status_enum"]
+          to: string
           updated_at?: string | null
         }
         Update: {
@@ -892,12 +898,15 @@ export type Database = {
           contract_id?: number
           created_at?: string | null
           employee_id?: string
-          end_date?: string
+          from?: string
+          hand_over?: string | null
+          hand_over_note?: string | null
           id?: never
           leave_type?: Database["public"]["Enums"]["leave_type_enum"]
+          note?: string | null
           org?: string
-          start_date?: string
           status?: Database["public"]["Enums"]["leave_status_enum"]
+          to?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -918,6 +927,13 @@ export type Database = {
           {
             foreignKeyName: "time_off_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_off_hand_over_fkey"
+            columns: ["hand_over"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
