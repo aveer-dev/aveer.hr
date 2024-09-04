@@ -13,6 +13,7 @@ import { BackButton } from '@/components/ui/back-button';
 import { JobApplicationForm } from '@/components/job-application/application-form';
 import { submitApplication } from '@/components/forms/contract/role.action';
 import { Badge } from '@/components/ui/badge';
+import { Details } from '@/components/ui/details';
 
 interface props {
 	role: string;
@@ -59,12 +60,12 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 
 	return (
 		<>
-			<section className="mx-auto -mt-6 grid max-w-4xl gap-10 p-6 pt-0">
+			<section className="mx-auto grid max-w-4xl gap-10 pb-6 pt-0">
 				<div className="flex justify-between">
-					<div className="relative flex">
-						<BackButton className="absolute -left-16" />
+					<div className="relative">
+						<BackButton />
 
-						<div className="grid gap-3">
+						<div className="mt-6 grid gap-3 lg:mt-0">
 							<h1 className="flex items-center gap-4 text-2xl font-bold">
 								{data?.job_title}{' '}
 								{data.state == 'closed' && type == 'job' && (
@@ -84,7 +85,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 						</div>
 					</div>
 
-					<div className="flex gap-3">
+					<div className="lg: fixed bottom-0 left-0 flex w-full gap-3 border-t bg-background p-4 lg:relative lg:w-fit lg:border-t-0 lg:p-0">
 						{user && type == 'role' && (
 							<>
 								<ToggleRoleStatus status={data?.state} org={orgId} role={role} />
@@ -118,127 +119,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 					</div>
 				</div>
 
-				<div className="mt-5 grid gap-20">
-					<div>
-						<h1 className="mb-4 text-xl font-semibold">Job Details</h1>
-						<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-							<li className="grid gap-3">
-								<p className="text-sm font-medium">Job Title</p>
-								<p className="text-sm font-light">{data?.job_title}</p>
-							</li>
-							<li className="grid gap-3">
-								<p className="text-sm font-medium">Seniority Level</p>
-								<p className="text-sm font-light">
-									{data?.level?.level} {data?.level?.role ? '•' : ''} {data?.level?.role}
-								</p>
-							</li>
-							<li className="grid gap-3">
-								<p className="text-sm font-medium">Employment Type</p>
-								<p className="text-sm font-light capitalize">{data?.employment_type}</p>
-							</li>
-						</ul>
-						<div className="mt-10 grid gap-3">
-							<p className="text-sm font-medium">Job Responsibilities</p>
-							<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.responsibilities as string[])?.map((responsibility, index) => <li key={index}>{responsibility}</li>)}</ul>
-						</div>
-					</div>
-
-					<div>
-						<h1 className="mb-4 text-xl font-semibold">Job Requirements</h1>
-						<ul className="grid items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
-							<li className="grid gap-3">
-								<p className="text-sm font-medium">Experience</p>
-								<p className="text-sm font-light">{data?.years_of_experience} years</p>
-							</li>
-
-							<li className="grid gap-3">
-								<h3 className="text-sm font-medium">Job Requirements</h3>
-								<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.requirements as string[])?.map((requirement, index) => <li key={index}>{requirement}</li>)}</ul>
-							</li>
-						</ul>
-					</div>
-
-					<div>
-						<h1 className="mb-4 text-xl font-semibold">Compensation</h1>
-						<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-							<li className="grid gap-3">
-								<p className="text-sm font-medium">Salary</p>
-								<p className="text-sm font-light">
-									{new Intl.NumberFormat('en-US', {
-										style: 'currency',
-										currency: 'USD'
-									}).format(Number(data?.salary))}
-								</p>
-							</li>
-
-							<li className="grid gap-3">
-								<p className="text-sm font-medium">Signing Bonus</p>
-								<p className="text-sm font-light">
-									{data?.signing_bonus
-										? new Intl.NumberFormat('en-US', {
-												style: 'currency',
-												currency: 'USD'
-											}).format(Number(data?.signing_bonus))
-										: '--'}
-								</p>
-							</li>
-
-							{(data.additional_offerings as string[])?.length > 0 && (
-								<li className="grid h-fit items-start gap-4">
-									<h3 className="h-fit text-sm font-medium">Additional offerings</h3>
-									<ul className="ml-3 grid list-disc gap-4 text-sm font-light">
-										{(data.additional_offerings as string[])?.map((offer, index) => (
-											<li key={index} className="text-sm font-light">
-												{offer}
-											</li>
-										))}
-									</ul>
-								</li>
-							)}
-
-							{(data?.fixed_allowance as [])?.length > 0 && (
-								<li className="grid h-fit gap-4">
-									<h3 className="text-sm font-medium">Fixed Allowances</h3>
-									<ul className="grid list-disc gap-3 pl-3 text-sm font-light">
-										{(data?.fixed_allowance as { name: string; frequency: string; amount: string }[])?.map((allowance, index) => (
-											<li key={index}>
-												<div className="flex items-baseline justify-between p-1 font-light">
-													<div>
-														{allowance?.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span> • <span className="text-xs text-muted-foreground">{allowance.frequency}</span>
-													</div>
-												</div>
-											</li>
-										))}
-									</ul>
-								</li>
-							)}
-						</ul>
-					</div>
-
-					<div>
-						<h1 className="mb-4 text-xl font-semibold">Job Schedule</h1>
-						<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-							<li className="grid gap-3">
-								<p className="text-sm font-medium">Paid Leave</p>
-								<p className="text-sm font-light">{data?.paid_leave} Days</p>
-							</li>
-							<li className="grid gap-3">
-								<p className="text-sm font-medium">Sick Leave</p>
-								<p className="text-sm font-light">{data?.sick_leave} Days</p>
-							</li>
-							<li className="grid gap-3">
-								<p className="text-sm font-medium">Probation Period</p>
-								<p className="text-sm font-light">{data?.probation_period} Days</p>
-							</li>
-							<li className="grid gap-3">
-								<p className="text-sm font-medium">Work Schedule</p>
-								<p className="text-sm font-light">
-									{data?.work_schedule}hrs, {data?.work_shedule_interval}
-								</p>
-							</li>
-						</ul>
-					</div>
-				</div>
+				<Details data={data} formType={'role'} />
 			</section>
 
 			{data.state == 'open' && <JobApplicationForm roleId={Number(role)} org={orgId} submit={submitApplication} />}

@@ -9,7 +9,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { FormSection, FormSectionDescription, InputsContainer } from '@/components/forms/form-section';
 import { Textarea } from '@/components/ui/textarea';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { SelectCountry } from '@/components/forms/countries-option';
 import { SelectCountryState } from '@/components/forms/states-option';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -19,6 +19,8 @@ import { createClient } from '@/utils/supabase/client';
 import { useFormStatus } from 'react-dom';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { ApplicationSuccessDialog } from './application-success-dialog';
+import { Plus, Trash2 } from 'lucide-react';
+import { Separator } from '../ui/separator';
 
 const formSchema = z.object({
 	first_name: z.string().min(1, 'Please enter first name'),
@@ -28,7 +30,7 @@ const formSchema = z.object({
 	resume: z.string().optional(),
 	cover_letter: z.string().optional(),
 	country_location: z.string().min(1, 'Please select your country'),
-	state_location: z.number(),
+	state_location: z.string(),
 	work_authorization: z.boolean(),
 	require_sponsorship: z.boolean(),
 	race_ethnicity: z.string(),
@@ -36,7 +38,8 @@ const formSchema = z.object({
 	gender: z.string().optional(),
 	disability: z.string().optional(),
 	links: z.array(z.object({ name: z.string(), link: z.string() })),
-	documents: z.array(z.object({ name: z.string(), path: z.string(), file: z.any() }))
+	documents: z.array(z.object({ name: z.string(), path: z.string(), file: z.any() })),
+	custom_answers: z.array(z.object({ name: z.string(), answer: z.string().min(1) }))
 });
 const supabase = createClient();
 
@@ -47,13 +50,13 @@ interface props {
 }
 
 export function JobApplicationForm({ org, roleId, submit }: props) {
-	const [selectedCountry, selectCountry] = useState<Tables<'countries'>>();
 	const [showManualResume, toggleManualResumeState] = useState(false);
 	const [showSuccessDialog, toggleSuccessDialog] = useState(false);
 	const [isSubmiting, toggleSubmitState] = useState(false);
 	const [showManualCoverLetter, toggleManualCoverLetterState] = useState(false);
 	const [applicationId, setApplicationId] = useState<number>();
-	// const [filesToUpload, updateFilesToUpload] = useState<{ name: string; path: string; file: File }[]>([]);
+	const [customQuestions, setCustomQuestions] = useState<string[]>([]);
+	const [links, setLinks] = useState<{ name: string; link: string }[]>([{ name: 'linkedin', link: '' }]);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -65,15 +68,16 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 			resume: '',
 			cover_letter: '',
 			country_location: '',
-			state_location: undefined,
 			work_authorization: undefined,
 			require_sponsorship: undefined,
 			race_ethnicity: '',
 			veterian_status: '',
 			disability: '',
-			links: [],
+			links: [{ name: 'linkedin', link: '' }],
 			gender: '',
-			documents: []
+			documents: [],
+			custom_answers: [],
+			state_location: ''
 		}
 	});
 
@@ -147,6 +151,21 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 
 		if (file) reader.readAsDataURL(file);
 	};
+
+	useEffect(() => {
+		const getRole = async (roleId: number) => {
+			const { data, error } = await supabase.from('open_roles').select('custom_fields').eq('id', roleId).single();
+			if (error) return toast.error(error.message);
+
+			setCustomQuestions(data.custom_fields as string[]);
+			form.setValue(
+				'custom_answers',
+				(data.custom_fields as string[]).map(question => ({ name: question, answer: '' }))
+			);
+		};
+
+		getRole(roleId);
+	}, [roleId, form]);
 
 	return (
 		<section className="mx-auto mt-16 grid max-w-4xl gap-4 p-6 pt-24" id="application-form">
@@ -240,7 +259,7 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 											<FormItem>
 												<FormLabel>Resume</FormLabel>
 												<FormControl>
-													<Input accept="application/pdf,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={event => pickFile(event, 'resume')} type="file" />
+													<Input accept="application/pdf" onChange={event => pickFile(event, 'resume')} type="file" />
 												</FormControl>
 												<FormDescription>
 													Or{' '}
@@ -284,7 +303,7 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 											<FormItem>
 												<FormLabel>Cover letter</FormLabel>
 												<FormControl>
-													<Input accept="application/pdf,image/png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={event => pickFile(event, 'cover letter')} type="file" />
+													<Input onChange={event => pickFile(event, 'cover letter')} type="file" />
 												</FormControl>
 												<FormDescription>
 													Or{' '}
@@ -331,9 +350,21 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 
 						<InputsContainer>
 							<div className="grid gap-x-6 gap-y-8">
-								<SelectCountry onSelectCountry={event => selectCountry(event)} name="country_location" label="Where do you reside?" form={form} />
+								<SelectCountry name="country_location" label="Where do you reside?" form={form} />
 
-								<SelectCountryState country={selectedCountry?.country_code} form={form} name="state_location" label="State / City / Province" />
+								<FormField
+									control={form.control}
+									name="state_location"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>State / province / city</FormLabel>
+											<FormControl>
+												<Input {...field} placeholder="Enter state / province / city" />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
 								<FormField
 									control={form.control}
@@ -390,19 +421,130 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 
 						<InputsContainer>
 							<div className="grid gap-x-6 gap-y-8">
-								<FormField
-									control={form.control}
-									name="links"
-									render={() => (
-										<FormItem>
-											<FormLabel>Linkedin</FormLabel>
-											<FormControl>
-												<Input type="url" onChange={event => form.setValue('links', [...form.getValues('links'), { name: 'linkedin', link: event.target.value }])} inputMode="url" placeholder="Enter linkedin profile link" />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
+								{links.map((link, index) => (
+									<FormField
+										control={form.control}
+										key={index + 'link'}
+										name={`links.${index}`}
+										render={() => (
+											<FormItem>
+												<FormLabel className="capitalize">{link.name}</FormLabel>
+												<div className="flex gap-1">
+													<FormControl>
+														<Input type="url" onChange={event => form.setValue(`links.${index}`, { ...form.getValues(`links.${index}`), link: event.target.value })} inputMode="url" placeholder="Enter link here" />
+													</FormControl>
+													<Button
+														type="button"
+														onClick={() => {
+															const formLinks = structuredClone(form.getValues('links'));
+															formLinks.splice(index, 1);
+															setLinks([...formLinks]);
+															form.setValue(`links`, formLinks);
+														}}
+														size={'icon'}
+														variant={'ghost'}
+														className="text-destructive hover:bg-destructive/5 hover:text-destructive focus:bg-destructive/5 focus:text-destructive">
+														<Trash2 size={12} />
+													</Button>
+												</div>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								))}
+
+								<div className="flex flex-wrap gap-2">
+									{!links.find(link => link.name == 'portfolio') && (
+										<Button
+											type="button"
+											onClick={() => {
+												form.setValue('links', [...form.getValues('links'), { name: 'portfolio', link: '' }]);
+												setLinks([...links, { name: 'portfolio', link: '' }]);
+											}}
+											variant={'secondary'}
+											className="w-fit gap-2">
+											<Plus size={10} />
+											<Separator orientation="vertical" />
+											Portfolio link
+										</Button>
 									)}
-								/>
+									{!links.find(link => link.name == 'github') && (
+										<Button
+											type="button"
+											onClick={() => {
+												form.setValue('links', [...form.getValues('links'), { name: 'github', link: '' }]);
+												setLinks([...links, { name: 'github', link: '' }]);
+											}}
+											variant={'secondary'}
+											className="w-fit gap-2">
+											<Plus size={10} />
+											<Separator orientation="vertical" />
+											Github
+										</Button>
+									)}
+									{!links.find(link => link.name == 'documents') && (
+										<Button
+											type="button"
+											onClick={() => {
+												form.setValue('links', [...form.getValues('links'), { name: 'documents', link: '' }]);
+												setLinks([...links, { name: 'documents', link: '' }]);
+											}}
+											variant={'secondary'}
+											className="w-fit gap-2">
+											<Plus size={10} />
+											<Separator orientation="vertical" />
+											Documents
+										</Button>
+									)}
+									{!links.find(link => link.name == 'linkedin') && (
+										<Button
+											type="button"
+											onClick={() => {
+												form.setValue('links', [...form.getValues('links'), { name: 'linkedin', link: '' }]);
+												setLinks([...links, { name: 'linkedin', link: '' }]);
+											}}
+											variant={'secondary'}
+											className="w-fit gap-2">
+											<Plus size={10} />
+											<Separator orientation="vertical" />
+											Linkedin
+										</Button>
+									)}
+								</div>
+							</div>
+						</InputsContainer>
+					</FormSection>
+
+					<FormSection>
+						<FormSectionDescription>
+							<h2 className="font-medium">Additional questions</h2>
+							<p className="text-balance text-xs font-light text-muted-foreground">These are specific qiestions required for this role</p>
+						</FormSectionDescription>
+
+						<InputsContainer>
+							<div className="grid gap-x-6 gap-y-8">
+								{customQuestions.map((question, index) => (
+									<FormField
+										key={index + 'question'}
+										control={form.control}
+										name={`custom_answers.${index}`}
+										render={() => (
+											<FormItem>
+												<FormLabel>{question}</FormLabel>
+												<FormControl>
+													<Input
+														onChange={event => {
+															form.setValue(`custom_answers.${index}`, { ...form.getValues(`custom_answers.${index}`), answer: event.target.value });
+															console.log(form.getValues('custom_answers'));
+														}}
+														placeholder="Enter answers here"
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								))}
 							</div>
 						</InputsContainer>
 					</FormSection>

@@ -18,7 +18,7 @@ export const Roles = async ({ orgId, type }: props) => {
 	const query: { org: string; state?: string } = { org: orgId };
 	if (type == 'job') query.state = 'open';
 
-	const { data, error } = await supabase.from('open_roles').select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country)').match(query);
+	const { data, error } = await supabase.from('open_roles').select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country)').match(query).order('created_at');
 
 	if (error) {
 		return (

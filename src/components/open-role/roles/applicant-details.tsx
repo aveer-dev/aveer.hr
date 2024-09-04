@@ -185,22 +185,34 @@ export const ApplicantDetails = ({ data, onUpdate }: props) => {
 						</div>
 
 						<div>
+							<h1 className="mb-4 text-base font-semibold">Custom Questions</h1>
+							<ul className="grid items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
+								{(data?.custom_answers as any[]).map(answer => (
+									<li key={answer.name} className="grid gap-3">
+										<h3 className="text-sm font-medium capitalize">{answer.name}</h3>
+										<p className="text-sm font-light capitalize">{answer.answer}</p>
+									</li>
+								))}
+							</ul>
+						</div>
+
+						<div>
 							<h1 className="mb-4 text-base font-semibold">Voluntary Self-Identification</h1>
 							<ul className="grid grid-cols-2 items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
 								<li className="grid gap-3">
-									<p className="text-sm font-medium">Gender</p>
+									<h3 className="text-sm font-medium">Gender</h3>
 									<p className="text-sm font-light capitalize">{data.gender}</p>
 								</li>
 								<li className="grid gap-3">
-									<p className="text-sm font-medium">Race / Ethnicity</p>
+									<h3 className="text-sm font-medium">Race / Ethnicity</h3>
 									<p className="text-sm font-light capitalize">{data.race_ethnicity.replaceAll('-', ' ')}</p>
 								</li>
 								<li className="grid gap-3">
-									<p className="text-sm font-medium">Veterian Status</p>
+									<h3 className="text-sm font-medium">Veterian Status</h3>
 									<p className="text-sm font-light capitalize">{data.veterian_status}</p>
 								</li>
 								<li className="grid gap-3">
-									<p className="text-sm font-medium">Disability status</p>
+									<h3 className="text-sm font-medium">Disability status</h3>
 									<p className="text-sm font-light capitalize">{data.disability}</p>
 								</li>
 							</ul>

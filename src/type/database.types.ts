@@ -286,6 +286,7 @@ export type Database = {
           cover_letter: string | null
           cover_letter_url: string | null
           created_at: string
+          custom_answers: Json[] | null
           disability: string | null
           documents: Json[]
           email: string
@@ -302,7 +303,7 @@ export type Database = {
           resume_url: string | null
           role: number
           stage: string
-          state_location: number
+          state_location: string
           veterian_status: string | null
           work_authorization: boolean
         }
@@ -311,6 +312,7 @@ export type Database = {
           cover_letter?: string | null
           cover_letter_url?: string | null
           created_at?: string
+          custom_answers?: Json[] | null
           disability?: string | null
           documents?: Json[]
           email: string
@@ -327,7 +329,7 @@ export type Database = {
           resume_url?: string | null
           role: number
           stage?: string
-          state_location: number
+          state_location: string
           veterian_status?: string | null
           work_authorization: boolean
         }
@@ -336,6 +338,7 @@ export type Database = {
           cover_letter?: string | null
           cover_letter_url?: string | null
           created_at?: string
+          custom_answers?: Json[] | null
           disability?: string | null
           documents?: Json[]
           email?: string
@@ -352,7 +355,7 @@ export type Database = {
           resume_url?: string | null
           role?: number
           stage?: string
-          state_location?: number
+          state_location?: string
           veterian_status?: string | null
           work_authorization?: boolean
         }
@@ -376,13 +379,6 @@ export type Database = {
             columns: ["role"]
             isOneToOne: false
             referencedRelation: "open_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "job_applications_state_location_fkey"
-            columns: ["state_location"]
-            isOneToOne: false
-            referencedRelation: "states"
             referencedColumns: ["id"]
           },
         ]
@@ -468,6 +464,7 @@ export type Database = {
           additional_offerings: Json[] | null
           applicants: number
           created_at: string
+          custom_fields: Json[] | null
           employment_type: Database["public"]["Enums"]["employment_type"]
           entity: number
           fixed_allowance: Json | null
@@ -492,6 +489,7 @@ export type Database = {
           additional_offerings?: Json[] | null
           applicants?: number
           created_at?: string
+          custom_fields?: Json[] | null
           employment_type: Database["public"]["Enums"]["employment_type"]
           entity: number
           fixed_allowance?: Json | null
@@ -516,6 +514,7 @@ export type Database = {
           additional_offerings?: Json[] | null
           applicants?: number
           created_at?: string
+          custom_fields?: Json[] | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
           entity?: number
           fixed_allowance?: Json | null

@@ -1,5 +1,5 @@
 import { AlertDialogHeader, AlertDialogFooter, AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription } from '@/components/ui/alert-dialog';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -9,8 +9,9 @@ interface props {
 	isAlertOpen: boolean;
 	toggleDialog: Dispatch<SetStateAction<boolean>>;
 	roleId: number;
+	onClose?: (action?: string) => void;
 }
-export const NewRoleDialog = ({ isAlertOpen, toggleDialog, roleId }: props) => {
+export const NewRoleDialog = ({ isAlertOpen, toggleDialog, roleId, onClose }: props) => {
 	const router = useRouter();
 
 	return (
@@ -23,9 +24,14 @@ export const NewRoleDialog = ({ isAlertOpen, toggleDialog, roleId }: props) => {
 				</AlertDialogHeader>
 
 				<AlertDialogFooter>
-					<Link href={`./new`} onClick={() => toggleDialog(false)} className={cn(buttonVariants({ variant: 'outline' }))}>
+					<Button
+						onClick={() => {
+							toggleDialog(false);
+							onClose && onClose();
+						}}
+						variant={'outline'}>
 						Create another role
-					</Link>
+					</Button>
 
 					<Link
 						href={`./${roleId}`}

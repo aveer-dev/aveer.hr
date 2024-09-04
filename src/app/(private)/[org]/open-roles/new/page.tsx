@@ -21,8 +21,8 @@ export default async function Home({ params, searchParams }: { params: { [key: s
 		<Suspense fallback={<PageLoader isLoading />}>
 			<div className="mx-auto max-w-4xl">
 				<div className="relative">
-					<BackButton className="absolute -left-16" />
-					<h1 className="mb-6 text-xl font-semibold">Create a role</h1>
+					<BackButton />
+					<h1 className="mb-6 mt-6 text-xl font-semibold lg:mt-0">Create a role</h1>
 				</div>
 
 				<Suspense

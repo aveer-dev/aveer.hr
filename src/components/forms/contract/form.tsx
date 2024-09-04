@@ -27,7 +27,7 @@ import { JobRequirements } from '@/components/forms/job-requirements';
 import { createOpenRole, updateRole } from './role.action';
 import { SelectCountry } from '../countries-option';
 import { NewRoleDialog } from './new-role-dialog';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { ContractDetails } from './contract-details';
 import { cn } from '@/lib/utils';
@@ -35,6 +35,7 @@ import { CompensationDialog } from './compensation-dialog';
 import { AdditionalOfferingDialog } from './additional-offering-dialog';
 import { JobScheduleDialog } from './job-schedule';
 import { FormSection, FormSectionDescription, InputsContainer } from '../form-section';
+import { CustomFields } from './custom-fields';
 
 const supabase = createClient();
 
@@ -98,7 +99,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		entity: z.string(),
 		manager: z.string().optional(),
 		department: z.string().optional(),
-		role: showRolesOption ? z.string() : z.string().optional()
+		role: showRolesOption ? z.string() : z.string().optional(),
+		customFields: z.array(z.string())
 	});
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -176,7 +178,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 							: undefined,
 			work_location: contractData?.work_location || contractDuplicate?.work_location || openRoleData?.work_location || openRoleDuplicate?.work_location || undefined,
 			requirements: (openRoleData?.requirements as string[]) || (openRoleDuplicate?.requirements as string[]) || [],
-			years_of_experience: openRoleData?.years_of_experience || openRoleDuplicate?.years_of_experience || Number('')
+			years_of_experience: openRoleData?.years_of_experience || openRoleDuplicate?.years_of_experience || Number(''),
+			customFields: []
 		}
 	});
 
@@ -233,8 +236,9 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			org: params.org,
 			work_location: values.work_location,
 			years_of_experience: values.years_of_experience,
-			state: 'open',
-			additional_offerings: values.additional_offerings
+			state: 'closed',
+			additional_offerings: values.additional_offerings,
+			custom_fields: values.customFields
 		};
 
 		if (showSigningBonus) role.signing_bonus = Number(values.signing_bonus);
@@ -423,7 +427,16 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			)}
 
 			<NewContractDialog isAlertOpen={isNewContractDialogOpen} toggleDialog={toggleNewContractDialog} contractId={newContractId} isLevelCreated={isLevelCreated} />
-			<NewRoleDialog isAlertOpen={showNewRoleDialog} toggleDialog={toggleNewRoleDialog} roleId={newRoleId} />
+			<NewRoleDialog
+				onClose={() => {
+					toggleFormDetails(false);
+					form.reset();
+					setActiveLevel(undefined);
+				}}
+				isAlertOpen={showNewRoleDialog}
+				toggleDialog={toggleNewRoleDialog}
+				roleId={newRoleId}
+			/>
 
 			{showFormDetails && (
 				<ContractDetails
@@ -449,7 +462,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 
 			{!showFormDetails && (
 				<Form {...form}>
-					<form className="grid w-full gap-6" onSubmit={form.handleSubmit(reviewFormDetails)}>
+					<form className="grid w-full" onSubmit={form.handleSubmit(reviewFormDetails)}>
 						{/* entity details */}
 						<FormSection>
 							<FormSectionDescription>
@@ -736,6 +749,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 								</InputsContainer>
 							</FormSection>
 						)}
+
+						{formType == 'role' && <CustomFields updateCustomFields={event => form.setValue('customFields', event)} customFields={form.getValues('customFields') as any} />}
 
 						<div className="flex items-center justify-end border-t border-t-border pt-10">
 							<Button disabled={isSubmiting} type="submit" size={'sm'} className="gap-3 px-6 text-sm font-light">

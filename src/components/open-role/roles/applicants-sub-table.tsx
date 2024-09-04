@@ -231,11 +231,11 @@ export const UpdateApplicantState = ({ id, onUpdateItem, name, stage, email, org
 				title="Send rejection email"
 				description="Send a message to applicant about this rejection."
 				message={`Hey ${name},
-\n
+
 Thanks for taking the time to meet with us recently and for your interest in ${orgName}. We appreciate the chance to get to know you.
-\n
+
 We've received many applications for the role and decided to consider other applicants for now. We will certainly reach out if new opportunities arise in the future.
-\n
+
 All the best.
 HR at ${orgName}`}
 			/>

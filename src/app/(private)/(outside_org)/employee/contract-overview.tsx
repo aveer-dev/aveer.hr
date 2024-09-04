@@ -78,7 +78,7 @@ export const ContractOverview = ({ isOpen, toggle, data }: props) => {
 			getOrgSettings(data);
 			getRequests(data);
 		}
-	}, [data, getOrgSettings]);
+	}, [data, getOrgSettings, getRequests]);
 
 	return (
 		<AlertDialog open={isOpen} onOpenChange={toggle}>
