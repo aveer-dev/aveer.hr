@@ -4,6 +4,7 @@ import { ChevronRightIcon } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
+import { FormSection, FormSectionDescription, InputsContainer } from '../forms/form-section';
 
 export const LegalEntities = async ({ org }: { org: string }) => {
 	const supabase = createClient();
@@ -19,13 +20,13 @@ export const LegalEntities = async ({ org }: { org: string }) => {
 		);
 
 	return (
-		<div className="grid grid-cols-2 border-t border-t-border py-10">
-			<div>
+		<FormSection>
+			<FormSectionDescription>
 				<h2 className="mb-1 font-normal">Legal Entities</h2>
-				<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">These are the legal details you provided while registering your company at the time of setup.</p>
-			</div>
+				<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">These are the legal details you provided while registering your company at the time of setup.</p>
+			</FormSectionDescription>
 
-			<div className="grid gap-8">
+			<InputsContainer>
 				{data.map(entity => (
 					<Card key={entity.id} className="w-full text-left">
 						<Link className="flex items-center justify-between p-4 text-xs" href={`./legal-entity/${entity.id}`}>
@@ -39,7 +40,7 @@ export const LegalEntities = async ({ org }: { org: string }) => {
 				<Link href="./legal-entity/new" className={cn(buttonVariants(), 'w-full text-xs')}>
 					Add Legal Entity
 				</Link>
-			</div>
-		</div>
+			</InputsContainer>
+		</FormSection>
 	);
 };

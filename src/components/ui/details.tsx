@@ -19,15 +19,15 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 	return (
 		<>
 			{data.first_name && (
-				<ul className="grid grid-cols-2 gap-x-5 gap-y-20 border-t border-t-border pt-6">
+				<ul className="grid gap-x-5 gap-y-20 border-t border-t-border pt-6">
 					<li>
 						<div className="mt-4 grid gap-3 text-xs font-light">
-							<h2 className="flex items-center gap-3 text-lg font-bold">
+							<h2 className="flex gap-3 text-lg font-bold">
 								{data?.first_name} {data?.last_name}
-								<Badge className="w-fit font-light" variant={'secondary'}>
+								<Badge className="mt-1 h-fit w-fit font-light" variant={'secondary'}>
 									{data.nationality?.name}
 								</Badge>
-								<Button onClick={() => (back ? back(false) : false)} variant={'secondary'} size={'icon'} className="h-[22px] w-8 gap-3">
+								<Button onClick={() => (back ? back(false) : false)} variant={'secondary'} size={'icon'} className="mt-1 h-[22px] w-8 gap-3">
 									<Pencil size={10} />
 								</Button>
 							</h2>
@@ -42,7 +42,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 			{data?.organisations && data?.profile && (
 				<div>
 					<h1 className="mb-4 text-xl font-semibold">Parties</h1>
-					<ul className="grid grid-cols-2 gap-x-5 gap-y-20 border-t border-t-border pt-6">
+					<ul className="grid grid-cols-2 gap-x-5 gap-y-14 border-t border-t-border pt-6">
 						<li>
 							<h2 className="text-sm text-muted-foreground">Employer</h2>
 							<div className="mt-4 grid gap-3 text-xs font-light">
@@ -101,9 +101,11 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 			<div>
 				<div className={cn(data.first_name ? '' : 'mt-8', 'mb-4 flex items-center justify-between')}>
 					<h1 className="text-lg font-semibold">Role Details</h1>
-					<Button onClick={() => (back ? back(false) : false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
-						<Pencil size={12} />
-					</Button>
+					{back && (
+						<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
+							<Pencil size={12} />
+						</Button>
+					)}
 				</div>
 
 				<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
@@ -160,9 +162,11 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 					<li className="grid gap-3">
 						<h2 className="flex items-center gap-2 text-sm font-medium">
 							Salary
-							<Button onClick={() => (openCompensationDialog ? openCompensationDialog(true) : false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-								<Pencil size={10} />
-							</Button>
+							{openCompensationDialog && (
+								<Button onClick={() => openCompensationDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+									<Pencil size={10} />
+								</Button>
+							)}
 						</h2>
 						<p className="text-sm font-light">
 							{new Intl.NumberFormat('en-US', {
@@ -175,9 +179,11 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 					<li className="grid gap-3">
 						<h2 className="flex items-center gap-2 text-sm font-medium">
 							Signing Bonus
-							<Button onClick={() => (openCompensationDialog ? openCompensationDialog(true) : false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-								<Pencil size={10} />
-							</Button>
+							{openCompensationDialog && (
+								<Button onClick={() => openCompensationDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+									<Pencil size={10} />
+								</Button>
+							)}
 						</h2>
 						<p className="text-sm font-light">
 							{data?.signing_bonus
@@ -189,12 +195,14 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						</p>
 					</li>
 
-					<li className="grid h-fit gap-4">
+					<li className="col-span-2 grid h-fit gap-4 sm:col-span-1">
 						<h2 className="flex h-fit items-center gap-2 text-sm font-medium">
 							Additional offerings{' '}
-							<Button onClick={() => (openBenefitsDialog ? openBenefitsDialog(true) : false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-								<Pencil size={10} />
-							</Button>
+							{openBenefitsDialog && (
+								<Button onClick={() => openBenefitsDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+									<Pencil size={10} />
+								</Button>
+							)}
 						</h2>
 
 						{data?.additional_offerings?.length > 0 && <ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.additional_offerings as string[])?.map((offering, index) => <li key={index}>{offering}</li>)}</ul>}
@@ -202,12 +210,14 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 					</li>
 
 					{data?.fixed_allowance?.length > 0 && (
-						<li className="grid h-fit max-w-72 gap-4">
+						<li className="col-span-2 grid h-fit max-w-72 gap-4 sm:col-span-1">
 							<h2 className="flex h-fit items-center gap-2 text-sm font-medium">
 								Fixed Allowances
-								<Button onClick={() => (openCompensationDialog ? openCompensationDialog(true) : false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-									<Pencil size={10} />
-								</Button>
+								{openCompensationDialog && (
+									<Button onClick={() => openCompensationDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+										<Pencil size={10} />
+									</Button>
+								)}
 							</h2>
 							<ul className="grid list-disc gap-4 pl-3 text-sm font-light">
 								{(data?.fixed_allowance as { name: string; frequency: string; amount: string }[])?.map((allowance, index) => (
@@ -242,9 +252,11 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 							<li className="grid gap-3">
 								<h2 className="flex items-center gap-2 text-sm font-medium">
 									Employment Start Date
-									<Button onClick={() => (back ? back(false) : false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-										<Pencil size={10} />
-									</Button>
+									{back && (
+										<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+											<Pencil size={10} />
+										</Button>
+									)}
 								</h2>
 								<p className="text-sm font-light">{format(data?.start_date as string, 'PP')}</p>
 							</li>
@@ -253,9 +265,11 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 								<li className="grid gap-3">
 									<h2 className="flex items-center gap-2 text-sm font-medium">
 										Employment End Date
-										<Button onClick={() => (back ? back(false) : false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-											<Pencil size={10} />
-										</Button>
+										{back && (
+											<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+												<Pencil size={10} />
+											</Button>
+										)}
 									</h2>
 									<p className="text-sm font-light">{format(data?.end_date as string, 'PP')}</p>
 								</li>
@@ -266,9 +280,11 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 					<li className="grid gap-3">
 						<h2 className="flex items-center gap-2 text-sm font-medium">
 							Leave
-							<Button onClick={() => (openScheduleDialog ? openScheduleDialog(true) : false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-								<Pencil size={10} />
-							</Button>
+							{openScheduleDialog && (
+								<Button onClick={() => openScheduleDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+									<Pencil size={10} />
+								</Button>
+							)}
 						</h2>
 						<p className="text-sm font-light">{data?.paid_leave} Days</p>
 					</li>
@@ -276,9 +292,11 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 					<li className="grid gap-3">
 						<h2 className="flex items-center gap-2 text-sm font-medium">
 							Sick Leave
-							<Button onClick={() => (openScheduleDialog ? openScheduleDialog(true) : false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-								<Pencil size={10} />
-							</Button>
+							{openScheduleDialog && (
+								<Button onClick={() => openScheduleDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+									<Pencil size={10} />
+								</Button>
+							)}
 						</h2>
 						<p className="text-sm font-light">{data?.sick_leave} Days</p>
 					</li>
@@ -286,9 +304,11 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 					<li className="grid gap-3">
 						<h2 className="flex items-center gap-2 text-sm font-medium">
 							Probation Period
-							<Button onClick={() => (openScheduleDialog ? openScheduleDialog(true) : false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-								<Pencil size={10} />
-							</Button>
+							{openScheduleDialog && (
+								<Button onClick={() => openScheduleDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+									<Pencil size={10} />
+								</Button>
+							)}
 						</h2>
 						<p className="text-sm font-light">{data?.probation_period} Days</p>
 					</li>

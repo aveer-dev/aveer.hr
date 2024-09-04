@@ -4,41 +4,48 @@ import { ColumnDef, flexRender, getCoreRowModel, Row, useReactTable } from '@tan
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '../ui/skeleton';
-import { PERSON } from '@/type/person';
 import { cn } from '@/lib/utils';
 import { NavLink } from '../ui/link';
-import { Tables } from '@/type/database.types';
-import { useEffect, useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { Button } from '../ui/button';
 
-interface DataTableProps<TData, TValue, TSubData, TSubValue> {
+import { ApplicantsSubTable } from '../open-role/roles/applicants-sub-table';
+
+interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
-	subColumns?: ColumnDef<TSubData, TSubValue>[];
+	subColumns?: string;
 	loading?: boolean;
 	org?: string;
 	link?: string;
 }
 
-const supabase = createClient();
-
-export function DataTable<TData, TValue, TSubData, TSubValue>({ columns, data, org, loading, subColumns, link }: DataTableProps<TData, TValue, TSubData, TSubValue>) {
+export function DataTable<TData, TValue>({ columns, data, org, loading, subColumns, link }: DataTableProps<TData, TValue>) {
 	const table = useReactTable({
 		data,
 		columns,
-		getCoreRowModel: getCoreRowModel()
+		getCoreRowModel: getCoreRowModel(),
+		initialState: {
+			columnPinning: {
+				left: ['select', 'name'],
+				right: []
+			}
+		}
 	});
 
 	return (
-		<div className="">
-			<Table>
+		<div className="w-7xl overflow-hidden">
+			<Table className="max-w-7xl" style={{ width: `min(100%, 80rem)` }}>
 				<TableHeader>
 					{table.getHeaderGroups().map(headerGroup => (
 						<TableRow key={headerGroup.id}>
 							{headerGroup.headers.map(header => {
-								return <TableHead key={header.id}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>;
+								return (
+									<TableHead className="whitespace-nowrap" style={{ width: header.getSize() }} key={header.id}>
+										{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+									</TableHead>
+								);
 							})}
 						</TableRow>
 					))}
@@ -159,13 +166,13 @@ export function DataTable<TData, TValue, TSubData, TSubValue>({ columns, data, o
 	);
 }
 
-const TableContent = ({ row, org, subColumns, link }: { row: Row<any>; org?: string; subColumns: any; link?: string }) => {
+const TableContent = ({ row, org, subColumns, link }: { row: Row<any>; org?: string; subColumns?: string; link?: string }) => {
 	const [showSubColumn, setSubColumnState] = useState(false);
 	return (
 		<>
-			<TableRow className={cn(subColumns && 'cursor-pointer', showSubColumn && 'bg-muted/50')} data-state={row.getIsSelected() && 'selected'} onClick={() => showSubColumn && setSubColumnState(!showSubColumn)}>
+			<TableRow className={cn(subColumns && 'cursor-pointer', showSubColumn && 'bg-muted/50')} data-state={row.getIsSelected() && 'selected'} onClick={() => subColumns && setSubColumnState(!showSubColumn)}>
 				{row.getVisibleCells().map((cell, index) => (
-					<TableCell key={cell.id} className={cn(link && 'p-0')}>
+					<TableCell key={cell.id} className={cn(link && 'p-0', 'whitespace-nowrap')}>
 						{link ? (
 							<NavLink org={org} scroll={true} className="block p-4" href={`${link}/${row.original.id}`}>
 								{flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -184,95 +191,7 @@ const TableContent = ({ row, org, subColumns, link }: { row: Row<any>; org?: str
 				))}
 			</TableRow>
 
-			{subColumns && showSubColumn && <SubTable org={org} roleId={row.original.id} columns={subColumns}></SubTable>}
+			{subColumns && showSubColumn && <ApplicantsSubTable org={org} roleId={row.original.id}></ApplicantsSubTable>}
 		</>
 	);
 };
-
-function SubTable<TData, TValue>({ columns, org, roleId }: { columns: ColumnDef<TData, TValue>[]; org?: string; roleId: number }) {
-	const [data, setData] = useState<TData[]>([]);
-	const [isLoading, setLoadingState] = useState(true);
-
-	useEffect(() => {
-		const getApplicants = async (org: string, roleId: number) => {
-			setLoadingState(true);
-			const { data, error } = await supabase.from('job_applications').select('*, country_location:countries!job_applications_country_location_fkey(name, country_code), role:open_roles!job_applications_role_fkey(job_title, id)').match({ org, role: roleId });
-			setLoadingState(false);
-			if (data) setData(data as any);
-		};
-
-		if (org && roleId) getApplicants(org, roleId);
-	}, [org, roleId, setData, setLoadingState]);
-
-	const table = useReactTable({
-		data,
-		columns,
-		getCoreRowModel: getCoreRowModel()
-	});
-
-	return (
-		<tr>
-			<td colSpan={7} className="border-b pl-8">
-				<Table>
-					<TableHeader className="">
-						{table.getHeaderGroups().map(headerGroup => (
-							<TableRow key={headerGroup.id} className="!border-b">
-								{headerGroup.headers.map(header => {
-									return (
-										<TableHead className="text-xs" key={header.id}>
-											{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-										</TableHead>
-									);
-								})}
-							</TableRow>
-						))}
-					</TableHeader>
-					<TableBody>
-						{!isLoading ? (
-							table.getRowModel().rows?.length ? (
-								// table has data
-								table.getRowModel().rows.map(row => (
-									<TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className="cursor-pointer">
-										{row.getVisibleCells().map(cell => (
-											<TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-										))}
-									</TableRow>
-								))
-							) : (
-								<TableRow>
-									<TableCell colSpan={columns.length} className="h-24 text-center">
-										No results.
-									</TableCell>
-								</TableRow>
-							)
-						) : (
-							<TableRow>
-								<TableCell className="">
-									<Skeleton className="h-5 w-5" />
-								</TableCell>
-								<TableCell className="">
-									<Skeleton className="h-9 w-56" />
-								</TableCell>
-								<TableCell className="">
-									<Skeleton className="h-6 w-32" />
-								</TableCell>
-								<TableCell className="">
-									<Skeleton className="h-5 w-20" />
-								</TableCell>
-								<TableCell className="">
-									<Skeleton className="h-4 w-16" />
-								</TableCell>
-								<TableCell className="">
-									<Skeleton className="h-4 w-12" />
-								</TableCell>
-								<TableCell className="">
-									<Skeleton className="h-4 w-12" />
-								</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
-			</td>
-		</tr>
-	);
-}

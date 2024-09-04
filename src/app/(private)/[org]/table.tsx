@@ -20,15 +20,17 @@ export const ClientTable = ({ org, data }: { org: string; data: PERSON[] }) => {
 
 	return (
 		<div className="container mx-auto p-0">
-			<div className="mb-6 flex w-full items-center gap-6">
-				<h1 className="text-2xl font-medium">People</h1>
+			<div className="mb-6 flex w-full items-center justify-between">
+				<div className="flex items-center gap-6">
+					<h1 className="text-2xl font-medium">People</h1>
 
-				<DashboardFilters org={org} toggleTableLoadingState={toggleTableLoadingState} updateData={updateData} />
+					<DashboardFilters org={org} toggleTableLoadingState={toggleTableLoadingState} updateData={updateData} />
+				</div>
 
 				{data.length > 0 && (
 					<NavLink org={org} href={`/people/new`} className={cn(buttonVariants(), 'ml-auto h-8 justify-end gap-4')}>
 						<Plus size={12} />
-						Add person
+						<span className="hidden sm:block">Add person</span>
 					</NavLink>
 				)}
 
@@ -36,7 +38,7 @@ export const ClientTable = ({ org, data }: { org: string; data: PERSON[] }) => {
 					<>
 						<Button onClick={() => (data.length > 0 ? router.push(`/${org}/people/new`) : toggleFirstContractModal(true))} className={'ml-auto h-8 justify-end gap-4'}>
 							<Plus size={12} />
-							Add person
+							<span className="hidden sm:block">Add person</span>
 						</Button>
 
 						<FirstContractDialog org={org} toggle={toggleFirstContractModal} isOpen={isFirstContractModalOpen} />

@@ -6,7 +6,6 @@ import { ArrowUpRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { columns } from './column';
 import { jobColumns } from './job-column';
-import { ApplicantsColumn } from './applicants-column';
 
 interface props {
 	orgId: string;
@@ -47,27 +46,25 @@ export const Roles = async ({ orgId, type }: props) => {
 	}
 
 	return (
-		<div className="mx-auto grid gap-20">
-			<div className="container mx-auto p-0">
-				<div className="mb-6 flex w-full items-center gap-6">
-					<h1 className="text-2xl font-medium">Open roles</h1>
+		<div className="container mx-auto p-0">
+			<div className="mb-6 flex w-full items-center gap-6">
+				<h1 className="text-2xl font-medium">Open roles</h1>
 
-					{type == 'role' && (
-						<div className="ml-auto flex gap-4">
-							<Link href={'./jobs'} target="_blank" className={cn(buttonVariants({ variant: 'secondary' }), 'gap-4')}>
-								Jobs page
-								<ArrowUpRight size={12} />
-							</Link>
-							<Link href={`./open-roles/new`} className={cn(buttonVariants({ size: 'sm' }), 'h-8 gap-4')}>
-								<Plus size={12} />
-								Create role
-							</Link>
-						</div>
-					)}
-				</div>
-
-				<DataTable org={orgId} subColumns={type == 'role' ? ApplicantsColumn : undefined} columns={type == 'job' ? jobColumns : columns} data={data} />
+				{type == 'role' && (
+					<div className="ml-auto flex gap-4">
+						<Link href={'./jobs'} target="_blank" className={cn(buttonVariants({ variant: 'secondary' }), 'gap-4')}>
+							Jobs page
+							<ArrowUpRight size={12} />
+						</Link>
+						<Link href={`./open-roles/new`} className={cn(buttonVariants({ size: 'sm' }), 'h-8 gap-4')}>
+							<Plus size={12} />
+							Create role
+						</Link>
+					</div>
+				)}
 			</div>
+
+			<DataTable org={orgId} subColumns={type == 'role' ? 'applicants' : undefined} columns={type == 'job' ? jobColumns : columns} data={data} />
 		</div>
 	);
 };

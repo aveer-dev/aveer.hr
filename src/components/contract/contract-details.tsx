@@ -18,6 +18,7 @@ import { sendEmail } from '@/api/email';
 import { TerminateContractEmail } from '@/components/emails/terminated-contract-email';
 import { ScheduleTerminationContractEmail } from '@/components/emails/schedule-terminate-contract-email';
 import { ContractStatus } from '@/components/ui/status-badge';
+import { Details } from '../ui/details';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -165,63 +166,60 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 	};
 
 	return (
-		<section className="mx-auto -mt-6 grid max-w-4xl gap-10 p-6 pt-0">
-			<div className="flex justify-between">
-				<div className="relative flex gap-8">
-					<BackButton className="absolute -left-16" />
+		<section className="mx-auto grid max-w-4xl gap-10 pb-6 pt-0">
+			<div className="relative">
+				<BackButton className="mb-6" />
 
-					<div className="grid gap-3">
-						<h1 className="flex items-center gap-4 text-2xl font-bold">
-							{data?.job_title}
-							<div className="flex gap-1">
-								<ContractStatus state={data.status} start_date={data.start_date || ''} end_date={data?.end_date} />
+				<div className="flex items-center justify-between">
+					<h1 className="flex items-center gap-4 text-2xl font-bold">{data?.job_title}</h1>
 
-								{data?.status == 'scheduled termination' && data?.end_date && (
-									<Badge className="h-fit gap-3 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
-										{format(data?.end_date, 'PP')}
-									</Badge>
+					<div className="fixed bottom-0 left-0 flex w-full justify-between gap-3 border-t bg-background p-4 sm:relative sm:w-fit sm:border-t-0 sm:p-0">
+						{data.profile && (
+							<>
+								{((signatureType === 'org' && !data.org_signed) || (signatureType === 'profile' && !data.profile_signed)) && <SignatureDrawer first_name={data.profile.first_name} job_title={data.job_title} signatureAction={signContract} />}
+
+								{signatureType === 'org' && (
+									<Popover>
+										<PopoverTrigger asChild>
+											<Button variant="secondary" size={'sm'} className="w-9">
+												<EllipsisVertical size={14} />
+											</Button>
+										</PopoverTrigger>
+
+										<PopoverContent align="end" className="w-48 p-2">
+											{data.status !== 'inactive' && data.status !== 'terminated' && (
+												<Link href={`./${id}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
+													<FilePenLine size={12} />
+													Edit Contract
+												</Link>
+											)}
+											<Link href={`./new?duplicate=${id}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
+												<Copy size={12} />
+												Duplicate
+											</Link>
+											{data.status !== 'terminated' && data.status !== 'inactive' && (
+												<TerminateContract first_name={data.profile.first_name} job_title={data.job_title} deleteContract={deleteContract} terminateContract={terminateContract} action={data.status === 'signed' ? 'terminate' : 'delete'} />
+											)}
+											{data.status === 'signed' && <ScheduleTermination first_name={data.profile.first_name} job_title={data.job_title} formAction={scheduleTermination} />}
+										</PopoverContent>
+									</Popover>
 								)}
-							</div>
-						</h1>
-						<p className="flex gap-3 text-xs font-light">
-							<span className="capitalize">{data?.organisations?.name}</span> • <span className="capitalize">{data?.employment_type}</span>
-						</p>
+							</>
+						)}
 					</div>
 				</div>
 
-				<div className="flex gap-3">
-					{data.profile && (
+				<div className="mt-4 flex items-center gap-3 text-xs font-light">
+					<ContractStatus state={data.status} start_date={data.start_date || ''} end_date={data?.end_date} />•
+					{data?.status == 'scheduled termination' && data?.end_date && (
 						<>
-							{((signatureType === 'org' && !data.org_signed) || (signatureType === 'profile' && !data.profile_signed)) && <SignatureDrawer first_name={data.profile.first_name} job_title={data.job_title} signatureAction={signContract} />}
-
-							{signatureType === 'org' && (
-								<Popover>
-									<PopoverTrigger asChild>
-										<Button variant="secondary" size={'sm'}>
-											<EllipsisVertical size={14} />
-										</Button>
-									</PopoverTrigger>
-
-									<PopoverContent align="end" className="w-48 p-2">
-										{data.status !== 'inactive' && data.status !== 'terminated' && (
-											<Link href={`./${id}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
-												<FilePenLine size={12} />
-												Edit Contract
-											</Link>
-										)}
-										<Link href={`./new?duplicate=${id}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
-											<Copy size={12} />
-											Duplicate
-										</Link>
-										{data.status !== 'terminated' && data.status !== 'inactive' && (
-											<TerminateContract first_name={data.profile.first_name} job_title={data.job_title} deleteContract={deleteContract} terminateContract={terminateContract} action={data.status === 'signed' ? 'terminate' : 'delete'} />
-										)}
-										{data.status === 'signed' && <ScheduleTermination first_name={data.profile.first_name} job_title={data.job_title} formAction={scheduleTermination} />}
-									</PopoverContent>
-								</Popover>
-							)}
+							<Badge className="h-fit gap-3 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
+								{format(data?.end_date, 'PP')}
+							</Badge>
+							•
 						</>
 					)}
+					<span className="capitalize">{data?.organisations?.name}</span> • <span className="capitalize">{data?.employment_type}</span>
 				</div>
 			</div>
 
@@ -232,160 +230,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				</div>
 			)}
 
-			<div className="mt-5 grid gap-20">
-				<div>
-					<h1 className="mb-4 text-xl font-semibold">Parties</h1>
-					<ul className="grid grid-cols-2 gap-x-5 gap-y-20 border-t border-t-border pt-6">
-						<li>
-							<h2 className="text-sm text-muted-foreground">Employer</h2>
-							<div className="mt-4 grid gap-3 text-xs font-light">
-								<p className="text-xl font-bold">{data?.organisations?.name}</p>
-								{!data?.org_signed && <p className="mt-4 text-xs">Pending signature from company</p>}
-								{data?.org_signed && (
-									<>
-										<p>
-											{data?.signed_by?.first_name} {data?.signed_by?.last_name}
-										</p>
-										<p>{data?.signed_by?.email}</p>
-										<p>
-											{data?.entity.address_code} {data?.entity.street_address}, {data?.entity.address_state}, {data?.entity.incorporation_country}
-										</p>
-									</>
-								)}
-							</div>
-						</li>
-
-						<li>
-							<h2 className="text-sm text-muted-foreground">Employee</h2>
-
-							<div className="mt-4 grid gap-3 text-xs font-light">
-								<p className="text-xl font-bold">
-									{data?.profile?.first_name} {data?.profile?.last_name}
-								</p>
-
-								{!data?.profile_signed && <p className="mt-4 text-xs">Pending your signature</p>}
-								{data?.profile_signed && (
-									<>
-										<p>Individual</p>
-										<p>{data?.profile?.email}</p>
-										<p>{data?.profile?.nationality}</p>
-									</>
-								)}
-							</div>
-						</li>
-
-						{data.terminated_by && (
-							<li>
-								<h2 className="text-sm text-muted-foreground">Terminated by</h2>
-
-								<div className="mt-4 grid gap-3 text-xs font-light">
-									<p className="text-xl font-bold">
-										{data?.terminated_by?.first_name} {data?.terminated_by?.last_name}
-									</p>
-									<p>{data?.terminated_by?.email}</p>
-								</div>
-							</li>
-						)}
-					</ul>
-				</div>
-
-				<div>
-					<h1 className="mb-4 text-xl font-semibold">Employment Details</h1>
-					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-						<li className="grid gap-3">
-							<p className="text-sm font-medium">Job Title</p>
-							<p className="text-sm font-light">{data?.job_title}</p>
-						</li>
-						<li className="grid gap-3">
-							<p className="text-sm font-medium">Seniority Level</p>
-							<p className="text-sm font-light">
-								{data?.level?.level} {data?.level?.role ? '•' : ''} {data?.level?.role}
-							</p>
-						</li>
-						<li className="grid gap-3">
-							<p className="text-sm font-medium">Employment Type</p>
-							<p className="text-sm font-light capitalize">{data?.employment_type}</p>
-						</li>
-						<li className="grid gap-3">
-							<p className="text-sm font-medium">Work Schedule</p>
-							<p className="text-sm font-light">
-								{data?.work_schedule}hrs, {data?.work_shedule_interval}
-							</p>
-						</li>
-					</ul>
-
-					<div className="mt-10 grid gap-4">
-						<h3 className="text-base font-bold">Job Responsibilities</h3>
-						<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.responsibilities as string[])?.map((responsibility, index) => <li key={index}>{responsibility}</li>)}</ul>
-					</div>
-				</div>
-
-				<div>
-					<h1 className="mb-4 text-xl font-semibold">Compensation</h1>
-					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-						<li className="grid gap-3">
-							<p className="text-sm font-medium">Salary</p>
-							<p className="text-sm font-light">
-								{new Intl.NumberFormat('en-US', {
-									style: 'currency',
-									currency: 'USD'
-								}).format(Number(data?.salary))}
-							</p>
-						</li>
-						<li className="grid gap-3">
-							<p className="text-sm font-medium">Signing Bonus</p>
-							<p className="text-sm font-light">
-								{data?.signing_bonus
-									? new Intl.NumberFormat('en-US', {
-											style: 'currency',
-											currency: 'USD'
-										}).format(Number(data?.signing_bonus))
-									: '--'}
-							</p>
-						</li>
-					</ul>
-
-					{data?.fixed_allowance && (
-						<div className="mt-10 grid grid-cols-2 gap-4">
-							<p className="text-sm font-medium">Fixed Allowances</p>
-							<ul className="grid list-disc gap-4 pl-3 text-sm font-light">
-								{(data?.fixed_allowance as { name: string; frequency: string; amount: string }[])?.map((allowance, index) => (
-									<li key={index}>
-										<div className="flex items-baseline justify-between p-1 font-light">
-											<div>
-												{allowance.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
-											</div>
-											<div className="text-xs text-muted-foreground">{allowance.frequency}</div>
-										</div>
-									</li>
-								))}
-							</ul>
-						</div>
-					)}
-				</div>
-
-				<div>
-					<h1 className="mb-4 text-xl font-semibold">Job Schedule</h1>
-					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-						<li className="grid gap-3">
-							<p className="text-sm font-medium">Employment Start Date</p>
-							<p className="text-sm font-light">{format(data?.start_date as string, 'PP')}</p>
-						</li>
-						<li className="grid gap-3">
-							<p className="text-sm font-medium">Paid Leave</p>
-							<p className="text-sm font-light">{data?.paid_leave} Days</p>
-						</li>
-						<li className="grid gap-3">
-							<p className="text-sm font-medium">Sick Leave</p>
-							<p className="text-sm font-light">{data?.sick_leave} Days</p>
-						</li>
-						<li className="grid gap-3">
-							<p className="text-sm font-medium">Probation Period</p>
-							<p className="text-sm font-light">{data?.probation_period} Days</p>
-						</li>
-					</ul>
-				</div>
-			</div>
+			<Details formType="contract" data={data} />
 		</section>
 	);
 };

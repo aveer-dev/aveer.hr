@@ -31,7 +31,7 @@ export const SignatureDrawer = ({ job_title, first_name, signatureAction }: { jo
 		<>
 			<Drawer open={drawerIsOpen} onOpenChange={toggleDrawerState}>
 				<DrawerTrigger asChild>
-					<Button size={'sm'} className="gap-4">
+					<Button size={'sm'} className="w-full gap-4 sm:w-fit">
 						Sign Contract
 						<Signature size={12} />
 					</Button>
@@ -53,7 +53,7 @@ export const SignatureDrawer = ({ job_title, first_name, signatureAction }: { jo
 							required
 							id="signature-string"
 							aria-label="Signature text"
-							className="placeholder:font-karla signature m-4 mt-7 w-[calc(100%-32px)] border-b border-b-foreground text-2xl outline-none"
+							className="signature m-4 mt-7 w-[calc(100%-32px)] border-b border-b-foreground text-2xl outline-none placeholder:font-karla"
 						/>
 
 						<DrawerFooter className="grid grid-cols-2 items-center gap-4">

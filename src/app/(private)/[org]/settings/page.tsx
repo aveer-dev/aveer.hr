@@ -9,6 +9,7 @@ import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmployeeBenefits } from '@/components/employee-benefits/employee-benefits';
 import { LegalEntities } from '@/components/legal-entities/legal-entities';
+import { FormSection, FormSectionDescription, InputsContainer } from '@/components/forms/form-section';
 
 export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -59,18 +60,16 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 
 				<TabsContent value="org">
 					{organisationResponse.data && (
-						<div className="grid w-full gap-6">
-							<div className="grid grid-cols-2 border-t border-t-border pt-10">
-								<div>
-									<h2 className="mb-1 font-normal">Company Details</h2>
-									<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">These are the legal details you provided while registering your company at the time of setup.</p>
-								</div>
+						<FormSection>
+							<FormSectionDescription>
+								<h2 className="mb-1 font-normal">Company Details</h2>
+								<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">These are the legal details you provided while registering your company at the time of setup.</p>
+							</FormSectionDescription>
 
-								<div className="mb-10 grid gap-8">
-									<OrgForm formAction={updateOrg} data={organisationResponse.data} />
-								</div>
-							</div>
-						</div>
+							<InputsContainer>
+								<OrgForm formAction={updateOrg} data={organisationResponse.data} />
+							</InputsContainer>
+						</FormSection>
 					)}
 
 					{organisationResponse.error && (

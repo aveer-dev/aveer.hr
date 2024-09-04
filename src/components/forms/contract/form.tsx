@@ -34,6 +34,7 @@ import { cn } from '@/lib/utils';
 import { CompensationDialog } from './compensation-dialog';
 import { AdditionalOfferingDialog } from './additional-offering-dialog';
 import { JobScheduleDialog } from './job-schedule';
+import { FormSection, FormSectionDescription, InputsContainer } from '../form-section';
 
 const supabase = createClient();
 
@@ -450,26 +451,26 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 				<Form {...form}>
 					<form className="grid w-full gap-6" onSubmit={form.handleSubmit(reviewFormDetails)}>
 						{/* entity details */}
-						<div className="grid grid-cols-2 border-t border-t-border pt-10">
-							<div>
+						<FormSection>
+							<FormSectionDescription>
 								<h2 className="font-semibold">Legal entity </h2>
-								<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">You can hire employee through one of your legal entity or through aveer.hr&apos;s, we&apos;ll sort out the compliance for you in that region automatically</p>
-							</div>
+								<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">You can hire employee through one of your legal entity or through aveer.hr&apos;s, we&apos;ll sort out the compliance for you in that region automatically</p>
+							</FormSectionDescription>
 
-							<div className="mb-10 grid gap-8">
+							<InputsContainer>
 								<SelectLegalEntity form={form} entities={entities} eorEntities={eorEntities} />
-							</div>
-						</div>
+							</InputsContainer>
+						</FormSection>
 
 						{/* employee details */}
 						{formType === 'contract' && (
-							<div className="grid grid-cols-2 border-t border-t-border pt-10">
-								<div>
+							<FormSection>
+								<FormSectionDescription>
 									<h2 className="font-semibold">{contractData ? 'Employee details' : 'Personal details'}</h2>
-									<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
-								</div>
+									<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+								</FormSectionDescription>
 
-								<div className="mb-10 grid gap-8">
+								<InputsContainer>
 									<div className="grid grid-cols-2 gap-6">
 										<FormField
 											control={form.control}
@@ -498,9 +499,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 												</FormItem>
 											)}
 										/>
-									</div>
 
-									<div className="grid grid-cols-2 gap-6">
 										<FormField
 											control={form.control}
 											name="email"
@@ -517,18 +516,18 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 
 										{formType == 'contract' && <SelectCountry onSelectCountry={setEmployeeNationality} name="nationality" label="Country" form={form} disabled={!!contractData} />}
 									</div>
-								</div>
-							</div>
+								</InputsContainer>
+							</FormSection>
 						)}
 
 						{/* employment details */}
-						<div className="grid grid-cols-2 border-t border-t-border pt-10">
-							<div>
+						<FormSection>
+							<FormSectionDescription>
 								<h2 className="font-semibold">Role details</h2>
-								<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
-							</div>
+								<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+							</FormSectionDescription>
 
-							<div className="mb-10 grid gap-8">
+							<InputsContainer>
 								{formType == 'contract' && (
 									<div className="mb-1 flex items-center justify-between space-x-2 rounded-lg bg-accent p-2">
 										<Label htmlFor="existing-role">Use existing role details</Label>
@@ -574,7 +573,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 									/>
 								)}
 
-								<div className={cn(formType == 'role' || !showRolesOption ? '' : 'pointer-events-none absolute opacity-0', 'mb-10 grid gap-8')}>
+								<div className={cn(formType == 'role' || !showRolesOption ? '' : 'pointer-events-none absolute opacity-0', 'grid gap-8')}>
 									<FormField
 										control={form.control}
 										name="job_title"
@@ -616,18 +615,18 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 
 									<JobResponsibilities form={form} />
 								</div>
-							</div>
-						</div>
+							</InputsContainer>
+						</FormSection>
 
 						{/* job requirements */}
 						{formType == 'role' && (
-							<div className="grid grid-cols-2 border-t border-t-border pt-10">
-								<div>
+							<FormSection>
+								<FormSectionDescription>
 									<h2 className="font-semibold">Job requirements</h2>
-									<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">What are the things, skills or characteristics you expect from your new hire.</p>
-								</div>
+									<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">What are the things, skills or characteristics you expect from your new hire.</p>
+								</FormSectionDescription>
 
-								<div className="mb-10 grid gap-10">
+								<InputsContainer>
 									<FormField
 										control={form.control}
 										name="years_of_experience"
@@ -646,74 +645,72 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 									/>
 
 									<JobRequirements form={form} />
-								</div>
-							</div>
+								</InputsContainer>
+							</FormSection>
 						)}
 
 						{/* job schedule */}
 						{formType === 'contract' && (
-							<div className="grid grid-cols-2 border-t border-t-border pt-10">
-								<div>
+							<FormSection>
+								<FormSectionDescription>
 									<h2 className="font-semibold">Job Schedule</h2>
-									<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
-								</div>
+									<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+								</FormSectionDescription>
 
-								<div className="mb-10 grid gap-8">
-									<>
-										<FormField
-											control={form.control}
-											name="start_date"
-											render={({ field }) => (
-												<FormItem className="flex flex-col">
-													<FormLabel>Employment start date</FormLabel>
-													<DatePicker onSetDate={field.onChange} selected={field.value} />
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
+								<InputsContainer>
+									<FormField
+										control={form.control}
+										name="start_date"
+										render={({ field }) => (
+											<FormItem className="flex flex-col">
+												<FormLabel>Employment start date</FormLabel>
+												<DatePicker onSetDate={field.onChange} selected={field.value} />
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 
-										<FormField
-											control={form.control}
-											name="end_date"
-											render={({ field }) => (
-												<FormItem className="grid gap-1">
-													<FormLabel>Employment end date</FormLabel>
-													<div className="grid w-full gap-3 rounded-lg bg-accent px-2 py-2">
-														<div className="flex items-center justify-between space-x-2">
-															<Label htmlFor="indefinite">Indefinite</Label>
-															<Switch
-																checked={indefiniteEndDate}
-																onCheckedChange={event => {
-																	toggleIndefiniteEndDate(event);
-																	if (event == true) form.setValue('end_date', undefined);
-																}}
-																id="indefinite"
-																className="scale-75"
-															/>
-														</div>
-
-														<div className={cn(!indefiniteEndDate ? '' : 'pointer-events-none absolute opacity-0')}>
-															<DatePicker onSetDate={field.onChange} selected={field.value} />
-														</div>
+									<FormField
+										control={form.control}
+										name="end_date"
+										render={({ field }) => (
+											<FormItem className="grid gap-1">
+												<FormLabel>Employment end date</FormLabel>
+												<div className="grid w-full gap-3 rounded-lg bg-accent px-2 py-2">
+													<div className="flex items-center justify-between space-x-2">
+														<Label htmlFor="indefinite">Indefinite</Label>
+														<Switch
+															checked={indefiniteEndDate}
+															onCheckedChange={event => {
+																toggleIndefiniteEndDate(event);
+																if (event == true) form.setValue('end_date', undefined);
+															}}
+															id="indefinite"
+															className="scale-75"
+														/>
 													</div>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</>
-								</div>
-							</div>
+
+													<div className={cn(!indefiniteEndDate ? '' : 'pointer-events-none absolute opacity-0')}>
+														<DatePicker onSetDate={field.onChange} selected={field.value} />
+													</div>
+												</div>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</InputsContainer>
+							</FormSection>
 						)}
 
 						{/* location */}
 						{!showRolesOption && (
-							<div className="grid grid-cols-2 border-t border-t-border pt-10">
-								<div>
+							<FormSection>
+								<FormSectionDescription>
 									<h2 className="font-semibold">Location</h2>
 									<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">Where will your new hire be working from: remote, office, or hybrid?</p>
-								</div>
+								</FormSectionDescription>
 
-								<div className="mb-10 grid gap-10">
+								<InputsContainer>
 									<FormField
 										control={form.control}
 										name="work_location"
@@ -736,8 +733,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 											</FormItem>
 										)}
 									/>
-								</div>
-							</div>
+								</InputsContainer>
+							</FormSection>
 						)}
 
 						<div className="flex items-center justify-end border-t border-t-border pt-10">

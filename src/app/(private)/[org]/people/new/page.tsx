@@ -20,8 +20,8 @@ export default async function Home({ params, searchParams }: { params: { [key: s
 	return (
 		<Suspense fallback={<PageLoader isLoading />}>
 			<div className="mx-auto max-w-4xl">
-				<div className="relative mb-6">
-					<BackButton className="absolute -left-16" />
+				<div className="relative mb-4 flex items-center gap-4">
+					<BackButton />
 
 					<h1 className="text-xl font-semibold">Add person</h1>
 				</div>

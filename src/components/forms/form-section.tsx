@@ -3,7 +3,7 @@ import { HTMLAttributes, ReactNode } from 'react';
 
 export const FormSection = ({ children, ...props }: { children: ReactNode } & HTMLAttributes<HTMLDivElement>) => {
 	return (
-		<div {...props} className={cn('grid grid-cols-2 border-t border-t-border py-16', props.className)}>
+		<div {...props} className={cn('grid gap-x-4 gap-y-12 border-t border-t-border py-8 md:grid-cols-2 md:py-16', props.className)}>
 			{children}
 		</div>
 	);

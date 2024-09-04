@@ -25,7 +25,8 @@ export const columns: ColumnDef<PERSON>[] = [
 		),
 		cell: ({ row }) => <Checkbox checked={row.getIsSelected()} className="h-5 w-5 border-none bg-muted data-[state=checked]:bg-accent data-[state=checked]:text-primary" onCheckedChange={value => row.toggleSelected(!!value)} aria-label="Select row" />,
 		enableSorting: false,
-		enableHiding: false
+		enableHiding: false,
+		size: 50
 	},
 	{
 		id: 'name',
@@ -33,7 +34,7 @@ export const columns: ColumnDef<PERSON>[] = [
 		cell: ({ row }) => {
 			return (
 				<div className="grid gap-1">
-					<div className="font-medium">
+					<div className="whitespace-nowrap font-medium">
 						{row.original.profile.first_name} {row.original.profile.last_name}
 					</div>
 					<div>{row.original.job_title}</div>
@@ -44,22 +45,27 @@ export const columns: ColumnDef<PERSON>[] = [
 	{
 		id: `nationality`,
 		header: 'Country',
-		cell: ({ row }) => <span>{row.original.profile.nationality.name}</span>
+		cell: ({ row }) => <span>{row.original.profile.nationality.name}</span>,
+		size: 100
 	},
 	{
 		id: 'status',
 		header: 'Status',
-		cell: ({ row }) => <ContractStatus state={row.original.status} start_date={row.original.start_date} end_date={row.original.end_date} />
+		cell: ({ row }) => <ContractStatus state={row.original.status} start_date={row.original.start_date} end_date={row.original.end_date} />,
+		size: 80
 	},
 	{
 		id: 'employment_type',
 		header: 'Employment type',
-		cell: ({ row }) => <span className="capitalize">{row.original.employment_type}</span>
+		cell: ({ row }) => <span className="capitalize">{row.original.employment_type}</span>,
+		enableHiding: true,
+		size: 80
 	},
 	{
 		id: 'start_date',
 		header: 'Start Date',
-		cell: ({ row }) => <span>{format(row.original.start_date, 'PP')}</span>
+		cell: ({ row }) => <span className="whitespace-nowrap">{format(row.original.start_date, 'PP')}</span>,
+		size: 80
 	},
 	{
 		id: 'actions',
@@ -91,7 +97,8 @@ export const columns: ColumnDef<PERSON>[] = [
 					</DropdownMenuContent>
 				</DropdownMenu>
 			);
-		}
+		},
+		size: 50
 	}
 ];
 

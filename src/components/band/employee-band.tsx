@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { EmployeeBandDialog } from './employee-band-form';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { TablesInsert, TablesUpdate } from '@/type/database.types';
+import { FormSection, FormSectionDescription, InputsContainer } from '../forms/form-section';
 
 interface props {
 	org: string;
@@ -65,13 +66,15 @@ export const EmployeeBand = async ({ org }: props) => {
 	};
 
 	return (
-		<div id="levels" className="grid grid-cols-2 border-t border-t-border py-10">
-			<div>
+		<FormSection>
+			<FormSectionDescription>
 				<h2 className="mb-1 font-normal">Employee Levels</h2>
-				<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">Creating employee levels makes it super easy to manage employees and their benefits. Set them once and connect them to employees once.</p>
-			</div>
+				<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Creating employee levels makes it super easy to manage employees and their benefits. Set them once and connect them to employees once.</p>
+			</FormSectionDescription>
 
-			<EmployeeBandDialog createBand={createBand} deleteBand={deleteBand} updateBand={updateBand} data={data} />
-		</div>
+			<InputsContainer>
+				<EmployeeBandDialog createBand={createBand} deleteBand={deleteBand} updateBand={updateBand} data={data} />
+			</InputsContainer>
+		</FormSection>
 	);
 };

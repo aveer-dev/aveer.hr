@@ -4,7 +4,7 @@ import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescript
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/client';
-import { ArrowUpRight, ChevronLeft, ChevronRight, CloudDownload, Maximize2 } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, CloudDownload, Ellipsis, Maximize2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Document, Page } from 'react-pdf';
 import { pdfjs } from 'react-pdf';
@@ -17,11 +17,13 @@ import { useResizeObserver } from '@wojtekmaj/react-hooks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
+import { UpdateApplicantState } from './applicants-sub-table';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface props {
 	data: Tables<'job_applications'>;
+	onUpdate: () => void;
 }
 
 const options = {
@@ -33,9 +35,10 @@ const supabase = createClient();
 const resizeObserverOptions = {};
 const maxWidth = 420;
 
-export const ApplicantDetails = ({ data }: props) => {
+export const ApplicantDetails = ({ data, onUpdate }: props) => {
 	const [numberOfPages, setNumberOfPages] = useState<number>(0);
 	const [activePageNumber, setActivePageNumber] = useState<number>(1);
+
 	interface DOCUMENT {
 		name: string;
 		url?: string;
@@ -93,30 +96,38 @@ export const ApplicantDetails = ({ data }: props) => {
 
 	return (
 		<AlertDialog>
-			<AlertDialogTrigger asChild>
+			<AlertDialogTrigger disabled={data.stage == 'rejected'} asChild>
 				<Button variant={'ghost'} size={'icon'}>
 					<Maximize2 size={14} className="text-muted-foreground" />
 				</Button>
 			</AlertDialogTrigger>
-			<AlertDialogContent className="block h-screen max-w-5xl pt-16">
-				<AlertDialogHeader className="relative">
-					<AlertDialogCancel className="absolute -left-16 top-1/2 -translate-y-1/2 rounded-full">
-						<ChevronLeft size={12} />
-					</AlertDialogCancel>
+			<AlertDialogContent className="block h-screen w-screen max-w-[unset] overflow-y-auto pb-10 pt-16">
+				<div className="mx-auto flex w-full max-w-5xl flex-col justify-between lg:flex-row">
+					<AlertDialogHeader className="flex-row gap-3 !space-y-0">
+						<AlertDialogCancel className="w-fit rounded-full">
+							<ChevronLeft size={12} />
+						</AlertDialogCancel>
 
-					<AlertDialogTitle className="text-xl">
-						<span className="font-normal text-muted-foreground">Role:</span> {(data.role as any).job_title}
-					</AlertDialogTitle>
-					<div className="flex gap-2">
-						<AlertDialogDescription>Stage: </AlertDialogDescription>
-						<Badge className="font-light" variant={'secondary'}>
-							{data.stage}
-						</Badge>
+						<div>
+							<AlertDialogTitle className="text-xl">
+								<span className="font-normal text-muted-foreground">Role:</span> {(data.role as any).job_title}
+							</AlertDialogTitle>
+							<div className="mt-1 flex gap-2">
+								<AlertDialogDescription>Stage: </AlertDialogDescription>
+								<Badge className="font-light" variant={data.stage.includes('reject') ? 'secondary-destructive' : data.stage == 'applicant' ? 'secondary' : 'success-secondary'}>
+									{data.stage}
+								</Badge>
+							</div>
+						</div>
+					</AlertDialogHeader>
+
+					<div className="mt-8 lg:mt-0">
+						<UpdateApplicantState stage={data.stage} onUpdateItem={onUpdate} id={data.id} email={data.email} orgName={(data.org as any).name} name={data.first_name} />
 					</div>
-				</AlertDialogHeader>
+				</div>
 
-				<section className="flex justify-between pt-10">
-					<div className="grid h-[70vh] w-full gap-16 overflow-auto border-r pr-8">
+				<section className="mx-auto grid w-full max-w-5xl gap-y-20 pt-10 lg:grid-cols-2">
+					<div className="order-2 mx-auto grid w-full max-w-2xl gap-16 border-r pr-8 lg:order-1 lg:h-screen lg:max-w-[unset] lg:overflow-auto">
 						<div>
 							<h1 className="mb-4 text-base font-semibold">Applicant Details</h1>
 							<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
@@ -197,7 +208,7 @@ export const ApplicantDetails = ({ data }: props) => {
 					</div>
 
 					{documents.length > 0 && (
-						<Tabs defaultValue={documents[0].name} className="w-[420px] pl-8">
+						<Tabs defaultValue={documents[0].name} className="order-1 mx-auto lg:order-2 lg:w-[420px] lg:pl-8">
 							<TabsList className="mb-6 grid w-fit grid-cols-2">
 								{documents.map((document, index) => (
 									<TabsTrigger key={index} className="capitalize" value={document.name}>
@@ -260,11 +271,6 @@ export const ApplicantDetails = ({ data }: props) => {
 
 					{documents.length < 1 && <Skeleton className="mx-auto h-full max-h-[554px] w-full max-w-[350px]" />}
 				</section>
-
-				{/* <AlertDialogFooter>
-					<AlertDialogCancel>Cancel</AlertDialogCancel>
-					<AlertDialogAction>Continue</AlertDialogAction>
-				</AlertDialogFooter> */}
 			</AlertDialogContent>
 		</AlertDialog>
 	);

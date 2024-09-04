@@ -52,7 +52,8 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 		),
 		cell: ({ row }) => <Checkbox checked={row.getIsSelected()} className="h-5 w-5 border-none bg-muted data-[state=checked]:bg-accent data-[state=checked]:text-primary" onCheckedChange={value => row.toggleSelected(!!value)} aria-label="Select row" />,
 		enableSorting: false,
-		enableHiding: false
+		enableHiding: false,
+		size: 80
 	},
 	{
 		accessorKey: 'job_title',
@@ -81,7 +82,8 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 	},
 	{
 		accessorKey: 'applicants',
-		header: 'Applicants'
+		header: 'Applicants',
+		size: 50
 	},
 	{
 		id: 'actions',
@@ -118,7 +120,8 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 					</DropdownMenuContent>
 				</DropdownMenu>
 			);
-		}
+		},
+		size: 50
 	}
 ];
 

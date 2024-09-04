@@ -1,5 +1,6 @@
 'use client';
 
+import { FormSection, FormSectionDescription, InputsContainer } from '@/components/forms/form-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +16,7 @@ export const SecurityForm = ({ updatePassword }: { updatePassword: (password: st
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" disabled={pending} size={'sm'} className="px-8 text-xs font-light">
+			<Button type="submit" disabled={pending} size={'sm'} className="px-5 text-xs font-light">
 				{pending ? 'Updating password...' : 'Update password'}
 			</Button>
 		);
@@ -27,14 +28,13 @@ export const SecurityForm = ({ updatePassword }: { updatePassword: (password: st
 	};
 
 	return (
-		<div className="grid w-full gap-6">
-			{/* Security Settings */}
-			<div className="grid grid-cols-2 border-t border-t-border py-10">
-				<div>
-					<h2 className="font-semibold">Security Settings</h2>
-					<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">Update your personal account password</p>
-				</div>
+		<FormSection>
+			<FormSectionDescription>
+				<h2 className="font-semibold">Security Settings</h2>
+				<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Update your personal account password</p>
+			</FormSectionDescription>
 
+			<InputsContainer>
 				<form className="grid gap-6" action={onSubmit}>
 					<div className="grid gap-3">
 						<Label htmlFor="password">New password</Label>
@@ -61,7 +61,7 @@ export const SecurityForm = ({ updatePassword }: { updatePassword: (password: st
 						<SubmitButton />
 					</div>
 				</form>
-			</div>
-		</div>
+			</InputsContainer>
+		</FormSection>
 	);
 };

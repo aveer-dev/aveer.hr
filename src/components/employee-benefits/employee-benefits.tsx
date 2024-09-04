@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { TablesUpdate } from '@/type/database.types';
 import { EmployeeBenefitsForm } from './employee-benefits-form';
+import { FormSection, FormSectionDescription, InputsContainer } from '../forms/form-section';
 
 interface props {
 	org: string;
@@ -25,15 +26,15 @@ export const EmployeeBenefits = async ({ org }: props) => {
 	};
 
 	return (
-		<div id="employee-policies" className="grid w-full gap-6">
-			<div className="grid grid-cols-2 border-t border-t-border pt-10">
-				<div>
-					<h2 className="mb-1 font-normal">Employee Policies</h2>
-					<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">These are generic policies, schedule and benefits available company wide. They get automatically populated when filling employee contract forms.</p>
-				</div>
+		<FormSection id="employee-policies">
+			<FormSectionDescription>
+				<h2 className="mb-1 font-normal">Employee Policies</h2>
+				<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">These are generic policies, schedule and benefits available company wide. They get automatically populated when filling employee contract forms.</p>
+			</FormSectionDescription>
 
+			<InputsContainer>
 				<EmployeeBenefitsForm updateBenefits={updateBenefits} data={data} />
-			</div>
-		</div>
+			</InputsContainer>
+		</FormSection>
 	);
 };
