@@ -68,7 +68,7 @@ export const LeaveRequestDialog = ({ org, onCreateLeave, contractId, profileId }
 			hand_over_note: values.hand_over_note,
 			note: values.note,
 			status: 'pending',
-			employee_id: profileId as string
+			profile: profileId as string
 		};
 
 		const { error } = await supabase.from('time_off').insert(leaveRequestData);

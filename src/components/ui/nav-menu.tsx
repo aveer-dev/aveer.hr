@@ -1,7 +1,7 @@
 'use client';
 
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
-import { Bolt, UserPlus, Users } from 'lucide-react';
+import { Bolt, CalendarPlus, ChartPie, UserPlus, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NavLink } from './link';
 import { usePathname } from 'next/navigation';
@@ -28,6 +28,22 @@ export function NavMenu({ orgId }: { orgId: string }) {
 						</NavigationMenuLink>
 					</NavLink>
 				</NavigationMenuItem>
+				<NavigationMenuItem>
+					<NavLink org={orgId} href={`/time-off`} legacyBehavior passHref>
+						<NavigationMenuLink active={path.includes('/time-off')} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
+							<CalendarPlus size={16} />
+							Time Off
+						</NavigationMenuLink>
+					</NavLink>
+				</NavigationMenuItem>
+				{/* <NavigationMenuItem>
+					<NavLink org={orgId} href={`/performance`} legacyBehavior passHref>
+						<NavigationMenuLink active={path.includes('/performance')} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
+							<ChartPie size={16} />
+							Performance
+						</NavigationMenuLink>
+					</NavLink>
+				</NavigationMenuItem> */}
 				<NavigationMenuItem>
 					<NavLink org={orgId} href={`/settings`} legacyBehavior passHref>
 						<NavigationMenuLink active={path.includes('/settings')} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>

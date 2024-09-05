@@ -868,7 +868,6 @@ export type Database = {
           approved_by: string | null
           contract_id: number
           created_at: string | null
-          employee_id: string
           from: string
           hand_over: string | null
           hand_over_note: string | null
@@ -876,6 +875,7 @@ export type Database = {
           leave_type: Database["public"]["Enums"]["leave_type_enum"]
           note: string | null
           org: string
+          profile: string
           status: Database["public"]["Enums"]["leave_status_enum"]
           to: string
           updated_at: string | null
@@ -885,7 +885,6 @@ export type Database = {
           approved_by?: string | null
           contract_id: number
           created_at?: string | null
-          employee_id: string
           from: string
           hand_over?: string | null
           hand_over_note?: string | null
@@ -893,6 +892,7 @@ export type Database = {
           leave_type: Database["public"]["Enums"]["leave_type_enum"]
           note?: string | null
           org: string
+          profile: string
           status: Database["public"]["Enums"]["leave_status_enum"]
           to: string
           updated_at?: string | null
@@ -902,7 +902,6 @@ export type Database = {
           approved_by?: string | null
           contract_id?: number
           created_at?: string | null
-          employee_id?: string
           from?: string
           hand_over?: string | null
           hand_over_note?: string | null
@@ -910,6 +909,7 @@ export type Database = {
           leave_type?: Database["public"]["Enums"]["leave_type_enum"]
           note?: string | null
           org?: string
+          profile?: string
           status?: Database["public"]["Enums"]["leave_status_enum"]
           to?: string
           updated_at?: string | null
@@ -930,13 +930,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "time_off_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "time_off_hand_over_fkey"
             columns: ["hand_over"]
             isOneToOne: false
@@ -949,6 +942,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "time_off_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
