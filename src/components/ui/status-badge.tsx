@@ -25,7 +25,7 @@ export const ContractStatus = ({ state, start_date, end_date }: { state: Databas
 	const stateData = getState();
 
 	return (
-		<Badge className="gap-2 whitespace-nowrap py-1 font-light" variant={stateData.state.includes('term') ? 'secondary-destructive' : stateData.state == 'active' || stateData.state == 'signed' ? 'success-secondary' : 'secondary'}>
+		<Badge className="gap-2 whitespace-nowrap py-1 font-light" variant={stateData.state.includes('term') ? 'secondary-destructive' : stateData.state == 'active' || stateData.state == 'signed' ? 'secondary-success' : 'secondary'}>
 			{stateData.state}
 			{/* <TooltipProvider>
 				<Tooltip>

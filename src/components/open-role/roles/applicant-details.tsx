@@ -114,7 +114,7 @@ export const ApplicantDetails = ({ data, onUpdate }: props) => {
 							</AlertDialogTitle>
 							<div className="mt-1 flex gap-2">
 								<AlertDialogDescription>Stage: </AlertDialogDescription>
-								<Badge className="font-light" variant={data.stage.includes('reject') ? 'secondary-destructive' : data.stage == 'applicant' ? 'secondary' : 'success-secondary'}>
+								<Badge className="font-light" variant={data.stage.includes('reject') ? 'secondary-destructive' : data.stage == 'applicant' ? 'secondary' : 'secondary-success'}>
 									{data.stage}
 								</Badge>
 							</div>

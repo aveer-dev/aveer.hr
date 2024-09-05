@@ -72,7 +72,7 @@ export const ApplicantsSubTable = ({ org, roleId }: { org?: string; roleId: numb
 			id: 'stage',
 			header: 'Stage',
 			cell: ({ row }) => (
-				<Badge className="font-light" variant={row.original.stage.includes('reject') ? 'secondary-destructive' : row.original.stage == 'applicant' ? 'secondary' : 'success-secondary'}>
+				<Badge className="font-light" variant={row.original.stage.includes('reject') ? 'secondary-destructive' : row.original.stage == 'applicant' ? 'secondary' : 'secondary-success'}>
 					{row.original.stage}
 				</Badge>
 			),
