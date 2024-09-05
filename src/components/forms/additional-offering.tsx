@@ -6,7 +6,6 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Info } from 'lucide-react';
-import { generateRandomString } from '@/utils/generate-string';
 
 interface props {
 	form: UseFormReturn<any>;
@@ -19,7 +18,6 @@ interface props {
 
 export const AdditionalOffering = ({ form, isToggled, toggle, label, benefits, readonly = false }: props) => {
 	const [offering, updateOffering] = useState('');
-	const randomString = generateRandomString(4);
 
 	return (
 		<FormField
@@ -28,7 +26,7 @@ export const AdditionalOffering = ({ form, isToggled, toggle, label, benefits, r
 			render={() => (
 				<div className="grid w-full gap-3 rounded-lg bg-accent p-2">
 					<div className="flex items-center justify-between space-x-2">
-						<FormLabel htmlFor={'additional_offerings' + randomString} className="flex items-center gap-2">
+						<FormLabel htmlFor={'additional_offerings'} className="flex items-center gap-2">
 							{label ? label : 'Additional offerings'}
 							<TooltipProvider>
 								<Tooltip>
@@ -43,7 +41,7 @@ export const AdditionalOffering = ({ form, isToggled, toggle, label, benefits, r
 								</Tooltip>
 							</TooltipProvider>
 						</FormLabel>
-						{!readonly && <Switch id={'additional_offerings' + randomString} checked={isToggled} onCheckedChange={event => toggle(event)} className="scale-75" />}
+						{!readonly && <Switch id={'additional_offerings'} checked={isToggled} onCheckedChange={event => toggle(event)} className="scale-75" />}
 					</div>
 
 					{isToggled && (

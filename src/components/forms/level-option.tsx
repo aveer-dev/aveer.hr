@@ -2,22 +2,24 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from '@/components/ui/form';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { TablesInsert } from '@/type/database.types';
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { ArrowUpRight, Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { Input } from '@/components/ui/input';
 
 interface props {
 	form: UseFormReturn<any>;
 	selectedLevelId: string;
-	setLevelDetails: (data: { level: TablesInsert<'employee_levels'>; isOrgs: boolean } | undefined) => void;
+	setLevelDetails: (level: TablesInsert<'employee_levels'> | undefined) => void;
 	orgJobLevels: TablesInsert<'employee_levels'>[];
-	updateOrgJobLevels: Dispatch<SetStateAction<TablesInsert<'employee_levels'>[]>>;
+	isManual?: boolean;
+	setManualSystem?: (state: boolean) => void;
 }
 
-export const SelectLevel = ({ form, setLevelDetails, selectedLevelId, orgJobLevels, updateOrgJobLevels }: props) => {
+export const SelectLevel = ({ form, setLevelDetails, selectedLevelId, orgJobLevels, isManual, setManualSystem }: props) => {
 	const [isLevelsOpen, toggleLevelsDropdown] = useState(false);
 	const [levelQuery, setLevelQuery] = useState('');
 	const [jobLevels] = useState(levels);
@@ -27,7 +29,7 @@ export const SelectLevel = ({ form, setLevelDetails, selectedLevelId, orgJobLeve
 		const activeLevel = orgJobLevels?.find(level => level.id == Number(selectedLevelId));
 
 		if (!isInitialActiveLevelSet && activeLevel) {
-			setLevelDetails({ level: activeLevel, isOrgs: true });
+			setLevelDetails(activeLevel);
 			setInitialActiveLevel(true);
 		}
 	}, [isInitialActiveLevelSet, selectedLevelId, setLevelDetails, orgJobLevels]);
@@ -36,7 +38,7 @@ export const SelectLevel = ({ form, setLevelDetails, selectedLevelId, orgJobLeve
 		getOrgLevels();
 	}, [getOrgLevels]);
 
-	const onSelectLevelFromOrgLevels = (level: TablesInsert<'employee_levels'>, isOrgs: boolean = true) => {
+	const onSelectLevelFromOrgLevels = (level: TablesInsert<'employee_levels'>) => {
 		form.setValue('level', String(level.id));
 		toggleLevelsDropdown(false);
 
@@ -57,86 +59,101 @@ export const SelectLevel = ({ form, setLevelDetails, selectedLevelId, orgJobLeve
 		if (!signingBonus && signingBonusFromLevel) form.setValue('signing_bonus', String(signingBonusFromLevel));
 
 		// while updating active level details, make sure to use updated fixed allowance
-		setLevelDetails({ level: { ...level, fixed_allowance: fixedAllowance }, isOrgs });
+		setLevelDetails({ ...level, fixed_allowance: fixedAllowance });
 	};
 
 	return (
-		<FormField
-			control={form.control}
-			name="level"
-			render={({ field }) => (
-				<FormItem>
-					<FormLabel>Level</FormLabel>
-					<Popover open={isLevelsOpen} onOpenChange={toggleLevelsDropdown}>
-						<PopoverTrigger asChild>
-							<FormControl>
-								<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
-									{orgJobLevels.find(level => level.id == Number(field.value))?.level || jobLevels.find(level => level.id == field.value)?.level || `Select seniority level`}
-									<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-								</Button>
-							</FormControl>
-						</PopoverTrigger>
+		<>
+			{!isManual && (
+				<FormField
+					control={form.control}
+					name="level"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel className="flex items-center justify-between">
+								Employee level
+								<Link className="inline-flex items-center gap-1 rounded-md bg-accent px-1 py-px text-[10px] text-muted-foreground" href={'../settings?type=org#levels'}>
+									Manage levels
+									<ArrowUpRight size={12} />
+								</Link>
+							</FormLabel>
+							<Popover open={isLevelsOpen} onOpenChange={toggleLevelsDropdown}>
+								<PopoverTrigger asChild>
+									<FormControl>
+										<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
+											{orgJobLevels.find(level => level.id == Number(field.value))?.level || jobLevels.find(level => level.id == field.value)?.level || `Select seniority level`}
+											<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+										</Button>
+									</FormControl>
+								</PopoverTrigger>
 
-						<PopoverContent align="start" className="w-[200px] p-0">
-							<Command>
-								<CommandInput placeholder="Enter seniority level..." value={levelQuery} onValueChange={(value: string) => setLevelQuery(value)} />
+								<PopoverContent align="start" className="w-[200px] p-0">
+									<Command>
+										<CommandInput placeholder="Enter seniority level..." value={levelQuery} onValueChange={(value: string) => setLevelQuery(value)} />
 
-								<CommandList>
-									<CommandEmpty
-										onClick={() => {
-											const level = { level: levelQuery, min_salary: 0, max_salary: 0, org: '', id: (orgJobLevels.length + 1) * 1000000 };
-											updateOrgJobLevels([...orgJobLevels, level]);
-											setLevelQuery('');
-											onSelectLevelFromOrgLevels(level, false);
-										}}
-										className="p-1">
-										<div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs font-light outline-none">
-											<Check className={cn('mr-2 h-4 w-4', levelQuery && levelQuery === field.value ? 'opacity-100' : 'opacity-0')} />
-											{levelQuery}
-										</div>
-									</CommandEmpty>
+										<CommandList>
+											<CommandEmpty className="p-1">
+												<p className="flex-initial py-4 text-center text-xs text-muted-foreground">
+													Level does not exist{' '}
+													<Link className="inline-flex items-center gap-1 rounded-md bg-accent px-1 py-px text-[10px] text-muted-foreground" href={'../settings?type=org#levels'}>
+														create it
+														<ArrowUpRight size={12} />
+													</Link>
+												</p>
+											</CommandEmpty>
 
-									{orgJobLevels.length > 0 && (
-										<CommandGroup heading="Active Org Levels">
-											{orgJobLevels.map((level, index) => (
-												<CommandItem className="gap-2" value={String(level.id)} key={index} onSelect={() => onSelectLevelFromOrgLevels(level)}>
-													<div className="flex items-center">
-														<Check className={cn('mr-2 h-3 w-3', String(level.id) === field.value ? 'opacity-100' : 'opacity-0')} />
-														{level.level}
-													</div>
-													• <div className="text-left text-xs text-muted-foreground">{level.role}</div>
-												</CommandItem>
-											))}
-										</CommandGroup>
-									)}
+											{orgJobLevels.length > 0 && (
+												<CommandGroup>
+													{orgJobLevels.map((level, index) => (
+														<CommandItem className="gap-2" value={String(level.id)} key={index} onSelect={() => onSelectLevelFromOrgLevels(level)}>
+															<div className="flex items-center">
+																<Check className={cn('mr-2 h-3 w-3', String(level.id) === field.value ? 'opacity-100' : 'opacity-0')} />
+																{level.level}
+															</div>
+															• <div className="text-left text-xs text-muted-foreground">{level.role}</div>
+														</CommandItem>
+													))}
+												</CommandGroup>
+											)}
+										</CommandList>
+									</Command>
+								</PopoverContent>
+							</Popover>
 
-									<CommandGroup heading="Suggested Org Levels">
-										{jobLevels.map((level, index) => (
-											<CommandItem className="gap-2" value={level.id} key={index} onSelect={() => onSelectLevelFromOrgLevels(level as any, false)}>
-												<div className="flex items-center">
-													<Check className={cn('mr-2 h-3 w-3', level.id === field.value ? 'opacity-100' : 'opacity-0')} />
-													{level.level}
-												</div>
-												• <div className="text-left text-xs text-muted-foreground">{level.role}</div>
-											</CommandItem>
-										))}
-									</CommandGroup>
-								</CommandList>
-							</Command>
-						</PopoverContent>
-					</Popover>
+							<FormDescription>
+								<button type="button" className="inline-flex items-center rounded-md bg-accent px-1 text-[10px]" onClick={() => setManualSystem && setManualSystem(true)}>
+									Use manual level system
+								</button>
+							</FormDescription>
 
-					<FormDescription>
-						Create and edit levels{' '}
-						<Link className="inline-flex items-center rounded-md bg-accent px-1" href={'../settings?type=org#levels'}>
-							here <ArrowUpRight size={12} />
-						</Link>
-					</FormDescription>
-
-					<FormMessage />
-				</FormItem>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 			)}
-		/>
+
+			{isManual && (
+				<FormField
+					control={form.control}
+					name="level_name"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Employee level</FormLabel>
+							<FormControl>
+								<Input placeholder="IC Level 1, Senior, Junior..." {...field} />
+							</FormControl>
+							<FormMessage />
+
+							<FormDescription>
+								<button type="button" className="inline-flex items-center rounded-md bg-accent px-1 text-[10px]" onClick={() => setManualSystem && setManualSystem(false)}>
+									Use employee band system
+								</button>
+							</FormDescription>
+						</FormItem>
+					)}
+				/>
+			)}
+		</>
 	);
 };
 

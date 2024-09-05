@@ -10,18 +10,15 @@ interface props {
 	back: Dispatch<SetStateAction<boolean>>;
 	submit: () => void;
 	nationality?: Tables<'countries'>;
-	openCompensationDialog: (state: boolean) => void;
-	openBenefitsDialog: (state: boolean) => void;
-	openScheduleDialog: (state: boolean) => void;
 	isSubmiting: boolean;
 	update: boolean;
 	formType: 'contract' | 'role';
 }
 
-export const ContractDetails = ({ data, level, back, submit, nationality, openCompensationDialog, openBenefitsDialog, isSubmiting, update, formType, openScheduleDialog }: props) => {
+export const ContractDetails = ({ data, level, back, submit, nationality, isSubmiting, update, formType }: props) => {
 	return (
 		<section className="mx-auto grid max-w-4xl gap-20">
-			<Details formType={formType} data={{ ...data, level, nationality }} back={back} openBenefitsDialog={openBenefitsDialog} openCompensationDialog={openCompensationDialog} openScheduleDialog={openScheduleDialog} />
+			<Details formType={formType} data={{ ...data, level, nationality }} back={back} />
 
 			<div className="flex justify-end gap-4 border-t border-t-border pt-8">
 				<Button

@@ -20,6 +20,7 @@ export type Database = {
           id: number
           job_title: string
           level: number | null
+          level_name: string | null
           org: string
           org_signature_string: string | null
           org_signed: string | null
@@ -54,6 +55,7 @@ export type Database = {
           id?: number
           job_title: string
           level?: number | null
+          level_name?: string | null
           org: string
           org_signature_string?: string | null
           org_signed?: string | null
@@ -88,6 +90,7 @@ export type Database = {
           id?: number
           job_title?: string
           level?: number | null
+          level_name?: string | null
           org?: string
           org_signature_string?: string | null
           org_signed?: string | null
@@ -471,6 +474,7 @@ export type Database = {
           id: number
           job_title: string
           level: number | null
+          level_name: string | null
           org: string
           paid_leave: number | null
           probation_period: number | null
@@ -496,6 +500,7 @@ export type Database = {
           id?: number
           job_title: string
           level?: number | null
+          level_name?: string | null
           org: string
           paid_leave?: number | null
           probation_period?: number | null
@@ -521,6 +526,7 @@ export type Database = {
           id?: number
           job_title?: string
           level?: number | null
+          level_name?: string | null
           org?: string
           paid_leave?: number | null
           probation_period?: number | null

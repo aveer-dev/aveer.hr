@@ -20,7 +20,7 @@ export const LegalEntities = async ({ org }: { org: string }) => {
 		);
 
 	return (
-		<FormSection>
+		<FormSection id="entities">
 			<FormSectionDescription>
 				<h2 className="mb-1 font-normal">Legal Entities</h2>
 				<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">These are the legal details you provided while registering your company at the time of setup.</p>

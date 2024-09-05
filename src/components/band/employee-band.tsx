@@ -66,7 +66,7 @@ export const EmployeeBand = async ({ org }: props) => {
 	};
 
 	return (
-		<FormSection>
+		<FormSection id="levels">
 			<FormSectionDescription>
 				<h2 className="mb-1 font-normal">Employee Levels</h2>
 				<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Creating employee levels makes it super easy to manage employees and their benefits. Set them once and connect them to employees once.</p>

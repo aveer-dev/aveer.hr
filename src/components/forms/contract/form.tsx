@@ -16,7 +16,7 @@ import { createClient } from '@/utils/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { toast } from 'sonner';
 import { useParams } from 'next/navigation';
-import { createLevel, inviteUser, updateContract } from './invite-user.action';
+import { inviteUser, updateContract } from './invite-user.action';
 import { EORAgreementDrawer } from '@/components/eor/eor-agreement';
 import { createEORAgreement, doesUserHaveAdequatePermissions, getEORAgreementByCountry } from '@/utils/api';
 import { NewContractDialog } from './new-contract-dialog';
@@ -27,15 +27,15 @@ import { JobRequirements } from '@/components/forms/job-requirements';
 import { createOpenRole, updateRole } from './role.action';
 import { SelectCountry } from '../countries-option';
 import { NewRoleDialog } from './new-role-dialog';
-import { ArrowUpRight, Plus } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import { ContractDetails } from './contract-details';
 import { cn } from '@/lib/utils';
-import { CompensationDialog } from './compensation-dialog';
-import { AdditionalOfferingDialog } from './additional-offering-dialog';
-import { JobScheduleDialog } from './job-schedule';
 import { FormSection, FormSectionDescription, InputsContainer } from '../form-section';
 import { CustomFields } from './custom-fields';
+import { PayInput } from '../pay-input';
+import { FixedAllowance } from '../fixed-allowance';
+import { AdditionalOffering } from '../additional-offering';
 
 const supabase = createClient();
 
@@ -64,14 +64,14 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	const [showNewRoleDialog, toggleNewRoleDialog] = useState(false);
 	const [newContractId, setNewContractId] = useState(0);
 	const [newRoleId, setNewRoleId] = useState(0);
-	const [isLevelCreated, setLevelCreationState] = useState(false);
 	const [showRolesOption, toggleRoleOption] = useState(formType == 'contract' ? !!(contractData || contractDuplicate)?.role : false);
 	const [showFormDetails, toggleFormDetails] = useState(false);
-	const [showCompensationDialog, toggleCompensationDialog] = useState(false);
-	const [showBenefitsDialog, toggleBenefitsDialog] = useState(false);
-	const [showScheduleDialog, toggleScheduleDialog] = useState(false);
 	const [employeeNationality, setEmployeeNationality] = useState<Tables<'countries'>>();
-	const [selectedLevel, setActiveLevel] = useState<{ level?: TablesInsert<'employee_levels'>; isOrgs: boolean }>();
+	const [selectedLevel, setActiveLevel] = useState<TablesInsert<'employee_levels'>>();
+	const [showAdditionalOffering, toggleAdditionalOffering] = useState(
+		!!contractData?.additional_offerings?.length || !!contractDuplicate?.additional_offerings?.length || !!openRoleData?.additional_offerings?.length || !!openRoleDuplicate?.additional_offerings?.length || !!orgBenefits?.additional_offerings?.length
+	);
+	const [showManualSystem, setManualSystem] = useState(true);
 
 	const formSchema = z.object({
 		first_name: formType == 'contract' ? z.string() : z.string().optional(),
@@ -79,7 +79,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		email: formType == 'contract' ? z.string().email() : z.string().email().optional(),
 		nationality: formType == 'contract' ? z.string() : z.string().optional(),
 		job_title: showRolesOption ? z.string().optional() : z.string().min(1),
-		level: showRolesOption ? z.string().optional() : z.string(),
+		level: z.string().optional(),
+		level_name: z.string().optional(),
 		employment_type: showRolesOption ? z.enum(['full-time', 'part-time', 'contract']).optional() : z.enum(['full-time', 'part-time', 'contract']),
 		work_schedule: z.string().optional(),
 		work_shedule_interval: z.string().optional(),
@@ -109,6 +110,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			first_name: formType == 'contract' ? (contractData?.profile as any)?.first_name || '' : undefined,
 			last_name: formType == 'contract' ? (contractData?.profile as any)?.last_name || '' : undefined,
 			email: formType == 'contract' ? (contractData?.profile as any)?.email || '' : undefined,
+			level_name: contractData?.level_name || contractDuplicate?.level_name || '',
 			additional_offerings:
 				(contractData?.additional_offerings as string[]) ||
 				(contractDuplicate?.additional_offerings as string[]) ||
@@ -192,9 +194,11 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	}, [params.org]);
 
 	const getRoles = useCallback(async () => {
+		if (formType == 'role') return;
+
 		const { data, error } = await supabase.from('open_roles').select().eq('org', params.org);
 		if (!error) setRoles(data);
-	}, [params.org]);
+	}, [formType, params.org]);
 
 	const getOrgLevels = useCallback(async () => {
 		const { data, error } = await supabase.from('employee_levels').select().match({ org: params.org });
@@ -207,18 +211,6 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		return entity;
 	};
 
-	const createEmployeeLevel = async (level: TablesInsert<'employee_levels'>) => {
-		const response = await createLevel(level);
-		if (typeof response == 'string') {
-			toggleSubmitState(false);
-			return toast.error('😔 Error', { description: response });
-		}
-
-		setLevelCreationState(true);
-		form.setValue('level', String(response));
-		return true;
-	};
-
 	const createRole = async (values: z.infer<typeof formSchema>) => {
 		const role: TablesInsert<'open_roles'> = {
 			employment_type: values.employment_type as any,
@@ -229,7 +221,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			work_schedule: values.work_schedule,
 			work_shedule_interval: values.work_shedule_interval,
 			job_title: values.job_title as string,
-			level: Number(form.getValues('level')),
+			level: form.getValues('level') ? Number(form.getValues('level')) : null,
+			level_name: values.level_name,
 			responsibilities: values.responsibilities,
 			requirements: values.requirements,
 			entity: Number(values.entity),
@@ -273,7 +266,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			work_schedule: values.work_schedule,
 			work_shedule_interval: values.work_shedule_interval,
 			job_title: values.job_title as string,
-			level: Number(form.getValues('level')),
+			level: form.getValues('level') ? Number(form.getValues('level')) : null,
+			level_name: values.level_name,
 			responsibilities: values.responsibilities,
 			profile: contractData ? (contractData?.profile as any).id : '',
 			entity: Number(values.entity),
@@ -298,30 +292,6 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		if (responseMessage) return toast.error(responseMessage);
 	};
 
-	const createContract = async (values: z.infer<typeof formSchema>) => {
-		const orgHasExistingLevel = selectedLevel?.isOrgs;
-
-		if (!orgHasExistingLevel && values.level) {
-			const localLevelSelected = selectedLevel?.level;
-
-			const level: TablesInsert<'employee_levels'> = {
-				level: localLevelSelected?.level || 'New band',
-				role: localLevelSelected?.role,
-				org: params.org,
-				min_salary: Number(values.salary),
-				max_salary: Number(values.salary) + 1,
-				max_signing_bonus: Number(values.signing_bonus) + 1,
-				min_signing_bonus: Number(values.signing_bonus),
-				fixed_allowance: values.fixed_allowance
-			};
-
-			const response = await createEmployeeLevel(level);
-			if (response !== true) return;
-		}
-
-		return formType === 'contract' ? createEmployeeContract(values) : createRole(values);
-	};
-
 	const onSubmit = async () => {
 		const values = form.getValues();
 
@@ -335,7 +305,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 
 		// does contract require EOR?
 		const entityData = await isEntityEOR(Number(values.entity));
-		if (entityData?.is_eor !== true) return createContract(values);
+		if (entityData?.is_eor !== true) return formType === 'contract' ? createEmployeeContract(values) : createRole(values);
 
 		// if the contract requires EOR contract, does the or have an existing contract
 		const eorAgreement = await getEORAgreementByCountry(entityData?.incorporation_country as string);
@@ -360,7 +330,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		}
 
 		// if contract exists and signed, create contract
-		return createContract(values);
+		return formType === 'contract' ? createEmployeeContract(values) : createRole(values);
 	};
 
 	const reviewFormDetails = () => {
@@ -370,7 +340,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 
 	const onSignAgreement = () => {
 		const values = form.getValues();
-		if (values) createContract(values);
+		if (values) return formType === 'contract' ? createEmployeeContract(values) : createRole(values);
 	};
 
 	useEffect(() => {
@@ -379,13 +349,14 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		getOrgLevels();
 	}, [getEntities, getRoles, getOrgLevels]);
 
-	const onSetLevel = (event: { level: TablesInsert<'employee_levels'>; isOrgs: boolean } | undefined) => {
-		setActiveLevel(event);
+	const onSetLevel = (level: TablesInsert<'employee_levels'> | undefined) => {
+		setActiveLevel(level);
+		form.setValue('salary', String(level?.min_salary));
+		form.setValue('signing_bonus', level?.min_signing_bonus ? String(level?.min_signing_bonus) : undefined);
+		form.setValue('fixed_allowance', level?.fixed_allowance ? (level?.fixed_allowance as any) : undefined);
+
 		toggleShowFixedIncome(() => !!form.getValues('fixed_allowance')?.length);
 		toggleShowSigningBonus(() => !!form.getValues('signing_bonus')?.length);
-		form.setValue('salary', String(event?.level.min_salary));
-		form.setValue('signing_bonus', event?.level.min_signing_bonus ? String(event?.level.min_signing_bonus) : undefined);
-		form.setValue('fixed_allowance', event?.level.fixed_allowance ? (event?.level.fixed_allowance as any) : undefined);
 	};
 
 	const onSelectRole = (roleId: string) => {
@@ -407,7 +378,31 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 
 		form.setValue('level', String(role.level));
 		const activeLevel = orgJobLevels.find(level => level.id === role.level);
-		setActiveLevel({ isOrgs: true, level: activeLevel });
+		setActiveLevel(activeLevel);
+	};
+
+	const clearCompensationSection = useCallback(() => {
+		form.setValue('salary', '');
+		form.setValue('level', '');
+		form.setValue('signing_bonus', '');
+		form.setValue('fixed_allowance', []);
+		form.setValue('additional_offerings', (orgBenefits?.additional_offerings as string[]) || []);
+
+		toggleShowFixedIncome(() => false);
+		toggleShowSigningBonus(() => false);
+
+		setActiveLevel(undefined);
+	}, [form, orgBenefits?.additional_offerings]);
+
+	useEffect(() => {
+		if (showManualSystem == true) clearCompensationSection();
+	}, [clearCompensationSection, showManualSystem]);
+
+	const resetForm = () => {
+		toggleFormDetails(false);
+		form.reset();
+		setActiveLevel(undefined);
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
 	return (
@@ -426,39 +421,11 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 				/>
 			)}
 
-			<NewContractDialog isAlertOpen={isNewContractDialogOpen} toggleDialog={toggleNewContractDialog} contractId={newContractId} isLevelCreated={isLevelCreated} />
-			<NewRoleDialog
-				onClose={() => {
-					toggleFormDetails(false);
-					form.reset();
-					setActiveLevel(undefined);
-				}}
-				isAlertOpen={showNewRoleDialog}
-				toggleDialog={toggleNewRoleDialog}
-				roleId={newRoleId}
-			/>
+			<NewContractDialog onClose={() => resetForm} isAlertOpen={isNewContractDialogOpen} toggleDialog={toggleNewContractDialog} contractId={newContractId} />
 
-			{showFormDetails && (
-				<ContractDetails
-					isSubmiting={isSubmiting}
-					formType={formType}
-					update={!!contractData}
-					openBenefitsDialog={toggleBenefitsDialog}
-					openCompensationDialog={toggleCompensationDialog}
-					nationality={employeeNationality}
-					back={toggleFormDetails}
-					submit={onSubmit}
-					level={selectedLevel?.level}
-					data={form.getValues()}
-					openScheduleDialog={toggleScheduleDialog}
-				/>
-			)}
+			<NewRoleDialog onClose={() => resetForm} isAlertOpen={showNewRoleDialog} toggleDialog={toggleNewRoleDialog} roleId={newRoleId} />
 
-			<CompensationDialog updateOrgJobLevels={updateOrgJobLevels} isDialogOpen={showCompensationDialog} openDialog={toggleCompensationDialog} selectedLevelId={form.getValues('level') || ''} orgJobLevels={orgJobLevels} setLevelDetails={onSetLevel} form={form} />
-
-			{showBenefitsDialog && <AdditionalOfferingDialog orgBenefits={orgBenefits?.additional_offerings as string[]} isDialogOpen={showBenefitsDialog} openDialog={toggleBenefitsDialog} form={form} />}
-
-			{showScheduleDialog && <JobScheduleDialog isDialogOpen={showScheduleDialog} openDialog={toggleScheduleDialog} form={form} />}
+			{showFormDetails && <ContractDetails isSubmiting={isSubmiting} formType={formType} update={!!contractData} nationality={employeeNationality} back={toggleFormDetails} submit={onSubmit} level={selectedLevel} data={form.getValues()} />}
 
 			{!showFormDetails && (
 				<Form {...form}>
@@ -554,7 +521,12 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 										name="role"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Role</FormLabel>
+												<FormLabel className="flex items-center justify-between">
+													Role
+													<Link href={'../open-roles'} className="inline-flex w-fit items-center gap-1 rounded-md bg-accent p-1">
+														Manage roles <ArrowUpRight size={12} />
+													</Link>
+												</FormLabel>
 												<Select
 													onValueChange={value => {
 														field.onChange(value);
@@ -574,12 +546,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 														))}
 													</SelectContent>
 												</Select>
-												<FormDescription>
-													You will be able to review and edit role details before sending contract{form.getValues('first_name') ? ' to ' + form.getValues('first_name') : ''}.{' '}
-													<Link href={'../open-roles'} className="inline-flex w-fit items-center gap-1 rounded-md bg-accent px-1">
-														Manage roles <ArrowUpRight size={12} />
-													</Link>
-												</FormDescription>
+												<FormDescription>You will be able to review and edit role details before sending contract{form.getValues('first_name') ? ' to ' + form.getValues('first_name') : ''}. </FormDescription>
 												<FormMessage />
 											</FormItem>
 										)}
@@ -587,21 +554,25 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 								)}
 
 								<div className={cn(formType == 'role' || !showRolesOption ? '' : 'pointer-events-none absolute opacity-0', 'grid gap-8')}>
-									<FormField
-										control={form.control}
-										name="job_title"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Job title</FormLabel>
-												<FormControl>
-													<Input type="text" placeholder="Enter job title" {...field} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
+									{
+										<div className="grid grid-cols-2 gap-8">
+											<FormField
+												control={form.control}
+												name="job_title"
+												render={({ field }) => (
+													<FormItem>
+														<FormLabel>Job title</FormLabel>
+														<FormControl>
+															<Input type="text" placeholder="Enter job title" {...field} />
+														</FormControl>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
 
-									<SelectLevel updateOrgJobLevels={updateOrgJobLevels} orgJobLevels={orgJobLevels} form={form} selectedLevelId={form.getValues('level') || ''} setLevelDetails={onSetLevel} />
+											<SelectLevel isManual={showManualSystem} setManualSystem={setManualSystem} orgJobLevels={orgJobLevels} form={form} selectedLevelId={form.getValues('level') || ''} setLevelDetails={onSetLevel} />
+										</div>
+									}
 
 									<FormField
 										control={form.control}
@@ -661,6 +632,37 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 								</InputsContainer>
 							</FormSection>
 						)}
+
+						{/* compensation */}
+						<div className="grid grid-cols-2 border-t border-t-border pt-10">
+							<div>
+								<h2 className="font-semibold">Compensation</h2>
+								<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+							</div>
+
+							<div className="mb-10 grid gap-8">
+								<PayInput form={form} name="salary" label="Gross annual salary" minValue={Number(selectedLevel?.min_salary)} maxValue={Number(selectedLevel?.max_salary)} />
+
+								<FormField
+									control={form.control}
+									name="signing_bonus"
+									render={() => (
+										<FormItem className="grid w-full gap-3 rounded-lg bg-accent p-2">
+											<div className="flex items-center justify-between space-x-2">
+												<Label htmlFor="signin-bonus">Add signing bonus</Label>
+												<Switch checked={showSigningBonus} onCheckedChange={event => toggleShowSigningBonus(event)} id="signin-bonus" className="scale-75" />
+											</div>
+
+											{showSigningBonus && <PayInput form={form} name="signing_bonus" minValue={Number(selectedLevel?.min_signing_bonus)} maxValue={Number(selectedLevel?.max_signing_bonus)} />}
+										</FormItem>
+									)}
+								/>
+
+								<FixedAllowance toggle={toggleShowFixedIncome} isToggled={showFixedIncome} form={form} />
+
+								<AdditionalOffering toggle={toggleAdditionalOffering} isToggled={showAdditionalOffering} form={form} />
+							</div>
+						</div>
 
 						{/* job schedule */}
 						{formType === 'contract' && (

@@ -12,8 +12,8 @@ interface props {
 	label?: string;
 	minValue: number;
 	maxValue: number;
-	salaryInvalid: boolean;
-	validateSalary: (salary: number) => void;
+	salaryInvalid?: boolean;
+	validateSalary?: (salary: number) => void;
 }
 
 export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue, validateSalary }: props) => {
@@ -78,12 +78,11 @@ export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue,
 							{...field}
 							onChange={event => {
 								field.onChange(event);
-								validateSalary(Number(event.target.value));
+								validateSalary && validateSalary(Number(event.target.value));
 							}}
 							type="number"
 							autoComplete="off"
-							placeholder="Employee gross annual salary"
-							required
+							placeholder="Enter amount"
 						/>
 					</FormControl>
 					<FormMessage />

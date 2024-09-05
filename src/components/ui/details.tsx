@@ -164,7 +164,14 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 
 			{/* compensation */}
 			<div>
-				<h1 className="mb-4 text-lg font-semibold">Compensation</h1>
+				<div className="mb-4 flex items-center justify-between">
+					<h1 className="text-lg font-semibold">Compensation</h1>
+					{back && (
+						<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
+							<Pencil size={12} />
+						</Button>
+					)}
+				</div>
 				<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
 					<li className="grid gap-3">
 						<h2 className="flex items-center gap-2 text-sm font-medium">
@@ -251,7 +258,14 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 
 			{/* job schedule */}
 			<div>
-				<h1 className="mb-4 text-lg font-semibold">Job Schedule</h1>
+				<div className="mb-4 flex items-center justify-between">
+					<h1 className="text-lg font-semibold">Job Schedule</h1>
+					{back && (
+						<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
+							<Pencil size={12} />
+						</Button>
+					)}
+				</div>
 
 				<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
 					{formType == 'contract' && (

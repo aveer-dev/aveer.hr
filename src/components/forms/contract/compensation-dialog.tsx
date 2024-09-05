@@ -14,7 +14,7 @@ import { Switch } from '@/components/ui/switch';
 interface props {
 	form: UseFormReturn<any>;
 	selectedLevelId: string;
-	setLevelDetails: (data: { level: TablesInsert<'employee_levels'>; isOrgs: boolean } | undefined) => void;
+	setLevelDetails: (level: TablesInsert<'employee_levels'> | undefined) => void;
 	orgJobLevels: TablesInsert<'employee_levels'>[];
 	updateOrgJobLevels: Dispatch<SetStateAction<TablesInsert<'employee_levels'>[]>>;
 	isDialogOpen: boolean;
@@ -22,34 +22,30 @@ interface props {
 }
 
 export const CompensationDialog = ({ isDialogOpen, openDialog, form, selectedLevelId, setLevelDetails, orgJobLevels, updateOrgJobLevels }: props) => {
-	const [selectedLevel, setActiveLevel] = useState<{ level?: TablesInsert<'employee_levels'>; isOrgs: boolean }>();
+	const [selectedLevel, setActiveLevel] = useState<TablesInsert<'employee_levels'>>();
 	const [showFixedIncome, toggleShowFixedIncome] = useState(false);
 	const [showSigningBonus, toggleShowSigningBonus] = useState(false);
 	const [showSalaryCustomError, toggleSalaryCustomError] = useState(false);
 	const [showSigningCustomError, toggleSigningCustomError] = useState(false);
 
 	const validateSalary = (salary: number) => {
-		const level = selectedLevel?.level;
-
-		if (!level?.min_salary || !level?.max_salary) return;
-		if (salary < level?.min_salary || salary > level?.max_salary) toggleSalaryCustomError(true);
+		if (!selectedLevel?.min_salary || !selectedLevel?.max_salary) return;
+		if (salary < selectedLevel?.min_salary || salary > selectedLevel?.max_salary) toggleSalaryCustomError(true);
 		else toggleSalaryCustomError(false);
 	};
 
 	const validateBonus = (bonus: number) => {
-		const level = selectedLevel?.level;
-
-		if (!level?.min_signing_bonus || !level?.min_signing_bonus) return;
-		if (bonus < level?.min_signing_bonus || bonus > level?.min_signing_bonus) toggleSigningCustomError(true);
+		if (!selectedLevel?.min_signing_bonus || !selectedLevel?.min_signing_bonus) return;
+		if (bonus < selectedLevel?.min_signing_bonus || bonus > selectedLevel?.min_signing_bonus) toggleSigningCustomError(true);
 		else toggleSigningCustomError(false);
 	};
 
-	const onSetActiveLevel = (event: { level: TablesInsert<'employee_levels'>; isOrgs: boolean } | undefined) => {
+	const onSetActiveLevel = (event: TablesInsert<'employee_levels'> | undefined) => {
 		setLevelDetails(event);
 		setActiveLevel(event);
 
-		toggleShowFixedIncome(!!event?.level?.fixed_allowance?.length);
-		toggleShowSigningBonus(!!event?.level?.min_signing_bonus);
+		toggleShowFixedIncome(!!event?.fixed_allowance?.length);
+		toggleShowSigningBonus(!!event?.min_signing_bonus);
 	};
 
 	return (
@@ -63,10 +59,10 @@ export const CompensationDialog = ({ isDialogOpen, openDialog, form, selectedLev
 				<div className="grid gap-4 py-6">
 					<Form {...form}>
 						<form className="space-y-8">
-							<SelectLevel updateOrgJobLevels={updateOrgJobLevels} orgJobLevels={orgJobLevels} setLevelDetails={onSetActiveLevel} selectedLevelId={selectedLevelId} form={form} />
+							<SelectLevel orgJobLevels={orgJobLevels} setLevelDetails={onSetActiveLevel} selectedLevelId={selectedLevelId} form={form} />
 
 							<div className="mb-10 grid gap-8">
-								<PayInput form={form} name="salary" label="Base salary" minValue={Number(selectedLevel?.level?.min_salary)} maxValue={Number(selectedLevel?.level?.max_salary)} validateSalary={validateSalary} salaryInvalid={showSalaryCustomError} />
+								<PayInput form={form} name="salary" label="Gross annual salary" minValue={Number(selectedLevel?.min_salary)} maxValue={Number(selectedLevel?.max_salary)} validateSalary={validateSalary} salaryInvalid={showSalaryCustomError} />
 
 								<FormField
 									control={form.control}
@@ -79,14 +75,7 @@ export const CompensationDialog = ({ isDialogOpen, openDialog, form, selectedLev
 											</div>
 
 											{showSigningBonus && (
-												<PayInput
-													form={form}
-													name="signing_bonus"
-													minValue={Number(selectedLevel?.level?.min_signing_bonus)}
-													maxValue={Number(selectedLevel?.level?.max_signing_bonus)}
-													validateSalary={validateBonus}
-													salaryInvalid={showSigningCustomError}
-												/>
+												<PayInput form={form} name="signing_bonus" minValue={Number(selectedLevel?.min_signing_bonus)} maxValue={Number(selectedLevel?.max_signing_bonus)} validateSalary={validateBonus} salaryInvalid={showSigningCustomError} />
 											)}
 										</FormItem>
 									)}
@@ -100,7 +89,7 @@ export const CompensationDialog = ({ isDialogOpen, openDialog, form, selectedLev
 											form.setValue('fixed_allowance', []);
 											if (selectedLevel?.level) {
 												setActiveLevel({ ...selectedLevel });
-												setLevelDetails({ isOrgs: selectedLevel?.isOrgs, level: selectedLevel?.level });
+												setLevelDetails(selectedLevel);
 											}
 										}
 									}}
