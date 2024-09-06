@@ -66,7 +66,7 @@ export const ContractOverview = ({ isOpen, toggle, data }: props) => {
 		const { data, error } = await supabase
 			.from('time_off')
 			.select()
-			.match({ org: (contract.org as any).subdomain, employee_id: (contract.profile as any).id, status: 'pending' });
+			.match({ org: (contract.org as any).subdomain, profile: (contract.profile as any).id, status: 'pending' });
 
 		if (error) return toast('😬 Ooops', { description: 'Unable to fetch your requests' });
 

@@ -26,9 +26,10 @@ export function DatePicker({ onSetDate, selected, field }: { onSetDate: (date: D
 				</FormControl>
 			</PopoverTrigger>
 
-			<PopoverContent className="w-auto p-0">
+			<PopoverContent className="w-auto pt-8">
 				<Calendar
 					mode="single"
+					className="p-0"
 					selected={date}
 					onSelect={event => {
 						if (event) {
@@ -37,7 +38,7 @@ export function DatePicker({ onSetDate, selected, field }: { onSetDate: (date: D
 							onSetDate(event);
 						}
 					}}
-					initialFocus
+					autoFocus
 				/>
 			</PopoverContent>
 		</Popover>

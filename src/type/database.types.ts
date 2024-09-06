@@ -866,7 +866,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
-          contract_id: number
+          contract: number
           created_at: string | null
           from: string
           hand_over: string | null
@@ -883,7 +883,7 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
-          contract_id: number
+          contract: number
           created_at?: string | null
           from: string
           hand_over?: string | null
@@ -900,7 +900,7 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
-          contract_id?: number
+          contract?: number
           created_at?: string | null
           from?: string
           hand_over?: string | null
@@ -923,8 +923,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "time_off_contract_id_fkey"
-            columns: ["contract_id"]
+            foreignKeyName: "time_off_contract_fkey"
+            columns: ["contract"]
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id"]

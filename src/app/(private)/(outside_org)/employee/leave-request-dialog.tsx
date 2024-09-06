@@ -61,7 +61,7 @@ export const LeaveRequestDialog = ({ org, onCreateLeave, contractId, profileId }
 		const leaveRequestData: TablesInsert<'time_off'> = {
 			from: values.dates.from as any,
 			to: values.dates.to as any,
-			contract_id: contractId as number,
+			contract: contractId as number,
 			org,
 			leave_type: values.leave_type,
 			hand_over: values.hand_over,
@@ -154,7 +154,7 @@ export const LeaveRequestDialog = ({ org, onCreateLeave, contractId, profileId }
 												)}
 											</div>
 										</FormControl>
-										<Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1} />
+										<Calendar className="!mt-10" mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1} />
 										{/* <FormDescription>Select the date range you'll like to have your leave</FormDescription> */}
 										<FormMessage />
 									</FormItem>
