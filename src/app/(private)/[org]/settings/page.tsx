@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmployeeBenefits } from '@/components/employee-benefits/employee-benefits';
 import { LegalEntities } from '@/components/legal-entities/legal-entities';
 import { FormSection, FormSectionDescription, InputsContainer } from '@/components/forms/form-section';
+import { ApprovalPolicies } from '@/components/approval-policies';
 
 export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -88,6 +89,10 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 
 					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
 						<EmployeeBenefits org={params.org} />
+					</Suspense>
+
+					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
+						<ApprovalPolicies org={params.org} />
 					</Suspense>
 				</TabsContent>
 

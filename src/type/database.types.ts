@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      approval_policies: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          levels: Json[]
+          name: string
+          org: string
+          type: Database["public"]["Enums"]["policy_types"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          levels: Json[]
+          name?: string
+          org: string
+          type: Database["public"]["Enums"]["policy_types"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          levels?: Json[]
+          name?: string
+          org?: string
+          type?: Database["public"]["Enums"]["policy_types"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_policies_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           additional_offerings: Json[] | null
@@ -649,8 +690,10 @@ export type Database = {
           additional_offerings: Json[] | null
           created_at: string
           id: number
+          maternity_leave: number | null
           org: string
           paid_time_off: number | null
+          paternity_leave: number | null
           probation: number | null
           sick_leave: number | null
           work_schedule: string | null
@@ -661,8 +704,10 @@ export type Database = {
           additional_offerings?: Json[] | null
           created_at?: string
           id?: number
+          maternity_leave?: number | null
           org: string
           paid_time_off?: number | null
+          paternity_leave?: number | null
           probation?: number | null
           sick_leave?: number | null
           work_schedule?: string | null
@@ -673,8 +718,10 @@ export type Database = {
           additional_offerings?: Json[] | null
           created_at?: string
           id?: number
+          maternity_leave?: number | null
           org?: string
           paid_time_off?: number | null
+          paternity_leave?: number | null
           probation?: number | null
           sick_leave?: number | null
           work_schedule?: string | null
@@ -862,6 +909,38 @@ export type Database = {
           },
         ]
       }
+      teams: {
+        Row: {
+          created_at: string
+          id: number
+          managers: Json[]
+          name: string
+          org: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          managers: Json[]
+          name: string
+          org?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          managers?: Json[]
+          name?: string
+          org?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       time_off: {
         Row: {
           approved_at: string | null
@@ -978,6 +1057,7 @@ export type Database = {
         | "more"
         | "cancelled"
       leave_type_enum: "paid" | "sick" | "maternity" | "paternity" | "unpaid"
+      policy_types: "time_off"
       role_status: "open" | "close"
       work_locations: "on-site" | "remote" | "hybrid"
     }
