@@ -27,13 +27,13 @@ const formSchema = z.object({
 	name: z.string().min(1),
 	description: z.string().min(1).optional(),
 	type: z.enum(['time_off']),
-	levels: z.array(z.object({ type: z.string(), id: z.string() }))
+	levels: z.array(z.object({ type: z.string(), id: z.string(), level: z.number() }))
 });
 
 const supabase = createClient();
 
 export const ApprovalPolicy = ({ data }: { data: Tables<'approval_policies'> }) => {
-	const [levels, updateLevels] = useState<{ type: string; id: string }[]>(data.levels as any);
+	const [levels, updateLevels] = useState<{ type: string; id: string; level: number }[]>(data.levels as any);
 	const [isUpdating, setUpdateState] = useState(false);
 	const [isDialogOpen, toggleDialogState] = useState(false);
 	const [employees, setEmployees] = useState<{ id: number; profile: { first_name: string; last_name: string } }[]>([]);
@@ -249,8 +249,8 @@ export const ApprovalPolicy = ({ data }: { data: Tables<'approval_policies'> }) 
 								<Button
 									type="button"
 									onClick={() => {
-										updateLevels([...levels, { type: 'manager', id: '' }]);
-										form.setValue('levels', [...form.getValues('levels'), { type: 'manager', id: '' }]);
+										updateLevels([...levels, { type: 'manager', id: '', level: levels.length + 1 }]);
+										form.setValue('levels', [...form.getValues('levels'), { type: 'manager', id: '', level: levels.length + 1 }]);
 									}}
 									variant={'secondary'}
 									className="mt-8 gap-3">

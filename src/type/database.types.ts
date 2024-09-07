@@ -944,7 +944,6 @@ export type Database = {
       time_off: {
         Row: {
           approved_at: string | null
-          approved_by: string | null
           contract: number
           created_at: string | null
           from: string
@@ -952,6 +951,7 @@ export type Database = {
           hand_over_note: string | null
           id: number
           leave_type: Database["public"]["Enums"]["leave_type_enum"]
+          levels: Json[] | null
           note: string | null
           org: string
           profile: string
@@ -961,7 +961,6 @@ export type Database = {
         }
         Insert: {
           approved_at?: string | null
-          approved_by?: string | null
           contract: number
           created_at?: string | null
           from: string
@@ -969,6 +968,7 @@ export type Database = {
           hand_over_note?: string | null
           id?: never
           leave_type: Database["public"]["Enums"]["leave_type_enum"]
+          levels?: Json[] | null
           note?: string | null
           org: string
           profile: string
@@ -978,7 +978,6 @@ export type Database = {
         }
         Update: {
           approved_at?: string | null
-          approved_by?: string | null
           contract?: number
           created_at?: string | null
           from?: string
@@ -986,6 +985,7 @@ export type Database = {
           hand_over_note?: string | null
           id?: never
           leave_type?: Database["public"]["Enums"]["leave_type_enum"]
+          levels?: Json[] | null
           note?: string | null
           org?: string
           profile?: string
@@ -994,13 +994,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "time_off_approved_by_fkey"
-            columns: ["approved_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "time_off_contract_fkey"
             columns: ["contract"]
