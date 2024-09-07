@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
 import { Tables } from '@/type/database.types';
 import { Badge } from '@/components/ui/badge';
+import { LeaveReview } from './leave-review';
 
 export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles'> }>[] = [
 	{
@@ -66,45 +67,18 @@ export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles
 	{
 		id: 'days',
 		header: 'Days',
-		cell: ({ row }) => <span className="whitespace-nowrap">{differenceInBusinessDays(row.original.to, row.original.from)}</span>
-		// },
-		// {
-		// 	id: 'actions',
-		// 	cell: ({ row }) => {
-		// 		return (
-		// 			<DropdownMenu>
-		// 				<DropdownMenuTrigger asChild>
-		// 					<Button variant="ghost" className="h-8 w-8 p-0 !ring-0 !ring-offset-0">
-		// 						<span className="sr-only">Open menu</span>
-		// 						<MoreHorizontal className="h-4 w-4" />
-		// 					</Button>
-		// 				</DropdownMenuTrigger>
-		// 				<DropdownMenuContent align="end">
-		// 					<DropdownMenuItem className="h-7 p-0 text-xs font-light">
-		// 						<DropdownListItem org={row.original.org} href={`/people/${row.original.id}`}>
-		// 							View
-		// 						</DropdownListItem>
-		// 					</DropdownMenuItem>
-		// 					<DropdownMenuItem className="h-7 p-0 text-xs font-light">
-		// 						<DropdownListItem org={row.original.org} href={`/people/${row.original.id}/edit`}>
-		// 							Edit
-		// 						</DropdownListItem>
-		// 					</DropdownMenuItem>
-		// 					<DropdownMenuItem className="h-7 p-0 text-xs font-light">
-		// 						<DropdownListItem org={row.original.org} href={`/people/new?duplicate=${row.original.id}`}>
-		// 							Duplicate
-		// 						</DropdownListItem>
-		// 					</DropdownMenuItem>
-		// 				</DropdownMenuContent>
-		// 			</DropdownMenu>
-		// 		);
-		// 	},
-		// 	size: 50
+		cell: ({ row }) => <span className="whitespace-nowrap">{differenceInBusinessDays(row.original.to, row.original.from) + 1}</span>
+	},
+	{
+		id: 'actions',
+		cell: ({ row }) => {
+			return (
+				<LeaveReview data={row.original as any}>
+					<Button variant={'secondary'} className="h-6">
+						Review
+					</Button>
+				</LeaveReview>
+			);
+		}
 	}
 ];
-
-// const DropdownListItem = ({ children, href, org }: { children: ReactNode; href: string; org?: string }) => (
-// 	<NavLink org={org} className={cn(buttonVariants({ size: 'sm', variant: 'ghost' }), 'h-7 w-full cursor-pointer justify-start')} href={href}>
-// 		{children}
-// 	</NavLink>
-// );

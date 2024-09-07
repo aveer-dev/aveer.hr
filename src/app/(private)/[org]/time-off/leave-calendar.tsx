@@ -52,7 +52,7 @@ export const LeaveCalendar = ({ leaveDays }: props) => {
 							<div className={cn(modifiers.outside && 'opacity-10', modifiers.today && 'bg-slate-800 text-white', 'mb-2 ml-auto flex h-6 w-6 items-center justify-center rounded-full p-1 text-right text-lg')}>{cellProps.children}</div>
 							{modifiers.leaveDay &&
 								dayLeaves.map((leave, index) => (
-									<LeaveReview data={leave.data} key={index + 'leave'} className={cn(modifiers.outside && 'opacity-10')} status={leave.status}>
+									<LeaveReview data={leave.data} key={index + 'leave'} className={cn(modifiers.outside && 'opacity-10')}>
 										{leave?.name}
 									</LeaveReview>
 								))}

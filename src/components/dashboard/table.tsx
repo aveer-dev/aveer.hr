@@ -181,7 +181,13 @@ const TableContent = ({ row, org, subColumns, link }: { row: Row<any>; org?: str
 							<div className="flex items-center gap-3">
 								{flexRender(cell.column.columnDef.cell, cell.getContext())}
 								{index == 0 && subColumns && (
-									<Button variant={'ghost'} size={'icon'}>
+									<Button
+										onClick={event => {
+											event.stopPropagation();
+											subColumns && setSubColumnState(!showSubColumn);
+										}}
+										variant={'ghost'}
+										size={'icon'}>
 										<ChevronRight size={14} className={cn(showSubColumn ? 'rotate-90' : '', 'transition-all')} />
 									</Button>
 								)}

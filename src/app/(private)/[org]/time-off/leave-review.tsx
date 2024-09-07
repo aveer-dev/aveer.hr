@@ -9,12 +9,11 @@ import { createClient } from '@/utils/supabase/client';
 import { differenceInBusinessDays, format } from 'date-fns';
 import { Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { HTMLAttributes, useCallback, useEffect, useId, useState } from 'react';
+import { HTMLAttributes, ReactNode, useCallback, useEffect, useId, useState } from 'react';
 import { toast } from 'sonner';
 
 interface props {
-	children: string;
-	status: string;
+	children: ReactNode | string;
 	data: Tables<'time_off'> & { profile: Tables<'profiles'>; contract: Tables<'contracts'> };
 }
 interface DBLevel {
@@ -34,7 +33,7 @@ interface level {
 const supabase = createClient();
 const role = 'admin';
 
-export const LeaveReview = ({ data, children, status, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
+export const LeaveReview = ({ data, children, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
 	const [levels, updateLevels] = useState<level[]>([]);
 	const [dbLevels, updateDBLevels] = useState<DBLevel[]>([]);
 	const [userId, setUserId] = useState<string>();
@@ -83,7 +82,7 @@ export const LeaveReview = ({ data, children, status, ...props }: props & HTMLAt
 
 	useEffect(() => {
 		if (isReviewOpen && data.levels) processLevels(data.levels);
-		if (!userId) getUserId();
+		if (isReviewOpen && !userId) getUserId();
 	}, [data, isReviewOpen]);
 
 	const updateLeave = async (levels: DBLevel[]) => {
@@ -127,25 +126,29 @@ export const LeaveReview = ({ data, children, status, ...props }: props & HTMLAt
 
 	return (
 		<Sheet open={isReviewOpen} onOpenChange={setReviewState}>
-			<TooltipProvider>
-				<Tooltip>
-					<TooltipTrigger asChild>
-						<SheetTrigger asChild>
-							<button {...props} className={cn('flex w-full items-center gap-2 overflow-hidden rounded-lg p-1 text-left text-xs capitalize text-muted-foreground transition-all duration-500 hover:bg-accent', props.className)}>
-								<div className={cn(`${status == 'approved' ? 'bg-green-400' : status == 'denied' ? 'bg-red-400' : status == 'pending' ? 'bg-orange-400' : 'bg-gray-400'}`, 'h-2 w-2 rounded-full')}></div> <div className="w-10/12 truncate">{children}</div>
-							</button>
-						</SheetTrigger>
-					</TooltipTrigger>
+			{typeof children == 'string' && (
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<SheetTrigger asChild>
+								<button {...props} className={cn('flex w-full items-center gap-2 overflow-hidden rounded-lg p-1 text-left text-xs capitalize text-muted-foreground transition-all duration-500 hover:bg-accent', props.className)}>
+									<div className={cn(`${data.status == 'approved' ? 'bg-green-400' : data.status == 'denied' ? 'bg-red-400' : data.status == 'pending' ? 'bg-orange-400' : 'bg-gray-400'}`, 'h-2 w-2 rounded-full')}></div>{' '}
+									<div className="w-10/12 truncate">{children}</div>
+								</button>
+							</SheetTrigger>
+						</TooltipTrigger>
 
-					<TooltipContent className="pl-2">
-						<div className={cn(`${status == 'approved' ? 'border-l-green-400' : status == 'denied' ? 'border-l-red-400' : status == 'pending' ? 'border-l-orange-400' : 'border-l-gray-200'}`, 'border-l-4 pl-2 text-left capitalize')}>
-							{children.split('|').map((text, index) => (
-								<p key={index}>{text}</p>
-							))}
-						</div>
-					</TooltipContent>
-				</Tooltip>
-			</TooltipProvider>
+						<TooltipContent className="pl-2">
+							<div className={cn(`${data.status == 'approved' ? 'border-l-green-400' : data.status == 'denied' ? 'border-l-red-400' : data.status == 'pending' ? 'border-l-orange-400' : 'border-l-gray-200'}`, 'border-l-4 pl-2 text-left capitalize')}>
+								{children.split('|').map((text, index) => (
+									<p key={index}>{text}</p>
+								))}
+							</div>
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+			)}
+			{typeof children !== 'string' && <SheetTrigger asChild>{children}</SheetTrigger>}
 
 			<SheetContent className="overflow-y-auto sm:max-w-md">
 				<SheetHeader>
@@ -173,7 +176,7 @@ export const LeaveReview = ({ data, children, status, ...props }: props & HTMLAt
 							<div className="text-xs leading-6">
 								<p>
 									<span className="text-muted-foreground">From:</span> {format(data.from, 'ccc')}, {format(data.from, 'PP')} - <span className="text-muted-foreground">To:</span> {format(data.to, 'ccc')}, {format(data.to, 'PP')}{' '}
-									<span className="text-muted-foreground">({differenceInBusinessDays(data.to, data.from)} days)</span>
+									<span className="text-muted-foreground">({differenceInBusinessDays(data.to, data.from) + 1} days)</span>
 								</p>
 							</div>
 						</li>
