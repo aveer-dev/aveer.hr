@@ -20,7 +20,7 @@ const sendContractEmail = async (email: string) => {
 const getExistingUserAccount = async (email: string) => {
 	const supabase = createClient();
 
-	const { data, error } = await supabase.from('profiles').select('id').eq('email', email).single();
+	const { data, error } = await supabase.from('profiles').select('id').eq('email', email).is('nationality', null).single();
 	if (error) return;
 
 	sendContractEmail(email);
@@ -34,12 +34,8 @@ export const inviteUser = async (contract: string, profile: string) => {
 	const parsedContract: TablesInsert<'contracts'> = JSON.parse(contract);
 	const parsedProfile: TablesInsert<'profiles'> = JSON.parse(profile);
 
-	const {
-		data: { user: adminUser }
-	} = await supabase.auth.getUser();
-	const role = await supabase.from('profiles_roles').select().match({ organisation: parsedContract.org, profile: adminUser?.id });
-	if (role.error) return role.error.message;
-	if (role.data && !role.data.length) return `You do not have adequate org permission to create contracts`;
+	const userHasPermission = await doesUserHaveAdequatePermissions({ orgId: parsedContract.org });
+	if (userHasPermission !== true) return userHasPermission;
 
 	const {
 		error,
@@ -49,19 +45,11 @@ export const inviteUser = async (contract: string, profile: string) => {
 
 	const userId = error && error.code == 'email_exists' ? await getExistingUserAccount(parsedProfile.email) : user?.id;
 
-	const [_profileRes, contractRes] = await Promise.all([
-		error?.code == 'email_exists'
-			? false
-			: supabase
-					.from('profiles')
-					.update({ nationality: parsedProfile.nationality })
-					.eq('id', userId as string),
-		await supabase
-			.from('contracts')
-			.insert({ ...parsedContract, profile: userId as string })
-			.select('id')
-			.single()
-	]);
+	const contractRes = await supabase
+		.from('contracts')
+		.insert({ ...parsedContract, profile: userId as string })
+		.select('id')
+		.single();
 
 	if (contractRes.error) return contractRes.error.message;
 	if (!contractRes.error) return contractRes.data.id;

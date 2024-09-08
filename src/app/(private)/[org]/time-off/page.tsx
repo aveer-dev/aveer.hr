@@ -12,7 +12,7 @@ interface props {
 export default async function TimeOffPage({ params }: props) {
 	const supabase = createClient();
 
-	const { data, error } = await supabase.from('time_off').select('*, contract:contracts!time_off_contract_fkey(job_title), profile:profiles!time_off_profile_fkey(*)').match({ org: params.org });
+	const { data, error } = await supabase.from('time_off').select('*, contract:contracts!time_off_contract_fkey(job_title,id), profile:profiles!time_off_profile_fkey(*)').match({ org: params.org });
 
 	if (error) return;
 

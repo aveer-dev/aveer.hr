@@ -46,7 +46,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						<li>
 							<h2 className="text-sm text-muted-foreground">Employer</h2>
 							<div className="mt-4 grid gap-3 text-xs font-light">
-								<p className="text-xl font-bold">{data?.organisations?.name}</p>
+								<p className="text-xl font-bold">{data?.organisation?.name}</p>
 								{!data?.org_signed && <p className="mt-4 text-xs">Pending signature from company</p>}
 								{data?.org_signed && (
 									<>

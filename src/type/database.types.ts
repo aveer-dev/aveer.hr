@@ -58,16 +58,20 @@ export type Database = {
           end_date: string | null
           entity: number
           fixed_allowance: Json | null
+          gender: string | null
           id: number
           job_title: string
           level: number | null
           level_name: string | null
+          maternity_leave: number | null
+          maternity_leave_used: number | null
           org: string
           org_signature_string: string | null
           org_signed: string | null
           paid_leave: number | null
           paid_leave_used: number
-          paternity_maternity_used: number
+          paternity_leave: number | null
+          paternity_leave_used: number
           probation_period: number | null
           profile: string | null
           profile_signature_string: string | null
@@ -82,6 +86,7 @@ export type Database = {
           start_date: string | null
           status: Database["public"]["Enums"]["contract_state"]
           terminated_by: string | null
+          unpaid_leave_used: number | null
           work_location: Database["public"]["Enums"]["work_locations"] | null
           work_schedule: string | null
           work_shedule_interval: string | null
@@ -93,16 +98,20 @@ export type Database = {
           end_date?: string | null
           entity: number
           fixed_allowance?: Json | null
+          gender?: string | null
           id?: number
           job_title: string
           level?: number | null
           level_name?: string | null
+          maternity_leave?: number | null
+          maternity_leave_used?: number | null
           org: string
           org_signature_string?: string | null
           org_signed?: string | null
           paid_leave?: number | null
           paid_leave_used?: number
-          paternity_maternity_used?: number
+          paternity_leave?: number | null
+          paternity_leave_used?: number
           probation_period?: number | null
           profile?: string | null
           profile_signature_string?: string | null
@@ -117,6 +126,7 @@ export type Database = {
           start_date?: string | null
           status?: Database["public"]["Enums"]["contract_state"]
           terminated_by?: string | null
+          unpaid_leave_used?: number | null
           work_location?: Database["public"]["Enums"]["work_locations"] | null
           work_schedule?: string | null
           work_shedule_interval?: string | null
@@ -128,16 +138,20 @@ export type Database = {
           end_date?: string | null
           entity?: number
           fixed_allowance?: Json | null
+          gender?: string | null
           id?: number
           job_title?: string
           level?: number | null
           level_name?: string | null
+          maternity_leave?: number | null
+          maternity_leave_used?: number | null
           org?: string
           org_signature_string?: string | null
           org_signed?: string | null
           paid_leave?: number | null
           paid_leave_used?: number
-          paternity_maternity_used?: number
+          paternity_leave?: number | null
+          paternity_leave_used?: number
           probation_period?: number | null
           profile?: string | null
           profile_signature_string?: string | null
@@ -152,6 +166,7 @@ export type Database = {
           start_date?: string | null
           status?: Database["public"]["Enums"]["contract_state"]
           terminated_by?: string | null
+          unpaid_leave_used?: number | null
           work_location?: Database["public"]["Enums"]["work_locations"] | null
           work_schedule?: string | null
           work_shedule_interval?: string | null

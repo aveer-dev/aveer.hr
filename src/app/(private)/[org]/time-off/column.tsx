@@ -1,14 +1,9 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
-import { Button, buttonVariants } from '@/components//ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components//ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { differenceInBusinessDays, format } from 'date-fns';
-import { NavLink } from '@/components/ui/link';
-import { cn } from '@/lib/utils';
-import { ReactNode } from 'react';
 import { Tables } from '@/type/database.types';
 import { Badge } from '@/components/ui/badge';
 import { LeaveReview } from './leave-review';

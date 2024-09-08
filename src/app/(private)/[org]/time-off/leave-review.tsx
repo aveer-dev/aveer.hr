@@ -49,7 +49,7 @@ export const LeaveReview = ({ data, children, ...props }: props & HTMLAttributes
 		} = await supabase.auth.getUser();
 		if (error) return router.push('/login');
 		setUserId(() => user?.id);
-	}, [setUserId]);
+	}, [router]);
 
 	const getPeopleInLevels = useCallback(async (profileId: string) => {
 		const { data, error } = await supabase.from('profiles').select('first_name, last_name').eq('id', profileId).single();
@@ -77,13 +77,13 @@ export const LeaveReview = ({ data, children, ...props }: props & HTMLAttributes
 			updateDBLevels(() => data.levels as any);
 			updateLevels(() => newLevels);
 		},
-		[levels, updateDBLevels, updateLevels]
+		[data.levels, getPeopleInLevels]
 	);
 
 	useEffect(() => {
 		if (isReviewOpen && data.levels) processLevels(data.levels);
 		if (isReviewOpen && !userId) getUserId();
-	}, [data, isReviewOpen]);
+	}, [data, getUserId, isReviewOpen, processLevels, userId]);
 
 	const updateLeave = async (levels: DBLevel[]) => {
 		const isAnyDenied = !!levels.find(level => level.action == 'denied');
@@ -92,6 +92,13 @@ export const LeaveReview = ({ data, children, ...props }: props & HTMLAttributes
 			.from('time_off')
 			.update({ levels: levels as any, status: isAllApproved ? 'approved' : isAnyDenied ? 'denied' : 'pending' })
 			.eq('id', data.id);
+
+		if (isAllApproved) {
+			await supabase
+				.from('contracts')
+				.update({ [`${data.leave_type}_leave_used`]: differenceInBusinessDays(data.to, data.from) + 1 })
+				.eq('id', data.contract.id);
+		}
 
 		if (error) toast.error('Unable to update leave', { description: error.message });
 		setUpdateState({ denying: false, approving: false });
