@@ -836,7 +836,10 @@ CREATE TABLE IF NOT EXISTS "public"."profiles" (
     "last_name" "text" NOT NULL,
     "nationality" "text",
     "email" "text" NOT NULL,
-    "org" "text"
+    "org" "text",
+    "medical" "jsonb",
+    "emergency_contact" "jsonb",
+    "contact" "jsonb"
 );
 
 

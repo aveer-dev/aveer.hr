@@ -21,13 +21,14 @@ import { ContractStatus } from '@/components/ui/status-badge';
 import { Details } from '../ui/details';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ContractOverview } from './contract-overview';
+import { Profile } from './profile';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
 	const { data, error } = await supabase
 		.from('contracts')
 		.select(
-			'*, org:organisations!contracts_org_fkey(id, name), level:employee_levels!contracts_level_fkey(level, role), entity:legal_entities!contracts_entity_fkey(incorporation_country, address_state, street_address, address_code), profile:profiles!contracts_profile_fkey(id, first_name, last_name, email, nationality:countries!profiles_nationality_fkey(name)), signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email), terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email)'
+			'*, org:organisations!contracts_org_fkey(id, name), level:employee_levels!contracts_level_fkey(level, role), entity:legal_entities!contracts_entity_fkey(incorporation_country, address_state, street_address, address_code), profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)), signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email), terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email)'
 		)
 		.match({ org, id })
 		.single();
@@ -227,14 +228,19 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 
 			<Tabs defaultValue={data.profile_signed && data.org_signed ? 'overview' : 'contract'} className="grid gap-6">
 				{data.profile_signed && data.org_signed && (
-					<TabsList className="grid w-fit grid-cols-2">
+					<TabsList className="grid w-fit grid-cols-3">
 						<TabsTrigger value="overview">Overview</TabsTrigger>
+						<TabsTrigger value="profile">Profile</TabsTrigger>
 						<TabsTrigger value="contract">Contract</TabsTrigger>
 					</TabsList>
 				)}
 
 				<TabsContent value="overview">
 					<ContractOverview data={data} />
+				</TabsContent>
+
+				<TabsContent value="profile">
+					<Profile type={signatureType} data={data.profile as any} />
 				</TabsContent>
 
 				<TabsContent value="contract" className="grid gap-10">

@@ -4,9 +4,6 @@ import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Link from 'next/link';
 import { CONTRACT } from '@/type/contract.types';
-import { useState } from 'react';
-import { ContractOverview } from './contract-overview';
-import { Tables } from '@/type/database.types';
 import { cn } from '@/lib/utils';
 
 interface DataTableProps<TData, TValue> {
@@ -15,10 +12,7 @@ interface DataTableProps<TData, TValue> {
 	action?: () => void;
 }
 
-export function ContractorTable<TData, TValue>({ columns, data, action }: DataTableProps<TData, TValue>) {
-	const [isOverviewOpen, toggleOverview] = useState(false);
-	const [activeContract, setActiveContract] = useState<Tables<'contracts'>>();
-
+export function ContractorTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
 	const table = useReactTable({
 		data,
 		columns,
@@ -27,8 +21,6 @@ export function ContractorTable<TData, TValue>({ columns, data, action }: DataTa
 
 	return (
 		<div className="">
-			{isOverviewOpen && <ContractOverview isOpen={isOverviewOpen} toggle={toggleOverview} data={activeContract} />}
-
 			<Table>
 				<TableHeader>
 					{table.getHeaderGroups().map(headerGroup => (
@@ -39,6 +31,7 @@ export function ContractorTable<TData, TValue>({ columns, data, action }: DataTa
 						</TableRow>
 					))}
 				</TableHeader>
+
 				<TableBody>
 					{table.getRowModel().rows?.length ? (
 						// table has data

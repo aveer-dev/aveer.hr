@@ -781,26 +781,41 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: Json | null
           email: string
+          emergency_contact: Json | null
           first_name: string
+          gender: string | null
           id: string
           last_name: string
+          medical: Json | null
+          mobile: string | null
           nationality: string | null
           org: string | null
         }
         Insert: {
+          address?: Json | null
           email: string
+          emergency_contact?: Json | null
           first_name: string
+          gender?: string | null
           id: string
           last_name: string
+          medical?: Json | null
+          mobile?: string | null
           nationality?: string | null
           org?: string | null
         }
         Update: {
+          address?: Json | null
           email?: string
+          emergency_contact?: Json | null
           first_name?: string
+          gender?: string | null
           id?: string
           last_name?: string
+          medical?: Json | null
+          mobile?: string | null
           nationality?: string | null
           org?: string | null
         }

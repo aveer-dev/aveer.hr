@@ -231,39 +231,6 @@ export const ContractOverview = async ({ data }: props) => {
 					</div>
 				</div>
 			</div>
-
-			<div className="w-full">
-				<div className="mb-8 flex items-center justify-between">
-					<h2 className="flex items-center justify-between text-xl font-bold">Personal Details</h2>
-
-					<div className="flex items-center gap-2">
-						<Button variant={'secondary'} className="h-9 gap-3">
-							Update
-							<UserRoundCog className="stroke-1" size={14} />
-						</Button>
-					</div>
-				</div>
-
-				<div className="grid gap-10 pt-0">
-					<ul className="grid grid-cols-2 gap-6 text-sm font-light">
-						<li className="grid gap-1">
-							<h4 className="text-xs text-muted-foreground">First name</h4> <p className="font-medium">{(data?.profile as any)?.first_name}</p>
-						</li>
-						<li className="grid gap-1">
-							<h4 className="text-xs text-muted-foreground">Last name</h4> <p className="font-medium">{(data?.profile as any)?.last_name}</p>
-						</li>
-						<li className="grid gap-1">
-							<h4 className="text-xs text-muted-foreground">Gender</h4> <p className="font-medium"></p>
-						</li>
-						<li className="grid gap-1 !border-b-0">
-							<h4 className="text-xs text-muted-foreground">Email</h4> <p className="font-medium">{(data?.profile as any)?.email}</p>
-						</li>
-						<li className="!border-b-0">
-							<h4 className="text-xs text-muted-foreground">Country</h4> <p className="font-medium">{(data?.profile as any)?.nationality.name}</p>
-						</li>
-					</ul>
-				</div>
-			</div>
 		</section>
 	);
 };
