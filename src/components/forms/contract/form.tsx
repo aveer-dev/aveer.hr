@@ -77,7 +77,6 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		first_name: formType == 'contract' ? z.string() : z.string().optional(),
 		last_name: formType == 'contract' ? z.string() : z.string().optional(),
 		email: formType == 'contract' ? z.string().email() : z.string().email().optional(),
-		nationality: formType == 'contract' ? z.string() : z.string().optional(),
 		job_title: showRolesOption ? z.string().optional() : z.string().min(1),
 		level: z.string().optional(),
 		level_name: z.string().optional(),
@@ -118,7 +117,6 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 				(openRoleDuplicate?.additional_offerings as string[]) ||
 				(orgBenefits?.additional_offerings as string[]) ||
 				[],
-			nationality: formType == 'contract' ? (contractData?.profile as any)?.nationality || '' : undefined,
 			responsibilities: (contractData?.responsibilities as string[]) || (contractDuplicate?.responsibilities as string[]) || (openRoleData?.responsibilities as string[]) || (openRoleDuplicate?.responsibilities as string[]) || [],
 			fixed_allowance: (contractData?.fixed_allowance as any) || (contractDuplicate?.fixed_allowance as any) || (openRoleData?.fixed_allowance as any) || (openRoleDuplicate?.fixed_allowance as any) || [],
 			start_date: contractData?.start_date ? new Date(contractData?.start_date) : new Date(),
@@ -252,9 +250,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		const profile: TablesInsert<'profiles'> = {
 			first_name: values.first_name as string,
 			last_name: values.last_name as string,
-			nationality: values.nationality,
 			email: values.email as string,
-			id: ''
+			id: contractData ? (contractData?.profile as any).id : ''
 		};
 		const contract: TablesInsert<'contracts'> = {
 			employment_type: values.employment_type as any,
@@ -421,9 +418,9 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 				/>
 			)}
 
-			<NewContractDialog onClose={() => resetForm} isAlertOpen={isNewContractDialogOpen} toggleDialog={toggleNewContractDialog} contractId={newContractId} />
+			<NewContractDialog onClose={resetForm} isAlertOpen={isNewContractDialogOpen} toggleDialog={toggleNewContractDialog} contractId={newContractId} />
 
-			<NewRoleDialog onClose={() => resetForm} isAlertOpen={showNewRoleDialog} toggleDialog={toggleNewRoleDialog} roleId={newRoleId} />
+			<NewRoleDialog onClose={resetForm} isAlertOpen={showNewRoleDialog} toggleDialog={toggleNewRoleDialog} roleId={newRoleId} />
 
 			{showFormDetails && <ContractDetails isSubmiting={isSubmiting} formType={formType} update={!!contractData} nationality={employeeNationality} back={toggleFormDetails} submit={onSubmit} level={selectedLevel} data={form.getValues()} />}
 
@@ -484,7 +481,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 											control={form.control}
 											name="email"
 											render={({ field }) => (
-												<FormItem>
+												<FormItem className="col-span-2">
 													<FormLabel>Email</FormLabel>
 													<FormControl>
 														<Input disabled={!!contractData} type="email" placeholder="Enter email" {...field} required />
@@ -493,8 +490,6 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 												</FormItem>
 											)}
 										/>
-
-										{formType == 'contract' && <SelectCountry onSelectCountry={setEmployeeNationality} name="nationality" label="Country" form={form} disabled={!!contractData} />}
 									</div>
 								</InputsContainer>
 							</FormSection>

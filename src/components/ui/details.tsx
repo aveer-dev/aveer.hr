@@ -209,19 +209,20 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						</p>
 					</li>
 
-					<li className="col-span-2 grid h-fit gap-4 sm:col-span-1">
-						<h2 className="flex h-fit items-center gap-2 text-sm font-medium">
-							Additional offerings{' '}
-							{openBenefitsDialog && (
-								<Button onClick={() => openBenefitsDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-									<Pencil size={10} />
-								</Button>
-							)}
-						</h2>
+					{data?.additional_offerings?.length > 0 && (
+						<li className="col-span-2 grid h-fit gap-4 sm:col-span-1">
+							<h2 className="flex h-fit items-center gap-2 text-sm font-medium">
+								Additional offerings{' '}
+								{openBenefitsDialog && (
+									<Button onClick={() => openBenefitsDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+										<Pencil size={10} />
+									</Button>
+								)}
+							</h2>
 
-						{data?.additional_offerings?.length > 0 && <ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.additional_offerings as string[])?.map((offering, index) => <li key={index}>{offering}</li>)}</ul>}
-						{data?.additional_offerings?.length == 0 && <p className="ml-3 grid list-disc gap-4 text-sm font-light italic text-muted-foreground">No additional offering set</p>}
-					</li>
+							<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.additional_offerings as string[])?.map((offering, index) => <li key={index}>{offering}</li>)}</ul>
+						</li>
+					)}
 
 					{data?.fixed_allowance?.length > 0 && (
 						<li className="col-span-2 grid h-fit max-w-72 gap-4 sm:col-span-1">
@@ -332,6 +333,25 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 							)}
 						</h2>
 						<p className="text-sm font-light">{data?.probation_period} Days</p>
+					</li>
+				</ul>
+			</div>
+
+			{/* job schedule */}
+			<div>
+				<div className="mb-4 flex items-center justify-between">
+					<h1 className="text-lg font-semibold">Location</h1>
+					{back && (
+						<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
+							<Pencil size={12} />
+						</Button>
+					)}
+				</div>
+
+				<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
+					<li className="grid gap-3">
+						<h2 className="flex items-center gap-2 text-sm font-medium">Work Location</h2>
+						<p className="text-sm font-light capitalize">{data?.work_location}</p>
 					</li>
 				</ul>
 			</div>

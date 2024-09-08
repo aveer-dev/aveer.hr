@@ -29,7 +29,7 @@ export const NewContractDialog = ({ isAlertOpen, toggleDialog, contractId, onClo
 							onClose && onClose();
 						}}
 						variant={'outline'}>
-						Create another role
+						Add another person
 					</Button>
 
 					<Link href={`./${contractId}`} className={cn(buttonVariants())}>

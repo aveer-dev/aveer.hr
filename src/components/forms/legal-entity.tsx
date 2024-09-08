@@ -35,10 +35,10 @@ export const SelectLegalEntity = ({ form, entities, eorEntities }: props) => {
 								))}
 							</SelectGroup>
 
-							{entities.length !== 0 && <Separator className="my-3" />}
+							{eorEntities.length !== 0 && <Separator className="my-3" />}
 
 							<SelectGroup>
-								{eorEntities.length && <SelectLabel>Hire with aveer.hr</SelectLabel>}
+								{eorEntities.length > 0 && <SelectLabel>Hire with aveer.hr</SelectLabel>}
 								{eorEntities.map(entity => (
 									<SelectItem key={entity.id} value={String(entity.id)}>
 										{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>

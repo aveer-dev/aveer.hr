@@ -45,7 +45,7 @@ export const columns: ColumnDef<PERSON>[] = [
 	{
 		id: `nationality`,
 		header: 'Country',
-		cell: ({ row }) => <span>{row.original.profile.nationality.name}</span>,
+		cell: ({ row }) => <span>{row.original.profile?.nationality.name || '-'}</span>,
 		size: 100
 	},
 	{
