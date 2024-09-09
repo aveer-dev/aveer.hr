@@ -4,7 +4,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { isSameDay } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { DayPicker } from 'react-day-picker';
+import { DayOfWeek, DayPicker } from 'react-day-picker';
 import { LeaveReview } from './leave-review';
 
 interface props {
@@ -12,6 +12,10 @@ interface props {
 }
 
 export const LeaveCalendar = ({ leaveDays }: props) => {
+	const dayOfWeekMatcher: DayOfWeek = {
+		dayOfWeek: [0, 6]
+	};
+
 	return (
 		<DayPicker
 			showOutsideDays
@@ -20,7 +24,7 @@ export const LeaveCalendar = ({ leaveDays }: props) => {
 				month: 'space-y-4 w-full',
 				month_caption: 'flex pt-1 relative items-center',
 				caption_label: 'text-xl font-bold mb-12',
-				nav: 'relative bg-transparent p-0 space-x-1 flex items-center justify-end -mb-9 z-10',
+				nav: 'relative bg-transparent p-0 space-x-1 flex items-center justify-end -mb-9 z-[1]',
 				button_previous: cn(buttonVariants({ variant: 'secondary' }), ''),
 				button_next: cn(buttonVariants({ variant: 'secondary' }), ''),
 				month_grid: 'w-full border-collapse space-y-1',
@@ -36,7 +40,8 @@ export const LeaveCalendar = ({ leaveDays }: props) => {
 				hidden: 'invisible'
 			}}
 			modifiers={{
-				leaveDay: leaveDays.map(day => day.date)
+				leaveDay: leaveDays.map(day => day.date),
+				weekend: dayOfWeekMatcher
 			}}
 			autoFocus
 			components={{
@@ -49,7 +54,7 @@ export const LeaveCalendar = ({ leaveDays }: props) => {
 						<td
 							{...cellProps}
 							className="relative h-28 w-full min-w-9 border-r p-1 text-center text-sm last-of-type:border-r-0 focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-r-md">
-							<div className={cn(modifiers.outside && 'opacity-10', modifiers.today && 'bg-slate-800 text-white', 'mb-2 ml-auto flex h-6 w-6 items-center justify-center rounded-full p-1 text-right text-lg')}>{cellProps.children}</div>
+							<div className={cn((modifiers.outside || modifiers.weekend) && 'opacity-10', modifiers.today && 'bg-slate-800 text-white', 'mb-2 ml-auto flex h-6 w-6 items-center justify-center rounded-full p-1 text-right text-lg')}>{cellProps.children}</div>
 							{modifiers.leaveDay &&
 								dayLeaves.map((leave, index) => (
 									<LeaveReview data={leave.data} key={index + 'leave'} className={cn(modifiers.outside && 'opacity-10')}>
