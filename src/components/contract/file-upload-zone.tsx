@@ -131,7 +131,7 @@ export const FileUpload = ({ orgId, employeeProfileId }: props) => {
 	return (
 		<Button onClick={openFilePicker} variant={'secondary'} className="h-9 gap-3">
 			Add file
-			<FilePlus2 className="stroke-1" size={14} />
+			<FilePlus2 size={14} />
 		</Button>
 	);
 };

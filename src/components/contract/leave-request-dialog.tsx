@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Calendar } from '@/components/ui/calendar';
 import { HardHat, MinusCircle, NotebookPen, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { addDays, format } from 'date-fns';
+import { addDays, differenceInBusinessDays, format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,8 +18,9 @@ import { Separator } from '@/components/ui/separator';
 import { Label, labelVariants } from '@/components/ui/label';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
-import { TablesInsert } from '@/type/database.types';
+import { Tables, TablesInsert } from '@/type/database.types';
 import { LoadingSpinner } from '@/components/ui/loader';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
 	dates: z.object({ from: z.date(), to: z.date() }),
@@ -32,22 +33,22 @@ const formSchema = z.object({
 const supabase = createClient();
 
 interface props {
-	org: string;
 	onCreateLeave?: () => void;
-	contractId?: number;
-	profileId?: string | null;
+	contract: Tables<'contracts'>;
 }
 
-export const LeaveRequestDialog = ({ org, onCreateLeave, contractId, profileId }: props) => {
+export const LeaveRequestDialog = ({ onCreateLeave, contract }: props) => {
 	const [creatingRequest, setCreatingState] = useState(false);
 	const [isDialoagOpen, toggleDialog] = useState(false);
 	const [showNote, setNoteState] = useState(false);
 	const [showHandover, setHandoverState] = useState(false);
 	const [employees, setEmployees] = useState<{ id: number; profile: { first_name: string; last_name: string } }[]>([]);
+	const [approvalPolicy, setPolicyDetails] = useState<any[]>([]);
 	const [date, setDate] = useState<DateRange | undefined>({
 		from: new Date(),
 		to: addDays(new Date(), 5)
 	});
+	const router = useRouter();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -60,25 +61,36 @@ export const LeaveRequestDialog = ({ org, onCreateLeave, contractId, profileId }
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setCreatingState(true);
+
 		const leaveRequestData: TablesInsert<'time_off'> = {
 			from: values.dates.from as any,
 			to: values.dates.to as any,
-			contract: contractId as number,
-			org,
+			contract: contract.id as number,
+			org: (contract.org as any).subdomain,
 			leave_type: values.leave_type,
-			hand_over: values.hand_over,
 			hand_over_note: values.hand_over_note,
 			note: values.note,
-			status: 'pending',
-			profile: profileId as string
+			status: approvalPolicy.length ? 'pending' : 'approved',
+			profile: (contract.profile as any)?.id,
+			levels: approvalPolicy
 		};
+		showHandover && (leaveRequestData.hand_over = Number(values.hand_over));
 
 		const { error } = await supabase.from('time_off').insert(leaveRequestData);
 		setCreatingState(false);
 		if (error) return toast('❌ Oooops', { description: error.message });
+		console.log({ [`${leaveRequestData.leave_type}_leave_used`]: differenceInBusinessDays(leaveRequestData.to, leaveRequestData.from) + 1 + (contract[`${leaveRequestData.leave_type}_leave_used`] || 0) });
+
+		if (leaveRequestData.status == 'approved')
+			await supabase
+				.from('contracts')
+				.update({ [`${leaveRequestData.leave_type}_leave_used`]: differenceInBusinessDays(leaveRequestData.to, leaveRequestData.from) + 1 + (contract[`${leaveRequestData.leave_type}_leave_used`] || 0) })
+				.eq('id', contract.id);
+
 		if (onCreateLeave) onCreateLeave();
 		toggleDialog(false);
 		toast('😎 Leave request sent', { description: 'Fingers crossed now 🤞🏾' });
+		router.refresh();
 	};
 
 	useEffect(() => {
@@ -87,13 +99,28 @@ export const LeaveRequestDialog = ({ org, onCreateLeave, contractId, profileId }
 
 	useEffect(() => {
 		const getEmployees = async () => {
-			const { data, error } = await supabase.from('contracts').select('id, profile:profiles!contracts_profile_fkey(first_name, last_name)').match({ org });
+			const { data, error } = await supabase
+				.from('contracts')
+				.select('id, profile:profiles!contracts_profile_fkey(first_name, last_name)')
+				.match({ org: (contract.org as any).subdomain });
 			if (!data || error) return toast('🥺 Error', { description: 'Unable to fetch list of colleagues for leave request form' });
-			if (data.length) setEmployees(data as any);
+			if (data.length) setEmployees(() => data as any);
 		};
 
-		if (org) getEmployees();
-	}, [org]);
+		const getPolicy = async () => {
+			const { data, error } = await supabase
+				.from('approval_policies')
+				.select()
+				.match({ org: (contract.org as any).subdomain, is_default: true });
+			if (!data || error) return toast('🥺 Error', { description: 'Unable to fetch list of colleagues for leave request form' });
+			setPolicyDetails(() => data[0]?.levels || []);
+		};
+
+		if ((contract.org as any).subdomain) {
+			getEmployees();
+			getPolicy();
+		}
+	}, [contract.org]);
 
 	return (
 		<Sheet onOpenChange={toggleDialog} open={isDialoagOpen}>

@@ -28,7 +28,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 	const { data, error } = await supabase
 		.from('contracts')
 		.select(
-			'*, org:organisations!contracts_org_fkey(id, name), level:employee_levels!contracts_level_fkey(level, role), entity:legal_entities!contracts_entity_fkey(incorporation_country, address_state, street_address, address_code), profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)), signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email), terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email)'
+			'*, org:organisations!contracts_org_fkey(id, name, subdomain), level:employee_levels!contracts_level_fkey(level, role), entity:legal_entities!contracts_entity_fkey(incorporation_country, address_state, street_address, address_code), profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)), signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email), terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email)'
 		)
 		.match({ org, id })
 		.single();

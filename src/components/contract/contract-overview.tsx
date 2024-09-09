@@ -9,6 +9,8 @@ import { FileDropZone, FileUpload } from './file-upload-zone';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { DeleteFile } from './delete-file';
 import { DownloadFile } from './download-file';
+import { Separator } from '../ui/separator';
+import { cn } from '@/lib/utils';
 
 interface props {
 	data: Tables<'contracts'> & { profile: Tables<'profiles'>; org: Tables<'organisations'> };
@@ -27,7 +29,7 @@ export const ContractOverview = async ({ data }: props) => {
 	const { data: timeOffRequests, error } = await supabase
 		.from('time_off')
 		.select()
-		.match({ org: data.org, profile: (data.profile as any).id, status: 'pending' });
+		.match({ org: data.org.subdomain, profile: (data.profile as any).id, status: 'pending' });
 	if (error) return 'Error';
 
 	const files = await supabase.storage.from('documents').list(`${data.org.id}/${data.profile?.id}`);
@@ -51,7 +53,7 @@ export const ContractOverview = async ({ data }: props) => {
 					</div>
 					<div className="absolute bottom-0 left-0 top-0 rounded-md bg-orange-300 transition-all" style={{ width: pending.percentage + percentage + '%' }}>
 						{pending.percentage > 0 && (
-							<div className="absolute -right-px bottom-0 h-16 border-r pr-2 text-xs text-muted-foreground">
+							<div className={cn('absolute -right-px bottom-0 border-r pr-2 text-xs text-muted-foreground', percentage > 0 ? 'h-16' : 'h-12')}>
 								<div>pending</div>
 								{pending.percentage}%
 							</div>
@@ -73,16 +75,17 @@ export const ContractOverview = async ({ data }: props) => {
 	};
 
 	return (
-		<section className="mt-6 flex w-full flex-wrap gap-14 space-y-10">
+		<section className="mt-6 flex w-full flex-wrap gap-14 space-y-8">
 			{/* leave */}
 			<div className="w-full">
 				<div className="flex items-center justify-between">
 					<h2 className="flex items-center justify-between text-xl font-bold">Leave Days</h2>
+
 					<div className="flex items-center gap-2">
-						<LeaveRequestDialog profileId={data?.profile} contractId={data?.id} org={(data?.org as any).subdomain} />
+						<LeaveRequestDialog contract={data} />
 
 						<Button variant={'secondary'} size={'icon'} className="h-9">
-							<Table2 className="stroke-1" size={14} />
+							<Table2 size={14} />
 						</Button>
 					</div>
 				</div>
@@ -102,6 +105,8 @@ export const ContractOverview = async ({ data }: props) => {
 				)}
 			</div>
 
+			<Separator />
+
 			{/* salary */}
 			<div className="w-full">
 				<div className="mb-12 flex items-center justify-between">
@@ -110,7 +115,7 @@ export const ContractOverview = async ({ data }: props) => {
 					<div className="flex items-center gap-2">
 						<Button variant={'secondary'} className="h-9 gap-3">
 							History
-							<PanelRightOpen className="stroke-1" size={14} />
+							<PanelRightOpen size={14} />
 						</Button>
 					</div>
 				</div>
@@ -129,6 +134,9 @@ export const ContractOverview = async ({ data }: props) => {
 				</div>
 			</div>
 
+			<Separator />
+
+			{/* documents */}
 			<div className="w-full">
 				<div className="mb-4 flex items-center justify-between">
 					<h2 className="flex items-center justify-between text-xl font-bold">Documents</h2>

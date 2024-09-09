@@ -14,6 +14,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: number
+          is_default: boolean
           levels: Json[]
           name: string
           org: string
@@ -24,6 +25,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: number
+          is_default?: boolean
           levels: Json[]
           name?: string
           org: string
@@ -34,6 +36,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: number
+          is_default?: boolean
           levels?: Json[]
           name?: string
           org?: string
@@ -977,7 +980,7 @@ export type Database = {
           contract: number
           created_at: string | null
           from: string
-          hand_over: string | null
+          hand_over: number | null
           hand_over_note: string | null
           id: number
           leave_type: Database["public"]["Enums"]["leave_type_enum"]
@@ -994,7 +997,7 @@ export type Database = {
           contract: number
           created_at?: string | null
           from: string
-          hand_over?: string | null
+          hand_over?: number | null
           hand_over_note?: string | null
           id?: never
           leave_type: Database["public"]["Enums"]["leave_type_enum"]
@@ -1011,7 +1014,7 @@ export type Database = {
           contract?: number
           created_at?: string | null
           from?: string
-          hand_over?: string | null
+          hand_over?: number | null
           hand_over_note?: string | null
           id?: never
           leave_type?: Database["public"]["Enums"]["leave_type_enum"]
@@ -1035,7 +1038,7 @@ export type Database = {
             foreignKeyName: "time_off_hand_over_fkey"
             columns: ["hand_over"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
           {
