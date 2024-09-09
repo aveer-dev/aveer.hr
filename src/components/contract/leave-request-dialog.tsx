@@ -79,7 +79,6 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract }: props) => {
 		const { error } = await supabase.from('time_off').insert(leaveRequestData);
 		setCreatingState(false);
 		if (error) return toast('❌ Oooops', { description: error.message });
-		console.log({ [`${leaveRequestData.leave_type}_leave_used`]: differenceInBusinessDays(leaveRequestData.to, leaveRequestData.from) + 1 + (contract[`${leaveRequestData.leave_type}_leave_used`] || 0) });
 
 		if (leaveRequestData.status == 'approved')
 			await supabase
