@@ -198,7 +198,9 @@ export const LeaveReview = ({ data, children, ...props }: props & HTMLAttributes
 						{data.hand_over && (
 							<li className="space-y-2">
 								<h2 className="text-xs text-muted-foreground">Handing over to</h2>
-								<p className="text-xs leading-6">{data.hand_over}</p>
+								<p className="text-xs leading-6">
+									{(data.hand_over as any).profile.first_name} {(data.hand_over as any).profile.last_name} • <span>{(data.hand_over as any).job_title}</span>
+								</p>
 							</li>
 						)}
 
@@ -210,46 +212,51 @@ export const LeaveReview = ({ data, children, ...props }: props & HTMLAttributes
 						)}
 					</ul>
 
-					<h1 className="text-base font-bold">Approvals</h1>
-					<ul className="mb-20 space-y-8">
-						{levels?.map((level, index) => (
-							<li key={index} className={cn('flex items-center justify-between', level.action && '-ml-2 border-l-4 pl-1', level.action == 'approved' ? 'border-l-green-200' : level.action == 'denied' ? 'border-l-red-200' : 'border-l-gray-200')}>
-								<div className="space-y-1 capitalize">
-									<h2 className="text-xs">{level?.type}</h2>
-									{level.action && (
-										<p className="text-xs text-muted-foreground empty:hidden">
-											{level.first_name} {level.last_name}
-										</p>
-									)}
-									{!level.action && <p className="text-xs font-light text-muted-foreground empty:hidden">Approval Level {index + 1}</p>}
-								</div>
+					{data.levels && data.levels.length > 0 && (
+						<>
+							<h1 className="text-base font-bold">Approvals</h1>
+							<ul className="mb-20 space-y-8">
+								{levels?.map((level, index) => (
+									<li key={index} className={cn('flex items-center justify-between', level.action && '-ml-2 border-l-4 pl-1', level.action == 'approved' ? 'border-l-green-200' : level.action == 'denied' ? 'border-l-red-200' : 'border-l-gray-200')}>
+										<div className="space-y-1 capitalize">
+											<h2 className="text-xs">{level?.type}</h2>
+											{level.action && (
+												<p className="text-xs text-muted-foreground empty:hidden">
+													{level.first_name} {level.last_name}
+												</p>
+											)}
+											{!level.action && <p className="text-xs font-light text-muted-foreground empty:hidden">Approval Level {index + 1}</p>}
+										</div>
 
-								{level.type !== role ? (
-									<span className="text-xs font-light capitalize text-muted-foreground">{level.action || 'Pending approval'}</span>
-								) : index == 0 ? (
-									<LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'opacity-30')} />
-								) : levels[index - 1].action ? (
-									!level.action ? (
-										<LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'opacity-30')} />
-									) : (
-										<span className="text-xs font-light capitalize text-muted-foreground">{level.action}</span>
-									)
-								) : (
-									<span className="text-xs font-light capitalize text-muted-foreground">Pending level {index} approval</span>
+										{level.type !== role ? (
+											<span className="text-xs font-light capitalize text-muted-foreground">{level.action || 'Pending approval'}</span>
+										) : index == 0 ? (
+											<LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'opacity-30')} />
+										) : levels[index - 1].action ? (
+											!level.action ? (
+												<LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'opacity-30')} />
+											) : (
+												<span className="text-xs font-light capitalize text-muted-foreground">{level.action}</span>
+											)
+										) : (
+											<span className="text-xs font-light capitalize text-muted-foreground">Pending level {index} approval</span>
+										)}
+									</li>
+								))}
+
+								{!levels.length && (
+									<>
+										<li>
+											<Skeleton className="h-10 w-full" />
+										</li>
+										<li>
+											<Skeleton className="h-10 w-full" />
+										</li>
+									</>
 								)}
-							</li>
-						))}
-						{!levels.length && (
-							<>
-								<li>
-									<Skeleton className="h-10 w-full" />
-								</li>
-								<li>
-									<Skeleton className="h-10 w-full" />
-								</li>
-							</>
-						)}
-					</ul>
+							</ul>
+						</>
+					)}
 				</section>
 			</SheetContent>
 		</Sheet>
