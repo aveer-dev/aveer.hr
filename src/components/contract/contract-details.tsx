@@ -236,7 +236,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				)}
 
 				<TabsContent value="overview">
-					<ContractOverview data={data} />
+					<ContractOverview data={data as any} />
 				</TabsContent>
 
 				<TabsContent value="profile">

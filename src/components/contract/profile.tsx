@@ -49,51 +49,51 @@ export const Profile = ({ data, type }: props) => {
 					<h4 className="text-xs text-muted-foreground">Country of residence</h4> <p className="font-normal">{data?.address?.country || '-'}</p>
 				</li>
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">State / City / Province</h4> <p className="font-normal">{data?.address.state || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">State / City / Province</h4> <p className="font-normal">{data?.address?.state || '-'}</p>
 				</li>
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Post code / zip code</h4> <p className="font-normal capitalize">{data?.address.code || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Post code / zip code</h4> <p className="font-normal capitalize">{data?.address?.code || '-'}</p>
 				</li>
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Street address</h4> <p className="font-normal">{data?.address.street_address || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Street address</h4> <p className="font-normal">{data?.address?.street_address || '-'}</p>
 				</li>
 			</ul>
 
 			<h1 className="mb-4 mt-16 text-xl font-semibold">Emergency Contact</h1>
 			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 border-t border-t-border pt-6 text-sm font-light">
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">First name</h4> <p className="font-normal">{data?.emergency_contact.first_name || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">First name</h4> <p className="font-normal">{data?.emergency_contact?.first_name || '-'}</p>
 				</li>
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Last name</h4> <p className="font-normal">{data?.emergency_contact.last_name || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Last name</h4> <p className="font-normal">{data?.emergency_contact?.last_name || '-'}</p>
 				</li>
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Relationship</h4> <p className="font-normal capitalize">{data?.emergency_contact.relationship || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Relationship</h4> <p className="font-normal capitalize">{data?.emergency_contact?.relationship || '-'}</p>
 				</li>
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Email</h4> <p className="font-normal">{data?.emergency_contact.email || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Email</h4> <p className="font-normal">{data?.emergency_contact?.email || '-'}</p>
 				</li>
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Mobile number</h4> <p className="font-normal">+{data?.emergency_contact.mobile || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Mobile number</h4> <p className="font-normal">+{data?.emergency_contact?.mobile || '-'}</p>
 				</li>
 			</ul>
 
 			<h1 className="mb-4 mt-16 text-xl font-semibold">Medical Record</h1>
 			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 border-t border-t-border pt-6 text-sm font-light">
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Blood type</h4> <p className="font-normal">{data?.medical.blood_type || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Blood type</h4> <p className="font-normal">{data?.medical?.blood_type || '-'}</p>
 				</li>
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Genotype</h4> <p className="font-normal">{data?.medical.gentype || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Genotype</h4> <p className="font-normal">{data?.medical?.gentype || '-'}</p>
 				</li>
 				<li className="col-span-2 grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Allergies</h4> <p className="font-normal capitalize">{data?.medical.allergies || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Allergies</h4> <p className="font-normal capitalize">{data?.medical?.allergies || '-'}</p>
 				</li>
 				<li className="col-span-2 grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Medical condition</h4> <p className="font-normal">{data?.medical.medical_condition || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Medical condition</h4> <p className="font-normal">{data?.medical?.medical_condition || '-'}</p>
 				</li>
 				<li className="col-span-2 grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Medical note</h4> <p className="font-normal">{data?.medical.note || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Medical note</h4> <p className="font-normal">{data?.medical?.note || '-'}</p>
 				</li>
 			</ul>
 		</div>
