@@ -2,7 +2,8 @@ import { Suspense } from 'react';
 import { ApprovalPolicy } from './approval-policy';
 import { FormSection, FormSectionDescription, InputsContainer } from '../forms/form-section';
 import { createClient } from '@/utils/supabase/server';
-import { Button } from '../ui/button';
+import { buttonVariants } from '../ui/button';
+import { cn } from '@/lib/utils';
 
 export const ApprovalPolicies = async ({ org }: { org: string }) => {
 	const supabase = createClient();
@@ -20,9 +21,12 @@ export const ApprovalPolicies = async ({ org }: { org: string }) => {
 
 				<InputsContainer>
 					{data.map(policy => (
-						<ApprovalPolicy key={policy.id} data={policy} />
+						<ApprovalPolicy org={org} key={policy.id} data={policy} />
 					))}
-					<Button className="w-full">Create approval policy</Button>
+
+					<ApprovalPolicy className={cn(buttonVariants())} org={org}>
+						Create approval policy
+					</ApprovalPolicy>
 				</InputsContainer>
 			</FormSection>
 		</Suspense>

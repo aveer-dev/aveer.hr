@@ -5,52 +5,64 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
-import { Textarea } from '../ui/textarea';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useEffect, useState } from 'react';
-import { ChartNoAxesGantt, Plus, Trash2 } from 'lucide-react';
-import { Separator } from '../ui/separator';
+import { ReactNode, useEffect, useState } from 'react';
+import { ChartNoAxesGantt, Plus, Trash2, TriangleAlert } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import { Tables } from '@/type/database.types';
 import { format } from 'date-fns';
-import { updatePolicy } from './policy-actions';
+import { createPolicy, updatePolicy } from './policy-actions';
 import { toast } from 'sonner';
 import { useFormStatus } from 'react-dom';
-import { LoadingSpinner } from '../ui/loader';
+import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formSchema = z.object({
 	name: z.string().min(1),
-	description: z.string().min(1).optional(),
+	description: z.string().optional(),
 	type: z.enum(['time_off']),
-	levels: z.array(z.object({ type: z.string(), id: z.string(), level: z.number() }))
+	levels: z.array(z.object({ type: z.string(), id: z.string(), level: z.number() })),
+	is_default: z.boolean()
 });
 
 const supabase = createClient();
 
-export const ApprovalPolicy = ({ data }: { data: Tables<'approval_policies'> }) => {
-	const [levels, updateLevels] = useState<{ type: string; id: string; level: number }[]>(data.levels as any);
+export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tables<'approval_policies'>; children?: ReactNode; org: string; className?: string }) => {
+	const [levels, updateLevels] = useState<{ type: string; id: string; level: number }[]>((data?.levels as any) || []);
 	const [isUpdating, setUpdateState] = useState(false);
 	const [isDialogOpen, toggleDialogState] = useState(false);
 	const [employees, setEmployees] = useState<{ id: number; profile: { first_name: string; last_name: string } }[]>([]);
+	const [defaultPolicy, setDefaultPolicy] = useState<Tables<'approval_policies'>[]>();
 	const router = useRouter();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: { ...data, levels: data.levels as any, description: data.description || '' }
+		defaultValues: { ...data, type: data?.type || 'time_off', is_default: data?.is_default, name: data?.name || '', levels: (data?.levels as any) || [], description: data?.description || '' }
 	});
+
+	const getDefaultPolicy = async (type: string) => {
+		const { data, error } = await supabase.from('approval_policies').select().match({ type, org, is_default: true });
+		if (error) toast.error('Error checking default policy', { description: error.message });
+		if (data) setDefaultPolicy(data);
+	};
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setUpdateState(true);
-		const response = await updatePolicy(data.org, data.id, { ...values, updated_at: new Date() as any });
-		setUpdateState(false);
-		if (response !== true) toast.error('Error', { description: response });
 
-		toast.success('Policy Updated', { description: 'Policy has been updated successfully' });
+		const response = data ? await updatePolicy(org, data.id, { ...values, updated_at: new Date() as any }) : await createPolicy(org, { ...values, org });
+		setUpdateState(false);
+		if (response !== true) return toast.error('Error', { description: response });
+
+		toast.success(`Policy ${data ? 'Updated' : 'Created'}`, { description: `Policy has been ${data ? 'updated' : 'created'} successfully` });
 		toggleDialogState(false);
 		router.refresh();
 	};
@@ -59,9 +71,17 @@ export const ApprovalPolicy = ({ data }: { data: Tables<'approval_policies'> }) 
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" disabled={pending || isUpdating} size={'sm'} className="w-full gap-3 px-4 text-xs font-light">
+			<Button
+				type="submit"
+				onClick={() => {
+					console.log(form.formState);
+					console.log(form.getValues());
+				}}
+				disabled={pending || isUpdating}
+				size={'sm'}
+				className="w-full gap-3 px-4 text-xs font-light">
 				{(pending || isUpdating) && <LoadingSpinner />}
-				{pending || isUpdating ? 'Updating policy' : 'Update policy'}
+				{pending || isUpdating ? (data ? 'Updating' : 'Creating') : data ? 'Update' : 'Create'} policy
 			</Button>
 		);
 	};
@@ -73,35 +93,40 @@ export const ApprovalPolicy = ({ data }: { data: Tables<'approval_policies'> }) 
 			if (data.length) setEmployees(data as any);
 		};
 
-		if (data.org) getEmployees(data.org);
+		if (org) getEmployees(org);
+		if (data?.type) getDefaultPolicy(data?.type);
 	}, [data]);
 
 	return (
 		<Sheet open={isDialogOpen} onOpenChange={toggleDialogState}>
 			<SheetTrigger asChild>
-				<button className="h-fit">
-					<Card className="flex w-full items-center justify-between p-4">
-						<div className="space-y-1 text-left">
-							<h4 className="text-xs font-semibold">{data.name}</h4>
-							<p className="text-xs capitalize text-muted-foreground">{data.type.replace('_', '-')} policy</p>
-						</div>
+				<button className={cn('h-fit', className)}>
+					{!children && data && (
+						<Card className="flex w-full items-center justify-between p-4">
+							<div className="space-y-1 text-left">
+								<h4 className="text-xs font-semibold">{data.name}</h4>
+								<p className="text-xs capitalize text-muted-foreground">{data.type.replace('_', '-')} policy</p>
+							</div>
 
-						<div className="space-y-px text-right text-xs font-light text-muted-foreground">
-							<div>Last updated</div>
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<a className="underline decoration-dashed">{format(data.updated_at as string, 'PP')}</a>
-									</TooltipTrigger>
-									<TooltipContent>
-										<p className="text-xs">
-											{format(data.updated_at as string, 'PP')} | {format(data.updated_at as string, 'p')}
-										</p>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-						</div>
-					</Card>
+							<div className="space-y-px text-right text-xs font-light text-muted-foreground">
+								<div>Last updated</div>
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<a className="underline decoration-dashed">{format(data.updated_at as string, 'PP')}</a>
+										</TooltipTrigger>
+										<TooltipContent>
+											<p className="text-xs">
+												{format(data.updated_at as string, 'PP')} | {format(data.updated_at as string, 'p')}
+											</p>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+							</div>
+						</Card>
+					)}
+
+					{!!children && children}
 				</button>
 			</SheetTrigger>
 
@@ -148,7 +173,12 @@ export const ApprovalPolicy = ({ data }: { data: Tables<'approval_policies'> }) 
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Policy type</FormLabel>
-										<Select onValueChange={field.onChange} defaultValue={field.value}>
+										<Select
+											onValueChange={value => {
+												field.onChange(value);
+												getDefaultPolicy(value);
+											}}
+											defaultValue={field.value}>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue placeholder="What policy is this?" />
@@ -163,6 +193,33 @@ export const ApprovalPolicy = ({ data }: { data: Tables<'approval_policies'> }) 
 									</FormItem>
 								)}
 							/>
+
+							<FormField
+								control={form.control}
+								name="is_default"
+								render={({ field }) => (
+									<FormItem className="flex flex-row justify-between">
+										<div className="space-y-2">
+											<FormLabel className="text-xs text-foreground">Default policy</FormLabel>
+											<FormDescription className="max-w-64 text-xs font-light">
+												Enabling this will make this the default <span className="font-semibold">{form.getValues('type')?.replace('_', ' ')}</span> policy for every one
+											</FormDescription>
+										</div>
+
+										<FormControl>
+											<Switch disabled={defaultPolicy && defaultPolicy?.length > 0 && defaultPolicy[0].id !== data?.id} className="!m-0 scale-75" checked={field.value} onCheckedChange={field.onChange} />
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+
+							{defaultPolicy && defaultPolicy?.length > 0 && defaultPolicy[0].id !== data?.id && (
+								<Alert className="text-xs">
+									<TriangleAlert size={14} className="stroke-orange-400" />
+									<AlertTitle>Current default</AlertTitle>
+									<AlertDescription className="text-xs font-light text-muted-foreground">"{defaultPolicy[0]?.name}" is the current default. You'll have to remove it as default to set another default</AlertDescription>
+								</Alert>
+							)}
 
 							<div className="!mt-12 space-y-8">
 								<h2 className="-mb-4 text-sm font-semibold">Approval levels</h2>
