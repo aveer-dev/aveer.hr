@@ -15,7 +15,7 @@ export const Teams = async ({ org }: props) => {
 
 	return (
 		<Suspense>
-			<FormSection>
+			<FormSection id="teams">
 				<FormSectionDescription>
 					<h2 className="mb-1 font-normal">Teams</h2>
 					<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">These are all the teams or groups available accross your organisation. You can manage them here.</p>

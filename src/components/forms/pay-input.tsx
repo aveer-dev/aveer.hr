@@ -10,8 +10,8 @@ interface props {
 	form: UseFormReturn<any>;
 	name: string;
 	label?: string;
-	minValue: number;
-	maxValue: number;
+	minValue?: number | null;
+	maxValue?: number | null;
 	salaryInvalid?: boolean;
 	validateSalary?: (salary: number) => void;
 }

@@ -632,6 +632,7 @@ export type Database = {
           entity: number
           fixed_allowance: Json | null
           id: number
+          is_manager: boolean
           job_title: string
           level: number | null
           level_name: string | null
@@ -644,6 +645,7 @@ export type Database = {
           sick_leave: number | null
           signing_bonus: number | null
           state: Database["public"]["Enums"]["is_open"]
+          team: number | null
           work_location: Database["public"]["Enums"]["work_locations"] | null
           work_schedule: string | null
           work_shedule_interval: string | null
@@ -658,6 +660,7 @@ export type Database = {
           entity: number
           fixed_allowance?: Json | null
           id?: number
+          is_manager?: boolean
           job_title: string
           level?: number | null
           level_name?: string | null
@@ -670,6 +673,7 @@ export type Database = {
           sick_leave?: number | null
           signing_bonus?: number | null
           state: Database["public"]["Enums"]["is_open"]
+          team?: number | null
           work_location?: Database["public"]["Enums"]["work_locations"] | null
           work_schedule?: string | null
           work_shedule_interval?: string | null
@@ -684,6 +688,7 @@ export type Database = {
           entity?: number
           fixed_allowance?: Json | null
           id?: number
+          is_manager?: boolean
           job_title?: string
           level?: number | null
           level_name?: string | null
@@ -696,12 +701,20 @@ export type Database = {
           sick_leave?: number | null
           signing_bonus?: number | null
           state?: Database["public"]["Enums"]["is_open"]
+          team?: number | null
           work_location?: Database["public"]["Enums"]["work_locations"] | null
           work_schedule?: string | null
           work_shedule_interval?: string | null
           years_of_experience?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "open_roles_team_fkey"
+            columns: ["team"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profile_contract_entity_fkey"
             columns: ["entity"]

@@ -13,12 +13,14 @@ interface props {
 	isSubmiting: boolean;
 	update: boolean;
 	formType: 'contract' | 'role';
+	isManager?: boolean;
+	team?: string;
 }
 
-export const ContractDetails = ({ data, level, back, submit, nationality, isSubmiting, update, formType }: props) => {
+export const ContractDetails = ({ data, level, back, submit, nationality, isSubmiting, update, formType, isManager, team }: props) => {
 	return (
 		<section className="mx-auto grid max-w-4xl gap-20">
-			<Details formType={formType} data={{ ...data, level, nationality }} back={back} />
+			<Details formType={formType} data={{ ...data, level, nationality }} isManager={isManager} team={team} back={back} />
 
 			<div className="flex justify-end gap-4 border-t border-t-border pt-8">
 				<Button

@@ -20,14 +20,14 @@ const sendContractEmail = async (email: string) => {
 const getExistingUserAccount = async (email: string) => {
 	const supabase = createClient();
 
-	const { data, error } = await supabase.from('profiles').select('id').eq('email', email).is('nationality', null).single();
+	const { data, error } = await supabase.from('profiles').select('id').eq('email', email).single();
 	if (error) return;
 
 	sendContractEmail(email);
 	return data.id;
 };
 
-export const inviteUser = async (contract: string, profile: string) => {
+export const inviteUser = async (contract: string, profile: string, isManager: boolean) => {
 	const supabase = createClient();
 	const supabaseAdmin = createClientAdminServer();
 
@@ -52,6 +52,12 @@ export const inviteUser = async (contract: string, profile: string) => {
 		.single();
 
 	if (contractRes.error) return contractRes.error.message;
+
+	if (isManager) {
+		const managerRes = await supabase.from('managers').insert({ profile: userId, person: contractRes.data?.id, role: 1, team: parsedContract.team as number, org: parsedContract.org });
+		if (managerRes.error) return managerRes.error.message;
+	}
+
 	if (!contractRes.error) return contractRes.data.id;
 };
 

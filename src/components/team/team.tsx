@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCallback, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { BriefcaseBusiness, ChevronRightIcon, CircleMinus, Plus } from 'lucide-react';
 import { Tables, TablesInsert } from '@/type/database.types';
 import { toast } from 'sonner';
@@ -31,7 +31,7 @@ const formSchema = z.object({
 
 const supabase = createClient();
 
-export const Team = ({ data, org }: { org: string; data?: Tables<'teams'> }) => {
+export const Team = ({ data, org, onCreate, children, className }: { org: string; data?: Tables<'teams'>; onCreate?: () => void; children?: ReactNode; className?: string }) => {
 	const [isUpdating, setUpdateState] = useState(false);
 	const [isDialogOpen, toggleDialogState] = useState(false);
 	const [teamMembers, setTeamMembers] = useState(0);
@@ -55,7 +55,9 @@ export const Team = ({ data, org }: { org: string; data?: Tables<'teams'> }) => 
 		if (response !== true) return toast.error('Error', { description: response });
 		toast.success('Teams updated');
 		toggleDialogState(false);
-		router.refresh();
+
+		if (!onCreate) router.refresh();
+		if (onCreate) onCreate();
 	};
 
 	const SubmitButton = () => {
@@ -107,8 +109,8 @@ export const Team = ({ data, org }: { org: string; data?: Tables<'teams'> }) => 
 	return (
 		<Sheet open={isDialogOpen} onOpenChange={toggleDialogState}>
 			<SheetTrigger asChild>
-				<button className={cn('w-full', !data && buttonVariants())}>
-					{data && (
+				<button type="button" className={cn('w-full', !data && !children && buttonVariants(), className)}>
+					{data && !children && (
 						<Card className="flex w-full items-center justify-between p-3 text-left transition-all duration-500 hover:bg-accent/60">
 							<div className="space-y-1">
 								<h4 className="text-xs font-semibold">{data?.name}</h4>
@@ -121,7 +123,9 @@ export const Team = ({ data, org }: { org: string; data?: Tables<'teams'> }) => 
 						</Card>
 					)}
 
-					{!data && 'Add team'}
+					{!data && !children && 'Add team'}
+
+					{!!children && children}
 				</button>
 			</SheetTrigger>
 

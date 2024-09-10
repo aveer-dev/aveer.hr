@@ -13,9 +13,11 @@ interface props {
 	openScheduleDialog?: (action: boolean) => void;
 	data: any;
 	formType: 'role' | 'contract';
+	isManager?: boolean;
+	team?: string;
 }
 
-export const Details = ({ data, back, formType, openCompensationDialog, openBenefitsDialog, openScheduleDialog }: props) => {
+export const Details = ({ data, back, formType, openCompensationDialog, openBenefitsDialog, openScheduleDialog, isManager, team }: props) => {
 	return (
 		<>
 			{data.first_name && (
@@ -24,9 +26,11 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						<div className="mt-4 grid gap-3 text-xs font-light">
 							<h2 className="flex gap-3 text-lg font-bold">
 								{data?.first_name} {data?.last_name}
-								<Badge className="mt-1 h-fit w-fit font-light" variant={'secondary'}>
-									{data.nationality?.name}
-								</Badge>
+								{data.nationality && (
+									<Badge className="mt-1 h-fit w-fit font-light" variant={'secondary'}>
+										{data.nationality?.name}
+									</Badge>
+								)}
 								<Button onClick={() => (back ? back(false) : false)} variant={'secondary'} size={'icon'} className="mt-1 h-[22px] w-8 gap-3">
 									<Pencil size={10} />
 								</Button>
@@ -116,7 +120,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 					<li className="grid gap-3">
 						<h2 className="text-sm font-medium">Seniority Level</h2>
 						<p className="text-sm font-light">
-							{data.level?.level} {data.level?.role ? '•' : ''} {data.level?.role}
+							{data.level?.level} {data.level?.role ? '•' : ''} {data.level?.role} {data.level_name}
 						</p>
 					</li>
 					<li className="grid gap-3">
@@ -129,6 +133,19 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 							{data?.work_schedule}hrs, {data?.work_shedule_interval}
 						</p>
 					</li>
+
+					{team && (
+						<li className="grid gap-3">
+							<h2 className="text-sm font-medium">Team</h2>
+							<p className="text-sm font-light">{team}</p>
+						</li>
+					)}
+					{isManager && (
+						<li className="grid gap-3">
+							<h2 className="text-sm font-medium">Team manager</h2>
+							<p className="text-sm font-light">{isManager ? 'Yes' : 'No'}</p>
+						</li>
+					)}
 				</ul>
 
 				<div className="mt-10 grid gap-4">
