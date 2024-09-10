@@ -5,10 +5,10 @@ import { createClient } from '@/utils/supabase/server';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LeaveRequestDialog } from './leave-request-dialog';
 import { differenceInBusinessDays } from 'date-fns';
-import { FileDropZone, FileUpload } from './file-upload-zone';
+import { FileDropZone, FileUpload } from './file-management/file-upload-zone';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { DeleteFile } from './delete-file';
-import { DownloadFile } from './download-file';
+import { DeleteFile } from './file-management/delete-file';
+import { DownloadFile } from './file-management/download-file';
 import { Separator } from '../ui/separator';
 import { cn } from '@/lib/utils';
 

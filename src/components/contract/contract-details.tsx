@@ -23,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ContractOverview } from './contract-overview';
 import { Profile } from './profile';
 import { Teams } from './team/teams';
+import { Timeoff } from './time-off';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -229,11 +230,12 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 
 			<Tabs defaultValue={data.profile_signed && data.org_signed ? 'overview' : 'contract'} className="grid gap-6">
 				{data.profile_signed && data.org_signed && (
-					<TabsList className={cn('grid w-fit', data.team ? 'grid-cols-4' : 'grid-cols-3')}>
+					<TabsList className={cn('grid w-fit', data.team ? 'grid-cols-5' : 'grid-cols-4')}>
 						<TabsTrigger value="overview">Overview</TabsTrigger>
 						<TabsTrigger value="profile">Profile</TabsTrigger>
-						<TabsTrigger value="team">Team</TabsTrigger>
-						{data.team && <TabsTrigger value="contract">Contract</TabsTrigger>}
+						{data.team && <TabsTrigger value="team">Team</TabsTrigger>}
+						<TabsTrigger value="time-off">Time-off</TabsTrigger>
+						<TabsTrigger value="contract">Contract</TabsTrigger>
 					</TabsList>
 				)}
 
@@ -245,22 +247,24 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					<Profile type={signatureType} data={data.profile as any} />
 				</TabsContent>
 
-				<TabsContent value="contract" className="grid gap-10">
-					{signatureType === 'profile' && (
-						<div className="flex w-fit items-center gap-3 rounded-sm border border-accent bg-accent px-3 py-2 text-xs font-thin">
-							<InfoIcon size={12} />
-							{`You can not edit your contract details. You'd need to reachout to your contact or manager to request an edit/change`}
-						</div>
-					)}
-
-					<Details formType="contract" data={data} />
+				<TabsContent value="time-off">
+					<Timeoff contract={data.id} org={org} team={data?.team} />
 				</TabsContent>
 
-				{data.team && (
-					<TabsContent value="team">
-						<Teams org={org} team={data.team} />
-					</TabsContent>
-				)}
+				<TabsContent value="contract" className="grid gap-10">
+					<section>
+						{signatureType === 'profile' && (
+							<div className="flex w-fit items-center gap-3 rounded-sm border border-accent bg-accent px-3 py-2 text-xs font-thin">
+								<InfoIcon size={12} />
+								{`You can not edit your contract details. You'd need to reachout to your contact or manager to request an edit/change`}
+							</div>
+						)}
+
+						<Details formType="contract" data={data} />
+					</section>
+				</TabsContent>
+
+				<TabsContent value="team">{data.team && <Teams org={org} team={data.team} />}</TabsContent>
 			</Tabs>
 		</section>
 	);

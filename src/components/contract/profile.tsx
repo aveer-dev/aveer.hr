@@ -15,7 +15,7 @@ interface props {
 
 export const Profile = ({ data, type }: props) => {
 	return (
-		<div>
+		<section className="mt-6">
 			<div className="mb-4 flex items-center justify-between">
 				<h2 className="text-xl font-semibold">Personal Details</h2>
 
@@ -96,6 +96,6 @@ export const Profile = ({ data, type }: props) => {
 					<h4 className="text-xs text-muted-foreground">Medical note</h4> <p className="font-normal">{data?.medical?.note || '-'}</p>
 				</li>
 			</ul>
-		</div>
+		</section>
 	);
 };

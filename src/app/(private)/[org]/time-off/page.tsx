@@ -1,8 +1,8 @@
 import { DataTable } from '@/components/dashboard/table';
 import { createClient } from '@/utils/supabase/server';
 import { Suspense } from 'react';
-import { columns } from './column';
-import { LeaveCalendar } from './leave-calendar';
+import { columns } from '@/components/leave/column';
+import { LeaveCalendar } from '@/components/leave/leave-calendar';
 
 interface props {
 	params: { [key: string]: string };

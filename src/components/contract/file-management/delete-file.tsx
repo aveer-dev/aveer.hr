@@ -4,8 +4,8 @@ import { createClient } from '@/utils/supabase/client';
 import { Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Button } from '../ui/button';
-import { LoadingSpinner } from '../ui/loader';
+import { Button } from '../../ui/button';
+import { LoadingSpinner } from '../../ui/loader';
 
 interface props {
 	path: string;
