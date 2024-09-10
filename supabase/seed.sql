@@ -1378,7 +1378,18 @@ INSERT INTO "auth"."audit_log_entries" ("instance_id", "id", "payload", "created
 	('00000000-0000-0000-0000-000000000000', 'c0cf0f26-12b4-4160-a43e-96f7f6ac7b4e', '{"action":"token_refreshed","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-07 22:47:36.854638+00', ''),
 	('00000000-0000-0000-0000-000000000000', '91a77953-5426-4ecc-8d24-a67845cea31b', '{"action":"token_revoked","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-07 22:47:36.856798+00', ''),
 	('00000000-0000-0000-0000-000000000000', '7b7785ba-c73f-4693-889c-cb8205b1ac27', '{"action":"token_refreshed","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-08 03:19:05.758255+00', ''),
-	('00000000-0000-0000-0000-000000000000', '91a040f7-ddf9-4b8f-9054-54b23ec42824', '{"action":"token_revoked","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-08 03:19:05.759275+00', '');
+	('00000000-0000-0000-0000-000000000000', '91a040f7-ddf9-4b8f-9054-54b23ec42824', '{"action":"token_revoked","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-08 03:19:05.759275+00', ''),
+	('00000000-0000-0000-0000-000000000000', '5ef72d93-2cca-4c7d-b329-4ada940e6664', '{"action":"token_refreshed","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-08 20:40:47.774342+00', ''),
+	('00000000-0000-0000-0000-000000000000', 'ad8b6198-faab-47b1-a242-c631869d4c29', '{"action":"token_revoked","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-08 20:40:47.775184+00', ''),
+	('00000000-0000-0000-0000-000000000000', 'b0cfcc31-d3ea-47cc-b19f-ccd3019cef24', '{"action":"token_refreshed","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-08 20:40:49.083308+00', ''),
+	('00000000-0000-0000-0000-000000000000', '88f5cc62-8e95-4503-8b0e-7b2013815ae4', '{"action":"token_refreshed","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-08 20:40:49.101474+00', ''),
+	('00000000-0000-0000-0000-000000000000', '9aed27cf-5482-43a3-98b0-0c166ccb91a8', '{"action":"token_refreshed","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-08 20:40:54.248599+00', ''),
+	('00000000-0000-0000-0000-000000000000', '8e9a8432-0196-467c-857c-d9e0e2acaf43', '{"action":"token_refreshed","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-08 20:40:55.071706+00', ''),
+	('00000000-0000-0000-0000-000000000000', 'b926023d-2638-4a02-817b-3dc7acf5497e', '{"action":"token_refreshed","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-08 20:40:55.084221+00', ''),
+	('00000000-0000-0000-0000-000000000000', '3cbcedcb-9862-49bb-99f8-1c2374983509', '{"action":"token_refreshed","actor_id":"a86740a7-223e-42fb-96d8-662006ef962c","actor_username":"emmanuel.ainaj@gmail.com","actor_via_sso":false,"log_type":"token"}', '2024-09-08 20:40:57.060446+00', ''),
+	('00000000-0000-0000-0000-000000000000', '683905df-0b30-43be-87b7-358c0cdef058', '{"action":"user_signedup","actor_id":"7fe9e639-7c31-4f1f-b66e-f2aee63977e9","actor_username":"prestonvictor25@gmail.com","actor_via_sso":false,"log_type":"team","traits":{"provider":"email"}}', '2024-09-09 16:59:37.921909+00', ''),
+	('00000000-0000-0000-0000-000000000000', '6c2ac48c-d5ee-428e-8b21-4d04628f47a1', '{"action":"login","actor_id":"7fe9e639-7c31-4f1f-b66e-f2aee63977e9","actor_username":"prestonvictor25@gmail.com","actor_via_sso":false,"log_type":"account","traits":{"provider":"email"}}', '2024-09-09 16:59:37.926352+00', ''),
+	('00000000-0000-0000-0000-000000000000', '2b5fa8bf-9c8c-447d-90c8-9ed31bf07cae', '{"action":"logout","actor_id":"7fe9e639-7c31-4f1f-b66e-f2aee63977e9","actor_username":"prestonvictor25@gmail.com","actor_via_sso":false,"log_type":"account"}', '2024-09-09 17:00:25.046048+00', '');
 
 
 --
@@ -1433,7 +1444,8 @@ INSERT INTO "auth"."users" ("instance_id", "id", "aud", "role", "email", "encryp
 	('00000000-0000-0000-0000-000000000000', '7339b698-136f-4e65-9a27-89512cd43ab1', 'authenticated', 'authenticated', 'tamilore@yopmail.com', '', NULL, '2024-08-29 02:55:43.843693+00', 'ebfdb328e52840cbe2895670f661fca1cdda9c72d25cec48b40b91f9', '2024-08-29 02:55:43.843693+00', '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"last_name": "Tamilore", "first_name": "Oladele"}', NULL, '2024-08-29 02:55:43.838634+00', '2024-08-29 02:55:45.221537+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
 	('00000000-0000-0000-0000-000000000000', 'f7caddb2-722d-41a7-a4e6-02dc2b89e498', 'authenticated', 'authenticated', 'segun@getanchor.co', '$2a$10$K4xD9pfH0F/OfHWRP05WHuf6Zq20o7572mZMCr6jUvtI1KyzLNVRa', '2024-08-28 16:50:15.513232+00', NULL, '', NULL, '', NULL, '', '', NULL, '2024-08-28 16:50:15.517782+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "f7caddb2-722d-41a7-a4e6-02dc2b89e498", "email": "segun@getanchor.co", "last_name": "Adeyemi", "first_name": "Segun", "email_verified": false, "phone_verified": false}', NULL, '2024-08-28 16:50:15.500596+00', '2024-08-28 16:50:15.521173+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
 	('00000000-0000-0000-0000-000000000000', 'c3610591-7ad3-422a-81d4-c4e50600b99b', 'authenticated', 'authenticated', 'temilore@yopmail.com', '', NULL, '2024-08-29 03:10:25.961029+00', '7898af498934da85b69c78cdf6165912709276193012293949f859d4', '2024-08-29 03:10:25.961029+00', '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"last_name": "Ajao", "first_name": "Temilore"}', NULL, '2024-08-29 03:10:25.952272+00', '2024-08-29 03:10:27.310382+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
-	('00000000-0000-0000-0000-000000000000', 'a86740a7-223e-42fb-96d8-662006ef962c', 'authenticated', 'authenticated', 'emmanuel.ainaj@gmail.com', '$2a$10$GL78yx0MeuXmhkoNmBjo2eF8WZohaeqTp2x4viemaP38ZtAkg42IW', '2024-08-07 18:27:13.92957+00', NULL, '', NULL, 'pkce_f77a35309c3b2f8fb389e9dd4f827d175410108c44286b4caf946d6d', '2024-08-29 06:54:19.492865+00', '', '', NULL, '2024-09-02 14:07:12.420836+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "a86740a7-223e-42fb-96d8-662006ef962c", "email": "emmanuel.ainaj@gmail.com", "last_name": "Aina", "first_name": "Emmanuel", "email_verified": false, "phone_verified": false}', NULL, '2024-08-07 18:27:13.921677+00', '2024-09-08 03:19:05.764648+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
+	('00000000-0000-0000-0000-000000000000', '7fe9e639-7c31-4f1f-b66e-f2aee63977e9', 'authenticated', 'authenticated', 'prestonvictor25@gmail.com', '$2a$10$6wqwWdouU4nGdCqdQ6./mu2wfSdl/NwVU1QECSru19b7fnFodZ7pq', '2024-09-09 16:59:37.923305+00', NULL, '', NULL, '', NULL, '', '', NULL, '2024-09-09 16:59:37.926901+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "7fe9e639-7c31-4f1f-b66e-f2aee63977e9", "email": "prestonvictor25@gmail.com", "last_name": "Tom", "first_name": "Victor", "email_verified": false, "phone_verified": false}', NULL, '2024-09-09 16:59:37.903193+00', '2024-09-09 16:59:37.932524+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
+	('00000000-0000-0000-0000-000000000000', 'a86740a7-223e-42fb-96d8-662006ef962c', 'authenticated', 'authenticated', 'emmanuel.ainaj@gmail.com', '$2a$10$GL78yx0MeuXmhkoNmBjo2eF8WZohaeqTp2x4viemaP38ZtAkg42IW', '2024-08-07 18:27:13.92957+00', NULL, '', NULL, 'pkce_f77a35309c3b2f8fb389e9dd4f827d175410108c44286b4caf946d6d', '2024-08-29 06:54:19.492865+00', '', '', NULL, '2024-09-02 14:07:12.420836+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "a86740a7-223e-42fb-96d8-662006ef962c", "email": "emmanuel.ainaj@gmail.com", "last_name": "Aina", "first_name": "Emmanuel", "email_verified": false, "phone_verified": false}', NULL, '2024-08-07 18:27:13.921677+00', '2024-09-08 20:40:47.779304+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
 	('00000000-0000-0000-0000-000000000000', 'b49457c1-5d63-484c-9a8a-658a919727e8', 'authenticated', 'authenticated', 'emmanuel.ainaj@yopmail.com', '$2a$10$2fqbnfXtSIbYFBnTrAlcm.OPgUI60.4K2ap8BtQ9sCQN6OekqBzVC', '2024-08-26 06:41:59.430078+00', NULL, '', NULL, '', NULL, '', '', NULL, '2024-08-29 18:49:09.77317+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "b49457c1-5d63-484c-9a8a-658a919727e8", "email": "emmanuel.ainaj@yopmail.com", "last_name": "Aina", "first_name": "Emmanuel", "email_verified": false, "phone_verified": false}', NULL, '2024-08-26 06:41:59.419127+00', '2024-09-01 20:37:44.536003+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
 	('00000000-0000-0000-0000-000000000000', '631c04fe-7b6c-4b51-8223-913ad185ac60', 'authenticated', 'authenticated', 'emmanuel.ainaj+ddd@gmail.com', '', NULL, '2024-08-29 20:00:04.365732+00', 'd16513dbf6926f9576f9d9f87ebfd4d17b841b6521189304f7faba6e', '2024-08-29 20:00:04.365732+00', '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"last_name": "Aina", "first_name": "Emmanuel"}', NULL, '2024-08-29 20:00:04.358248+00', '2024-08-29 20:00:05.83292+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
 
@@ -1474,7 +1486,8 @@ INSERT INTO "auth"."identities" ("provider_id", "user_id", "identity_data", "pro
 	('c3610591-7ad3-422a-81d4-c4e50600b99b', 'c3610591-7ad3-422a-81d4-c4e50600b99b', '{"sub": "c3610591-7ad3-422a-81d4-c4e50600b99b", "email": "temilore@yopmail.com", "email_verified": false, "phone_verified": false}', 'email', '2024-08-29 03:10:25.957578+00', '2024-08-29 03:10:25.957626+00', '2024-08-29 03:10:25.957626+00', 'f7389bdb-7eac-43c1-98b8-5489c25f2d61'),
 	('ca37eecb-f0af-48e3-b97e-6c0dbccdaa7b', 'ca37eecb-f0af-48e3-b97e-6c0dbccdaa7b', '{"sub": "ca37eecb-f0af-48e3-b97e-6c0dbccdaa7b", "email": "dolapo@yopmail.com", "email_verified": false, "phone_verified": false}', 'email', '2024-08-29 03:12:01.225099+00', '2024-08-29 03:12:01.225171+00', '2024-08-29 03:12:01.225171+00', '005e9802-daaa-4d00-872a-501fb11c2ad4'),
 	('8c815757-b7ee-4f99-846e-cd3f53851c89', '8c815757-b7ee-4f99-846e-cd3f53851c89', '{"sub": "8c815757-b7ee-4f99-846e-cd3f53851c89", "email": "emmanuel.ainaj+one@gmail.com", "email_verified": false, "phone_verified": false}', 'email', '2024-08-29 18:51:50.822456+00', '2024-08-29 18:51:50.822509+00', '2024-08-29 18:51:50.822509+00', 'fbcded5b-5583-457d-877f-71d97d481feb'),
-	('631c04fe-7b6c-4b51-8223-913ad185ac60', '631c04fe-7b6c-4b51-8223-913ad185ac60', '{"sub": "631c04fe-7b6c-4b51-8223-913ad185ac60", "email": "emmanuel.ainaj+ddd@gmail.com", "email_verified": false, "phone_verified": false}', 'email', '2024-08-29 20:00:04.362894+00', '2024-08-29 20:00:04.362951+00', '2024-08-29 20:00:04.362951+00', '5bf29b9e-bd01-47ce-9ed0-d95223f95faa');
+	('631c04fe-7b6c-4b51-8223-913ad185ac60', '631c04fe-7b6c-4b51-8223-913ad185ac60', '{"sub": "631c04fe-7b6c-4b51-8223-913ad185ac60", "email": "emmanuel.ainaj+ddd@gmail.com", "email_verified": false, "phone_verified": false}', 'email', '2024-08-29 20:00:04.362894+00', '2024-08-29 20:00:04.362951+00', '2024-08-29 20:00:04.362951+00', '5bf29b9e-bd01-47ce-9ed0-d95223f95faa'),
+	('7fe9e639-7c31-4f1f-b66e-f2aee63977e9', '7fe9e639-7c31-4f1f-b66e-f2aee63977e9', '{"sub": "7fe9e639-7c31-4f1f-b66e-f2aee63977e9", "email": "prestonvictor25@gmail.com", "last_name": "Tom", "first_name": "Victor", "email_verified": false, "phone_verified": false}', 'email', '2024-09-09 16:59:37.917218+00', '2024-09-09 16:59:37.917276+00', '2024-09-09 16:59:37.917276+00', 'de6dd656-6313-464b-be92-d829cf1ca336');
 
 
 --
@@ -1496,8 +1509,8 @@ INSERT INTO "auth"."sessions" ("id", "user_id", "created_at", "updated_at", "fac
 	('58153c94-5e82-484c-ab03-3459c17bfdee', 'cadfb92e-fd1a-4dcf-b2ab-fd63210a2fac', '2024-08-25 23:25:56.524984+00', '2024-08-30 10:53:37.381077+00', NULL, 'aal1', NULL, '2024-08-30 10:53:37.381003', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36', '94.12.164.27', NULL),
 	('81318224-8872-40b6-81d8-68c1d7c3ae7b', 'a09b4dff-2b82-423c-b7d2-1bbc8affb2ca', '2024-08-17 21:55:44.43654+00', '2024-09-05 19:43:48.437666+00', NULL, 'aal1', NULL, '2024-09-05 19:43:48.437598', 'Vercel Edge Functions', '2a06:98c0:3600::103', NULL),
 	('5499e4dd-6605-4dcf-a0ac-346af4c0ab83', 'a86740a7-223e-42fb-96d8-662006ef962c', '2024-08-28 18:57:38.765257+00', '2024-08-29 06:37:04.600348+00', NULL, 'aal1', NULL, '2024-08-29 06:37:04.600271', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36', '174.171.114.99', NULL),
-	('fa7c1a07-23dd-431d-95e5-114c6029d787', 'a86740a7-223e-42fb-96d8-662006ef962c', '2024-08-29 07:03:49.679093+00', '2024-09-08 03:19:05.766016+00', NULL, 'aal1', NULL, '2024-09-08 03:19:05.765941', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36', '174.171.114.99', NULL),
-	('c13d9ce4-c38d-4b7a-be29-568e69580d3a', 'a86740a7-223e-42fb-96d8-662006ef962c', '2024-09-01 20:38:15.500327+00', '2024-09-06 18:36:44.126626+00', NULL, 'aal1', NULL, '2024-09-06 18:36:44.126554', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36', '174.171.114.99', NULL);
+	('c13d9ce4-c38d-4b7a-be29-568e69580d3a', 'a86740a7-223e-42fb-96d8-662006ef962c', '2024-09-01 20:38:15.500327+00', '2024-09-06 18:36:44.126626+00', NULL, 'aal1', NULL, '2024-09-06 18:36:44.126554', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36', '174.171.114.99', NULL),
+	('fa7c1a07-23dd-431d-95e5-114c6029d787', 'a86740a7-223e-42fb-96d8-662006ef962c', '2024-08-29 07:03:49.679093+00', '2024-09-08 20:40:57.062482+00', NULL, 'aal1', NULL, '2024-09-08 20:40:57.062404', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36', '174.171.114.99', NULL);
 
 
 --
@@ -1722,7 +1735,8 @@ INSERT INTO "auth"."refresh_tokens" ("instance_id", "id", "token", "user_id", "r
 	('00000000-0000-0000-0000-000000000000', 517, 'hQq3SwkA_zkGWIEfdm3_Ww', 'a86740a7-223e-42fb-96d8-662006ef962c', true, '2024-09-07 20:47:28.257752+00', '2024-09-07 21:49:19.468332+00', 'ecF30MOcSBWqHng0QKGI3A', 'fa7c1a07-23dd-431d-95e5-114c6029d787'),
 	('00000000-0000-0000-0000-000000000000', 518, '9TuXASwJ8cA7W7l5ytVb_w', 'a86740a7-223e-42fb-96d8-662006ef962c', true, '2024-09-07 21:49:19.473281+00', '2024-09-07 22:47:36.858064+00', 'hQq3SwkA_zkGWIEfdm3_Ww', 'fa7c1a07-23dd-431d-95e5-114c6029d787'),
 	('00000000-0000-0000-0000-000000000000', 519, '3j6rMeCXJ4Ah2Vb98GulBA', 'a86740a7-223e-42fb-96d8-662006ef962c', true, '2024-09-07 22:47:36.858762+00', '2024-09-08 03:19:05.76044+00', '9TuXASwJ8cA7W7l5ytVb_w', 'fa7c1a07-23dd-431d-95e5-114c6029d787'),
-	('00000000-0000-0000-0000-000000000000', 520, 'P5rOE6xMUZ1woAl5pCX69Q', 'a86740a7-223e-42fb-96d8-662006ef962c', false, '2024-09-08 03:19:05.763485+00', '2024-09-08 03:19:05.763485+00', '3j6rMeCXJ4Ah2Vb98GulBA', 'fa7c1a07-23dd-431d-95e5-114c6029d787');
+	('00000000-0000-0000-0000-000000000000', 520, 'P5rOE6xMUZ1woAl5pCX69Q', 'a86740a7-223e-42fb-96d8-662006ef962c', true, '2024-09-08 03:19:05.763485+00', '2024-09-08 20:40:47.775716+00', '3j6rMeCXJ4Ah2Vb98GulBA', 'fa7c1a07-23dd-431d-95e5-114c6029d787'),
+	('00000000-0000-0000-0000-000000000000', 521, 'j4NuWHY-2oUf6heZerwADg', 'a86740a7-223e-42fb-96d8-662006ef962c', false, '2024-09-08 20:40:47.776994+00', '2024-09-08 20:40:47.776994+00', 'P5rOE6xMUZ1woAl5pCX69Q', 'fa7c1a07-23dd-431d-95e5-114c6029d787');
 
 
 --
@@ -1765,15 +1779,16 @@ INSERT INTO "public"."organisations" ("id", "created_at", "updated_at", "name", 
 	(15, '2024-08-17 20:37:27.532138+00', '2024-08-17 20:37:27.532138+00', 'Wayge', 'https://aveer.site', 'wayge'),
 	(16, '2024-08-17 21:56:38.596658+00', '2024-08-17 21:56:38.596658+00', 'Liveet', 'https://www.liveet.co/', 'liveet'),
 	(28, '2024-08-26 06:42:25.271691+00', '2024-08-26 06:42:25.271691+00', 'one of one', 'https://emmanuelaina.dev/', 'one-of-two'),
-	(12, '2024-08-09 03:30:03.977119+00', '2024-08-09 03:30:03.977119+00', 'Best Org', 'https://emmanuelaina.dev/', 'emmy');
+	(12, '2024-08-09 03:30:03.977119+00', '2024-08-09 03:30:03.977119+00', 'Best Org', 'https://emmanuelaina.dev/', 'emmy'),
+	(30, '2024-09-09 16:59:55.281935+00', '2024-09-09 16:59:55.281935+00', 'oyi;/', 'https://victorpreston.tech/', 'oyi');
 
 
 --
 -- Data for Name: approval_policies; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."approval_policies" ("id", "created_at", "name", "description", "type", "levels", "org", "updated_at") VALUES
-	(1, '2024-09-06 20:52:03.445009+00', 'Employees leave policies', 'Default policy that requires time-off approval from managers', 'time_off', '{"{\"id\": \"34\", \"type\": \"manager\"}","{\"id\": \"\", \"type\": \"admin\"}"}', 'emmy', '2024-09-06 21:50:27.127+00');
+INSERT INTO "public"."approval_policies" ("id", "created_at", "name", "description", "type", "levels", "org", "updated_at", "is_default") VALUES
+	(1, '2024-09-06 20:52:03.445009+00', 'Employees leave policies', 'Default policy that requires time-off approval from managers', 'time_off', '{"{\"id\": \"34\", \"type\": \"manager\"}","{\"id\": \"\", \"type\": \"admin\"}"}', 'emmy', '2024-09-06 21:50:27.127+00', false);
 
 
 --
@@ -2204,39 +2219,40 @@ INSERT INTO "public"."open_roles" ("id", "created_at", "job_title", "level", "em
 -- Data for Name: profiles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."profiles" ("id", "first_name", "last_name", "nationality", "email", "org") VALUES
-	('08c00d64-cff8-4f01-b12f-f44b2ecf7eea', 'Emmanuel', 'Emmanuel', 'US', 'emmanuel.aveer@yopmail.com', NULL),
-	('90977fa1-1da9-4306-b7a5-eed853071d66', 'Ololade', 'Ololade', 'NG', 'ololade@yopmail.com', NULL),
-	('516d7e62-2072-420e-8cbf-7835e9beef9e', 'Emmanuel', 'Emmanuel', 'US', 'emmy@yopmail.com', NULL),
-	('7297a686-0cc5-4904-a924-d6e60e7bc501', 'Emmanuel', 'Emmanuel', 'NG', 'emily@yopmail.com', NULL),
-	('919bbf5f-1d4b-4561-9e13-4a422fb7a9a0', 'Emmanuel', 'Emmanuel', 'NG', 'emmanuella@yopmail.com', NULL),
-	('a86740a7-223e-42fb-96d8-662006ef962c', 'Emmanuel', 'Aina', 'AF', 'emmanuel.ainaj@gmail.com', NULL),
-	('8c815757-b7ee-4f99-846e-cd3f53851c89', 'Emmanuel', 'Aina', 'SC', 'emmanuel.ainaj+one@gmail.com', NULL),
-	('631c04fe-7b6c-4b51-8223-913ad185ac60', 'Emmanuel', 'Aina', 'AZ', 'emmanuel.ainaj+ddd@gmail.com', NULL),
-	('a207ad14-e231-46f6-b996-89119e5e4682', 'Oladele', 'Olayinka', 'NG', 'oladele.olayinka@yopmail.com', NULL),
-	('a174d2ae-bdeb-45b0-a6d4-74946292a281', 'Temitope', 'Olurinde', 'NG', 'temitope@yopmail.com', NULL),
-	('23f54e30-3d47-48cd-a6a8-44c3d9b8666f', 'Pamilerin', 'Ajanoku', 'NG', 'pamilerin@yopmail.com', NULL),
-	('68425c41-cd27-4997-943b-cafa3cb92ed3', 'Ajasco', 'Ajao', 'NG', 'ajasco@yopmail.com', NULL),
-	('6a2a27fb-d5fb-4d47-90e5-dc742bbda028', 'Pelumi', 'Kamoru', 'NG', 'pelumi@yopmail.com', NULL),
-	('47cd14c0-3739-41c0-ad49-ddc4deccb2d5', 'Funmilayo', 'Fabumi', 'NG', 'funmilayo@yopmail.com', NULL),
-	('b7843e00-6f21-4544-8cdd-824f307aa681', 'Olawale', 'Gbadamosi', 'AT', 'olawale@yopmail.com', NULL),
-	('587b1f4d-e7d1-4a25-a2a2-4145ba97be4e', 'Ponmile', 'Daniels', 'AU', 'ponmile@yopmail.com', NULL),
-	('c1321b2b-4c58-439b-a8a7-774bf166a296', 'Olubukola', 'Adeonipekun', 'NG', 'olubukola@yopmail.com', NULL),
-	('b996753b-4797-4f50-ac38-88723108f985', 'Abdul', 'Azeez', 'SV', 'abdul@yopmail.com', NULL),
-	('c93c2fbe-40ca-440d-bc5b-d3babe8c3655', 'Kazeem', 'Ahmed', 'NE', 'kazeem@yopmail.com', NULL),
-	('cadfb92e-fd1a-4dcf-b2ab-fd63210a2fac', 'Tomi', 'Arowosegbe', 'US', 'tomilade.arowosegbe@gmail.com', NULL),
-	('a09b4dff-2b82-423c-b7d2-1bbc8affb2ca', 'Oladayo', 'Popoola', 'US', 'dayo@liveet.co', NULL),
-	('5cc34fae-0dd8-43d2-8f3a-df8742141156', 'Toni', 'Grew', 'AU', 'xxtomiladexx@live.co.uk', NULL),
-	('9267e9e1-ed4a-4a4e-b1c5-39ed0996d6ec', 'Adedimeji', 'Bankole', 'BJ', 'adedimeji@yopmail.com', NULL),
-	('77a84878-022e-44f1-9740-af6079296469', 'Tomilade', 'Aro', NULL, 'tomiladearo@yopmail.com', NULL),
-	('ed18c820-0bae-4a57-a0b9-6dcbb081a28d', 'Olaitan', 'Oladele', 'AF', 'olaitan@yopmail.com', NULL),
-	('84450a9d-d019-44bc-a34f-80be030ca897', 'Jomiloju', 'Adepitan', 'GH', 'jomiloju@yopmail.com', NULL),
-	('b49457c1-5d63-484c-9a8a-658a919727e8', 'Emmanuel', 'Aina', NULL, 'emmanuel.ainaj@yopmail.com', NULL),
-	('0e7852fa-f714-4060-acab-45586b0e79bd', 'Emmanuel', 'Durojaye', 'NG', 'emmy-emmy@yopmail.com', NULL),
-	('f7caddb2-722d-41a7-a4e6-02dc2b89e498', 'Segun', 'Adeyemi', NULL, 'segun@getanchor.co', NULL),
-	('7339b698-136f-4e65-9a27-89512cd43ab1', 'Oladele', 'Tamilore', 'NG', 'tamilore@yopmail.com', NULL),
-	('c3610591-7ad3-422a-81d4-c4e50600b99b', 'Temilore', 'Ajao', 'AF', 'temilore@yopmail.com', NULL),
-	('ca37eecb-f0af-48e3-b97e-6c0dbccdaa7b', 'Dolapo', 'Ajanlekoko', 'NG', 'dolapo@yopmail.com', NULL);
+INSERT INTO "public"."profiles" ("id", "first_name", "last_name", "nationality", "email", "org", "medical", "emergency_contact", "address", "mobile", "gender") VALUES
+	('08c00d64-cff8-4f01-b12f-f44b2ecf7eea', 'Emmanuel', 'Emmanuel', 'US', 'emmanuel.aveer@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('90977fa1-1da9-4306-b7a5-eed853071d66', 'Ololade', 'Ololade', 'NG', 'ololade@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('516d7e62-2072-420e-8cbf-7835e9beef9e', 'Emmanuel', 'Emmanuel', 'US', 'emmy@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('7297a686-0cc5-4904-a924-d6e60e7bc501', 'Emmanuel', 'Emmanuel', 'NG', 'emily@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('919bbf5f-1d4b-4561-9e13-4a422fb7a9a0', 'Emmanuel', 'Emmanuel', 'NG', 'emmanuella@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('a86740a7-223e-42fb-96d8-662006ef962c', 'Emmanuel', 'Aina', 'AF', 'emmanuel.ainaj@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('8c815757-b7ee-4f99-846e-cd3f53851c89', 'Emmanuel', 'Aina', 'SC', 'emmanuel.ainaj+one@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('631c04fe-7b6c-4b51-8223-913ad185ac60', 'Emmanuel', 'Aina', 'AZ', 'emmanuel.ainaj+ddd@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('7fe9e639-7c31-4f1f-b66e-f2aee63977e9', 'Victor', 'Tom', NULL, 'prestonvictor25@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('a207ad14-e231-46f6-b996-89119e5e4682', 'Oladele', 'Olayinka', 'NG', 'oladele.olayinka@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('a174d2ae-bdeb-45b0-a6d4-74946292a281', 'Temitope', 'Olurinde', 'NG', 'temitope@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('23f54e30-3d47-48cd-a6a8-44c3d9b8666f', 'Pamilerin', 'Ajanoku', 'NG', 'pamilerin@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('68425c41-cd27-4997-943b-cafa3cb92ed3', 'Ajasco', 'Ajao', 'NG', 'ajasco@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('6a2a27fb-d5fb-4d47-90e5-dc742bbda028', 'Pelumi', 'Kamoru', 'NG', 'pelumi@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('47cd14c0-3739-41c0-ad49-ddc4deccb2d5', 'Funmilayo', 'Fabumi', 'NG', 'funmilayo@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('b7843e00-6f21-4544-8cdd-824f307aa681', 'Olawale', 'Gbadamosi', 'AT', 'olawale@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('587b1f4d-e7d1-4a25-a2a2-4145ba97be4e', 'Ponmile', 'Daniels', 'AU', 'ponmile@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('c1321b2b-4c58-439b-a8a7-774bf166a296', 'Olubukola', 'Adeonipekun', 'NG', 'olubukola@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('b996753b-4797-4f50-ac38-88723108f985', 'Abdul', 'Azeez', 'SV', 'abdul@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('c93c2fbe-40ca-440d-bc5b-d3babe8c3655', 'Kazeem', 'Ahmed', 'NE', 'kazeem@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('cadfb92e-fd1a-4dcf-b2ab-fd63210a2fac', 'Tomi', 'Arowosegbe', 'US', 'tomilade.arowosegbe@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('a09b4dff-2b82-423c-b7d2-1bbc8affb2ca', 'Oladayo', 'Popoola', 'US', 'dayo@liveet.co', NULL, NULL, NULL, NULL, NULL, NULL),
+	('5cc34fae-0dd8-43d2-8f3a-df8742141156', 'Toni', 'Grew', 'AU', 'xxtomiladexx@live.co.uk', NULL, NULL, NULL, NULL, NULL, NULL),
+	('9267e9e1-ed4a-4a4e-b1c5-39ed0996d6ec', 'Adedimeji', 'Bankole', 'BJ', 'adedimeji@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('77a84878-022e-44f1-9740-af6079296469', 'Tomilade', 'Aro', NULL, 'tomiladearo@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('ed18c820-0bae-4a57-a0b9-6dcbb081a28d', 'Olaitan', 'Oladele', 'AF', 'olaitan@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('84450a9d-d019-44bc-a34f-80be030ca897', 'Jomiloju', 'Adepitan', 'GH', 'jomiloju@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('b49457c1-5d63-484c-9a8a-658a919727e8', 'Emmanuel', 'Aina', NULL, 'emmanuel.ainaj@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('0e7852fa-f714-4060-acab-45586b0e79bd', 'Emmanuel', 'Durojaye', 'NG', 'emmy-emmy@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('f7caddb2-722d-41a7-a4e6-02dc2b89e498', 'Segun', 'Adeyemi', NULL, 'segun@getanchor.co', NULL, NULL, NULL, NULL, NULL, NULL),
+	('7339b698-136f-4e65-9a27-89512cd43ab1', 'Oladele', 'Tamilore', 'NG', 'tamilore@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('c3610591-7ad3-422a-81d4-c4e50600b99b', 'Temilore', 'Ajao', 'AF', 'temilore@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL),
+	('ca37eecb-f0af-48e3-b97e-6c0dbccdaa7b', 'Dolapo', 'Ajanlekoko', 'NG', 'dolapo@yopmail.com', NULL, NULL, NULL, NULL, NULL, NULL);
 
 
 --
@@ -2249,9 +2265,9 @@ INSERT INTO "public"."contracts" ("id", "created_at", "job_title", "level", "emp
 	(31, '2024-08-20 21:16:25.859789+00', 'Publisher', NULL, 'full-time', '9', 'daily', '[]', 110000, 100, '[]', '2024-08-20', NULL, 93, 20, 20, 'c93c2fbe-40ca-440d-bc5b-d3babe8c3655', 18, NULL, NULL, 'awaiting signatures', NULL, NULL, NULL, NULL, 'integral-media-ltd', NULL, NULL, NULL, 0, 0, 0, NULL, 0, 0, 60, 20, NULL),
 	(32, '2024-08-21 21:19:40.10204+00', 'Stylist', NULL, 'part-time', '4', 'daily', '["fab"]', 45000, 20000, '[{"name": "wardrobe allowance", "amount": "1500", "frequency": "monthly"}]', '2024-08-21', NULL, 180, 2, 1, '5cc34fae-0dd8-43d2-8f3a-df8742141156', 17, NULL, NULL, 'awaiting signatures', NULL, NULL, NULL, NULL, 'wayge', NULL, NULL, NULL, 0, 0, 0, NULL, 0, 0, 60, 20, NULL),
 	(29, '2024-08-20 20:51:07.32247+00', 'Operations Associate', NULL, 'full-time', '8', 'daily', '["Xyz"]', 72000, 10000, NULL, '2024-08-20', NULL, 90, 20, 20, 'cadfb92e-fd1a-4dcf-b2ab-fd63210a2fac', 17, '2024-08-20 20:51:33.281+00', '2024-08-20 20:53:08.075+00', 'signed', 'cadfb92e-fd1a-4dcf-b2ab-fd63210a2fac', 'Olatomilade Arowosegbe', 'Olatomilade Arowosegbe', NULL, 'wayge', NULL, NULL, NULL, 0, 0, 0, NULL, 0, 0, 60, 20, NULL),
+	(9, '2024-08-10 18:40:36.953868+00', 'New role', NULL, 'full-time', '8', 'daily', '["New job"]', 5000, 500, '[{"name": "Rent", "amount": "50", "frequency": "one-off"}]', '2024-06-03', '2024-08-17', 90, 20, 23, '919bbf5f-1d4b-4561-9e13-4a422fb7a9a0', 12, '2024-08-11 05:37:47.846+00', '2024-08-11 04:57:48.369+00', 'terminated', 'a86740a7-223e-42fb-96d8-662006ef962c', 'Emmanuel Aina', 'Boss man', 'a86740a7-223e-42fb-96d8-662006ef962c', 'emmy', NULL, NULL, NULL, 0, 0, 0, NULL, 0, 0, 60, 20, NULL),
 	(36, '2024-08-26 06:56:08.953867+00', 'Producer', 18, 'full-time', '8', 'daily', '["Just work"]', 500000, 5000, NULL, '2024-08-26', NULL, 90, 20, 20, '0e7852fa-f714-4060-acab-45586b0e79bd', 19, '2024-08-26 06:56:28.828+00', NULL, 'awaiting signature', 'b49457c1-5d63-484c-9a8a-658a919727e8', NULL, 'Emmanuel Aina', NULL, 'one-of-two', '{"\"One car per person\""}', NULL, NULL, 0, 0, 0, NULL, 0, 0, 60, 20, NULL),
 	(4, '2024-08-09 03:37:12.371245+00', 'New', NULL, 'full-time', '8', 'daily', '[]', 5000, NULL, NULL, '2024-08-09', '2024-08-31', 90, 20, 20, 'a86740a7-223e-42fb-96d8-662006ef962c', 12, '2024-08-13 07:47:36.047+00', '2024-08-13 07:08:39.466+00', 'scheduled termination', 'a86740a7-223e-42fb-96d8-662006ef962c', 'Emmanuel Aina', 'Emmanuel Aina', 'a86740a7-223e-42fb-96d8-662006ef962c', 'emmy', NULL, NULL, NULL, 0, 0, 0, NULL, 0, 0, 60, 20, NULL),
-	(9, '2024-08-10 18:40:36.953868+00', 'New role', NULL, 'full-time', '8', 'daily', '["New job"]', 5000, 500, '[{"name": "Rent", "amount": "50", "frequency": "one-off"}]', '2024-06-03', '2024-08-17', 90, 20, 20, '919bbf5f-1d4b-4561-9e13-4a422fb7a9a0', 12, '2024-08-11 05:37:47.846+00', '2024-08-11 04:57:48.369+00', 'terminated', 'a86740a7-223e-42fb-96d8-662006ef962c', 'Emmanuel Aina', 'Boss man', 'a86740a7-223e-42fb-96d8-662006ef962c', 'emmy', NULL, NULL, NULL, 0, 0, 0, NULL, 0, 0, 60, 20, NULL),
 	(22, '2024-08-16 06:11:02.808448+00', 'Engineer', NULL, 'full-time', '8', 'daily', '[]', 5000, NULL, NULL, '2024-08-16', NULL, 90, 20, 20, '6a2a27fb-d5fb-4d47-90e5-dc742bbda028', 13, NULL, NULL, 'awaiting signatures', NULL, NULL, NULL, NULL, 'emmy', NULL, NULL, NULL, 0, 0, 0, NULL, 0, 0, 60, 20, NULL),
 	(23, '2024-08-16 06:31:57.946146+00', 'Sales', NULL, 'full-time', '8', 'daily', '[]', 5000, NULL, NULL, '2024-08-16', NULL, 90, 20, 20, '47cd14c0-3739-41c0-ad49-ddc4deccb2d5', 13, NULL, NULL, 'awaiting signatures', NULL, NULL, NULL, NULL, 'emmy', NULL, NULL, NULL, 0, 0, 0, NULL, 0, 0, 60, 20, NULL),
 	(25, '2024-08-16 07:02:50.045187+00', 'Secretary', NULL, 'full-time', '8', 'daily', '[]', 439498, NULL, NULL, '2024-08-16', NULL, 90, 20, 20, 'b7843e00-6f21-4544-8cdd-824f307aa681', 12, NULL, NULL, 'awaiting signatures', NULL, NULL, NULL, NULL, 'emmy', NULL, NULL, NULL, 0, 0, 0, NULL, 0, 0, 60, 20, NULL),
@@ -2340,6 +2356,18 @@ Cras ut vestibulum massa, et posuere nunc. Proin sed velit accumsan, pretium odi
 
 
 --
+-- Data for Name: teams; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- Data for Name: managers; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
 -- Data for Name: org_documents; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -2374,22 +2402,25 @@ INSERT INTO "public"."profiles_roles" ("id", "created_at", "role", "profile", "o
 	(3, '2024-08-17 20:37:27.799507+00', 'admin', 'cadfb92e-fd1a-4dcf-b2ab-fd63210a2fac', 'wayge'),
 	(4, '2024-08-17 21:56:38.868713+00', 'admin', 'a09b4dff-2b82-423c-b7d2-1bbc8affb2ca', 'liveet'),
 	(6, '2024-08-26 06:42:25.54869+00', 'admin', 'b49457c1-5d63-484c-9a8a-658a919727e8', 'one-of-two'),
-	(1, '2024-08-10 17:48:39.078048+00', 'admin', 'a86740a7-223e-42fb-96d8-662006ef962c', 'emmy');
+	(1, '2024-08-10 17:48:39.078048+00', 'admin', 'a86740a7-223e-42fb-96d8-662006ef962c', 'emmy'),
+	(7, '2024-09-09 16:59:55.583968+00', 'admin', '7fe9e639-7c31-4f1f-b66e-f2aee63977e9', 'oyi');
 
 
 --
--- Data for Name: teams; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: team_roles; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
+INSERT INTO "public"."team_roles" ("id", "created_at", "name", "description") VALUES
+	(1, '2024-09-09 10:28:25.303444+00', 'admin', 'Default all access');
 
 
 --
 -- Data for Name: time_off; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "public"."time_off" ("id", "profile", "contract", "leave_type", "from", "to", "status", "approved_at", "created_at", "updated_at", "org", "hand_over", "hand_over_note", "note", "levels") OVERRIDING SYSTEM VALUE VALUES
-	(3, 'a86740a7-223e-42fb-96d8-662006ef962c', 53, 'paid', '2024-09-11 05:00:00+00', '2024-09-19 05:00:00+00', 'approved', NULL, '2024-09-02 04:44:51.309883+00', '2024-09-02 04:44:51.309883+00', 'emmy', NULL, '', 'You!', '{"{\"id\": \"a86740a7-223e-42fb-96d8-662006ef962c\", \"type\": \"manager\", \"level\": 1, \"action\": \"approved\"}","{\"id\": \"a86740a7-223e-42fb-96d8-662006ef962c\", \"type\": \"admin\", \"level\": 2, \"action\": \"approved\"}","{\"id\": \"a86740a7-223e-42fb-96d8-662006ef962c\", \"type\": \"admin\", \"level\": 3, \"action\": \"approved\"}"}'),
-	(4, 'a86740a7-223e-42fb-96d8-662006ef962c', 53, 'paid', '2024-09-11 05:00:00+00', '2024-09-19 05:00:00+00', 'pending', NULL, '2024-09-02 04:48:24.979357+00', '2024-09-02 04:48:24.979357+00', 'emmy', NULL, '', 'You!', '{"{\"id\": \"\", \"type\": \"manager\", \"level\": 1}","{\"id\": \"\", \"type\": \"admin\", \"level\": 2}","{\"id\": \"\", \"type\": \"admin\", \"level\": 3}"}');
+INSERT INTO "public"."time_off" ("id", "profile", "contract", "leave_type", "from", "to", "status", "approved_at", "created_at", "updated_at", "org", "hand_over_note", "note", "levels", "hand_over") OVERRIDING SYSTEM VALUE VALUES
+	(3, 'a86740a7-223e-42fb-96d8-662006ef962c', 53, 'paid', '2024-09-11 05:00:00+00', '2024-09-19 05:00:00+00', 'approved', NULL, '2024-09-02 04:44:51.309883+00', '2024-09-02 04:44:51.309883+00', 'emmy', '', 'You!', '{"{\"id\": \"a86740a7-223e-42fb-96d8-662006ef962c\", \"type\": \"manager\", \"level\": 1, \"action\": \"approved\"}","{\"id\": \"a86740a7-223e-42fb-96d8-662006ef962c\", \"type\": \"admin\", \"level\": 2, \"action\": \"approved\"}","{\"id\": \"a86740a7-223e-42fb-96d8-662006ef962c\", \"type\": \"admin\", \"level\": 3, \"action\": \"approved\"}"}', NULL),
+	(4, 'a86740a7-223e-42fb-96d8-662006ef962c', 53, 'paid', '2024-09-11 05:00:00+00', '2024-09-19 05:00:00+00', 'pending', NULL, '2024-09-02 04:48:24.979357+00', '2024-09-02 04:48:24.979357+00', 'emmy', '', 'You!', '{"{\"id\": \"\", \"type\": \"manager\", \"level\": 1}","{\"id\": \"\", \"type\": \"admin\", \"level\": 2}","{\"id\": \"\", \"type\": \"admin\", \"level\": 3}"}', NULL);
 
 
 --
@@ -2398,7 +2429,8 @@ INSERT INTO "public"."time_off" ("id", "profile", "contract", "leave_type", "fro
 
 INSERT INTO "storage"."buckets" ("id", "name", "owner", "created_at", "updated_at", "public", "avif_autodetection", "file_size_limit", "allowed_mime_types", "owner_id") VALUES
 	('job-applications', 'job-applications', NULL, '2024-08-23 23:27:57.805266+00', '2024-08-23 23:27:57.805266+00', true, false, 4194304, NULL, NULL),
-	('platform assets', 'platform assets', NULL, '2024-08-29 02:21:41.311936+00', '2024-08-29 02:21:41.311936+00', true, false, NULL, NULL, NULL);
+	('platform assets', 'platform assets', NULL, '2024-08-29 02:21:41.311936+00', '2024-08-29 02:21:41.311936+00', true, false, NULL, NULL, NULL),
+	('documents', 'documents', NULL, '2024-09-08 18:03:43.043629+00', '2024-09-08 18:03:43.043629+00', false, false, 20971520, NULL, NULL);
 
 
 --
@@ -2417,7 +2449,8 @@ INSERT INTO "storage"."objects" ("id", "bucket_id", "name", "owner", "created_at
 	('d3903fb9-872d-46d2-aeee-b44ead015d1b', 'job-applications', 'applications/one-of-two/39/530-407-8333_Payment Details incl taxes_10_22_2022_10_28_2022.pdf', 'b49457c1-5d63-484c-9a8a-658a919727e8', '2024-08-26 06:50:58.680687+00', '2024-08-26 06:50:58.680687+00', '2024-08-26 06:50:58.680687+00', '{"eTag": "\"746180c2b148e80709055e558395a43f\"", "size": 5991, "mimetype": "application/pdf", "cacheControl": "max-age=3600", "lastModified": "2024-08-26T06:50:59.000Z", "contentLength": 5991, "httpStatusCode": 200}', '0b7d6dde-f712-49eb-b05c-4a09275459a6', 'b49457c1-5d63-484c-9a8a-658a919727e8', '{}'),
 	('e0a573d8-e39c-4691-93b9-48d887502dc4', 'platform assets', 'logo/.emptyFolderPlaceholder', NULL, '2024-08-29 02:22:00.88929+00', '2024-08-29 02:22:00.88929+00', '2024-08-29 02:22:00.88929+00', '{"eTag": "\"d41d8cd98f00b204e9800998ecf8427e\"", "size": 0, "mimetype": "application/octet-stream", "cacheControl": "max-age=3600", "lastModified": "2024-08-29T02:22:01.000Z", "contentLength": 0, "httpStatusCode": 200}', 'c9af0308-173e-412f-96e0-b1392318c3bc', NULL, '{}'),
 	('a0d98d9c-6475-4be1-bf73-3011488d1522', 'platform assets', 'logo/aveer-text.png', NULL, '2024-08-29 02:24:34.557669+00', '2024-08-29 02:24:44.185477+00', '2024-08-29 02:24:34.557669+00', '{"eTag": "\"01313bb0dbd44042f2f5a2c4cea4ad01\"", "size": 8481, "mimetype": "image/png", "cacheControl": "max-age=3600", "lastModified": "2024-08-29T02:24:45.000Z", "contentLength": 8481, "httpStatusCode": 200}', '7812c713-d159-4ebe-911b-d30cbf2de3dd', NULL, NULL),
-	('b63d3104-abf6-4057-9662-d55e61bdcf12', 'job-applications', 'applications/emmy/45/1Password Emergency Kit A3-QLBFWN-fraintechnologies.pdf', 'a86740a7-223e-42fb-96d8-662006ef962c', '2024-09-04 06:30:34.956901+00', '2024-09-04 06:30:34.956901+00', '2024-09-04 06:30:34.956901+00', '{"eTag": "\"722d3d5080358d8ba3e3e3e0cf63fa54\"", "size": 46297, "mimetype": "application/pdf", "cacheControl": "max-age=3600", "lastModified": "2024-09-04T06:30:35.000Z", "contentLength": 46297, "httpStatusCode": 200}', '369a6214-7699-41b1-b0f6-4544ab65f2f9', 'a86740a7-223e-42fb-96d8-662006ef962c', '{}');
+	('b63d3104-abf6-4057-9662-d55e61bdcf12', 'job-applications', 'applications/emmy/45/1Password Emergency Kit A3-QLBFWN-fraintechnologies.pdf', 'a86740a7-223e-42fb-96d8-662006ef962c', '2024-09-04 06:30:34.956901+00', '2024-09-04 06:30:34.956901+00', '2024-09-04 06:30:34.956901+00', '{"eTag": "\"722d3d5080358d8ba3e3e3e0cf63fa54\"", "size": 46297, "mimetype": "application/pdf", "cacheControl": "max-age=3600", "lastModified": "2024-09-04T06:30:35.000Z", "contentLength": 46297, "httpStatusCode": 200}', '369a6214-7699-41b1-b0f6-4544ab65f2f9', 'a86740a7-223e-42fb-96d8-662006ef962c', '{}'),
+	('c947a993-c450-47b3-842d-0072fd3b1010', 'documents', '12/a86740a7-223e-42fb-96d8-662006ef962c/sticky.html', 'a86740a7-223e-42fb-96d8-662006ef962c', '2024-09-08 20:48:17.79913+00', '2024-09-08 20:48:17.79913+00', '2024-09-08 20:48:17.79913+00', '{"eTag": "\"94027c5ba22c36e900fb9a576d27f07c\"", "size": 95634, "mimetype": "text/html", "cacheControl": "max-age=3600", "lastModified": "2024-09-08T20:48:18.000Z", "contentLength": 95634, "httpStatusCode": 200}', 'ee21a301-923f-473b-9d22-4379f6794536', 'a86740a7-223e-42fb-96d8-662006ef962c', '{}');
 
 
 --
@@ -2448,7 +2481,7 @@ INSERT INTO "storage"."objects" ("id", "bucket_id", "name", "owner", "created_at
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: auth; Owner: supabase_auth_admin
 --
 
-SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 520, true);
+SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 522, true);
 
 
 --
@@ -2515,6 +2548,13 @@ SELECT pg_catalog.setval('"public"."legal_entities_address_state_seq"', 7, true)
 
 
 --
+-- Name: managers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('"public"."managers_id_seq"', 1, false);
+
+
+--
 -- Name: org_documents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -2532,7 +2572,7 @@ SELECT pg_catalog.setval('"public"."org_settings_id_seq"', 9, true);
 -- Name: organisations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('"public"."organisations_id_seq"', 29, true);
+SELECT pg_catalog.setval('"public"."organisations_id_seq"', 30, true);
 
 
 --
@@ -2557,6 +2597,13 @@ SELECT pg_catalog.setval('"public"."states_id_seq"', 133, true);
 
 
 --
+-- Name: team_roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('"public"."team_roles_id_seq"', 1, true);
+
+
+--
 -- Name: teams_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -2574,7 +2621,7 @@ SELECT pg_catalog.setval('"public"."time_off_id_seq"', 4, true);
 -- Name: user_roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('"public"."user_roles_id_seq"', 6, true);
+SELECT pg_catalog.setval('"public"."user_roles_id_seq"', 7, true);
 
 
 --

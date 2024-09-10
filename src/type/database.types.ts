@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string
+          query?: string
+          variables?: Json
+          extensions?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       approval_policies: {
@@ -88,6 +113,7 @@ export type Database = {
           signing_bonus: number | null
           start_date: string | null
           status: Database["public"]["Enums"]["contract_state"]
+          team: number | null
           terminated_by: string | null
           unpaid_leave_used: number | null
           work_location: Database["public"]["Enums"]["work_locations"] | null
@@ -128,6 +154,7 @@ export type Database = {
           signing_bonus?: number | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["contract_state"]
+          team?: number | null
           terminated_by?: string | null
           unpaid_leave_used?: number | null
           work_location?: Database["public"]["Enums"]["work_locations"] | null
@@ -168,6 +195,7 @@ export type Database = {
           signing_bonus?: number | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["contract_state"]
+          team?: number | null
           terminated_by?: string | null
           unpaid_leave_used?: number | null
           work_location?: Database["public"]["Enums"]["work_locations"] | null
@@ -215,6 +243,13 @@ export type Database = {
             columns: ["signed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_team_fkey"
+            columns: ["team"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
           {
@@ -518,6 +553,72 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
+          },
+        ]
+      }
+      managers: {
+        Row: {
+          created_at: string
+          id: number
+          org: string
+          person: number | null
+          profile: string | null
+          role: number
+          team: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          org: string
+          person?: number | null
+          profile?: string | null
+          role: number
+          team: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          org?: string
+          person?: number | null
+          profile?: string | null
+          role?: number
+          team?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "managers_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "managers_person_fkey"
+            columns: ["person"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managers_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managers_role_fkey1"
+            columns: ["role"]
+            isOneToOne: false
+            referencedRelation: "team_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managers_team_fkey"
+            columns: ["team"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -942,27 +1043,51 @@ export type Database = {
           },
         ]
       }
-      teams: {
+      team_roles: {
         Row: {
           created_at: string
+          description: string | null
           id: number
-          managers: Json[]
           name: string
-          org: string | null
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: number
-          managers: Json[]
           name: string
-          org?: string | null
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: number
-          managers?: Json[]
           name?: string
-          org?: string | null
+        }
+        Relationships: []
+      }
+      teams: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          name: string
+          org: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name: string
+          org: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name?: string
+          org?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1174,3 +1299,4 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
+

@@ -11,6 +11,7 @@ import { EmployeeBenefits } from '@/components/employee-benefits/employee-benefi
 import { LegalEntities } from '@/components/legal-entities/legal-entities';
 import { FormSection, FormSectionDescription, InputsContainer } from '@/components/forms/form-section';
 import { ApprovalPolicies } from '@/components/approval-policies';
+import { Teams } from '@/components/team/teams';
 
 export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -85,6 +86,10 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 
 					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
 						<EmployeeBand org={params.org} />
+					</Suspense>
+
+					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
+						<Teams org={params.org} />
 					</Suspense>
 
 					<Suspense fallback={<Skeleton className="h-56 w-full" />}>

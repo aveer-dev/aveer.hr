@@ -60,7 +60,7 @@ export const ApprovalPolicy = ({ data }: { data: Tables<'approval_policies'> }) 
 
 		return (
 			<Button type="submit" disabled={pending || isUpdating} size={'sm'} className="w-full gap-3 px-4 text-xs font-light">
-				{pending && isUpdating && <LoadingSpinner />}
+				{(pending || isUpdating) && <LoadingSpinner />}
 				{pending || isUpdating ? 'Updating policy' : 'Update policy'}
 			</Button>
 		);
