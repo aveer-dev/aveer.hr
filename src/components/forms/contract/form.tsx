@@ -370,7 +370,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			const profileId = contractData?.profile || contractDuplicate?.profile;
 			if (contractId && profileId) checkIfManager(contractId, profileId);
 		}
-	}, [getEntities, getRoles, getOrgLevels, getTeams, checkIfManager, contractData, contractDuplicate]);
+	}, [getEntities, getRoles, getOrgLevels, getTeams, checkIfManager, contractData, contractDuplicate, formType]);
 
 	const onSetLevel = (level: TablesInsert<'employee_levels'> | undefined) => {
 		setActiveLevel(level);

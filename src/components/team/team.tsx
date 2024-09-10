@@ -84,15 +84,12 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 		[form]
 	);
 
-	const getTeamMembersCount = useCallback(
-		async (team: number, org: string, name: string) => {
-			const { count, error } = await supabase.from('contracts').select('*', { count: 'estimated', head: true }).match({ org, team });
-			if (error) toast.error(`Unable to fetch team count for ${name} team`, { description: error.message });
+	const getTeamMembersCount = useCallback(async (team: number, org: string, name: string) => {
+		const { count, error } = await supabase.from('contracts').select('*', { count: 'estimated', head: true }).match({ org, team });
+		if (error) toast.error(`Unable to fetch team count for ${name} team`, { description: error.message });
 
-			if (count) setTeamMembers(() => count);
-		},
-		[form]
-	);
+		if (count) setTeamMembers(() => count);
+	}, []);
 
 	const getEmployees = useCallback(async (org: string) => {
 		const { data, error } = await supabase.from('contracts').select('id, profile:profiles!contracts_profile_fkey(id, first_name, last_name)').match({ org });
@@ -104,7 +101,7 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 		if (org) getEmployees(org);
 		if (data?.org && data?.id) getManagers(data.id, data.org);
 		if (data?.org && data?.id && data?.name) getTeamMembersCount(data.id, data.org, data.name);
-	}, [data, getEmployees, getManagers, org]);
+	}, [data, getEmployees, getManagers, getTeamMembersCount, org]);
 
 	return (
 		<Sheet open={isDialogOpen} onOpenChange={toggleDialogState}>

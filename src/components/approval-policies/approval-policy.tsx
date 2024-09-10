@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { ChartNoAxesGantt, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tables } from '@/type/database.types';
@@ -49,11 +49,14 @@ export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tabl
 		defaultValues: { ...data, type: data?.type || 'time_off', is_default: data?.is_default, name: data?.name || '', levels: (data?.levels as any) || [], description: data?.description || '' }
 	});
 
-	const getDefaultPolicy = async (type: string) => {
-		const { data, error } = await supabase.from('approval_policies').select().match({ type, org, is_default: true });
-		if (error) toast.error('Error checking default policy', { description: error.message });
-		if (data) setDefaultPolicy(data);
-	};
+	const getDefaultPolicy = useCallback(
+		async (type: string) => {
+			const { data, error } = await supabase.from('approval_policies').select().match({ type, org, is_default: true });
+			if (error) toast.error('Error checking default policy', { description: error.message });
+			if (data) setDefaultPolicy(data);
+		},
+		[org]
+	);
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setUpdateState(true);
@@ -95,7 +98,7 @@ export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tabl
 
 		if (org) getEmployees(org);
 		if (data?.type) getDefaultPolicy(data?.type);
-	}, [data]);
+	}, [data, getDefaultPolicy, org]);
 
 	return (
 		<Sheet open={isDialogOpen} onOpenChange={toggleDialogState}>
@@ -217,7 +220,7 @@ export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tabl
 								<Alert className="text-xs">
 									<TriangleAlert size={14} className="stroke-orange-400" />
 									<AlertTitle>Current default</AlertTitle>
-									<AlertDescription className="text-xs font-light text-muted-foreground">"{defaultPolicy[0]?.name}" is the current default. You'll have to remove it as default to set another default</AlertDescription>
+									<AlertDescription className="text-xs font-light text-muted-foreground">&quot;{defaultPolicy[0]?.name}&quot; is the current default. You&apos;ll have to remove it as default to set another default</AlertDescription>
 								</Alert>
 							)}
 
