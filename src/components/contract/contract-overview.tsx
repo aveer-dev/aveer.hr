@@ -82,11 +82,15 @@ export const ContractOverview = async ({ data }: props) => {
 					<h2 className="flex items-center justify-between text-xl font-bold">Leave Days</h2>
 
 					<div className="flex items-center gap-2">
-						<LeaveRequestDialog contract={data} />
+						{data.status == 'signed' && (
+							<>
+								<LeaveRequestDialog contract={data} />
 
-						<Button variant={'secondary'} size={'icon'} className="h-9">
-							<Table2 size={14} />
-						</Button>
+								<Button variant={'secondary'} size={'icon'} className="h-9">
+									<Table2 size={14} />
+								</Button>
+							</>
+						)}
 					</div>
 				</div>
 
