@@ -39,7 +39,7 @@ export const Profile = ({ data, type }: props) => {
 					<h4 className="text-xs text-muted-foreground">Country of origin</h4> <p className="font-normal">{data?.nationality?.name || '-'}</p>
 				</li>
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Mobile number</h4> <p className="font-normal">+{data?.mobile || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Mobile number</h4> <p className="font-normal">{data?.mobile ? `+${data?.mobile}` : '-'}</p>
 				</li>
 			</ul>
 

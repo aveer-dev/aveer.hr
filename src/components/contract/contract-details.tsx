@@ -22,6 +22,7 @@ import { Details } from '../ui/details';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ContractOverview } from './contract-overview';
 import { Profile } from './profile';
+import { Teams } from './team/teams';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -228,10 +229,11 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 
 			<Tabs defaultValue={data.profile_signed && data.org_signed ? 'overview' : 'contract'} className="grid gap-6">
 				{data.profile_signed && data.org_signed && (
-					<TabsList className="grid w-fit grid-cols-3">
+					<TabsList className={cn('grid w-fit', data.team ? 'grid-cols-4' : 'grid-cols-3')}>
 						<TabsTrigger value="overview">Overview</TabsTrigger>
 						<TabsTrigger value="profile">Profile</TabsTrigger>
-						<TabsTrigger value="contract">Contract</TabsTrigger>
+						<TabsTrigger value="team">Team</TabsTrigger>
+						{data.team && <TabsTrigger value="contract">Contract</TabsTrigger>}
 					</TabsList>
 				)}
 
@@ -253,6 +255,12 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 
 					<Details formType="contract" data={data} />
 				</TabsContent>
+
+				{data.team && (
+					<TabsContent value="team">
+						<Teams org={org} team={data.team} />
+					</TabsContent>
+				)}
 			</Tabs>
 		</section>
 	);
