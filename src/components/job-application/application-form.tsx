@@ -11,9 +11,8 @@ import { FormSection, FormSectionDescription, InputsContainer } from '@/componen
 import { Textarea } from '@/components/ui/textarea';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { SelectCountry } from '@/components/forms/countries-option';
-import { SelectCountryState } from '@/components/forms/states-option';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Json, Tables, TablesInsert } from '@/type/database.types';
+import { Json, TablesInsert } from '@/type/database.types';
 import { toast } from 'sonner';
 import { createClient } from '@/utils/supabase/client';
 import { useFormStatus } from 'react-dom';
@@ -41,6 +40,7 @@ const formSchema = z.object({
 	documents: z.array(z.object({ name: z.string(), path: z.string(), file: z.any() })),
 	custom_answers: z.array(z.object({ name: z.string(), answer: z.string().min(1) }))
 });
+
 const supabase = createClient();
 
 interface props {

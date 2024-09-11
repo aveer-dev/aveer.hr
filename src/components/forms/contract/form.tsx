@@ -717,7 +717,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 									)}
 								/>
 
-								{!contractData && (
+								{!contractData && form.getValues('team') && (
 									<div className="mb-1 flex items-center justify-between space-x-2 rounded-lg bg-accent p-2">
 										<Label htmlFor="isManager">Is this employee a manager on the team?</Label>
 										<Switch checked={isManager} onCheckedChange={toggleManagerState} id="isManager" className="scale-75" />
