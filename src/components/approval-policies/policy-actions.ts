@@ -27,3 +27,15 @@ export const createPolicy = async (org: string, payload: TablesInsert<'approval_
 
 	return true;
 };
+
+export const deletePolicy = async (org: string, id: number) => {
+	const supabase = createClient();
+
+	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: org });
+	if (canUpdate !== true) return canUpdate;
+
+	const { error } = await supabase.from('approval_policies').delete().match({ id, org });
+	if (error) return error.message;
+
+	return true;
+};

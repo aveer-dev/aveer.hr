@@ -15,7 +15,7 @@ import { ChartNoAxesGantt, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Tables } from '@/type/database.types';
 import { format } from 'date-fns';
-import { createPolicy, updatePolicy } from './policy-actions';
+import { createPolicy, deletePolicy, updatePolicy } from './policy-actions';
 import { toast } from 'sonner';
 import { useFormStatus } from 'react-dom';
 import { LoadingSpinner } from '@/components/ui/loader';
@@ -39,6 +39,7 @@ const supabase = createClient();
 export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tables<'approval_policies'>; children?: ReactNode; org: string; className?: string }) => {
 	const [levels, updateLevels] = useState<{ type: string; id: string; level: number }[]>((data?.levels as any) || []);
 	const [isUpdating, setUpdateState] = useState(false);
+	const [isDeleting, setDeleteState] = useState(false);
 	const [isDialogOpen, toggleDialogState] = useState(false);
 	const [employees, setEmployees] = useState<{ id: number; profile: { first_name: string; last_name: string } }[]>([]);
 	const [defaultPolicy, setDefaultPolicy] = useState<Tables<'approval_policies'>[]>();
@@ -87,6 +88,18 @@ export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tabl
 				{pending || isUpdating ? (data ? 'Updating' : 'Creating') : data ? 'Update' : 'Create'} policy
 			</Button>
 		);
+	};
+
+	const onDeletePolicy = async (id: number) => {
+		setDeleteState(true);
+
+		const response = await deletePolicy(org, id);
+		setDeleteState(false);
+		if (response !== true) return toast.error('Error deleting process', { description: response });
+
+		toast.success(`Policy deleted`, { description: `Policy has been deleted successfully` });
+		toggleDialogState(false);
+		router.refresh();
 	};
 
 	useEffect(() => {
@@ -321,7 +334,16 @@ export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tabl
 								</Button>
 							</div>
 
-							<SubmitButton />
+							<div className="flex items-center gap-4">
+								{data?.id && (
+									<Button type="button" onClick={() => onDeletePolicy(data?.id)} variant={'secondary_destructive'} size={'icon'} className="w-16 gap-3">
+										{!isDeleting && <Trash2 size={12} />}
+										{isDeleting && <LoadingSpinner className="text-inherit" />}
+									</Button>
+								)}
+
+								<SubmitButton />
+							</div>
 						</form>
 					</Form>
 				</section>
