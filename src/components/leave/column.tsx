@@ -8,7 +8,7 @@ import { Tables } from '@/type/database.types';
 import { Badge } from '@/components/ui/badge';
 import { LeaveReview } from './leave-review';
 
-export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles'> }>[] = [
+export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles'>; reviewType: string }>[] = [
 	{
 		id: 'select',
 		header: ({ table }) => (
@@ -68,7 +68,7 @@ export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles
 		id: 'actions',
 		cell: ({ row }) => {
 			return (
-				<LeaveReview data={row.original as any}>
+				<LeaveReview reviewType={row.original.reviewType} data={row.original as any}>
 					<Button variant={'secondary'} className="h-6">
 						Review
 					</Button>

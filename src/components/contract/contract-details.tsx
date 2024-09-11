@@ -248,7 +248,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				</TabsContent>
 
 				<TabsContent value="time-off">
-					<Timeoff contract={data.id} org={org} team={data?.team} />
+					<Timeoff reviewType={signatureType == 'org' ? 'admin' : 'employee'} contract={data.id} org={org} team={data?.team} />
 				</TabsContent>
 
 				<TabsContent value="contract" className="grid gap-10">

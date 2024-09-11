@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 interface props {
 	children: ReactNode | string;
 	data: Tables<'time_off'> & { profile: Tables<'profiles'>; contract: Tables<'contracts'> };
+	reviewType: string;
 }
 interface DBLevel {
 	type: string;
@@ -31,15 +32,15 @@ interface level {
 }
 
 const supabase = createClient();
-const role = 'admin';
 
-export const LeaveReview = ({ data, children, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
+export const LeaveReview = ({ data, reviewType, children, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
 	const [levels, updateLevels] = useState<level[]>([]);
 	const [dbLevels, updateDBLevels] = useState<DBLevel[]>([]);
 	const [userId, setUserId] = useState<string>();
 	const [isReviewOpen, setReviewState] = useState(false);
 	const [isAnyLevelDenied, setDeniedLevelState] = useState(false);
 	const [isUpdating, setUpdateState] = useState({ denying: false, approving: false });
+	const [role, setRole] = useState<'admin' | 'manager'>();
 	const router = useRouter();
 
 	const getUserId = useCallback(async () => {
@@ -49,6 +50,8 @@ export const LeaveReview = ({ data, children, ...props }: props & HTMLAttributes
 		} = await supabase.auth.getUser();
 		if (error) return router.push('/login');
 		setUserId(() => user?.id);
+
+		return user?.id;
 	}, [router]);
 
 	const getPeopleInLevels = useCallback(async (profileId: string) => {
@@ -77,13 +80,25 @@ export const LeaveReview = ({ data, children, ...props }: props & HTMLAttributes
 			updateDBLevels(() => data.levels as any);
 			updateLevels(() => newLevels);
 		},
-		[data.levels, getPeopleInLevels]
+		[data.levels, getPeopleInLevels, role]
 	);
 
+	const getManagerStatus = async (team: number, org: string, profile: string) => {
+		const { data, error } = await supabase.from('managers').select('id').match({ team, org, profile });
+		if (error) return toast.error('Unable to check manager status', { description: error.message });
+		if (data && data.length) setRole('manager');
+	};
+
 	useEffect(() => {
-		if (isReviewOpen && data.levels) processLevels(data.levels);
-		if (isReviewOpen && !userId) getUserId();
-	}, [data, getUserId, isReviewOpen, processLevels, userId]);
+		if (reviewType == 'admin') setRole('admin');
+
+		if (isReviewOpen) {
+			getUserId().then(async userId => {
+				if (reviewType !== 'admin' && data.contract?.team && data.org && userId) await getManagerStatus(data.contract.team, data.org, userId);
+				if (data.levels) processLevels(data.levels);
+			});
+		}
+	}, [data, getUserId, isReviewOpen, processLevels, reviewType, userId]);
 
 	const updateLeave = async (levels: DBLevel[]) => {
 		const isAnyDenied = !!levels.find(level => level.action == 'denied');
@@ -96,12 +111,14 @@ export const LeaveReview = ({ data, children, ...props }: props & HTMLAttributes
 		if (isAllApproved) {
 			await supabase
 				.from('contracts')
-				.update({ [`${data.leave_type}_leave_used`]: differenceInBusinessDays(data.to, data.from) + 1 })
+				.update({ [`${data.leave_type}_leave_used`]: differenceInBusinessDays(data.to, data.from) + 1 + Number(data.contract[`${data.leave_type}_leave_used`] as any) })
 				.eq('id', data.contract.id);
 		}
 
-		if (error) toast.error('Unable to update leave', { description: error.message });
 		setUpdateState({ denying: false, approving: false });
+		if (error) return toast.error('Unable to update leave', { description: error.message });
+
+		toast.success('Leave updated successfully');
 		setReviewState(false);
 		router.refresh();
 	};
@@ -231,7 +248,11 @@ export const LeaveReview = ({ data, children, ...props }: props & HTMLAttributes
 										{level.type !== role ? (
 											<span className="text-xs font-light capitalize text-muted-foreground">{level.action || 'Pending approval'}</span>
 										) : index == 0 ? (
-											<LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'opacity-30')} />
+											levels[0].action ? (
+												<span className="text-xs font-light capitalize text-muted-foreground">{level.action}</span>
+											) : (
+												<LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'opacity-30')} />
+											)
 										) : levels[index - 1].action ? (
 											!level.action ? (
 												<LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'opacity-30')} />
