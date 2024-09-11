@@ -1221,7 +1221,7 @@ export type Database = {
         | "more"
         | "cancelled"
       leave_type_enum: "paid" | "sick" | "maternity" | "paternity" | "unpaid"
-      policy_types: "time_off"
+      policy_types: "time_off" | "role_application"
       role_status: "open" | "close"
       work_locations: "on-site" | "remote" | "hybrid"
     }

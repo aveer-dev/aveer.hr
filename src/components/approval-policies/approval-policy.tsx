@@ -29,7 +29,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 const formSchema = z.object({
 	name: z.string().min(1),
 	description: z.string().optional(),
-	type: z.enum(['time_off']),
+	type: z.enum(['time_off', 'role_application']),
 	levels: z.array(z.object({ type: z.string(), id: z.string(), level: z.number() })),
 	is_default: z.boolean()
 });
@@ -47,7 +47,7 @@ export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tabl
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: { ...data, type: data?.type || 'time_off', is_default: data?.is_default, name: data?.name || '', levels: (data?.levels as any) || [], description: data?.description || '' }
+		defaultValues: { ...data, type: data?.type, is_default: data?.is_default, name: data?.name || '', levels: (data?.levels as any) || [], description: data?.description || '' }
 	});
 
 	const getDefaultPolicy = useCallback(
@@ -203,6 +203,7 @@ export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tabl
 
 											<SelectContent>
 												<SelectItem value="time_off">Time-Off</SelectItem>
+												<SelectItem value="role_application">Role applications</SelectItem>
 											</SelectContent>
 										</Select>
 										<FormMessage />
