@@ -1,4 +1,4 @@
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { sendEmail } from '@/api/email';
@@ -7,20 +7,22 @@ import { LoadingSpinner } from '@/components/ui/loader';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Input } from './input';
+import { ReactNode } from 'react';
 
 interface props {
 	message?: string;
 	subject?: string;
 	name: string;
-	isOpen: boolean;
+	isOpen?: boolean;
 	recipients: string[];
-	toggleDialog: (state: boolean) => void;
+	toggleDialog?: (state: boolean) => void;
 	onClose?: (state?: 'success' | 'error') => void;
 	title?: string;
 	description?: string;
+	children?: ReactNode;
 }
 
-export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, recipients, onClose, name, title, description }: props) => {
+export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, recipients, onClose, name, title, description, children }: props) => {
 	const sendMessage = async (form: FormData) => {
 		const mailMessage = form.get('message') as string;
 		const mailSubject = subject || (form.get('subject') as string);
@@ -35,7 +37,7 @@ export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, reci
 
 		if (error) return toast.error(error.message);
 		onClose && onClose('success');
-		toggleDialog(false);
+		toggleDialog && toggleDialog(false);
 	};
 
 	const SendButton = () => {
@@ -50,7 +52,8 @@ export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, reci
 	};
 
 	return (
-		<AlertDialog open={isOpen} onOpenChange={toggleDialog}>
+		<AlertDialog open={isOpen} onOpenChange={state => toggleDialog && toggleDialog(state)}>
+			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 			<AlertDialogContent>
 				<form action={sendMessage} className="grid gap-8">
 					<AlertDialogHeader>

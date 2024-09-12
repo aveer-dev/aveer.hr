@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { ChartNoAxesGantt, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { Tables } from '@/type/database.types';
+import { Database, Tables } from '@/type/database.types';
 import { format } from 'date-fns';
 import { createPolicy, deletePolicy, updatePolicy } from './policy-actions';
 import { toast } from 'sonner';
@@ -36,7 +36,16 @@ const formSchema = z.object({
 
 const supabase = createClient();
 
-export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tables<'approval_policies'>; children?: ReactNode; org: string; className?: string }) => {
+interface props {
+	type?: Database['public']['Enums']['policy_types'];
+	data?: Tables<'approval_policies'>;
+	children?: ReactNode;
+	org: string;
+	className?: string;
+	onCreate?: (policy: Tables<'approval_policies'>) => void;
+}
+
+export const ApprovalPolicy = ({ data, org, children, className, onCreate, type }: props) => {
 	const [levels, updateLevels] = useState<{ type: string; id: string; level: number }[]>((data?.levels as any) || []);
 	const [isUpdating, setUpdateState] = useState(false);
 	const [isDeleting, setDeleteState] = useState(false);
@@ -47,7 +56,7 @@ export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tabl
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: { ...data, type: data?.type, is_default: data?.is_default, name: data?.name || '', levels: (data?.levels as any) || [], description: data?.description || '' }
+		defaultValues: { ...data, type: data?.type || type, is_default: data?.is_default, name: data?.name || '', levels: (data?.levels as any) || [], description: data?.description || '' }
 	});
 
 	const getDefaultPolicy = useCallback(
@@ -64,11 +73,12 @@ export const ApprovalPolicy = ({ data, org, children, className }: { data?: Tabl
 
 		const response = data ? await updatePolicy(org, data.id, { ...values, updated_at: new Date() as any }) : await createPolicy(org, { ...values, org });
 		setUpdateState(false);
-		if (response !== true) return toast.error('Error', { description: response });
+		if (typeof response == 'string') return toast.error('Error', { description: response });
 
 		toast.success(`Policy ${data ? 'Updated' : 'Created'}`, { description: `Policy has been ${data ? 'updated' : 'created'} successfully` });
 		toggleDialogState(false);
-		router.refresh();
+		!onCreate && router.refresh();
+		response !== true && !!onCreate && onCreate(response);
 	};
 
 	const SubmitButton = () => {

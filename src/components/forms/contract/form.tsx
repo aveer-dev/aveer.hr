@@ -36,6 +36,8 @@ import { PayInput } from '../pay-input';
 import { FixedAllowance } from '../fixed-allowance';
 import { AdditionalOffering } from '../additional-offering';
 import { Team } from '@/components/team/team';
+import { ApprovalPolicy } from '@/components/approval-policies/approval-policy';
+import { NavLink } from '@/components/ui/link';
 
 const supabase = createClient();
 
@@ -68,6 +70,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	const [showFormDetails, toggleFormDetails] = useState(false);
 	const [isManager, toggleManagerState] = useState(openRoleData ? !!openRoleData?.is_manager : openRoleDuplicate ? !!openRoleDuplicate?.is_manager : false);
 	const [teams, setTeams] = useState<Tables<'teams'>[]>([]);
+	const [policies, setPolicies] = useState<Tables<'approval_policies'>[]>([]);
 	const [selectedLevel, setActiveLevel] = useState<TablesInsert<'employee_levels'>>();
 	const [showAdditionalOffering, toggleAdditionalOffering] = useState(
 		!!contractData?.additional_offerings?.length || !!contractDuplicate?.additional_offerings?.length || !!openRoleData?.additional_offerings?.length || !!openRoleDuplicate?.additional_offerings?.length || !!orgBenefits?.additional_offerings?.length
@@ -102,7 +105,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		department: z.string().optional(),
 		role: showRolesOption ? z.string() : z.string().optional(),
 		customFields: z.array(z.string()),
-		team: z.string().optional()
+		team: z.string().optional(),
+		policy: z.string().optional()
 	});
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -199,6 +203,13 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		if (!error && data) setTeams(data);
 	}, [params.org]);
 
+	const getPolicies = useCallback(async () => {
+		if (formType == 'contract') return;
+
+		const { data, error } = await supabase.from('approval_policies').select().match({ org: params.org, type: 'role_application' });
+		if (!error && data) setPolicies(data);
+	}, [formType, params.org]);
+
 	const checkIfManager = useCallback(
 		async (person: number, profile: string) => {
 			const { data, error } = await supabase.from('managers').select().match({ org: params.org, person, profile });
@@ -247,7 +258,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			additional_offerings: values.additional_offerings,
 			custom_fields: values.customFields,
 			team: Number(values.team),
-			is_manager: isManager
+			is_manager: isManager,
+			policy: Number(values.policy)
 		};
 
 		if (showSigningBonus) role.signing_bonus = Number(values.signing_bonus);
@@ -364,13 +376,14 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		getRoles();
 		getOrgLevels();
 		getTeams();
+		getPolicies();
 
 		if (formType == 'contract') {
 			const contractId = contractData?.id || contractDuplicate?.id;
 			const profileId = contractData?.profile || contractDuplicate?.profile;
 			if (contractId && profileId) checkIfManager(contractId, profileId);
 		}
-	}, [getEntities, getRoles, getOrgLevels, getTeams, checkIfManager, contractData, contractDuplicate, formType]);
+	}, [getEntities, getRoles, getOrgLevels, getTeams, checkIfManager, contractData, contractDuplicate, formType, getPolicies]);
 
 	const onSetLevel = (level: TablesInsert<'employee_levels'> | undefined) => {
 		setActiveLevel(level);
@@ -708,9 +721,9 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 												</SelectContent>
 											</Select>
 											<FormDescription>
-												<Link href={'../settings?type=org#teams'} className="inline-flex w-fit items-center gap-1 rounded-md bg-accent p-1">
+												<NavLink org={params.org} target="_blank" href={'/settings?type=org#teams'} className="inline-flex w-fit items-center gap-1 rounded-md bg-accent p-1">
 													Manage teams <ArrowUpRight size={12} />
-												</Link>
+												</NavLink>
 											</FormDescription>
 											<FormMessage />
 										</FormItem>
@@ -839,6 +852,56 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 														<SelectItem value="remote">Remote</SelectItem>
 													</SelectContent>
 												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</InputsContainer>
+							</FormSection>
+						)}
+
+						{/* policy */}
+						{formType === 'role' && (
+							<FormSection>
+								<FormSectionDescription>
+									<h2 className="font-semibold">Review/approval policy</h2>
+									<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This will enable automated flow of candidate review, from one person to the other</p>
+								</FormSectionDescription>
+
+								<InputsContainer>
+									<FormField
+										control={form.control}
+										name="policy"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="flex items-center justify-between">
+													Policy
+													<ApprovalPolicy type="role_application" org={params.org} onCreate={policy => setPolicies([...policies, policy])} className="inline-flex w-fit items-center gap-2 rounded-md bg-accent px-2 py-1">
+														Create policy <PanelRightOpen size={12} />
+													</ApprovalPolicy>
+												</FormLabel>
+
+												<Select onValueChange={field.onChange} defaultValue={field.value}>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select an existing policy" />
+														</SelectTrigger>
+													</FormControl>
+
+													<SelectContent>
+														{policies.map(policy => (
+															<SelectItem key={policy.id} value={String(policy.id)}>
+																{policy.name}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+
+												<FormDescription>
+													<NavLink org={params.org} target="_blank" href={'/settings?type=org#poicies'} className="inline-flex w-fit items-center gap-1 rounded-md bg-accent p-1">
+														Manage policies <ArrowUpRight size={12} />
+													</NavLink>
+												</FormDescription>
 												<FormMessage />
 											</FormItem>
 										)}

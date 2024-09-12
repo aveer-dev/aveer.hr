@@ -10,10 +10,10 @@ export const updatePolicy = async (org: string, policyId: number, payload: Table
 	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (canUpdate !== true) return canUpdate;
 
-	const { error } = await supabase.from('approval_policies').update(payload).eq('id', policyId);
+	const { error, data } = await supabase.from('approval_policies').update(payload).eq('id', policyId).select().single();
 	if (error) return error.message;
 
-	return true;
+	return data;
 };
 
 export const createPolicy = async (org: string, payload: TablesInsert<'approval_policies'>) => {

@@ -391,6 +391,7 @@ export type Database = {
           gender: string | null
           id: number
           last_name: string
+          levels: Json[]
           links: Json | null
           org: string
           phone_number: string | null
@@ -417,6 +418,7 @@ export type Database = {
           gender?: string | null
           id?: number
           last_name: string
+          levels?: Json[]
           links?: Json | null
           org: string
           phone_number?: string | null
@@ -443,6 +445,7 @@ export type Database = {
           gender?: string | null
           id?: number
           last_name?: string
+          levels?: Json[]
           links?: Json | null
           org?: string
           phone_number?: string | null
@@ -638,6 +641,7 @@ export type Database = {
           level_name: string | null
           org: string
           paid_leave: number | null
+          policy: number | null
           probation_period: number | null
           requirements: Json[] | null
           responsibilities: Json | null
@@ -666,6 +670,7 @@ export type Database = {
           level_name?: string | null
           org: string
           paid_leave?: number | null
+          policy?: number | null
           probation_period?: number | null
           requirements?: Json[] | null
           responsibilities?: Json | null
@@ -694,6 +699,7 @@ export type Database = {
           level_name?: string | null
           org?: string
           paid_leave?: number | null
+          policy?: number | null
           probation_period?: number | null
           requirements?: Json[] | null
           responsibilities?: Json | null
@@ -708,6 +714,13 @@ export type Database = {
           years_of_experience?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "open_roles_policy_fkey"
+            columns: ["policy"]
+            isOneToOne: false
+            referencedRelation: "approval_policies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "open_roles_team_fkey"
             columns: ["team"]
