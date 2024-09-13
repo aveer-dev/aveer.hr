@@ -92,6 +92,7 @@ export const ApplicantsSubTable = ({ org, roleId }: { org?: string; roleId: numb
 			id: 'open',
 			cell: ({ row }) => (
 				<ApplicantDetails
+					userRole="admin"
 					onUpdate={() => {
 						if (org && roleId) return getApplicants(org, roleId);
 					}}

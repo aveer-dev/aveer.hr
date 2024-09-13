@@ -44,6 +44,8 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 	const router = useRouter();
 
 	const getUserId = useCallback(async () => {
+		if (userId) return userId;
+
 		const {
 			data: { user },
 			error
@@ -52,7 +54,7 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 		setUserId(() => user?.id);
 
 		return user?.id;
-	}, [router]);
+	}, [router, userId]);
 
 	const getPeopleInLevels = useCallback(async (profileId: string) => {
 		const { data, error } = await supabase.from('profiles').select('first_name, last_name').eq('id', profileId).single();
@@ -83,14 +85,14 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 		[data.levels, getPeopleInLevels, role]
 	);
 
-	const getManagerStatus = async (team: number, org: string, profile: string) => {
+	const getManagerStatus = useCallback(async (team: number, org: string, profile: string) => {
 		const { data, error } = await supabase.from('managers').select('id').match({ team, org, profile });
 		if (error) return toast.error('Unable to check manager status', { description: error.message });
-		if (data && data.length) setRole('manager');
-	};
+		if (data && data.length) setRole(() => 'manager');
+	}, []);
 
 	useEffect(() => {
-		if (reviewType == 'admin') setRole('admin');
+		if (reviewType == 'admin') setRole(() => 'admin');
 
 		if (isReviewOpen) {
 			getUserId().then(async userId => {
@@ -98,7 +100,7 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 				if (data.levels) processLevels(data.levels);
 			});
 		}
-	}, [data, getUserId, isReviewOpen, processLevels, reviewType, userId]);
+	}, [data, getManagerStatus, getUserId, isReviewOpen, processLevels, reviewType, userId]);
 
 	const updateLeave = async (levels: DBLevel[]) => {
 		const isAnyDenied = !!levels.find(level => level.action == 'denied');

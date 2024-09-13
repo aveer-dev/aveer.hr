@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
-import { format } from 'date-fns';
+import { format, isPast } from 'date-fns';
 import { Copy, EllipsisVertical, FilePenLine, InfoIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -22,8 +22,9 @@ import { Details } from '../ui/details';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ContractOverview } from './contract-overview';
 import { Profile } from './profile';
-import { Teams } from './team/teams';
+import { Teams } from './teams';
 import { Timeoff } from './time-off';
+import { Applicants } from './applicants';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -230,11 +231,16 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 
 			<Tabs defaultValue={data.profile_signed && data.org_signed ? 'overview' : 'contract'} className="grid gap-6">
 				{data.profile_signed && data.org_signed && (
-					<TabsList className={cn('grid w-fit', data.team ? 'grid-cols-5' : 'grid-cols-4')}>
+					<TabsList
+						className={cn('grid w-fit')}
+						style={{
+							gridTemplateColumns: `repeat(${4 + (!!data.team && ((!data.terminated_by || (data.end_date && !isPast(data.end_date))) as any)) + (signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))))}, minmax(0, 1fr))`
+						}}>
 						<TabsTrigger value="overview">Overview</TabsTrigger>
 						<TabsTrigger value="profile">Profile</TabsTrigger>
-						{data.team && <TabsTrigger value="team">Team</TabsTrigger>}
+						{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="team">Team</TabsTrigger>}
 						<TabsTrigger value="time-off">Time-off</TabsTrigger>
+						{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="applicants">Applicants</TabsTrigger>}
 						<TabsTrigger value="contract">Contract</TabsTrigger>
 					</TabsList>
 				)}
@@ -251,10 +257,18 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					<Timeoff reviewType={signatureType == 'org' ? 'admin' : 'employee'} contract={data.id} org={org} team={data?.team} />
 				</TabsContent>
 
-				<TabsContent value="contract" className="grid gap-10">
-					<section>
+				{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && (
+					<TabsContent value="applicants">
+						<Applicants contract={data as any} org={org} />
+					</TabsContent>
+				)}
+
+				<TabsContent value="team">{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <Teams org={org} team={data.team} />}</TabsContent>
+
+				<TabsContent value="contract">
+					<section className="grid gap-14">
 						{signatureType === 'profile' && (
-							<div className="flex w-fit items-center gap-3 rounded-sm border border-accent bg-accent px-3 py-2 text-xs font-thin">
+							<div className="-mb-6 flex w-fit items-center gap-3 rounded-sm border border-accent bg-accent px-3 py-2 text-xs font-thin">
 								<InfoIcon size={12} />
 								{`You can not edit your contract details. You'd need to reachout to your contact or manager to request an edit/change`}
 							</div>
@@ -263,8 +277,6 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 						<Details formType="contract" data={data} />
 					</section>
 				</TabsContent>
-
-				<TabsContent value="team">{data.team && <Teams org={org} team={data.team} />}</TabsContent>
 			</Tabs>
 		</section>
 	);

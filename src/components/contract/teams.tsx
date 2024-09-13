@@ -17,7 +17,7 @@ export const Teams = async ({ org, team }: props) => {
 	if (error) return error.message;
 
 	return (
-		<div className="w-full">
+		<section className="mt-6 w-full">
 			<div className="mb-4 flex items-center justify-between">
 				<h2 className="flex items-center justify-between text-xl font-bold">Team</h2>
 			</div>
@@ -47,6 +47,6 @@ export const Teams = async ({ org, team }: props) => {
 					))}
 				</ul>
 			</div>
-		</div>
+		</section>
 	);
 };
