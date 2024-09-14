@@ -25,7 +25,6 @@ import { Profile } from './profile';
 import { Teams } from './teams';
 import { Timeoff } from './time-off';
 import { Applicants } from './applicants';
-import { Separator } from '@/components/ui/separator';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -255,7 +254,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 
 				{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && (
 					<TabsContent value="requests">
-						<Timeoff reviewType="admin" contract={data.id} org={org} team={data?.team} />
+						<Timeoff reviewType="employee" contract={data.id} org={org} team={data?.team} />
 
 						<Applicants contract={data as any} org={org} />
 					</TabsContent>

@@ -11,7 +11,7 @@ import { createClient } from '@/utils/supabase/client';
 import { differenceInBusinessDays, format } from 'date-fns';
 import { Check, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { HTMLAttributes, ReactNode, useCallback, useEffect, useId, useState } from 'react';
+import { HTMLAttributes, ReactNode, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 interface props {
@@ -19,25 +19,21 @@ interface props {
 	data: Tables<'time_off'> & { profile: Tables<'profiles'>; contract: Tables<'contracts'> };
 	reviewType: string;
 }
-interface DBLevel {
+interface LEVEL {
+	action?: string;
+	id: string;
+	level: number;
 	type: string;
-	id?: string;
-	action: 'approved' | 'denied';
-}
-interface level {
-	type: string;
-	id?: string;
-	action: 'approved' | 'denied';
-	first_name: string;
-	last_name: string;
-	enabled: boolean;
+	first_name?: string;
+	last_name?: string;
+	created_at?: Date;
+	is_employee?: boolean;
 }
 
 const supabase = createClient();
 
 export const LeaveReview = ({ data, reviewType, children, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
-	const [levels, updateLevels] = useState<level[]>([]);
-	const [dbLevels, updateDBLevels] = useState<DBLevel[]>([]);
+	const [levels, updateLevels] = useState<LEVEL[]>([]);
 	const [userId, setUserId] = useState<string>();
 	const [isReviewOpen, setReviewState] = useState(false);
 	const [isAnyLevelDenied, setDeniedLevelState] = useState(false);
@@ -71,17 +67,16 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 			for (let i = 0; i < dataLevels.length; i++) {
 				const level = dataLevels[i];
 
-				if (level?.action) {
+				if (level?.id) {
 					const details = await getPeopleInLevels(level?.id);
-					newLevels.push({ ...level, ...details, enabled: level.type == role });
+					newLevels.push({ ...level, ...details, enabled: level.type == role, is_employee: role != 'admin' && level.id == userId });
 
 					if (level.action == 'denied') setDeniedLevelState(true);
 				} else {
-					newLevels.push({ ...level, enabled: level.type == role });
+					newLevels.push({ ...level, enabled: level.type == role, is_employee: role != 'admin' && level.id == userId });
 				}
 			}
 
-			updateDBLevels(() => data.levels as any);
 			updateLevels(() => newLevels);
 		},
 		[data.levels, getPeopleInLevels, role]
@@ -104,7 +99,7 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 		}
 	}, [data, getManagerStatus, getUserId, isReviewOpen, processLevels, reviewType, userId]);
 
-	const updateLeave = async (levels: DBLevel[]) => {
+	const updateLeave = async (levels: LEVEL[]) => {
 		const isAnyDenied = !!levels.find(level => level.action == 'denied');
 		const isAllApproved = !levels.find(level => level.action == 'denied' || !level.action);
 		const { error } = await supabase
@@ -127,16 +122,21 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 		router.refresh();
 	};
 
-	const LeaveActions = ({ className, index, level }: { className?: string; index: number; level: level }) => {
+	const LeaveActions = ({ className, index, level }: { className?: string; index: number; level: LEVEL }) => {
 		const onAction = (action: 'approved' | 'denied') => {
 			if (!userId) return toast.error('User not found');
 
 			setUpdateState({ denying: action == 'denied', approving: action == 'approved' });
-			const newDBLevel: any = { ...dbLevels[index], action, id: userId };
-			dbLevels[index] = newDBLevel;
-			updateDBLevels(() => dbLevels);
+			const newLevels = levels.map(lv => {
+				const item: LEVEL = { id: lv.id, level: lv.level, type: lv.type };
+				lv.action && (item.action = lv.action);
+				lv.created_at && (item.created_at = lv.created_at);
+				return item;
+			});
+			const newLevel: LEVEL = { id: userId as string, level: level.level, type: level.type, action, created_at: new Date() };
+			newLevels[index] = newLevel;
 
-			updateLeave(dbLevels);
+			updateLeave(newLevels);
 		};
 
 		return (
@@ -160,7 +160,7 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 						<TooltipTrigger asChild>
 							<SheetTrigger asChild>
 								<button {...props} className={cn('flex w-full items-center gap-2 overflow-hidden rounded-lg p-1 text-left text-xs capitalize text-muted-foreground transition-all duration-500 hover:bg-accent', props.className)}>
-									<div className={cn(`${data.status == 'approved' ? 'bg-green-400' : data.status == 'denied' ? 'bg-red-400' : data.status == 'pending' ? 'bg-orange-400' : 'bg-gray-400'}`, 'h-2 w-2 rounded-full')}></div>{' '}
+									<div className={cn(`${data.status == 'approved' ? 'bg-green-400' : data.status == 'denied' ? 'bg-red-400' : data.status == 'pending' ? 'bg-orange-400' : 'bg-gray-400'}`, 'h-3 w-[2px] rounded-sm')}></div>
 									<div className="w-10/12 truncate">{children}</div>
 								</button>
 							</SheetTrigger>
@@ -249,7 +249,7 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 											{!level.action && <p className="text-xs font-light text-muted-foreground empty:hidden">Approval Level {index + 1}</p>}
 										</div>
 
-										{level.type !== role ? (
+										{level.type !== role && !level.is_employee ? (
 											<span className="text-xs font-light capitalize text-muted-foreground">{level.action || 'Pending approval'}</span>
 										) : index == 0 ? (
 											levels[0].action ? (

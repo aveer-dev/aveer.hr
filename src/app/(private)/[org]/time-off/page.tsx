@@ -12,18 +12,21 @@ interface props {
 export default async function TimeOffPage({ params }: props) {
 	const supabase = createClient();
 
-	const { data, error } = await supabase
+	const query = supabase
 		.from('time_off')
 		.select(
 			'*, hand_over:contracts!time_off_hand_over_fkey(id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)), contract:contracts!time_off_contract_fkey(job_title,id, team, unpaid_leave_used, sick_leave_used, paternity_leave_used, paid_leave_used, maternity_leave_used), profile:profiles!time_off_profile_fkey(*)'
 		)
-		.match({ org: params.org });
+		.eq('org', params.org);
 
-	if (error) return;
+	const [{ data, error }, { data: calendar, error: calendarError }] = await Promise.all([await query, await query.neq('status', 'denied')]);
+
+	if (error) return error.message;
+	if (calendarError) return calendarError.message;
 
 	const result = [];
 
-	for (const item of data) {
+	for (const item of calendar) {
 		const startDate = new Date(item.from);
 		const endDate = new Date(item.to);
 		const name = `${item.leave_type} leave | ${item.profile.first_name} ${item.profile.last_name}`;
@@ -44,7 +47,7 @@ export default async function TimeOffPage({ params }: props) {
 		<Suspense>
 			<LeaveCalendar leaveDays={result} />
 
-			<div className="mb-6 mt-20 flex w-full items-center justify-between">
+			<div className="mb-6 mt-24 flex w-full items-center justify-between border-b pb-3">
 				<h1 className="text-2xl font-medium">Leave History</h1>
 			</div>
 

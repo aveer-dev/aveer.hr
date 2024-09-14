@@ -22,8 +22,8 @@ export const LeaveCalendar = ({ leaveDays }: props) => {
 			classNames={{
 				months: 'flex flex-col sm:flex-col space-y-4 sm:space-y-0',
 				month: 'space-y-4 w-full',
-				month_caption: 'flex pt-1 relative items-center',
-				caption_label: 'text-xl font-bold mb-12',
+				month_caption: 'flex pt-1 relative items-center border-b mb-12 pb-3',
+				caption_label: 'text-xl font-bold',
 				nav: 'relative bg-transparent p-0 space-x-1 flex items-center justify-end -mb-9 z-[1]',
 				button_previous: cn(buttonVariants({ variant: 'secondary' }), ''),
 				button_next: cn(buttonVariants({ variant: 'secondary' }), ''),
@@ -56,6 +56,7 @@ export const LeaveCalendar = ({ leaveDays }: props) => {
 							className="relative h-28 w-full min-w-9 border-r p-1 text-center text-sm last-of-type:border-r-0 focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-r-md">
 							<div className={cn((modifiers.outside || modifiers.weekend) && 'opacity-10', modifiers.today && 'bg-slate-800 text-white', 'mb-2 ml-auto flex h-6 w-6 items-center justify-center rounded-full p-1 text-right text-lg')}>{cellProps.children}</div>
 							{modifiers.leaveDay &&
+								!modifiers.weekend &&
 								dayLeaves.map((leave, index) => (
 									<LeaveReview reviewType="admin" data={leave.data} key={index + 'leave'} className={cn(modifiers.outside && 'opacity-10')}>
 										{leave?.name}
