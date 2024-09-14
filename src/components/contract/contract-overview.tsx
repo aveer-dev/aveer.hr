@@ -117,10 +117,10 @@ export const ContractOverview = async ({ data }: props) => {
 					<h2 className="flex items-center justify-between text-xl font-bold">Salary</h2>
 
 					<div className="flex items-center gap-2">
-						<Button variant={'secondary'} className="h-9 gap-3">
+						{/* <Button variant={'secondary'} className="h-9 gap-3">
 							History
 							<PanelRightOpen size={14} />
-						</Button>
+						</Button> */}
 					</div>
 				</div>
 

@@ -263,7 +263,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					</TabsContent>
 				)}
 
-				<TabsContent value="team">{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <Teams org={org} team={data.team} />}</TabsContent>
+				<TabsContent value="team">{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <Teams contractId={data.id} org={org} team={data.team} />}</TabsContent>
 
 				<TabsContent value="contract">
 					<section className="grid gap-14">
