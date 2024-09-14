@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { DataTable } from '@/components/dashboard/table';
 import { createClient } from '@/utils/supabase/server';
 import { columns } from '../leave/column';
-import { Separator } from '../ui/separator';
+import { Separator } from '@/components/ui/separator';
 
 export const Timeoff = async ({ org, team, contract, reviewType }: { org: string; team: number | null; contract: number; reviewType: string }) => {
 	const supabase = createClient();

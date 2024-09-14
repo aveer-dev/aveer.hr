@@ -2,12 +2,12 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
-import { Button, buttonVariants } from '../ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PERSON } from '@/type/person';
 import { format } from 'date-fns';
-import { NavLink } from '../ui/link';
+import { NavLink } from '@/components/ui/link';
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
 import { ContractStatus } from '@/components/ui/status-badge';

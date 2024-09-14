@@ -19,7 +19,7 @@ import { useFormStatus } from 'react-dom';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { ApplicationSuccessDialog } from './application-success-dialog';
 import { Plus, Trash2 } from 'lucide-react';
-import { Separator } from '../ui/separator';
+import { Separator } from '@/components/ui/separator';
 
 const formSchema = z.object({
 	first_name: z.string().min(1, 'Please enter first name'),

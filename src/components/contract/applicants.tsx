@@ -3,8 +3,8 @@ import { Card } from '@/components/ui/card';
 import { ChevronRight } from 'lucide-react';
 import { ApplicantDetails } from '../open-role/roles/applicant-details';
 import { Tables } from '@/type/database.types';
-import { Separator } from '../ui/separator';
-import { ApplicantBadge } from '../ui/applicant-stage-badge';
+import { Separator } from '@/components/ui/separator';
+import { ApplicantBadge } from '@/components/ui/applicant-stage-badge';
 
 interface props {
 	org: string;

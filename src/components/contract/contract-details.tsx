@@ -12,20 +12,20 @@ import { SignatureDrawer } from './signature-drawer';
 import { redirect } from 'next/navigation';
 import { ScheduleTermination } from './schedule-termination';
 import { TerminateContract } from './terminate-contract';
-import { BackButton } from '../ui/back-button';
+import { BackButton } from '@/components/ui/back-button';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { sendEmail } from '@/api/email';
 import { TerminateContractEmail } from '@/components/emails/terminated-contract-email';
 import { ScheduleTerminationContractEmail } from '@/components/emails/schedule-terminate-contract-email';
 import { ContractStatus } from '@/components/ui/status-badge';
-import { Details } from '../ui/details';
+import { Details } from '@/components/ui/details';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ContractOverview } from './contract-overview';
 import { Profile } from './profile';
 import { Teams } from './teams';
 import { Timeoff } from './time-off';
 import { Applicants } from './applicants';
-import { Separator } from '../ui/separator';
+import { Separator } from '@/components/ui/separator';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();

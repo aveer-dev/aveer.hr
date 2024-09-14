@@ -3,12 +3,12 @@
 import { ColumnDef, flexRender, getCoreRowModel, Row, useReactTable } from '@tanstack/react-table';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { NavLink } from '../ui/link';
+import { NavLink } from '@/components/ui/link';
 import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 
 import { ApplicantsSubTable } from '../open-role/roles/applicants-sub-table';
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, buttonVariants } from '../ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Building2, CheckCheck, ChevronDown, UserRound } from 'lucide-react';

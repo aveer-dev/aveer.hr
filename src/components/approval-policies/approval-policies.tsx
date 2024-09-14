@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { ApprovalPolicy } from './approval-policy';
 import { FormSection, FormSectionDescription, InputsContainer } from '../forms/form-section';
 import { createClient } from '@/utils/supabase/server';
-import { buttonVariants } from '../ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export const ApprovalPolicies = async ({ org }: { org: string }) => {

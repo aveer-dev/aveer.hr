@@ -9,13 +9,13 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Textarea } from '../ui/textarea';
+import { Textarea } from '@/components/ui/textarea';
 import { Tables, TablesUpdate } from '@/type/database.types';
 import { SelectCountry } from '../forms/countries-option';
 import { createClient } from '@/utils/supabase/client';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { LoadingSpinner } from '../ui/loader';
+import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({

@@ -1,7 +1,7 @@
 'use client';
 
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { DatePicker } from '../ui/date-picker';
+import { DatePicker } from '@/components/ui/date-picker';
 import { CalendarClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFormStatus } from 'react-dom';

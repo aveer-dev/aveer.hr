@@ -6,10 +6,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { LeaveRequestDialog, LeaveRequests } from './leave';
 import { differenceInBusinessDays } from 'date-fns';
 import { FileDropZone, FileUpload } from './file-management/file-upload-zone';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { DeleteFile } from './file-management/delete-file';
 import { DownloadFile } from './file-management/download-file';
-import { Separator } from '../ui/separator';
+import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
 interface props {
