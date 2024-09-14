@@ -25,6 +25,7 @@ import { Profile } from './profile';
 import { Teams } from './teams';
 import { Timeoff } from './time-off';
 import { Applicants } from './applicants';
+import { Separator } from '../ui/separator';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -234,13 +235,12 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					<TabsList
 						className={cn('grid w-fit')}
 						style={{
-							gridTemplateColumns: `repeat(${4 + (!!data.team && ((!data.terminated_by || (data.end_date && !isPast(data.end_date))) as any)) + (signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))))}, minmax(0, 1fr))`
+							gridTemplateColumns: `repeat(${3 + (!!data.team && ((!data.terminated_by || (data.end_date && !isPast(data.end_date))) as any)) + (signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))))}, minmax(0, 1fr))`
 						}}>
 						<TabsTrigger value="overview">Overview</TabsTrigger>
 						<TabsTrigger value="profile">Profile</TabsTrigger>
 						{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="team">Team</TabsTrigger>}
-						<TabsTrigger value="time-off">Time-off</TabsTrigger>
-						{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="applicants">Applicants</TabsTrigger>}
+						{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="requests">Requests</TabsTrigger>}
 						<TabsTrigger value="contract">Contract</TabsTrigger>
 					</TabsList>
 				)}
@@ -253,12 +253,10 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					<Profile type={signatureType} data={data.profile as any} />
 				</TabsContent>
 
-				<TabsContent value="time-off">
-					<Timeoff reviewType={signatureType == 'org' ? 'admin' : 'employee'} contract={data.id} org={org} team={data?.team} />
-				</TabsContent>
-
 				{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && (
-					<TabsContent value="applicants">
+					<TabsContent value="requests">
+						<Timeoff reviewType="admin" contract={data.id} org={org} team={data?.team} />
+
 						<Applicants contract={data as any} org={org} />
 					</TabsContent>
 				)}

@@ -85,14 +85,14 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 	);
 
 	const getTeamMembersCount = useCallback(async (team: number, org: string, name: string) => {
-		const { count, error } = await supabase.from('contracts').select('*', { count: 'estimated', head: true }).match({ org, team });
+		const { count, error } = await supabase.from('contracts').select('*', { count: 'estimated', head: true }).match({ org, team, status: 'signed' });
 		if (error) toast.error(`Unable to fetch team count for ${name} team`, { description: error.message });
 
 		if (count) setTeamMembers(() => count);
 	}, []);
 
 	const getEmployees = useCallback(async (org: string) => {
-		const { data, error } = await supabase.from('contracts').select('id, profile:profiles!contracts_profile_fkey(id, first_name, last_name)').match({ org });
+		const { data, error } = await supabase.from('contracts').select('id, profile:profiles!contracts_profile_fkey(id, first_name, last_name)').match({ org, status: 'signed' });
 		if (!data || error) return toast('🥺 Error', { description: 'Unable to fetch list of colleagues for leave request form' });
 		if (data.length) setEmployees(() => data as any);
 	}, []);

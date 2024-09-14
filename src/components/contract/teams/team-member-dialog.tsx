@@ -28,7 +28,7 @@ export const TeamMember = ({ person }: props) => {
 				</button>
 			</SheetTrigger>
 
-			<SheetContent>
+			<SheetContent className="overflow-y-auto">
 				<SheetHeader>
 					<SheetTitle>Team member</SheetTitle>
 					<SheetDescription>Selected team member details</SheetDescription>
@@ -56,7 +56,7 @@ export const TeamMember = ({ person }: props) => {
 					</li>
 				</ul>
 
-				<ul className="mt-10 grid gap-x-5 gap-y-6 py-4 text-sm font-light">
+				<ul className="mt-6 grid gap-x-5 gap-y-6 py-4 text-sm font-light">
 					<h3 className="text-sm">Work Details</h3>
 					<li className="grid gap-1">
 						<h4 className="text-xs text-muted-foreground">Job title</h4> <p className="font-normal">{person?.job_title}</p>

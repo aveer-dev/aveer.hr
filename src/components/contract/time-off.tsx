@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { DataTable } from '@/components/dashboard/table';
 import { createClient } from '@/utils/supabase/server';
 import { columns } from '../leave/column';
+import { Separator } from '../ui/separator';
 
 export const Timeoff = async ({ org, team, contract, reviewType }: { org: string; team: number | null; contract: number; reviewType: string }) => {
 	const supabase = createClient();
@@ -21,11 +22,12 @@ export const Timeoff = async ({ org, team, contract, reviewType }: { org: string
 
 	return (
 		<section className="mt-6">
-			<div className="mb-6 flex w-full items-center justify-between">
-				<h1 className="text-xl font-semibold">Time off</h1>
+			<div className="flex w-full items-center justify-between">
+				<h2 className="text-lg font-medium">Leave review</h2>
 			</div>
 
 			<Suspense>
+				<Separator className="mb-4 mt-2" />
 				<DataTable data={data.map(item => ({ ...item, reviewType }))} columns={columns} />
 			</Suspense>
 		</section>

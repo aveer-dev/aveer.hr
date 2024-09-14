@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
-import { EllipsisVertical, FileText, PanelRightOpen, Table2 } from 'lucide-react';
+import { EllipsisVertical, FileText } from 'lucide-react';
 import { Database, Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 import { Skeleton } from '@/components/ui/skeleton';
-import { LeaveRequestDialog } from './leave-request-dialog';
+import { LeaveRequestDialog, LeaveRequests } from './leave';
 import { differenceInBusinessDays } from 'date-fns';
 import { FileDropZone, FileUpload } from './file-management/file-upload-zone';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
@@ -85,10 +85,7 @@ export const ContractOverview = async ({ data }: props) => {
 						{data.status == 'signed' && (
 							<>
 								<LeaveRequestDialog contract={data} />
-
-								<Button variant={'secondary'} size={'icon'} className="h-9">
-									<Table2 size={14} />
-								</Button>
+								<LeaveRequests org={data.org.subdomain} contractId={data.id} />
 							</>
 						)}
 					</div>

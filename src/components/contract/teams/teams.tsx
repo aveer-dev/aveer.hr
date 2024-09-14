@@ -10,7 +10,7 @@ interface props {
 export const Teams = async ({ org, team, contractId }: props) => {
 	const supabase = createClient();
 
-	const { data, error } = await supabase.from('contracts').select('*, level:employee_levels!contracts_level_fkey(*), profile:profiles!contracts_profile_fkey(*)').match({ org, team });
+	const { data, error } = await supabase.from('contracts').select('*, level:employee_levels!contracts_level_fkey(*), profile:profiles!contracts_profile_fkey(*)').match({ org, team, status: 'signed' });
 
 	if (error) return error.message;
 	const filteredTeam = data.filter(contract => contract.id !== contractId);

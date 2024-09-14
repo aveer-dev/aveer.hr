@@ -8,6 +8,7 @@ import { createClient } from '@/utils/supabase/client';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ApplicantBadge } from '@/components/ui/applicant-stage-badge';
 
 const supabase = createClient();
 
@@ -69,11 +70,7 @@ export const ApplicantsSubTable = ({ org, roleId }: { org?: string; roleId: numb
 		{
 			id: 'stage',
 			header: 'Stage',
-			cell: ({ row }) => (
-				<Badge className="font-light" variant={row.original.stage.includes('reject') ? 'secondary-destructive' : row.original.stage == 'applicant' ? 'secondary' : 'secondary-success'}>
-					{row.original.stage}
-				</Badge>
-			),
+			cell: ({ row }) => <ApplicantBadge stage={row.original.stage} />,
 			size: 120
 		},
 		{

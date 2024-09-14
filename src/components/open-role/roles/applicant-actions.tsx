@@ -11,6 +11,7 @@ import { updateApplication } from './application.action';
 import { Tables, TablesUpdate } from '@/type/database.types';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ApplicantBadge } from '@/components/ui/applicant-stage-badge';
 
 const AcceptedApplicantActions = ({ email, name, org }: { email: string; org: string; name: string }) => {
 	const [showMailDialog, toggleMailDialog] = useState(false);
@@ -75,21 +76,6 @@ export const UpdateApplication = ({ id, onUpdateItem, stage, org, levels, classN
 		if (stage == 'applicant') setToReview();
 	}, [id, onUpdateItem, org, stage]);
 
-	const StageBadge = ({ stage }: { stage: string }) => (
-		<Badge
-			variant={'secondary'}
-			className={cn(
-				'px-3 py-[2px] text-[10px] capitalize',
-				stage == 'applicant' && 'bg-secondary',
-				stage == 'review' && 'bg-blue-100 hover:bg-blue-100',
-				stage == 'interview' && 'bg-violet-100 hover:bg-violet-100',
-				stage == 'offer' && 'bg-indigo-100 hover:bg-indigo-100',
-				stage == 'hired' && 'bg-green-100 hover:bg-green-100'
-			)}>
-			{stage || 'Select stage...'}
-		</Badge>
-	);
-
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
@@ -97,7 +83,7 @@ export const UpdateApplication = ({ id, onUpdateItem, stage, org, levels, classN
 					Stage:
 					<div className="flex items-center gap-1">
 						{isUpdating && <LoadingSpinner />}
-						<StageBadge stage={value} />
+						<ApplicantBadge stage={value} />
 						<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 					</div>
 				</Button>
@@ -118,7 +104,7 @@ export const UpdateApplication = ({ id, onUpdateItem, stage, org, levels, classN
 									}}>
 									<Check className={cn('mr-2 h-4 w-4', value === stage ? 'opacity-100' : 'opacity-0')} />
 
-									<StageBadge stage={stage} />
+									<ApplicantBadge stage={stage} />
 
 									{stage == 'interview' && (
 										<TooltipProvider>

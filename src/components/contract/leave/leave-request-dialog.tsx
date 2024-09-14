@@ -101,7 +101,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract }: props) => {
 			const { data, error } = await supabase
 				.from('contracts')
 				.select('id, profile:profiles!contracts_profile_fkey(first_name, last_name)')
-				.match({ org: (contract.org as any).subdomain });
+				.match({ org: (contract.org as any).subdomain, status: 'signed' });
 			if (!data || error) return toast('🥺 Error', { description: 'Unable to fetch list of colleagues for leave request form' });
 			if (data.length) setEmployees(() => data as any);
 		};

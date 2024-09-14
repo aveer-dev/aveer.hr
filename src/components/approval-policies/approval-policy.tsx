@@ -50,7 +50,7 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 	const [isUpdating, setUpdateState] = useState(false);
 	const [isDeleting, setDeleteState] = useState(false);
 	const [isDialogOpen, toggleDialogState] = useState(false);
-	const [employees, setEmployees] = useState<{ id: number; profile: { first_name: string; last_name: string } }[]>([]);
+	const [employees, setEmployees] = useState<{ id: number; job_title: string; profile: { first_name: string; last_name: string } }[]>([]);
 	const [defaultPolicy, setDefaultPolicy] = useState<Tables<'approval_policies'>[]>();
 	const router = useRouter();
 
@@ -114,7 +114,7 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 
 	useEffect(() => {
 		const getEmployees = async (org: string) => {
-			const { data, error } = await supabase.from('contracts').select('id, profile:profiles!contracts_profile_fkey(first_name, last_name)').match({ org });
+			const { data, error } = await supabase.from('contracts').select('id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)').match({ org, status: 'signed' });
 			if (!data || error) return toast('🥺 Error', { description: 'Unable to fetch list of colleagues for leave request form' });
 			if (data.length) setEmployees(data as any);
 		};
@@ -316,7 +316,7 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 																<SelectContent>
 																	{employees.map(employee => (
 																		<SelectItem key={employee.id} value={String(employee.id)}>
-																			{employee.profile.first_name} {employee.profile.last_name}
+																			{employee.profile.first_name} {employee.profile.last_name} • {employee.job_title}
 																		</SelectItem>
 																	))}
 																</SelectContent>
