@@ -1,7 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
 import { EmployeeBandDialog } from './employee-band-form';
-import { doesUserHaveAdequatePermissions } from '@/utils/api';
-import { TablesInsert, TablesUpdate } from '@/type/database.types';
 import { FormSection, FormSectionDescription, InputsContainer } from '../forms/form-section';
 
 interface props {
@@ -22,49 +20,6 @@ export const EmployeeBand = async ({ org }: props) => {
 		);
 	}
 
-	const updateBand = async (band: TablesUpdate<'employee_levels'>) => {
-		'use server';
-
-		const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
-		if (typeof hasPermission == 'string') return hasPermission;
-
-		if (!band.id) return 'Band ID not found. Unable to update band';
-
-		const supabase = createClient();
-		const { error } = await supabase
-			.from('employee_levels')
-			.update({ ...band, org })
-			.eq('id', band.id);
-		if (error) return error.message;
-		return 'Update';
-	};
-
-	const createBand = async (band: TablesInsert<'employee_levels'>) => {
-		'use server';
-
-		const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
-		if (typeof hasPermission == 'string') return hasPermission;
-
-		const supabase = createClient();
-		const { error } = await supabase.from('employee_levels').insert({ ...band, org });
-		if (error) return error.message;
-		return true;
-	};
-
-	const deleteBand = async (bandId?: number) => {
-		'use server';
-
-		const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
-		if (typeof hasPermission == 'string') return hasPermission;
-
-		if (!bandId) return 'Band ID not found. Unable to delete band';
-
-		const supabase = createClient();
-		const { error } = await supabase.from('employee_levels').delete().eq('id', bandId);
-		if (error) return error.message;
-		return true;
-	};
-
 	return (
 		<FormSection id="levels">
 			<FormSectionDescription>
@@ -73,7 +28,13 @@ export const EmployeeBand = async ({ org }: props) => {
 			</FormSectionDescription>
 
 			<InputsContainer>
-				<EmployeeBandDialog createBand={createBand} deleteBand={deleteBand} updateBand={updateBand} data={data} />
+				<div className="grid gap-8">
+					{data.map(band => (
+						<EmployeeBandDialog band={band} key={band.id} org={org} />
+					))}
+
+					<EmployeeBandDialog org={org} />
+				</div>
 			</InputsContainer>
 		</FormSection>
 	);

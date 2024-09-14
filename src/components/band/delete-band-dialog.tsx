@@ -1,23 +1,25 @@
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loader';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
+import { deleteBand } from './band.action';
 
 interface props {
-	toggleDialog: Dispatch<SetStateAction<boolean>>;
-	isToggled?: boolean;
-	deleteBand: () => Promise<string | true>;
+	org: string;
+	id: number;
 	onBandDeleted: () => void;
 }
 
-export const DeleteBandDialog = ({ isToggled, toggleDialog, deleteBand, onBandDeleted }: props) => {
+export const DeleteBandDialog = ({ org, id, onBandDeleted }: props) => {
 	const [isDeleting, setDeleteState] = useState(false);
+	const [isToggled, toggleDialog] = useState(false);
 
 	const onDeleteBand = async () => {
 		setDeleteState(true);
-		const response = await deleteBand();
+		const response = await deleteBand(org, id);
 		setDeleteState(false);
 		toggleDialog(false);
 		if (response !== true) return toast('❌ Error', { description: response });
@@ -38,6 +40,12 @@ export const DeleteBandDialog = ({ isToggled, toggleDialog, deleteBand, onBandDe
 
 	return (
 		<AlertDialog open={isToggled} onOpenChange={toggleDialog}>
+			<AlertDialogTrigger>
+				<Button type="button" variant={'secondary_destructive'}>
+					<Trash2 size={14} />
+				</Button>
+			</AlertDialogTrigger>
+
 			<AlertDialogContent className="gap-12">
 				<AlertDialogHeader>
 					<AlertDialogTitle>🙋🏾 Caution, are you absolutely sure?</AlertDialogTitle>

@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Check, ChevronDown, ChevronRight, Info, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MinMaxPay } from '@/components/forms/min-max-pay';
 import { FixedAllowance } from '@/components/forms/fixed-allowance';
@@ -22,6 +22,7 @@ import { useFormStatus } from 'react-dom';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 import { DeleteBandDialog } from './delete-band-dialog';
+import { createBand, updateBand } from './band.action';
 
 const formSchema = z.object({
 	level: z.string(),
@@ -47,13 +48,11 @@ const formSchema = z.object({
 });
 
 interface props {
-	data: Tables<'employee_levels'>[];
-	updateBand: (band: TablesUpdate<'employee_levels'>) => Promise<string | true>;
-	createBand: (band: TablesInsert<'employee_levels'>) => Promise<string | true>;
-	deleteBand: (bandId?: number) => Promise<string | true>;
+	band?: Tables<'employee_levels'>;
+	org: string;
 }
 
-export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }: props) => {
+export const EmployeeBandDialog = ({ band, org }: props) => {
 	const [isDialogOpen, openDialog] = useState(false);
 	const [showSigningBonus, toggleShowSigningBonus] = useState(false);
 	const [showFixedAllowance, toggleShowFixedAllowance] = useState(false);
@@ -61,46 +60,26 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 	const [jobLevels] = useState<string[]>(levels);
 	const [orgJobLevels, updateOrgJobLevels] = useState<string[]>([]);
 	const [levelQuery, setLevelQuery] = useState<string>('');
-	const [activeBandId, setActiveBandId] = useState<number>();
 	const [isSubmitting, setSubmitState] = useState(false);
-	const [showDeleteBandDialog, toggleDeleteBandDialog] = useState(false);
 	const router = useRouter();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			level: undefined,
-			role: '',
-			org: '',
-			fixed_allowance: [],
+			level: band?.level || undefined,
+			role: band?.role || '',
+			org: band?.org || '',
+			fixed_allowance: (band?.fixed_allowance as any) || [],
 			salary: {
-				min: 0,
-				max: 0
+				min: band?.min_salary || 0,
+				max: band?.max_salary || 0
+			},
+			signing_bonus: {
+				min: band?.min_signing_bonus || 0,
+				max: band?.max_signing_bonus || 0
 			}
 		}
 	});
-
-	const setActiveBandForm = (activeBand: TablesUpdate<'employee_levels'>) => {
-		form.reset({
-			level: activeBand.level,
-			org: activeBand.org,
-			role: activeBand.role || undefined,
-			salary: {
-				min: activeBand.min_salary,
-				max: activeBand.max_salary
-			},
-			signing_bonus: {
-				min: activeBand.min_signing_bonus || undefined,
-				max: activeBand.max_signing_bonus || undefined
-			},
-			fixed_allowance: activeBand.fixed_allowance as any
-		});
-		setActiveBandId(activeBand.id);
-		toggleShowSigningBonus(!!(activeBand?.min_signing_bonus || activeBand?.max_signing_bonus));
-		toggleShowFixedAllowance(!!activeBand?.fixed_allowance?.length);
-
-		openDialog(true);
-	};
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setSubmitState(true);
@@ -115,7 +94,7 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 			fixed_allowance: values.fixed_allowance
 		};
 
-		const response = activeBandId ? await updateBand({ ...band, id: activeBandId }) : await createBand(band);
+		const response = band ? await updateBand({ ...band, id: band.id }, org) : await createBand(band, org);
 		setSubmitState(false);
 
 		if (typeof response == 'string' && response !== 'Update') return toast.error('😥 Error', { description: response });
@@ -132,28 +111,26 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" disabled={pending || isSubmitting} size={'sm'} className="mt-8 w-full gap-2">
+			<Button type="submit" disabled={pending || isSubmitting} size={'sm'} className="w-full gap-2">
 				{(pending || isSubmitting) && <LoadingSpinner />}
-				{pending || isSubmitting ? (activeBandId ? 'Updating band' : 'Creating band') : activeBandId ? 'Update band' : 'Create band'}
+				{pending || isSubmitting ? (band ? 'Updating band' : 'Creating band') : band ? 'Update band' : 'Create band'}
 			</Button>
 		);
 	};
 
+	useEffect(() => {
+		if (band) {
+			toggleShowSigningBonus(!!(band?.min_signing_bonus || band?.max_signing_bonus));
+			toggleShowFixedAllowance(!!band?.fixed_allowance?.length);
+		}
+	}, [band]);
+
 	return (
-		<>
-			<div className="grid gap-8">
-				{data.map(band => (
-					<Card key={band.id} className="relative w-full text-left">
-						<Button
-							onClick={() => {
-								toggleDeleteBandDialog(true);
-								setActiveBandId(band.id);
-							}}
-							variant={'ghost'}
-							className="absolute -left-12 top-1/2 -translate-y-1/2 text-destructive hover:bg-transparent hover:text-destructive">
-							<Trash2 size={14} />
-						</Button>
-						<button className="flex w-full items-center justify-between p-4 text-xs" onClick={() => setActiveBandForm(band)}>
+		<Sheet open={isDialogOpen} onOpenChange={openDialog}>
+			<SheetTrigger asChild>
+				<Card className="w-full text-left">
+					{band && (
+						<button className="flex w-full items-center justify-between p-4 text-xs">
 							<div>
 								{band.level} • <span className="text-muted-foreground">{band.role}</span>
 							</div>
@@ -174,87 +151,58 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 								<ChevronRight size={14} />
 							</div>
 						</button>
-					</Card>
-				))}
+					)}
 
-				<Button
-					className={cn('w-full text-xs')}
-					onClick={() => {
-						openDialog(true);
-						setActiveBandId(undefined);
-					}}>
-					Add new band
-				</Button>
-			</div>
+					{!band && <Button className={cn('w-full text-xs')}>Add new band</Button>}
+				</Card>
+			</SheetTrigger>
 
-			<DeleteBandDialog onBandDeleted={() => setActiveBandId(undefined)} toggleDialog={toggleDeleteBandDialog} isToggled={showDeleteBandDialog} deleteBand={() => deleteBand(activeBandId)} />
+			<SheetContent className="overflow-auto pb-24">
+				<SheetHeader className="mb-6">
+					<SheetTitle>Employee Level</SheetTitle>
+					<SheetDescription className="text-xs">This enables you to categorize employee benefits once, in a level.</SheetDescription>
+				</SheetHeader>
 
-			<Sheet open={isDialogOpen} onOpenChange={openDialog}>
-				<SheetContent className="overflow-auto pb-24">
-					<SheetHeader className="mb-6">
-						<SheetTitle>Employee Level</SheetTitle>
-						<SheetDescription className="text-xs">This enables you to categorize employee benefits once, in a level.</SheetDescription>
-					</SheetHeader>
+				<div className="grid gap-4 py-6">
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+							<FormField
+								control={form.control}
+								name="level"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Level</FormLabel>
+										<Popover open={isLevelsOpen} onOpenChange={toggleLevelsDropdown}>
+											<PopoverTrigger asChild>
+												<FormControl>
+													<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
+														{field.value || `Select level`}
+														<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+													</Button>
+												</FormControl>
+											</PopoverTrigger>
 
-					<div className="grid gap-4 py-6">
-						<Form {...form}>
-							<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-								<FormField
-									control={form.control}
-									name="level"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Level</FormLabel>
-											<Popover open={isLevelsOpen} onOpenChange={toggleLevelsDropdown}>
-												<PopoverTrigger asChild>
-													<FormControl>
-														<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !field.value && 'text-muted-foreground')}>
-															{field.value || `Select level`}
-															<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-														</Button>
-													</FormControl>
-												</PopoverTrigger>
+											<PopoverContent className="max-h-64 w-72 overflow-hidden p-0" align="start">
+												<Command>
+													<CommandInput placeholder="Enter seniority level..." value={levelQuery} onValueChange={(value: string) => setLevelQuery(value)} />
+													<CommandList>
+														<CommandEmpty
+															onClick={() => {
+																updateOrgJobLevels([...orgJobLevels, levelQuery]);
+																form.setValue('level', levelQuery);
+																setLevelQuery('');
+																toggleLevelsDropdown(false);
+															}}
+															className="p-1">
+															<div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs font-light outline-none">
+																<Check className={cn('mr-2 h-4 w-4', levelQuery && levelQuery === field.value ? 'opacity-100' : 'opacity-0')} />
+																{levelQuery}
+															</div>
+														</CommandEmpty>
 
-												<PopoverContent className="max-h-64 w-72 overflow-hidden p-0" align="start">
-													<Command>
-														<CommandInput placeholder="Enter seniority level..." value={levelQuery} onValueChange={(value: string) => setLevelQuery(value)} />
-														<CommandList>
-															<CommandEmpty
-																onClick={() => {
-																	updateOrgJobLevels([...orgJobLevels, levelQuery]);
-																	form.setValue('level', levelQuery);
-																	setLevelQuery('');
-																	toggleLevelsDropdown(false);
-																}}
-																className="p-1">
-																<div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-xs font-light outline-none">
-																	<Check className={cn('mr-2 h-4 w-4', levelQuery && levelQuery === field.value ? 'opacity-100' : 'opacity-0')} />
-																	{levelQuery}
-																</div>
-															</CommandEmpty>
-
-															{orgJobLevels.length > 0 && (
-																<CommandGroup heading="Active Org Levels">
-																	{orgJobLevels.map(level => (
-																		<CommandItem
-																			className="gap-2"
-																			value={level}
-																			key={level}
-																			onSelect={() => {
-																				form.setValue('level', level);
-																				toggleLevelsDropdown(false);
-																			}}>
-																			<div className="flex items-center">
-																				<Check className={cn('mr-2 h-3 w-3', level === field.value ? 'opacity-100' : 'opacity-0')} />
-																				{level}
-																			</div>
-																		</CommandItem>
-																	))}
-																</CommandGroup>
-															)}
-
-															<CommandGroup heading="Suggested Org Levels">
-																{jobLevels.map(level => (
+														{orgJobLevels.length > 0 && (
+															<CommandGroup heading="Active Org Levels">
+																{orgJobLevels.map(level => (
 																	<CommandItem
 																		className="gap-2"
 																		value={level}
@@ -263,70 +211,91 @@ export const EmployeeBandDialog = ({ data, updateBand, createBand, deleteBand }:
 																			form.setValue('level', level);
 																			toggleLevelsDropdown(false);
 																		}}>
-																		<Check className={cn('mr-2 h-3 w-3', level === field.value ? 'opacity-100' : 'opacity-0')} />
-																		{level}
+																		<div className="flex items-center">
+																			<Check className={cn('mr-2 h-3 w-3', level === field.value ? 'opacity-100' : 'opacity-0')} />
+																			{level}
+																		</div>
 																	</CommandItem>
 																))}
 															</CommandGroup>
-														</CommandList>
-													</Command>
-												</PopoverContent>
-											</Popover>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+														)}
 
-								<FormField
-									control={form.control}
-									name="role"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel className="flex items-center gap-2">
-												Role
-												<TooltipProvider>
-													<Tooltip>
-														<TooltipTrigger asChild>
-															<button type="button">
-																<Info size={10} />
-															</button>
-														</TooltipTrigger>
-														<TooltipContent side="right" className="max-w-44">
-															<p>Think of this as a description for this band. Eg: Entry, Mid I, Mid II, Senior, e.t.c</p>
-														</TooltipContent>
-													</Tooltip>
-												</TooltipProvider>
-											</FormLabel>
-											<FormControl>
-												<Input type="text" placeholder="Mid I, Mid II, Senior I, Senior II, ..." {...field} />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+														<CommandGroup heading="Suggested Org Levels">
+															{jobLevels.map(level => (
+																<CommandItem
+																	className="gap-2"
+																	value={level}
+																	key={level}
+																	onSelect={() => {
+																		form.setValue('level', level);
+																		toggleLevelsDropdown(false);
+																	}}>
+																	<Check className={cn('mr-2 h-3 w-3', level === field.value ? 'opacity-100' : 'opacity-0')} />
+																	{level}
+																</CommandItem>
+															))}
+														</CommandGroup>
+													</CommandList>
+												</Command>
+											</PopoverContent>
+										</Popover>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-								<MinMaxPay form={form} isToggled name="salary" label="salary" formLabel="Base annual salary range" />
+							<FormField
+								control={form.control}
+								name="role"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="flex items-center gap-2">
+											Role
+											<TooltipProvider>
+												<Tooltip>
+													<TooltipTrigger asChild>
+														<button type="button">
+															<Info size={10} />
+														</button>
+													</TooltipTrigger>
+													<TooltipContent side="right" className="max-w-44">
+														<p>Think of this as a description for this band. Eg: Entry, Mid I, Mid II, Senior, e.t.c</p>
+													</TooltipContent>
+												</Tooltip>
+											</TooltipProvider>
+										</FormLabel>
+										<FormControl>
+											<Input type="text" placeholder="Mid I, Mid II, Senior I, Senior II, ..." {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-								<MinMaxPay
-									form={form}
-									name="signing_bonus"
-									label="bonus"
-									formLabel="Signing bonus range"
-									showToggle
-									toggle={event => toggleShowSigningBonus(event)}
-									isToggled={showSigningBonus}
-									tooltip="A one-time payment offered to an employee upon accepting a job, often used as an incentive."
-								/>
+							<MinMaxPay form={form} isToggled name="salary" label="salary" formLabel="Base annual salary range" />
 
-								<FixedAllowance toggle={toggleShowFixedAllowance} isToggled={showFixedAllowance} form={form} />
+							<MinMaxPay
+								form={form}
+								name="signing_bonus"
+								label="bonus"
+								formLabel="Signing bonus range"
+								showToggle
+								toggle={event => toggleShowSigningBonus(event)}
+								isToggled={showSigningBonus}
+								tooltip="A one-time payment offered to an employee upon accepting a job, often used as an incentive."
+							/>
 
+							<FixedAllowance toggle={toggleShowFixedAllowance} isToggled={showFixedAllowance} form={form} />
+
+							<div className="mt-8 flex items-center gap-2">
+								{band && <DeleteBandDialog onBandDeleted={() => router.refresh()} org={org} id={band?.id} />}
 								<SubmitButton />
-							</form>
-						</Form>
-					</div>
-				</SheetContent>
-			</Sheet>
-		</>
+							</div>
+						</form>
+					</Form>
+				</div>
+			</SheetContent>
+		</Sheet>
 	);
 };
 
