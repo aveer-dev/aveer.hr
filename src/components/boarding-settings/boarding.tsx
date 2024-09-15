@@ -74,7 +74,7 @@ export const Boarding = ({ data, children, className, org }: props) => {
 
 	useEffect(() => {
 		getPolicies();
-	}, []);
+	}, [getPolicies]);
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setUpdateState(true);
@@ -204,7 +204,13 @@ export const Boarding = ({ data, children, className, org }: props) => {
 													<SelectValue placeholder="Select approval policy" />
 												</SelectTrigger>
 											</FormControl>
-											<SelectContent>{policies?.map(policy => <SelectItem value={String(policy.id)}>{policy.name}</SelectItem>)}</SelectContent>
+											<SelectContent>
+												{policies?.map(policy => (
+													<SelectItem key={policy.id} value={String(policy.id)}>
+														{policy.name}
+													</SelectItem>
+												))}
+											</SelectContent>
 										</Select>
 										<FormMessage />
 									</FormItem>
