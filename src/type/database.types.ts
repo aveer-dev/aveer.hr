@@ -78,6 +78,67 @@ export type Database = {
           },
         ]
       }
+      boaring_check_list: {
+        Row: {
+          checklist: Json[]
+          created_at: string
+          description: string | null
+          entity: number | null
+          id: number
+          is_default: boolean
+          name: string
+          org: string
+          policy: number
+          type: Database["public"]["Enums"]["boarding_type"]
+        }
+        Insert: {
+          checklist: Json[]
+          created_at?: string
+          description?: string | null
+          entity?: number | null
+          id?: number
+          is_default: boolean
+          name: string
+          org: string
+          policy: number
+          type: Database["public"]["Enums"]["boarding_type"]
+        }
+        Update: {
+          checklist?: Json[]
+          created_at?: string
+          description?: string | null
+          entity?: number | null
+          id?: number
+          is_default?: boolean
+          name?: string
+          org?: string
+          policy?: number
+          type?: Database["public"]["Enums"]["boarding_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boaring_check_list_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "boaring_check_list_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "boaring_check_list_policy_fkey"
+            columns: ["policy"]
+            isOneToOne: false
+            referencedRelation: "approval_policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           additional_offerings: Json[] | null
@@ -1222,6 +1283,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      boarding_type: "on" | "off"
       contract_state:
         | "awaiting signatures"
         | "awaiting org signature"
@@ -1240,7 +1302,7 @@ export type Database = {
         | "more"
         | "cancelled"
       leave_type_enum: "paid" | "sick" | "maternity" | "paternity" | "unpaid"
-      policy_types: "time_off" | "role_application"
+      policy_types: "time_off" | "role_application" | "boarding"
       role_status: "open" | "close"
       work_locations: "on-site" | "remote" | "hybrid"
     }

@@ -29,7 +29,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 const formSchema = z.object({
 	name: z.string().min(1),
 	description: z.string().optional(),
-	type: z.enum(['time_off', 'role_application']),
+	type: z.enum(['time_off', 'role_application', 'boarding']),
 	levels: z.array(z.object({ type: z.string(), id: z.string(), level: z.number() })),
 	is_default: z.boolean()
 });
@@ -214,6 +214,7 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 											<SelectContent>
 												<SelectItem value="time_off">Time-Off</SelectItem>
 												<SelectItem value="role_application">Role applications</SelectItem>
+												<SelectItem value="boarding">Onboarding / Offboarding</SelectItem>
 											</SelectContent>
 										</Select>
 										<FormMessage />

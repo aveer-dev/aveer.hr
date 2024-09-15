@@ -12,6 +12,7 @@ import { LegalEntities } from '@/components/legal-entities/legal-entities';
 import { FormSection, FormSectionDescription, InputsContainer } from '@/components/forms/form-section';
 import { ApprovalPolicies } from '@/components/approval-policies';
 import { Teams } from '@/components/team/teams';
+import { Boardings } from '@/components/boarding-settings';
 
 export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -98,6 +99,10 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 
 					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
 						<ApprovalPolicies org={params.org} />
+					</Suspense>
+
+					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
+						<Boardings org={params.org} />
 					</Suspense>
 				</TabsContent>
 

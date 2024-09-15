@@ -1,0 +1,321 @@
+'use client';
+
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
+import { Tables, TablesInsert } from '@/type/database.types';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { ChevronRightIcon, List, Plus, TriangleAlert } from 'lucide-react';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { useFormStatus } from 'react-dom';
+import { LoadingSpinner } from '@/components/ui/loader';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { createClient } from '@/utils/supabase/client';
+import { toast } from 'sonner';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { createBoarding, updateBoarding } from './boarding.action';
+import { useRouter } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
+
+interface props {
+	data?: Tables<'boaring_check_list'>;
+	children?: ReactNode;
+	className?: string;
+	org: string;
+}
+
+const formSchema = z.object({
+	name: z.string().min(1, { message: 'Provide team name' }),
+	description: z.string().optional(),
+	type: z.enum(['off', 'on']),
+	is_default: z.boolean(),
+	policy: z.string(),
+	checklist: z.object({ item: z.string(), description: z.string().optional(), created_at: z.string().optional() }).array().min(1, { message: 'Add at least one item' }),
+	org: z.string()
+});
+
+const supabase = createClient();
+
+export const Boarding = ({ data, children, className, org }: props) => {
+	const [isUpdating, setUpdateState] = useState(false);
+	const [items, updateItems] = useState<{ item: string; description: string; created_at?: string }[]>((data?.checklist as any[]) || []);
+	const [defaultBoarding, setDefaultBoarding] = useState<Tables<'boaring_check_list'>[]>();
+	const [policies, setPolicies] = useState<Tables<'approval_policies'>[]>();
+	const [isDialogOpen, toggleDialogState] = useState(false);
+	const router = useRouter();
+
+	const form = useForm<z.infer<typeof formSchema>>({
+		resolver: zodResolver(formSchema),
+		defaultValues: { name: data?.name || '', org, description: data?.description || '', checklist: (data?.checklist as any) || [], type: data?.type, is_default: data?.is_default, policy: String(data?.policy) }
+	});
+
+	const getDefaultBoarding = useCallback(
+		async (type: string) => {
+			const { data, error } = await supabase.from('boaring_check_list').select().match({ type, org, is_default: true });
+			if (error) toast.error('Error checking default on/off-boading', { description: error.message });
+			if (data) setDefaultBoarding(data);
+		},
+		[org]
+	);
+
+	const getPolicies = useCallback(async () => {
+		const { data, error } = await supabase.from('approval_policies').select().match({ type: 'boarding', org });
+		if (error) toast.error('Error getting policies', { description: error.message });
+		if (data) setPolicies(data);
+	}, [org]);
+
+	useEffect(() => {
+		getPolicies();
+	}, []);
+
+	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+		setUpdateState(true);
+		const payload: TablesInsert<'boaring_check_list'> = { ...values, policy: Number(values.policy) };
+		const response = data ? await updateBoarding(payload, data.id, org) : await createBoarding(payload, org);
+		setUpdateState(false);
+
+		if (data && response !== 'Update') return toast.error('Error', { description: response });
+		if (!data && response !== true) return toast.error('Error', { description: response });
+
+		toggleDialogState(false);
+		toast.success(`${values.type}boading items updated`);
+		router.refresh();
+	};
+
+	const SubmitButton = () => {
+		const { pending } = useFormStatus();
+
+		return (
+			<Button type="submit" disabled={pending || isUpdating} size={'sm'} className="w-full gap-3 px-4 text-xs font-light">
+				{(pending || isUpdating) && <LoadingSpinner />}
+				{pending || isUpdating ? (data ? 'Updating checklist' : 'Creating checklist') : data ? 'Update checklist' : 'Create team'}
+			</Button>
+		);
+	};
+
+	return (
+		<Sheet open={isDialogOpen} onOpenChange={toggleDialogState}>
+			<SheetTrigger asChild>
+				<button type="button" className={cn('w-full', !data && !children && buttonVariants(), className)}>
+					{data && !children && (
+						<Card className="flex w-full items-center justify-between p-5 text-left transition-all duration-500 hover:bg-accent/60">
+							<div className="space-y-1">
+								<h4 className="text-xs font-semibold">
+									{data?.name} • <span className="text-xs capitalize text-muted-foreground">{data.type}boarding</span>
+								</h4>
+							</div>
+
+							<div className="flex items-center gap-2">
+								<Badge className="py-px text-xs font-light text-muted-foreground" variant={'secondary'}>
+									{data.is_default && 'default'}
+								</Badge>
+								<ChevronRightIcon size={12} />
+							</div>
+						</Card>
+					)}
+
+					{!data && !children && 'Add checklist'}
+
+					{!!children && children}
+				</button>
+			</SheetTrigger>
+
+			<SheetContent className="overflow-y-auto">
+				<SheetHeader>
+					<SheetTitle>Onboarding / Offboarding checklist</SheetTitle>
+					<SheetDescription>Manage checklist items for employees here</SheetDescription>
+				</SheetHeader>
+
+				<section className="mt-10 grid gap-4 py-4">
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+							<FormField
+								control={form.control}
+								name="type"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Type</FormLabel>
+										<Select
+											onValueChange={value => {
+												field.onChange(value);
+												getDefaultBoarding(value);
+											}}
+											defaultValue={field.value}>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Select either onboarding or offboarding" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												<SelectItem value="on">Onboarding</SelectItem>
+												<SelectItem value="off">Offboarding</SelectItem>
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="name"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Name*</FormLabel>
+										<FormControl>
+											<Input placeholder="What would you like to call this team" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="description"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Description</FormLabel>
+										<FormControl>
+											<Textarea placeholder="How would you describe this team" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="policy"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Approval policy</FormLabel>
+										<Select onValueChange={field.onChange} defaultValue={field.value}>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Select approval policy" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>{policies?.map(policy => <SelectItem value={String(policy.id)}>{policy.name}</SelectItem>)}</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="is_default"
+								render={({ field }) => (
+									<FormItem className="flex flex-row justify-between">
+										<div className="space-y-2">
+											<FormLabel className="text-xs text-foreground">Make default</FormLabel>
+											<FormDescription className="max-w-64 text-xs font-light">
+												Enabling this will make this the default <span className="font-semibold">{form.getValues('type')}</span>boarding checklist for everyone
+											</FormDescription>
+										</div>
+
+										<FormControl>
+											<Switch disabled={defaultBoarding && defaultBoarding?.length > 0 && defaultBoarding[0].id !== data?.id} className="!m-0 scale-75" checked={field.value} onCheckedChange={field.onChange} />
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+
+							{defaultBoarding && defaultBoarding?.length > 0 && defaultBoarding[0].id !== data?.id && (
+								<Alert className="text-xs">
+									<TriangleAlert size={14} className="stroke-orange-400" />
+									<AlertTitle>Current default</AlertTitle>
+									<AlertDescription className="text-xs font-light text-muted-foreground">&quot;{defaultBoarding[0]?.name}&quot; is the current default. You&apos;ll have to remove it as default to set another default</AlertDescription>
+								</Alert>
+							)}
+
+							<FormField
+								control={form.control}
+								name="checklist"
+								render={() => (
+									<FormItem>
+										<FormLabel>
+											<h2 className="mb-4 mt-16 text-sm font-medium text-foreground">Checklist</h2>
+										</FormLabel>
+
+										{items.length > 0 && (
+											<ul className="w-full space-y-8">
+												{items.map((_item, index) => (
+													<li key={index} className="flex w-full gap-2">
+														<div className="h-5 w-5 rounded-full border"></div>
+
+														<div className="w-full space-y-4">
+															<FormField
+																control={form.control}
+																name={`checklist.${index}.item`}
+																render={({ field }) => (
+																	<FormItem>
+																		<FormLabel>Item {index + 1} *</FormLabel>
+																		<FormControl>
+																			<Input placeholder="E.g Return company laptop" {...field} />
+																		</FormControl>
+																		<FormMessage />
+																	</FormItem>
+																)}
+															/>
+
+															<FormField
+																control={form.control}
+																name={`checklist.${index}.description`}
+																render={({ field }) => (
+																	<FormItem>
+																		<FormLabel>Description</FormLabel>
+																		<FormControl>
+																			<Textarea placeholder="You can explain how to get this item done here" {...field} />
+																		</FormControl>
+																		<FormMessage />
+																	</FormItem>
+																)}
+															/>
+														</div>
+													</li>
+												))}
+											</ul>
+										)}
+
+										{items.length == 0 && (
+											<div className="flex min-h-32 flex-col items-center justify-center gap-3 rounded-md bg-accent/70 text-xs text-muted-foreground">
+												<p>No items added yet</p>
+												<Button type="button" className="gap-2" onClick={() => updateItems([...items, { item: '', description: '' }])}>
+													<Plus size={12} />
+													Add item
+												</Button>
+											</div>
+										)}
+
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							{items.length > 0 && (
+								<Button type="button" variant={'secondary'} className="gap-2" onClick={() => updateItems([...items, { item: '', description: '' }])}>
+									<Plus size={12} />
+									<Separator orientation="vertical" />
+									Add item
+									<List size={12} />
+								</Button>
+							)}
+
+							<SubmitButton />
+						</form>
+					</Form>
+				</section>
+			</SheetContent>
+		</Sheet>
+	);
+};
