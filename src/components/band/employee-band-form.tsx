@@ -135,19 +135,6 @@ export const EmployeeBandDialog = ({ band, org }: props) => {
 								{band.level} • <span className="text-muted-foreground">{band.role}</span>
 							</div>
 							<div className="flex items-center gap-2 text-muted-foreground">
-								<div>
-									{new Intl.NumberFormat('en-US', {
-										style: 'currency',
-										currency: 'USD'
-									}).format(band.min_salary)}{' '}
-								</div>
-								-
-								<div>
-									{new Intl.NumberFormat('en-US', {
-										style: 'currency',
-										currency: 'USD'
-									}).format(band.max_salary)}
-								</div>
 								<ChevronRight size={14} />
 							</div>
 						</button>

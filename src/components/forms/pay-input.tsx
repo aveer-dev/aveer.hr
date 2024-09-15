@@ -14,9 +14,10 @@ interface props {
 	maxValue?: number | null;
 	salaryInvalid?: boolean;
 	validateSalary?: (salary: number) => void;
+	currency: string;
 }
 
-export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue, validateSalary }: props) => {
+export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue, validateSalary, currency }: props) => {
 	const EmployeeBandSalaryRange = () => {
 		if (!minValue || !maxValue) return;
 
@@ -27,14 +28,14 @@ export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue,
 						<div>
 							{new Intl.NumberFormat('en-US', {
 								style: 'currency',
-								currency: 'USD'
+								currency: currency || ''
 							}).format(minValue)}
 						</div>
 						-
 						<div>
 							{new Intl.NumberFormat('en-US', {
 								style: 'currency',
-								currency: 'USD'
+								currency: currency || ''
 							}).format(maxValue)}
 						</div>
 						<TooltipProvider>
@@ -90,7 +91,7 @@ export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue,
 						<FormDescription>
 							{new Intl.NumberFormat('en-US', {
 								style: 'currency',
-								currency: 'USD'
+								currency: currency
 							}).format(Number(field.value))}
 						</FormDescription>
 					)}

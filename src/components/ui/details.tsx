@@ -189,6 +189,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						</Button>
 					)}
 				</div>
+
 				<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
 					<li className="grid gap-3">
 						<h2 className="flex items-center gap-2 text-sm font-medium">
@@ -202,7 +203,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						<p className="text-sm font-light">
 							{new Intl.NumberFormat('en-US', {
 								style: 'currency',
-								currency: 'USD'
+								currency: data.entity.incorporation_country.currency_code || ''
 							}).format(Number(data?.salary))}
 						</p>
 					</li>
@@ -220,7 +221,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 							{data?.signing_bonus
 								? new Intl.NumberFormat('en-US', {
 										style: 'currency',
-										currency: 'USD'
+										currency: data.entity.incorporation_country.currency_code || ''
 									}).format(Number(data?.signing_bonus))
 								: '--'}
 						</p>
@@ -260,7 +261,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 												<span className="text-xs font-light text-muted-foreground">
 													{new Intl.NumberFormat('en-US', {
 														style: 'currency',
-														currency: 'USD'
+														currency: data.entity.incorporation_country.currency_code || ''
 													}).format(Number(allowance.amount))}
 												</span>
 											</div>

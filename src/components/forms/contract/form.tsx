@@ -52,6 +52,7 @@ interface props {
 
 export const ContractForm = ({ contractData, openRoleData, contractDuplicate, openRoleDuplicate, orgBenefits, formType = 'contract' }: props) => {
 	const [entities, setEntities] = useState<Tables<'legal_entities'>[]>([]);
+	const [entityCurrency, setCurrency] = useState('');
 	const [roles, setRoles] = useState<Tables<'open_roles'>[]>([]);
 	const [orgJobLevels, updateOrgJobLevels] = useState<TablesInsert<'employee_levels'>[]>([]);
 	const [eorEntities, setEorEntities] = useState<Tables<'legal_entities'>[]>([]);
@@ -191,11 +192,11 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	});
 
 	const getEntities = useCallback(async () => {
-		const { data, error } = await supabase.from('legal_entities').select().eq('org', params.org);
-		const { data: eorData, error: eorError } = await supabase.from('legal_entities').select().eq('is_eor', true);
+		const { data, error } = await supabase.from('legal_entities').select('*, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)').eq('org', params.org);
+		const { data: eorData, error: eorError } = await supabase.from('legal_entities').select('*, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)').eq('is_eor', true);
 
-		if (!error) setEntities(data);
-		if (!eorError) setEorEntities(eorData);
+		if (!error && data) setEntities(data);
+		if (!eorError && eorData) setEorEntities(eorData);
 	}, [params.org]);
 
 	const getTeams = useCallback(async () => {
@@ -493,7 +494,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 							</FormSectionDescription>
 
 							<InputsContainer>
-								<SelectLegalEntity form={form} entities={entities} eorEntities={eorEntities} />
+								<SelectLegalEntity onSelect={entity => entity.incorporation_country.currency_code && setCurrency(entity.incorporation_country.currency_code)} form={form} entities={entities as any} eorEntities={eorEntities as any} />
 							</InputsContainer>
 						</FormSection>
 
@@ -747,7 +748,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 							</FormSectionDescription>
 
 							<InputsContainer>
-								<PayInput form={form} name="salary" label="Gross annual salary" minValue={selectedLevel?.min_salary && Number(selectedLevel?.min_salary)} maxValue={selectedLevel?.max_salary && Number(selectedLevel?.max_salary)} />
+								<PayInput currency={entityCurrency} form={form} name="salary" label="Gross annual salary" minValue={selectedLevel?.min_salary && Number(selectedLevel?.min_salary)} maxValue={selectedLevel?.max_salary && Number(selectedLevel?.max_salary)} />
 
 								<FormField
 									control={form.control}
@@ -760,13 +761,19 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 											</div>
 
 											{showSigningBonus && (
-												<PayInput form={form} name="signing_bonus" minValue={selectedLevel?.min_signing_bonus && Number(selectedLevel?.min_signing_bonus)} maxValue={selectedLevel?.max_signing_bonus && Number(selectedLevel?.max_signing_bonus)} />
+												<PayInput
+													currency={entityCurrency}
+													form={form}
+													name="signing_bonus"
+													minValue={selectedLevel?.min_signing_bonus && Number(selectedLevel?.min_signing_bonus)}
+													maxValue={selectedLevel?.max_signing_bonus && Number(selectedLevel?.max_signing_bonus)}
+												/>
 											)}
 										</FormItem>
 									)}
 								/>
 
-								<FixedAllowance toggle={toggleShowFixedIncome} isToggled={showFixedIncome} form={form} />
+								<FixedAllowance currency={entityCurrency} toggle={toggleShowFixedIncome} isToggled={showFixedIncome} form={form} />
 
 								<AdditionalOffering toggle={toggleAdditionalOffering} isToggled={showAdditionalOffering} form={form} />
 							</InputsContainer>

@@ -12,9 +12,10 @@ interface props {
 	form: UseFormReturn<any>;
 	isToggled?: boolean;
 	toggle: (action: boolean) => void;
+	currency?: string;
 }
 
-export const FixedAllowance = ({ form, isToggled, toggle }: props) => {
+export const FixedAllowance = ({ form, isToggled, toggle, currency }: props) => {
 	const [allowance, updateAllowance] = useState({ name: '', amount: '', frequency: '' });
 
 	return (
@@ -50,7 +51,18 @@ export const FixedAllowance = ({ form, isToggled, toggle }: props) => {
 										{form.getValues().fixed_allowance?.map((allowance: { name: string; amount: string; frequency: string }, index: number) => (
 											<li key={index} className="flex list-disc items-center justify-between p-1 text-xs font-light">
 												<div>
-													{allowance?.name} • <span className="text-xs font-light text-muted-foreground">${allowance.amount}</span>
+													{allowance?.name} •{' '}
+													<span className="text-xs font-light text-muted-foreground">
+														{new Intl.NumberFormat(
+															'en-US',
+															currency
+																? {
+																		style: 'currency',
+																		currency: currency
+																	}
+																: {}
+														).format(Number(allowance.amount) || 0)}
+													</span>
 												</div>
 												<div className="text-muted-foreground">{allowance.frequency}</div>
 											</li>

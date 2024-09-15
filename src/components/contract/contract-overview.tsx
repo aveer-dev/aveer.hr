@@ -13,7 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
 interface props {
-	data: Tables<'contracts'> & { profile: Tables<'profiles'>; org: Tables<'organisations'> };
+	data: Tables<'contracts'> & { profile: Tables<'profiles'>; org: Tables<'organisations'>; entity: Tables<'legal_entities'> & { incorporation_country: { currency_code: string } } };
 }
 
 export const ContractOverview = async ({ data }: props) => {
@@ -125,7 +125,7 @@ export const ContractOverview = async ({ data }: props) => {
 					{data?.salary
 						? new Intl.NumberFormat('en-US', {
 								style: 'currency',
-								currency: 'USD'
+								currency: data.entity.incorporation_country?.currency_code || ''
 							}).format(data?.salary)
 						: '00'}
 				</h3>

@@ -79,7 +79,7 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 
 			updateLevels(() => newLevels);
 		},
-		[data.levels, getPeopleInLevels, role]
+		[getPeopleInLevels, role, userId]
 	);
 
 	const getManagerStatus = useCallback(async (team: number, org: string, profile: string) => {

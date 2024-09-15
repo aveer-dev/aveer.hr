@@ -266,6 +266,8 @@ export type Database = {
           can_legal_entity: boolean
           country_code: string
           created_at: string
+          currency_code: string | null
+          currency_name: string | null
           dial_code: string
           id: number
           name: string
@@ -274,6 +276,8 @@ export type Database = {
           can_legal_entity?: boolean
           country_code: string
           created_at?: string
+          currency_code?: string | null
+          currency_name?: string | null
           dial_code: string
           id?: number
           name: string
@@ -282,6 +286,8 @@ export type Database = {
           can_legal_entity?: boolean
           country_code?: string
           created_at?: string
+          currency_code?: string | null
+          currency_name?: string | null
           dial_code?: string
           id?: number
           name?: string

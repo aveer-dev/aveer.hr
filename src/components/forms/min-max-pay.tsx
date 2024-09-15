@@ -16,9 +16,10 @@ interface props {
 	showToggle?: boolean;
 	isToggled?: boolean;
 	toggle?: Dispatch<SetStateAction<boolean>>;
+	currency?: string;
 }
 
-export const MinMaxPay = ({ form, name, label, formLabel, tooltip, showToggle, isToggled, toggle }: props) => {
+export const MinMaxPay = ({ form, name, label, formLabel, tooltip, showToggle, isToggled, toggle, currency }: props) => {
 	return (
 		<FormField
 			control={form.control}
@@ -61,7 +62,7 @@ export const MinMaxPay = ({ form, name, label, formLabel, tooltip, showToggle, i
 											{field.value
 												? new Intl.NumberFormat('en-US', {
 														style: 'currency',
-														currency: 'USD'
+														currency: currency
 													}).format(Number(field.value))
 												: ''}
 										</FormDescription>
@@ -83,7 +84,7 @@ export const MinMaxPay = ({ form, name, label, formLabel, tooltip, showToggle, i
 											{field.value
 												? new Intl.NumberFormat('en-US', {
 														style: 'currency',
-														currency: 'USD'
+														currency: currency
 													}).format(Number(field.value))
 												: ''}
 										</FormDescription>

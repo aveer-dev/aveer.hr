@@ -2,7 +2,7 @@ import { Database } from './database.types';
 
 export interface CONTRACT {
 	org: { name: string; id: string; subdomain: string };
-	entity: { name: string; id: string; incorporation_country: { country_code: string; name: string } };
+	entity: { name: string; id: string; incorporation_country: { country_code: string; name: string; currency_code: string } };
 	salary: number;
 	start_date: string;
 	employment_type: string;

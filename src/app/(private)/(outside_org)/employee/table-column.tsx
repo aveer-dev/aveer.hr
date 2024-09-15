@@ -42,7 +42,7 @@ export const columns: ColumnDef<CONTRACT>[] = [
 			<span>
 				{new Intl.NumberFormat('en-US', {
 					style: 'currency',
-					currency: 'USD'
+					currency: row.original.entity.incorporation_country.currency_code
 				}).format(row.original.salary)}
 			</span>
 		)
