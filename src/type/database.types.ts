@@ -139,6 +139,58 @@ export type Database = {
           },
         ]
       }
+      contract_check_list: {
+        Row: {
+          boarding: number
+          checklist: Json[]
+          contract: number
+          created_at: string
+          id: number
+          org: string
+          state: Database["public"]["Enums"]["boarding_state"]
+        }
+        Insert: {
+          boarding: number
+          checklist?: Json[]
+          contract: number
+          created_at?: string
+          id?: number
+          org: string
+          state?: Database["public"]["Enums"]["boarding_state"]
+        }
+        Update: {
+          boarding?: number
+          checklist?: Json[]
+          contract?: number
+          created_at?: string
+          id?: number
+          org?: string
+          state?: Database["public"]["Enums"]["boarding_state"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_check_list_boarding_fkey"
+            columns: ["boarding"]
+            isOneToOne: false
+            referencedRelation: "boaring_check_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_check_list_contract_fkey"
+            columns: ["contract"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_check_list_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           additional_offerings: Json[] | null
@@ -154,6 +206,8 @@ export type Database = {
           level_name: string | null
           maternity_leave: number | null
           maternity_leave_used: number | null
+          offboarding: number | null
+          onboarding: number | null
           org: string
           org_signature_string: string | null
           org_signed: string | null
@@ -195,6 +249,8 @@ export type Database = {
           level_name?: string | null
           maternity_leave?: number | null
           maternity_leave_used?: number | null
+          offboarding?: number | null
+          onboarding?: number | null
           org: string
           org_signature_string?: string | null
           org_signed?: string | null
@@ -236,6 +292,8 @@ export type Database = {
           level_name?: string | null
           maternity_leave?: number | null
           maternity_leave_used?: number | null
+          offboarding?: number | null
+          onboarding?: number | null
           org?: string
           org_signature_string?: string | null
           org_signed?: string | null
@@ -276,6 +334,20 @@ export type Database = {
             columns: ["level"]
             isOneToOne: false
             referencedRelation: "employee_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_offboarding_fkey"
+            columns: ["offboarding"]
+            isOneToOne: false
+            referencedRelation: "boaring_check_list"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_onboarding_fkey"
+            columns: ["onboarding"]
+            isOneToOne: false
+            referencedRelation: "boaring_check_list"
             referencedColumns: ["id"]
           },
           {
@@ -1283,6 +1355,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      boarding_state: "initial" | "pending" | "approved"
       boarding_type: "on" | "off"
       contract_state:
         | "awaiting signatures"
