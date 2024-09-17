@@ -34,7 +34,7 @@ export const deleteBoarding = async (org: string, id?: number) => {
 	if (typeof hasPermission == 'string') return hasPermission;
 
 	const supabase = createClient();
-	const { error } = await supabase.from('employee_levels').delete().match({ id, org });
-	if (error) return error.code == '23503' ? 'Level is still connected to one or more employees' : error.message;
+	const { error } = await supabase.from('boaring_check_list').delete().match({ id, org });
+	if (error) return error.code == '23503' ? 'Checklist is still connected to one or more employees' : error.message;
 	return true;
 };

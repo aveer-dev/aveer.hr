@@ -6,7 +6,7 @@ import { Tables, TablesInsert } from '@/type/database.types';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { ChevronRightIcon, List, Plus, TriangleAlert } from 'lucide-react';
+import { ChevronRightIcon, List, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -21,9 +21,10 @@ import { Switch } from '@/components/ui/switch';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { createBoarding, updateBoarding } from './boarding.action';
+import { createBoarding, deleteBoarding, updateBoarding } from './boarding.action';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
+import { generateRandomString } from '@/utils/generate-string';
 
 interface props {
 	data?: Tables<'boaring_check_list'>;
@@ -38,7 +39,7 @@ const formSchema = z.object({
 	type: z.enum(['off', 'on']),
 	is_default: z.boolean(),
 	policy: z.string(),
-	checklist: z.object({ item: z.string(), description: z.string().optional(), created_at: z.string().optional() }).array().min(1, { message: 'Add at least one item' }),
+	checklist: z.object({ item: z.string(), description: z.string().optional(), created_at: z.string().optional(), id: z.string() }).array().min(1, { message: 'Add at least one item' }),
 	org: z.string()
 });
 
@@ -46,6 +47,7 @@ const supabase = createClient();
 
 export const Boarding = ({ data, children, className, org }: props) => {
 	const [isUpdating, setUpdateState] = useState(false);
+	const [isDeleting, setDeleteState] = useState(false);
 	const [items, updateItems] = useState<{ item: string; description: string; created_at?: string }[]>((data?.checklist as any[]) || []);
 	const [defaultBoarding, setDefaultBoarding] = useState<Tables<'boaring_check_list'>[]>();
 	const [policies, setPolicies] = useState<Tables<'approval_policies'>[]>();
@@ -99,6 +101,31 @@ export const Boarding = ({ data, children, className, org }: props) => {
 				{pending || isUpdating ? (data ? 'Updating checklist' : 'Creating checklist') : data ? 'Update checklist' : 'Create team'}
 			</Button>
 		);
+	};
+
+	const addChecklistItem = () => {
+		updateItems([...items, { item: '', description: '' }]);
+		form.setValue('checklist', [...form.getValues('checklist'), { item: '', description: '', id: generateRandomString(5) }]);
+	};
+
+	const removeChecklistItem = (index: number) => {
+		const newItems = items.splice(index, 1);
+		updateItems(newItems);
+
+		const newFormItems = form.getValues('checklist').splice(index, 1);
+		form.setValue('checklist', newFormItems);
+	};
+
+	const onDeleteBoarding = async (id: number) => {
+		setDeleteState(true);
+
+		const response = await deleteBoarding(org, id);
+		setDeleteState(false);
+		if (response !== true) return toast.error('Error deleting checklist', { description: response });
+
+		toast.success(`Checklist deleted`, { description: `Checklist has been deleted successfully` });
+		toggleDialogState(false);
+		router.refresh();
 	};
 
 	return (
@@ -265,7 +292,13 @@ export const Boarding = ({ data, children, className, org }: props) => {
 																name={`checklist.${index}.item`}
 																render={({ field }) => (
 																	<FormItem>
-																		<FormLabel>Item {index + 1} *</FormLabel>
+																		<FormLabel className="flex items-center justify-between">
+																			<div>Item {index + 1} *</div>
+																			<button type="button" onClick={() => removeChecklistItem(index)} className="text-destructive">
+																				<Trash2 size={10} />
+																			</button>
+																		</FormLabel>
+
 																		<FormControl>
 																			<Input placeholder="E.g Return company laptop" {...field} />
 																		</FormControl>
@@ -296,7 +329,7 @@ export const Boarding = ({ data, children, className, org }: props) => {
 										{items.length == 0 && (
 											<div className="flex min-h-32 flex-col items-center justify-center gap-3 rounded-md bg-accent/70 text-xs text-muted-foreground">
 												<p>No items added yet</p>
-												<Button type="button" className="gap-2" onClick={() => updateItems([...items, { item: '', description: '' }])}>
+												<Button type="button" className="gap-2" onClick={addChecklistItem}>
 													<Plus size={12} />
 													Add item
 												</Button>
@@ -309,7 +342,7 @@ export const Boarding = ({ data, children, className, org }: props) => {
 							/>
 
 							{items.length > 0 && (
-								<Button type="button" variant={'secondary'} className="gap-2" onClick={() => updateItems([...items, { item: '', description: '' }])}>
+								<Button type="button" variant={'secondary'} className="gap-2" onClick={addChecklistItem}>
 									<Plus size={12} />
 									<Separator orientation="vertical" />
 									Add item
@@ -317,7 +350,16 @@ export const Boarding = ({ data, children, className, org }: props) => {
 								</Button>
 							)}
 
-							<SubmitButton />
+							<div className="flex items-center gap-4">
+								{data?.id && (
+									<Button type="button" onClick={() => onDeleteBoarding(data?.id)} variant={'secondary_destructive'} size={'icon'} className="w-16 gap-3">
+										{!isDeleting && <Trash2 size={12} />}
+										{isDeleting && <LoadingSpinner className="text-inherit" />}
+									</Button>
+								)}
+
+								<SubmitButton />
+							</div>
 						</form>
 					</Form>
 				</section>
