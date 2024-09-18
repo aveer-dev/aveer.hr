@@ -78,8 +78,10 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType,
 		const payload = userState;
 		payload.state = 'pending';
 
-		const levels = await getApprovalLevels();
-		if (levels) payload.levels = levels;
+		if (policy) {
+			const levels = await getApprovalLevels();
+			if (levels) payload.levels = levels;
+		}
 
 		const response = await updateEmployeeBoarding(payload, org);
 

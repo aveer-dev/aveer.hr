@@ -42,7 +42,7 @@ export const Boardings = async ({ org, onboardingId, offboardingId, contract, us
 					boarding={onboarding?.data[0]?.id}
 					org={org}
 					userType={userType}
-					policy={onboarding.data[0].policy}
+					policy={onboarding.data[0]?.policy}
 				/>
 			)}
 
@@ -55,7 +55,7 @@ export const Boardings = async ({ org, onboardingId, offboardingId, contract, us
 					boarding={offboarding?.data[0]?.id}
 					org={org}
 					userType={userType}
-					policy={offboarding.data[0].policy}
+					policy={offboarding.data[0]?.policy}
 				/>
 			)}
 		</section>
