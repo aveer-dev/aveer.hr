@@ -33,7 +33,7 @@ export const Boardings = async ({ org, onboardingId, offboardingId, contract, us
 
 	return (
 		<section className="space-y-24">
-			{onboarding?.data && (
+			{onboarding?.data && onboarding?.data.length > 0 && (
 				<Boarding
 					state={typeof onboardingChecklist == 'object' && onboardingChecklist?.data && (onboardingChecklist?.data[0] as any)}
 					type={onboarding.data[0]?.type}
@@ -46,7 +46,7 @@ export const Boardings = async ({ org, onboardingId, offboardingId, contract, us
 				/>
 			)}
 
-			{(contract.terminated_by || contract.end_date) && typeof offboarding !== 'string' && typeof offboarding !== 'boolean' && typeof offboarding !== 'number' && offboarding?.data && (
+			{(contract.terminated_by || contract.end_date) && typeof offboarding !== 'string' && typeof offboarding !== 'boolean' && typeof offboarding !== 'number' && offboarding?.data && offboarding?.data.length > 0 && (
 				<Boarding
 					state={typeof offboardingChecklist == 'object' && offboardingChecklist?.data && (offboardingChecklist?.data[0] as any)}
 					type={offboarding.data[0]?.type}
@@ -57,6 +57,12 @@ export const Boardings = async ({ org, onboardingId, offboardingId, contract, us
 					userType={userType}
 					policy={offboarding.data[0]?.policy}
 				/>
+			)}
+
+			{(!onboarding?.data || !onboarding?.data.length) && (!(offboarding as any)?.data || !(offboarding as any)?.data.length) && (
+				<div className="flex h-40 items-center justify-center rounded-md bg-accent/80 text-xs text-muted-foreground">
+					<p>Boarding system hasn&apos;t been setup yet</p>
+				</div>
 			)}
 		</section>
 	);
