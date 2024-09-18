@@ -8,13 +8,12 @@ import { updateEmployeeBoarding } from './boarding.action';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/ui/loader';
-
-interface CHECKLIST {
-	item: string;
-	description: string;
-	created_at?: string;
-	id: string;
-}
+import { CHECKLIST } from '@/type/boarding.types';
+import { Separator } from '@/components/ui/separator';
+import { PanelRightOpen } from 'lucide-react';
+import { BoardingReview } from './boarding-review';
+import { createClient } from '@/utils/supabase/client';
+import { format } from 'date-fns';
 
 interface props {
 	data: CHECKLIST[];
@@ -24,15 +23,18 @@ interface props {
 	boarding: number;
 	org: string;
 	userType: 'profile' | 'org';
+	policy: number;
 }
 
-export const Boarding = ({ data, type, state, contract, boarding, org, userType }: props) => {
-	console.log('🚀 ~ Boarding ~ state:', state);
+const supabase = createClient();
+
+export const Boarding = ({ data, type, state, contract, boarding, org, userType, policy }: props) => {
 	const [items, updateItems] = useState<CHECKLIST[]>([]);
 	const [requestingApproval, setRequestState] = useState(false);
 	const [userState, updateUserState] = useState(state);
 
 	useEffect(() => {
+		updateUserState(state);
 		if (!userState) return updateItems(data);
 
 		const newItems = data.map(item => {
@@ -43,7 +45,7 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType 
 		});
 
 		updateItems(newItems as any);
-	}, [data, userState]);
+	}, [data, userState, state]);
 
 	const onCheckChange = async (value: boolean | string, index: number) => {
 		const checklist = structuredClone(items);
@@ -62,12 +64,23 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType 
 		toast('Saved');
 	};
 
+	const getApprovalLevels = async () => {
+		const { data, error } = await supabase.from('approval_policies').select().match({ id: policy, org }).single();
+		if (error) toast.error('Error fetch policy', { description: error.message });
+
+		return data?.levels;
+	};
+
 	const requestApproval = async () => {
 		if (!userState) return;
 		setRequestState(true);
 
 		const payload = userState;
 		payload.state = 'pending';
+
+		const levels = await getApprovalLevels();
+		if (levels) payload.levels = levels;
+
 		const response = await updateEmployeeBoarding(payload, org);
 
 		setRequestState(false);
@@ -89,6 +102,19 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType 
 					<div className="text-xs font-light text-muted-foreground">
 						Checked {userState?.checklist?.length || 0}/{data.length}
 					</div>
+
+					{userState?.state == 'approved' && (
+						<>
+							<Separator orientation="vertical" className="h-3" />
+
+							<BoardingReview data={state as any} reviewType={userType == 'org' ? 'admin' : ''}>
+								<Button className="flex h-7 gap-2" variant={'secondary'}>
+									Review
+									<PanelRightOpen size={12} />
+								</Button>
+							</BoardingReview>
+						</>
+					)}
 				</div>
 			</div>
 
@@ -103,16 +129,20 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType 
 								className="h-6 w-6 rounded-full border-border"
 								id={`onboarding-${index}`}
 							/>
-							<label htmlFor={`onboarding-${index}`} className="peer-disabled:opacity-7 space-y-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed">
-								<h4>{item.item}</h4>
+
+							<label htmlFor={`onboarding-${index}`} className="peer-disabled:opacity-7 w-full space-y-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed">
+								<div className="flex w-full">
+									<h4>{item.item}</h4>
+									{item.created_at && <p className="ml-auto text-xs font-light text-muted-foreground">{format(item.created_at, 'PP')}</p>}
+								</div>
 
 								<p className="text-xs font-light leading-5 text-muted-foreground">{item.description}</p>
 							</label>
 						</li>
 					))}
 
-					{!items.find(itm => !itm.created_at) && userType == 'profile' && (
-						<Button onClick={requestApproval} className="h-8 gap-2" disabled={!!items.find(itm => !itm.created_at) || userState?.state == 'pending' || userState?.state == 'approved' || requestingApproval}>
+					{!items.find(itm => !itm.created_at) && userType == 'profile' && userState?.state !== 'approved' && (
+						<Button onClick={requestApproval} className="h-8 gap-2" disabled={!!items.find(itm => !itm.created_at) || userState?.state == 'pending' || requestingApproval}>
 							{requestingApproval && <LoadingSpinner />} Request approval
 						</Button>
 					)}

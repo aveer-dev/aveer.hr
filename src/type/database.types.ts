@@ -146,6 +146,7 @@ export type Database = {
           contract: number
           created_at: string
           id: number
+          levels: Json[]
           org: string
           state: Database["public"]["Enums"]["boarding_state"]
         }
@@ -155,6 +156,7 @@ export type Database = {
           contract: number
           created_at?: string
           id?: number
+          levels?: Json[]
           org: string
           state?: Database["public"]["Enums"]["boarding_state"]
         }
@@ -164,6 +166,7 @@ export type Database = {
           contract?: number
           created_at?: string
           id?: number
+          levels?: Json[]
           org?: string
           state?: Database["public"]["Enums"]["boarding_state"]
         }
