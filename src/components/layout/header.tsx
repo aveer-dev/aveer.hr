@@ -11,7 +11,7 @@ export const Header = async ({ orgId }: { orgId?: string }) => {
 	const { data } = await supabase.auth.getUser();
 
 	return (
-		<header className="sticky top-0 z-10 w-full bg-background drop-shadow-sm">
+		<header className="sticky top-0 z-10 w-full bg-background shadow-sm">
 			<div className="flex items-center justify-between px-6 py-4">
 				<div className="flex items-center gap-3">
 					<NavLink org={orgId} href={'/'} className="font-logo text-xl font-light">
