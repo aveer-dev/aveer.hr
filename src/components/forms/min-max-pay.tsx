@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Info } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Dispatch, SetStateAction } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, currencyFormat } from '@/lib/utils';
 
 interface props {
 	form: UseFormReturn<any>;
@@ -58,14 +58,7 @@ export const MinMaxPay = ({ form, name, label, formLabel, tooltip, showToggle, i
 										<FormControl>
 											<Input type="number" {...field} onChange={(event: { target: { value: any } }) => form.setValue(`${name}.min`, Number(event.target.value))} placeholder="Min amount" />
 										</FormControl>
-										<FormDescription className="!mt-1 text-xs font-light text-muted-foreground">
-											{field.value
-												? new Intl.NumberFormat('en-US', {
-														style: 'currency',
-														currency: currency
-													}).format(Number(field.value))
-												: ''}
-										</FormDescription>
+										<FormDescription className="!mt-1 text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(field.value), currency })}</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -80,14 +73,7 @@ export const MinMaxPay = ({ form, name, label, formLabel, tooltip, showToggle, i
 										<FormControl>
 											<Input type="number" {...field} onChange={event => form.setValue(`${name}.max`, Number(event.target.value))} placeholder="Max amount" />
 										</FormControl>
-										<FormDescription className="!mt-1 text-xs font-light text-muted-foreground">
-											{field.value
-												? new Intl.NumberFormat('en-US', {
-														style: 'currency',
-														currency: currency
-													}).format(Number(field.value))
-												: ''}
-										</FormDescription>
+										<FormDescription className="!mt-1 text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(field.value), currency })}</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}

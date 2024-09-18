@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArrowUpRight, Info } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, currencyFormat } from '@/lib/utils';
 
 interface props {
 	form: UseFormReturn<any>;
@@ -25,19 +25,7 @@ export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue,
 			<>
 				{minValue && maxValue ? (
 					<div className="flex gap-1">
-						<div>
-							{new Intl.NumberFormat('en-US', {
-								style: 'currency',
-								currency: currency || ''
-							}).format(minValue)}
-						</div>
-						-
-						<div>
-							{new Intl.NumberFormat('en-US', {
-								style: 'currency',
-								currency: currency || ''
-							}).format(maxValue)}
-						</div>
+						<div>{currencyFormat({ currency, value: minValue })}</div>-<div>{currencyFormat({ currency, value: maxValue })}</div>
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>
@@ -87,14 +75,7 @@ export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue,
 						/>
 					</FormControl>
 					<FormMessage />
-					{field.value && (
-						<FormDescription>
-							{new Intl.NumberFormat('en-US', {
-								style: 'currency',
-								currency: currency
-							}).format(Number(field.value))}
-						</FormDescription>
-					)}
+					{field.value && <FormDescription>{currencyFormat({ currency, value: Number(field.value) })}</FormDescription>}
 					{salaryInvalid && <FormDescription className="text-destructive">Amount must be within the selected employee level&apos;s range</FormDescription>}
 				</FormItem>
 			)}

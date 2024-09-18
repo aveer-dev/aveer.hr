@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { DeleteFile } from './file-management/delete-file';
 import { DownloadFile } from './file-management/download-file';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
+import { cn, currencyFormat } from '@/lib/utils';
 
 interface props {
 	data: Tables<'contracts'> & { profile: Tables<'profiles'>; org: Tables<'organisations'>; entity: Tables<'legal_entities'> & { incorporation_country: { currency_code: string } } };
@@ -121,14 +121,7 @@ export const ContractOverview = async ({ data }: props) => {
 					</div>
 				</div>
 
-				<h3 className="text-4xl font-bold">
-					{data?.salary
-						? new Intl.NumberFormat('en-US', {
-								style: 'currency',
-								currency: data.entity.incorporation_country?.currency_code || ''
-							}).format(data?.salary)
-						: '00'}
-				</h3>
+				<h3 className="text-4xl font-bold">{data?.salary ? currencyFormat({ currency: data.entity.incorporation_country?.currency_code, value: data?.salary }) : '00'}</h3>
 
 				<div className="mt-3">
 					<p className="text-xs text-muted-foreground">This is you gross annual pay as stated in your contract</p>

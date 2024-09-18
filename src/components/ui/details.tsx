@@ -3,7 +3,7 @@
 import { Button } from './button';
 import { Pencil } from 'lucide-react';
 import { Badge } from './badge';
-import { cn } from '@/lib/utils';
+import { cn, currencyFormat } from '@/lib/utils';
 import { format } from 'date-fns';
 
 interface props {
@@ -43,14 +43,14 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 				</ul>
 			)}
 
-			{data?.organisations && data?.profile && (
+			{data?.org && data?.profile && (
 				<div>
 					<h1 className="mb-4 text-xl font-semibold">Parties</h1>
 					<ul className="grid grid-cols-2 gap-x-5 gap-y-14 border-t border-t-border pt-6">
 						<li>
 							<h2 className="text-sm text-muted-foreground">Employer</h2>
 							<div className="mt-4 grid gap-3 text-xs font-light">
-								<p className="text-xl font-bold">{data?.organisation?.name}</p>
+								<p className="text-xl font-bold">{data?.org?.name}</p>
 								{!data?.org_signed && <p className="mt-4 text-xs">Pending signature from company</p>}
 								{data?.org_signed && (
 									<>
@@ -59,7 +59,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 										</p>
 										<p>{data?.signed_by?.email}</p>
 										<p>
-											{data?.entity.address_code} {data?.entity.street_address}, {data?.entity.address_state}, {data?.entity.incorporation_country}
+											{data?.entity.address_code} {data?.entity.street_address}, {data?.entity.address_state}, {data?.entity.incorporation_country?.name}
 										</p>
 									</>
 								)}
@@ -79,7 +79,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 									<>
 										<p>Individual</p>
 										<p>{data?.profile?.email}</p>
-										<p>{data?.profile?.nationality}</p>
+										{data?.profile?.nationality && <p>{data?.profile?.nationality.name}</p>}
 									</>
 								)}
 							</div>
@@ -200,12 +200,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 								</Button>
 							)}
 						</h2>
-						<p className="text-sm font-light">
-							{new Intl.NumberFormat('en-US', {
-								style: 'currency',
-								currency: data.entity.incorporation_country.currency_code || ''
-							}).format(Number(data?.salary))}
-						</p>
+						<p className="text-sm font-light">{currencyFormat({ value: data.salary, currency: data.entity?.incorporation_country?.currency_code })}</p>
 					</li>
 
 					<li className="grid gap-3">
@@ -217,14 +212,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 								</Button>
 							)}
 						</h2>
-						<p className="text-sm font-light">
-							{data?.signing_bonus
-								? new Intl.NumberFormat('en-US', {
-										style: 'currency',
-										currency: data.entity.incorporation_country.currency_code || ''
-									}).format(Number(data?.signing_bonus))
-								: '--'}
-						</p>
+						<p className="text-sm font-light">{data?.signing_bonus ? currencyFormat({ value: data?.signing_bonus, currency: data.entity?.incorporation_country?.currency_code }) : '--'}</p>
 					</li>
 
 					{data?.additional_offerings?.length > 0 && (
@@ -257,13 +245,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 									<li key={index}>
 										<div className="flex items-baseline justify-between p-1 font-light">
 											<div>
-												{allowance.name} •{' '}
-												<span className="text-xs font-light text-muted-foreground">
-													{new Intl.NumberFormat('en-US', {
-														style: 'currency',
-														currency: data.entity.incorporation_country.currency_code || ''
-													}).format(Number(allowance.amount))}
-												</span>
+												{allowance.name} • <span className="text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(allowance.amount), currency: data.entity.incorporation_country.currency_code })}</span>
 											</div>
 											<div className="text-xs capitalize text-muted-foreground">{allowance.frequency.replace('-', ' ')}</div>
 										</div>
@@ -355,24 +337,26 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 				</ul>
 			</div>
 
-			{/* job schedule */}
-			<div>
-				<div className="mb-4 flex items-center justify-between">
-					<h1 className="text-lg font-semibold">Location</h1>
-					{back && (
-						<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
-							<Pencil size={12} />
-						</Button>
-					)}
-				</div>
+			{/* job location */}
+			{data?.work_location && (
+				<div>
+					<div className="mb-4 flex items-center justify-between">
+						<h1 className="text-lg font-semibold">Location</h1>
+						{back && (
+							<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
+								<Pencil size={12} />
+							</Button>
+						)}
+					</div>
 
-				<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-					<li className="grid gap-3">
-						<h2 className="flex items-center gap-2 text-sm font-medium">Work Location</h2>
-						<p className="text-sm font-light capitalize">{data?.work_location}</p>
-					</li>
-				</ul>
-			</div>
+					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
+						<li className="grid gap-3">
+							<h2 className="flex items-center gap-2 text-sm font-medium">Work Location</h2>
+							<p className="text-sm font-light capitalize">{data?.work_location}</p>
+						</li>
+					</ul>
+				</div>
+			)}
 		</>
 	);
 };

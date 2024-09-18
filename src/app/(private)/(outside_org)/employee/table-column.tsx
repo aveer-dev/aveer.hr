@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { CONTRACT } from '@/type/contract.types';
 import { ContractStatus } from '@/components/ui/status-badge';
+import { currencyFormat } from '@/lib/utils';
 
 export const columns: ColumnDef<CONTRACT>[] = [
 	{
@@ -38,14 +39,7 @@ export const columns: ColumnDef<CONTRACT>[] = [
 	{
 		id: `salary`,
 		header: 'Salary',
-		cell: ({ row }) => (
-			<span>
-				{new Intl.NumberFormat('en-US', {
-					style: 'currency',
-					currency: row.original.entity.incorporation_country.currency_code
-				}).format(row.original.salary)}
-			</span>
-		)
+		cell: ({ row }) => <span>{currencyFormat({ currency: row.original.entity.incorporation_country.currency_code, value: row.original.salary })}</span>
 	},
 	{
 		id: 'status',
