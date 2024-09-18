@@ -195,8 +195,17 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		const { data, error } = await supabase.from('legal_entities').select('*, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)').eq('org', params.org);
 		const { data: eorData, error: eorError } = await supabase.from('legal_entities').select('*, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)').eq('is_eor', true);
 
-		if (!error && data) setEntities(data);
-		if (!eorError && eorData) setEorEntities(eorData);
+		if (!error && data) {
+			setEntities(data);
+			const entity = data.find(entity => entity.id == Number(form.getValues('entity')));
+			if (entity && entity.incorporation_country.currency_code) setCurrency(entity.incorporation_country.currency_code);
+		}
+
+		if (!eorError && eorData) {
+			setEorEntities(eorData);
+			const entity = eorData.find(entity => entity.id == Number(form.getValues('entity')));
+			if (entity && entity.incorporation_country.currency_code) setCurrency(entity.incorporation_country.currency_code);
+		}
 	}, [params.org]);
 
 	const getTeams = useCallback(async () => {
@@ -303,7 +312,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			role: Number(values.role),
 			work_location: values.work_location,
 			additional_offerings: values.additional_offerings,
-			team: Number(values.team)
+			team: values.team ? Number(values.team) : null
 		};
 
 		if (showSigningBonus) contract.signing_bonus = Number(values.signing_bonus);

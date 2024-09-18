@@ -23,7 +23,11 @@ interface props {
 
 export const RoleDetails = async ({ role, orgId, type }: props) => {
 	const supabase = createClient();
-	let { data, error } = await supabase.from('open_roles').select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country), level:employee_levels!profile_contract_level_fkey(level, role)').match({ id: role, org: orgId }).single();
+	let { data, error } = await supabase
+		.from('open_roles')
+		.select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)), level:employee_levels!profile_contract_level_fkey(level, role)')
+		.match({ id: role, org: orgId })
+		.single();
 	const {
 		data: { user },
 		error: authError
