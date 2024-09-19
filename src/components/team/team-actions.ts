@@ -45,3 +45,15 @@ export const updateTeam = async (org: string, teamId: number, team: TablesInsert
 
 	return true;
 };
+
+export const deleteManager = async (org: string, managers: number[]) => {
+	const supabase = createClient();
+
+	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: org });
+	if (canUpdate !== true) return canUpdate;
+
+	const { error } = await supabase.from('managers').delete().in('id', managers);
+	if (error) return error.message;
+
+	return true;
+};

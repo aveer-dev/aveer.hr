@@ -9,9 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
-import { BriefcaseBusiness, ChevronRightIcon, CircleMinus, Plus } from 'lucide-react';
+import { BriefcaseBusiness, Check, ChevronRightIcon, ChevronsUpDown, CircleMinus, Plus } from 'lucide-react';
 import { Tables, TablesInsert } from '@/type/database.types';
 import { toast } from 'sonner';
 import { useFormStatus } from 'react-dom';
@@ -20,12 +19,27 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
-import { createTeam, updateTeam } from './team-actions';
+import { createTeam, deleteManager, updateTeam } from './team-actions';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 
 const formSchema = z.object({
 	name: z.string().min(1, { message: 'Provide team name' }),
 	description: z.string().optional(),
-	managers: z.object({ id: z.number().optional(), person: z.string(), role: z.number(), org: z.string(), team: z.number().nullable(), profile: z.string() }).array().min(1, { message: 'Add at least one manager' }),
+	managers: z
+		.object({ id: z.number().optional(), person: z.string(), role: z.number(), org: z.string(), team: z.number().nullable(), profile: z.string() })
+		.refine(input => input.person && input.role && input.team && input.profile, { message: 'Selete an employee' })
+		.array()
+		.refine(
+			inputs => {
+				if (inputs.length <= 1) return true;
+
+				const items = inputs.map(input => !!inputs.find(finder => finder.person == input.person));
+
+				return !items?.find(item => item == true);
+			},
+			{ message: 'You can mot make an employee a manager twice' }
+		),
 	org: z.string()
 });
 
@@ -36,7 +50,7 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 	const [isDialogOpen, toggleDialogState] = useState(false);
 	const [teamMembers, setTeamMembers] = useState(0);
 	const [employees, setEmployees] = useState<{ id: number; profile: { first_name: string; last_name: string; id: string } }[]>([]);
-	const [managers, setManagers] = useState<number[]>([]);
+	const [managers, setManagers] = useState<{ isOpen?: boolean; isDeleting?: boolean; id: number }[]>([]);
 	const router = useRouter();
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -48,7 +62,7 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 		setUpdateState(true);
 
 		const team: TablesInsert<'teams'> = { name: values.name, description: values.description, org: values.org };
-		const managersPayload: TablesInsert<'managers'>[] = values.managers.map(manager => ({ ...manager, person: Number(manager.person), team: manager.team || 0 }));
+		const managersPayload: TablesInsert<'managers'>[] = values.managers?.map(manager => ({ ...manager, person: Number(manager.person), team: manager.team || 0 })) || [];
 		const response = data ? await updateTeam(org, data.id, { ...team, updated_at: new Date() as any }, managersPayload) : await createTeam(org, team, managersPayload);
 		setUpdateState(false);
 
@@ -77,7 +91,7 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 			if (error) toast.error('Unable to fetch managers', { description: error.message });
 
 			if (data) {
-				setManagers(() => data.map(manager => manager.id));
+				setManagers(() => data.map(manager => ({ id: manager.id })));
 				form.setValue('managers', data.map(manager => ({ ...manager, team: manager.team, person: String(manager.person) })) as any);
 			}
 		},
@@ -102,6 +116,33 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 		if (data?.org && data?.id) getManagers(data.id, data.org);
 		if (data?.org && data?.id && data?.name) getTeamMembersCount(data.id, data.org, data.name);
 	}, [data, getEmployees, getManagers, getTeamMembersCount, org]);
+
+	const getEmployeeFullname = (index: number) => {
+		const selectedEmployeeId = form.getValues(`managers.${index}.person`);
+		if (!selectedEmployeeId) return 'Select employee type';
+
+		const employeeDetails = employees.find(employee => employee.id === Number(form.getValues(`managers.${index}.person`)))?.profile;
+		const employeeFullName = `${employeeDetails?.first_name} ${employeeDetails?.last_name}`;
+
+		return employeeFullName;
+	};
+
+	const onDeleteManager = async (manager: number, index: number) => {
+		managers[index].isDeleting = true;
+		setManagers([...managers]);
+		const response = await deleteManager(org, [manager]);
+		managers[index].isDeleting = false;
+		setManagers([...managers]);
+
+		if (response !== true) return toast.error('Error removing manager', { description: response });
+
+		managers.splice(index, 1);
+		setManagers([...managers]);
+
+		const formManagers = form.getValues('managers');
+		formManagers.splice(index, 1);
+		form.setValue('managers', formManagers);
+	};
 
 	return (
 		<Sheet open={isDialogOpen} onOpenChange={toggleDialogState}>
@@ -173,54 +214,72 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 										</FormLabel>
 
 										<div className="space-y-8">
-											{managers.map((_manager, index) => (
+											{managers.map((manager, index) => (
 												<FormField
-													control={form.control}
 													key={index}
-													name={`managers.${index}.person`}
-													render={({ field }) => (
+													control={form.control}
+													name={`managers.${index}`}
+													render={() => (
 														<FormItem>
-															<FormLabel className="flex items-center justify-between">
-																Manager {index + 1}
-																<Button
-																	type="button"
-																	onClick={() => {
-																		const newManagers = managers.splice(index, 1);
-																		setManagers(newManagers);
+															<FormField
+																control={form.control}
+																key={index}
+																name={`managers.${index}.person`}
+																render={() => (
+																	<FormItem>
+																		<FormLabel className="flex items-center justify-between">
+																			Manager {index + 1}
+																			<Button disabled={manager.isDeleting} type="button" onClick={() => onDeleteManager(manager.id, index)} variant={'ghost_destructive'} className="h-6 w-6 p-0">
+																				{!manager.isDeleting && <CircleMinus size={12} />}
+																				{manager.isDeleting && <LoadingSpinner />}
+																			</Button>
+																		</FormLabel>
 
-																		const newManagersForm = form.getValues('managers').splice(index, 1);
-																		form.setValue('managers', newManagersForm);
-																	}}
-																	variant={'ghost'}
-																	className="h-6 w-6 p-0">
-																	<CircleMinus size={12} />
-																</Button>
-															</FormLabel>
+																		<Popover
+																			open={manager.isOpen}
+																			onOpenChange={state => {
+																				manager.isOpen = state;
+																				managers[index] = manager;
+																				setManagers([...managers]);
+																			}}>
+																			<PopoverTrigger asChild>
+																				<FormControl>
+																					<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !form.getValues(`managers.${index}.person`) && 'text-muted-foreground')}>
+																						{getEmployeeFullname(index)}
+																						<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+																					</Button>
+																				</FormControl>
+																			</PopoverTrigger>
 
-															<Select
-																onValueChange={value => {
-																	const managerDetails = employees.find(employee => employee.id == Number(value));
-																	if (!managerDetails) return;
+																			<PopoverContent className="w-[300px] p-0">
+																				<Command>
+																					<CommandList>
+																						<CommandGroup>
+																							{employees.map(employee => (
+																								<CommandItem
+																									value={String(employee.id)}
+																									onSelect={value => {
+																										const managerDetails = employees.find(employee => employee.id == Number(value));
+																										if (!managerDetails) return;
 
-																	form.setValue(`managers.${index}`, { team: (data?.id as number) || null, person: String(managerDetails?.id), profile: managerDetails?.profile.id, org, role: 1 });
-																	managers[index] = managerDetails?.id;
-																	setManagers([...managers]);
-																}}
-																defaultValue={field.value}>
-																<FormControl>
-																	<SelectTrigger>
-																		<SelectValue placeholder="Select a manager from employees" />
-																	</SelectTrigger>
-																</FormControl>
+																										form.setValue(`managers.${index}`, { team: (data?.id as number) || null, person: String(managerDetails?.id), profile: managerDetails?.profile.id, org, role: 1 });
+																										managers[index] = { id: managerDetails?.id, isOpen: false };
+																										setManagers([...managers]);
+																									}}>
+																									<Check className={cn('mr-2 h-4 w-4', employee.id === Number(form.getValues(`managers.${index}.person`)) ? 'opacity-100' : 'opacity-0')} />
+																									{employee.profile.first_name} {employee.profile.first_name}
+																								</CommandItem>
+																							))}
+																						</CommandGroup>
+																					</CommandList>
+																				</Command>
+																			</PopoverContent>
+																		</Popover>
+																		<FormMessage />
+																	</FormItem>
+																)}
+															/>
 
-																<SelectContent>
-																	{employees.map(employee => (
-																		<SelectItem key={employee.id} value={String(employee.id)}>
-																			{employee.profile.first_name} {employee.profile.last_name}
-																		</SelectItem>
-																	))}
-																</SelectContent>
-															</Select>
 															<FormMessage />
 														</FormItem>
 													)}
@@ -238,7 +297,7 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 								variant={'secondary'}
 								className="gap-2"
 								onClick={() => {
-									setManagers([...managers, managers.length + 1]);
+									setManagers([...managers, { id: managers.length + 1 }]);
 									form.setValue('managers', [...form.getValues('managers'), { team: (data?.id as number) || null, person: '', profile: '', org, role: 1 }]);
 								}}>
 								<Plus size={12} />
