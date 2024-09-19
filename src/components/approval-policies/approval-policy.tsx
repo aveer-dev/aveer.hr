@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
-import { ChartNoAxesGantt, Check, ChevronsUpDown, Plus, Trash2, TriangleAlert } from 'lucide-react';
+import { ChartNoAxesGantt, Check, ChevronsUpDown, CircleMinus, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Database, Tables } from '@/type/database.types';
 import { format } from 'date-fns';
@@ -256,6 +256,7 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 									{levels.map((level, index) => (
 										<FormField
 											control={form.control}
+											key={index}
 											name={`levels.${index}`}
 											render={() => (
 												<FormItem key={index} className="mt-4 space-y-4 rounded-md bg-accent p-2">
@@ -263,7 +264,7 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 														<h3 className="text-sm font-semibold text-muted-foreground">Level {index + 1}</h3>
 														<Button
 															type="button"
-															variant={'ghost'}
+															variant={'ghost_destructive'}
 															onClick={() => {
 																levels.splice(index, 1);
 																updateLevels([...levels]);
@@ -272,8 +273,8 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 																formLevels.splice(index, 1);
 																form.setValue('levels', formLevels);
 															}}
-															className="h-6 w-6 p-0 text-destructive hover:text-destructive focus:ring-destructive focus-visible:ring-destructive">
-															<Trash2 size={12} />
+															className="h-6 w-6 p-0">
+															<CircleMinus size={12} />
 														</Button>
 													</FormLabel>
 
@@ -284,6 +285,7 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 															render={() => (
 																<FormItem className="flex w-full flex-col">
 																	<FormLabel>Employee type</FormLabel>
+
 																	<Popover
 																		open={level.isopen}
 																		onOpenChange={state => {
