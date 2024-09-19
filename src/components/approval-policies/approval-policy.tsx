@@ -11,13 +11,12 @@ import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
-import { ChartNoAxesGantt, Plus, Trash2, TriangleAlert } from 'lucide-react';
+import { ChartNoAxesGantt, Check, ChevronsUpDown, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Database, Tables } from '@/type/database.types';
 import { format } from 'date-fns';
 import { createPolicy, deletePolicy, updatePolicy } from './policy-actions';
 import { toast } from 'sonner';
-import { useFormStatus } from 'react-dom';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
@@ -25,13 +24,19 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 
 const formSchema = z.object({
 	name: z.string().min(1),
 	description: z.string().optional(),
 	type: z.enum(['time_off', 'role_application', 'boarding']),
-	levels: z.array(z.object({ type: z.string(), id: z.string(), level: z.number() })),
-	is_default: z.boolean()
+	levels: z
+		.object({ type: z.string(), id: z.string(), level: z.number() })
+		.refine(input => (input.type == 'employee' && input.id) || input.type == 'admin' || input.type == 'manager', { message: 'Selete an employee' })
+		.array()
+		.min(1, { message: 'Add at least one approval level' }),
+	is_default: z.boolean().optional()
 });
 
 const supabase = createClient();
@@ -46,7 +51,7 @@ interface props {
 }
 
 export const ApprovalPolicy = ({ data, org, children, className, onCreate, type }: props) => {
-	const [levels, updateLevels] = useState<{ type: string; id: string; level: number }[]>((data?.levels as any) || []);
+	const [levels, updateLevels] = useState<{ type: string; id: string; level: number; isopen?: boolean }[]>([]);
 	const [isUpdating, setUpdateState] = useState(false);
 	const [isDeleting, setDeleteState] = useState(false);
 	const [isDialogOpen, toggleDialogState] = useState(false);
@@ -81,25 +86,6 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 		response !== true && !!onCreate && onCreate(response);
 	};
 
-	const SubmitButton = () => {
-		const { pending } = useFormStatus();
-
-		return (
-			<Button
-				type="submit"
-				onClick={() => {
-					console.log(form.formState);
-					console.log(form.getValues());
-				}}
-				disabled={pending || isUpdating}
-				size={'sm'}
-				className="w-full gap-3 px-4 text-xs font-light">
-				{(pending || isUpdating) && <LoadingSpinner />}
-				{pending || isUpdating ? (data ? 'Updating' : 'Creating') : data ? 'Update' : 'Create'} policy
-			</Button>
-		);
-	};
-
 	const onDeletePolicy = async (id: number) => {
 		setDeleteState(true);
 
@@ -123,8 +109,20 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 		if (data?.type) getDefaultPolicy(data?.type);
 	}, [data, getDefaultPolicy, org]);
 
+	const employeeTypes = [
+		{ label: 'Admins', type: 'admin' },
+		{ label: 'Manager', type: 'manager' },
+		{ label: 'Employee', type: 'employee' }
+	];
+
 	return (
-		<Sheet open={isDialogOpen} onOpenChange={toggleDialogState}>
+		<Sheet
+			open={isDialogOpen}
+			onOpenChange={state => {
+				toggleDialogState(state);
+
+				if (state == true && data?.levels) return updateLevels(structuredClone(data?.levels as any));
+			}}>
 			<SheetTrigger asChild>
 				<button className={cn('h-fit', className)}>
 					{!children && data && (
@@ -164,178 +162,214 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 
 				<section className="grid gap-4 py-4">
 					<Form {...form}>
-						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-							<FormField
-								control={form.control}
-								name="name"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Name*</FormLabel>
-										<FormControl>
-											<Input placeholder="What would you like to call this policy" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="description"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Description</FormLabel>
-										<FormControl>
-											<Textarea placeholder="How would you describe this policy" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="type"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Policy type</FormLabel>
-										<Select
-											onValueChange={value => {
-												field.onChange(value);
-												getDefaultPolicy(value);
-											}}
-											defaultValue={field.value}>
+						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-16">
+							<div className="space-y-8">
+								<FormField
+									control={form.control}
+									name="name"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Name*</FormLabel>
 											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder="What policy is this?" />
-												</SelectTrigger>
+												<Input placeholder="What would you like to call this policy" {...field} />
 											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-											<SelectContent>
-												<SelectItem value="time_off">Time-Off</SelectItem>
-												<SelectItem value="role_application">Role applications</SelectItem>
-												<SelectItem value="boarding">Onboarding / Offboarding</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
+								<FormField
+									control={form.control}
+									name="description"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Description</FormLabel>
+											<FormControl>
+												<Textarea placeholder="How would you describe this policy" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-							<FormField
-								control={form.control}
-								name="is_default"
-								render={({ field }) => (
-									<FormItem className="flex flex-row justify-between">
-										<div className="space-y-2">
-											<FormLabel className="text-xs text-foreground">Default policy</FormLabel>
-											<FormDescription className="max-w-64 text-xs font-light">
-												Enabling this will make this the default <span className="font-semibold">{form.getValues('type')?.replace('_', ' ')}</span> policy for every one
-											</FormDescription>
-										</div>
-
-										<FormControl>
-											<Switch disabled={defaultPolicy && defaultPolicy?.length > 0 && defaultPolicy[0].id !== data?.id} className="!m-0 scale-75" checked={field.value} onCheckedChange={field.onChange} />
-										</FormControl>
-									</FormItem>
-								)}
-							/>
-
-							{defaultPolicy && defaultPolicy?.length > 0 && defaultPolicy[0].id !== data?.id && (
-								<Alert className="text-xs">
-									<TriangleAlert size={14} className="stroke-orange-400" />
-									<AlertTitle>Current default</AlertTitle>
-									<AlertDescription className="text-xs font-light text-muted-foreground">&quot;{defaultPolicy[0]?.name}&quot; is the current default. You&apos;ll have to remove it as default to set another default</AlertDescription>
-								</Alert>
-							)}
-
-							<div className="!mt-12 space-y-8">
-								<h2 className="-mb-4 text-sm font-semibold">Approval levels</h2>
-
-								{levels.map((level, index) => (
-									<div key={index} className="mt-4 space-y-4 rounded-md bg-accent p-2">
-										<div className="flex items-center justify-between">
-											<h3 className="text-sm font-semibold text-muted-foreground">Level {index + 1}</h3>
-											<Button
-												type="button"
-												variant={'ghost'}
-												onClick={() => {
-													const newLevels = levels.splice(index, 1);
-													updateLevels(newLevels);
+								<FormField
+									control={form.control}
+									name="type"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Policy type</FormLabel>
+											<Select
+												onValueChange={value => {
+													field.onChange(value);
+													getDefaultPolicy(value);
 												}}
-												className="h-6 w-6 p-0 text-destructive hover:text-destructive focus:ring-destructive focus-visible:ring-destructive">
-												<Trash2 size={12} />
-											</Button>
-										</div>
+												defaultValue={field.value}>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="What policy is this?" />
+													</SelectTrigger>
+												</FormControl>
 
-										<div className="space-y-6">
-											<FormField
-												control={form.control}
-												name={`levels.${index}.type`}
-												render={({ field }) => (
-													<FormItem>
-														<FormLabel>Employee type</FormLabel>
-														<Select
-															onValueChange={event => {
-																field.onChange(event);
-																const newLevels = [...levels];
-																newLevels[index].type = event;
-																updateLevels(newLevels);
+												<SelectContent>
+													<SelectItem value="time_off">Time-Off</SelectItem>
+													<SelectItem value="role_application">Role applications</SelectItem>
+													<SelectItem value="boarding">Onboarding / Offboarding</SelectItem>
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="is_default"
+									render={({ field }) => (
+										<FormItem className="flex flex-row justify-between">
+											<div className="space-y-2">
+												<FormLabel className="text-xs text-foreground">Default policy</FormLabel>
+												<FormDescription className="max-w-64 text-xs font-light">
+													Enabling this will make this the default <span className="font-semibold">{form.getValues('type')?.replace('_', ' ')}</span> policy for every one
+												</FormDescription>
+											</div>
+
+											<FormControl>
+												<Switch disabled={defaultPolicy && defaultPolicy?.length > 0 && defaultPolicy[0].id !== data?.id} className="!m-0 scale-75" checked={field.value} onCheckedChange={field.onChange} />
+											</FormControl>
+										</FormItem>
+									)}
+								/>
+
+								{defaultPolicy && defaultPolicy?.length > 0 && defaultPolicy[0].id !== data?.id && (
+									<Alert className="text-xs">
+										<TriangleAlert size={14} className="stroke-orange-400" />
+										<AlertTitle>Current default</AlertTitle>
+										<AlertDescription className="text-xs font-light text-muted-foreground">&quot;{defaultPolicy[0]?.name}&quot; is the current default. You&apos;ll have to remove it as default to set another default</AlertDescription>
+									</Alert>
+								)}
+							</div>
+
+							<div>
+								<h2 className="mb-4 text-sm font-medium text-foreground">Approval levels</h2>
+
+								<div className="space-y-8">
+									{levels.map((level, index) => (
+										<FormField
+											control={form.control}
+											name={`levels.${index}`}
+											render={() => (
+												<FormItem key={index} className="mt-4 space-y-4 rounded-md bg-accent p-2">
+													<FormLabel className="flex items-center justify-between">
+														<h3 className="text-sm font-semibold text-muted-foreground">Level {index + 1}</h3>
+														<Button
+															type="button"
+															variant={'ghost'}
+															onClick={() => {
+																levels.splice(index, 1);
+																updateLevels([...levels]);
+
+																const formLevels = form.getValues('levels');
+																formLevels.splice(index, 1);
+																form.setValue('levels', formLevels);
 															}}
-															defaultValue={field.value}>
-															<FormControl>
-																<SelectTrigger>
-																	<SelectValue placeholder="Select the kind of employee for approval" />
-																</SelectTrigger>
-															</FormControl>
+															className="h-6 w-6 p-0 text-destructive hover:text-destructive focus:ring-destructive focus-visible:ring-destructive">
+															<Trash2 size={12} />
+														</Button>
+													</FormLabel>
 
-															<SelectContent>
-																<SelectItem value="manager">Managers</SelectItem>
-																<SelectItem value="employee">Employee</SelectItem>
-																<SelectItem value="admin">Admins</SelectItem>
-															</SelectContent>
-														</Select>
-														<FormMessage />
-													</FormItem>
-												)}
-											/>
+													<div className="space-y-6">
+														<FormField
+															control={form.control}
+															name={`levels.${index}.type`}
+															render={() => (
+																<FormItem className="flex w-full flex-col">
+																	<FormLabel>Employee type</FormLabel>
+																	<Popover
+																		open={level.isopen}
+																		onOpenChange={state => {
+																			level.isopen = state;
+																			levels[index] = level;
+																			updateLevels([...levels]);
+																		}}>
+																		<PopoverTrigger asChild>
+																			<FormControl>
+																				<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !form.getValues(`levels.${index}.type`) && 'text-muted-foreground')}>
+																					{form.getValues(`levels.${index}.type`) ? employeeTypes.find(type => type.type === form.getValues(`levels.${index}.type`))?.label : 'Select employee type'}
+																					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+																				</Button>
+																			</FormControl>
+																		</PopoverTrigger>
 
-											{levels[index].type == 'employee' && (
-												<FormField
-													control={form.control}
-													name={`levels.${index}.id`}
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>Employee</FormLabel>
-															<Select onValueChange={field.onChange} defaultValue={field.value}>
-																<FormControl>
-																	<SelectTrigger>
-																		<SelectValue placeholder="Select an employee" />
-																	</SelectTrigger>
-																</FormControl>
+																		<PopoverContent className="w-[300px] p-0">
+																			<Command>
+																				<CommandList>
+																					<CommandGroup>
+																						{employeeTypes.map(type => (
+																							<CommandItem
+																								value={type.type}
+																								onSelect={value => {
+																									form.setValue(`levels.${index}.type`, value);
+																									if (value !== 'employee') form.setValue(`levels.${index}.id`, '');
+																									levels[index] = { ...levels[index], type: value, isopen: false };
+																									updateLevels([...levels]);
+																								}}>
+																								<Check className={cn('mr-2 h-4 w-4', type.type === form.getValues(`levels.${index}.type`) ? 'opacity-100' : 'opacity-0')} />
+																								{type.label}
+																							</CommandItem>
+																						))}
+																					</CommandGroup>
+																				</CommandList>
+																			</Command>
+																		</PopoverContent>
+																	</Popover>
 
-																<SelectContent>
-																	{employees.map(employee => (
-																		<SelectItem key={employee.id} value={String(employee.id)}>
-																			{employee.profile.first_name} {employee.profile.last_name} • {employee.job_title}
-																		</SelectItem>
-																	))}
-																</SelectContent>
-															</Select>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
+																	<FormMessage />
+																</FormItem>
+															)}
+														/>
+
+														{levels[index].type == 'employee' && (
+															<FormField
+																control={form.control}
+																name={`levels.${index}.id`}
+																render={({ field }) => (
+																	<FormItem>
+																		<FormLabel>Employee</FormLabel>
+																		<Select onValueChange={field.onChange} defaultValue={field.value}>
+																			<FormControl>
+																				<SelectTrigger>
+																					<SelectValue placeholder="Select an employee" />
+																				</SelectTrigger>
+																			</FormControl>
+
+																			<SelectContent>
+																				{employees.map(employee => (
+																					<SelectItem key={employee.id} value={String(employee.id)}>
+																						{employee.profile.first_name} {employee.profile.last_name} • {employee.job_title}
+																					</SelectItem>
+																				))}
+																			</SelectContent>
+																		</Select>
+
+																		<FormMessage />
+																	</FormItem>
+																)}
+															/>
+														)}
+													</div>
+
+													<FormMessage />
+												</FormItem>
 											)}
-										</div>
-									</div>
-								))}
+										/>
+									))}
+								</div>
 
 								<Button
 									type="button"
 									onClick={() => {
-										updateLevels([...levels, { type: 'manager', id: '', level: levels.length + 1 }]);
-										form.setValue('levels', [...form.getValues('levels'), { type: 'manager', id: '', level: levels.length + 1 }]);
+										updateLevels([...levels, { type: '', id: '', level: levels.length + 1 }]);
+										form.setValue('levels', [...form.getValues('levels'), { type: '', id: '', level: levels.length + 1 }]);
 									}}
 									variant={'secondary'}
 									className="mt-8 gap-3">
@@ -354,7 +388,10 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 									</Button>
 								)}
 
-								<SubmitButton />
+								<Button type="submit" disabled={isUpdating} size={'sm'} className="w-full gap-3 px-4 text-xs font-light">
+									{isUpdating && <LoadingSpinner />}
+									{isUpdating ? (data ? 'Updating' : 'Creating') : data ? 'Update' : 'Create'} policy
+								</Button>
 							</div>
 						</form>
 					</Form>
