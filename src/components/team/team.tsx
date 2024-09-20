@@ -251,6 +251,7 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 																							{employees.map(employee => (
 																								<CommandItem
 																									value={String(employee.id)}
+																									key={employee.id}
 																									onSelect={value => {
 																										const managerDetails = employees.find(employee => employee.id == Number(value));
 																										if (!managerDetails) return;
