@@ -38,6 +38,8 @@ import { AdditionalOffering } from '../additional-offering';
 import { Team } from '@/components/team/team';
 import { ApprovalPolicy } from '@/components/approval-policies/approval-policy';
 import { NavLink } from '@/components/ui/link';
+import { Badge } from '@/components/ui/badge';
+import { LoadingSpinner } from '@/components/ui/loader';
 
 const supabase = createClient();
 
@@ -76,7 +78,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	const [showAdditionalOffering, toggleAdditionalOffering] = useState(
 		!!contractData?.additional_offerings?.length || !!contractDuplicate?.additional_offerings?.length || !!openRoleData?.additional_offerings?.length || !!openRoleDuplicate?.additional_offerings?.length || !!orgBenefits?.additional_offerings?.length
 	);
-	const [showManualSystem, setManualSystem] = useState(true);
+	const [showManualSystem, setManualSystem] = useState(!(contractData?.level || contractDuplicate?.level || openRoleData?.level || openRoleDuplicate?.level));
 
 	const formSchema = z.object({
 		first_name: formType == 'contract' ? z.string() : z.string().optional(),
@@ -102,7 +104,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		requirements: z.array(z.string()).optional(),
 		work_location: z.enum(['remote', 'hybrid', 'on-site']),
 		entity: z.string(),
-		manager: z.string().optional(),
+		manager: z.boolean().optional(),
 		department: z.string().optional(),
 		role: showRolesOption ? z.string() : z.string().optional(),
 		customFields: z.array(z.string()),
@@ -187,7 +189,8 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			requirements: (openRoleData?.requirements as string[]) || (openRoleDuplicate?.requirements as string[]) || [],
 			years_of_experience: openRoleData?.years_of_experience || openRoleDuplicate?.years_of_experience || Number(''),
 			customFields: [],
-			team: ''
+			team: String(contractData?.team || contractDuplicate?.team || openRoleData?.team || openRoleDuplicate?.team || ''),
+			manager: openRoleData?.is_manager || openRoleDuplicate?.is_manager
 		}
 	});
 
@@ -206,7 +209,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			const entity = eorData.find(entity => entity.id == Number(form.getValues('entity')));
 			if (entity && entity.incorporation_country.currency_code) setCurrency(entity.incorporation_country.currency_code);
 		}
-	}, [params.org]);
+	}, [form, params.org]);
 
 	const getTeams = useCallback(async () => {
 		const { data, error } = await supabase.from('teams').select().eq('org', params.org);
@@ -214,26 +217,29 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	}, [params.org]);
 
 	const getPolicies = useCallback(async () => {
-		if (formType == 'contract') return;
-
 		const { data, error } = await supabase.from('approval_policies').select().match({ org: params.org, type: 'role_application' });
-		if (!error && data) setPolicies(data);
-	}, [formType, params.org]);
+		if (!error && data) {
+			setPolicies(data);
+			form.setValue('policy', String(data.find(item => item.is_default)?.id || ''));
+		}
+	}, [form, params.org]);
 
 	const checkIfManager = useCallback(
-		async (person: number, profile: string) => {
-			const { data, error } = await supabase.from('managers').select().match({ org: params.org, person, profile });
-			if (!error) toggleManagerState(!!data);
+		async (person: number, profile: string, team: number) => {
+			const { data, error } = await supabase.from('managers').select().match({ org: params.org, person, profile, team });
+
+			if (!error) {
+				toggleManagerState(!!data);
+				form.setValue('manager', !!data);
+			}
 		},
-		[params.org]
+		[form, params.org]
 	);
 
 	const getRoles = useCallback(async () => {
-		if (formType == 'role') return;
-
 		const { data, error } = await supabase.from('open_roles').select().eq('org', params.org);
 		if (!error) setRoles(data);
-	}, [formType, params.org]);
+	}, [params.org]);
 
 	const getOrgLevels = useCallback(async () => {
 		const { data, error } = await supabase.from('employee_levels').select().match({ org: params.org });
@@ -267,7 +273,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			state: 'closed',
 			additional_offerings: values.additional_offerings,
 			custom_fields: values.customFields,
-			team: Number(values.team),
+			team: values.team ? Number(values.team) : null,
 			is_manager: isManager,
 			policy: Number(values.policy)
 		};
@@ -383,16 +389,19 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 
 	useEffect(() => {
 		getEntities();
-		getRoles();
 		getOrgLevels();
 		getTeams();
-		getPolicies();
 
 		if (formType == 'contract') {
 			const contractId = contractData?.id || contractDuplicate?.id;
 			const profileId = contractData?.profile || contractDuplicate?.profile;
-			if (contractId && profileId) checkIfManager(contractId, profileId);
+			const team = contractData?.team || contractDuplicate?.team;
+			if (contractId && profileId && team) checkIfManager(contractId, profileId, team);
+
+			getRoles();
 		}
+
+		if (formType == 'role') getPolicies();
 	}, [getEntities, getRoles, getOrgLevels, getTeams, checkIfManager, contractData, contractDuplicate, formType, getPolicies]);
 
 	const onSetLevel = (level: TablesInsert<'employee_levels'> | undefined) => {
@@ -479,17 +488,13 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			<NewRoleDialog onClose={resetForm} isAlertOpen={showNewRoleDialog} toggleDialog={toggleNewRoleDialog} roleId={newRoleId} />
 
 			{showFormDetails && (
-				<ContractDetails
-					isManager={isManager}
-					team={teams.find(team => team.id == Number(form.getValues('team')))?.name}
-					isSubmiting={isSubmiting}
-					formType={formType}
-					update={!!contractData}
-					back={toggleFormDetails}
-					submit={onSubmit}
-					level={selectedLevel}
-					data={form.getValues()}
-				/>
+				<ContractDetails isManager={isManager} team={teams.find(team => team.id == Number(form.getValues('team')))?.name} formType={formType} back={toggleFormDetails} level={selectedLevel} data={form.getValues()} currency={entityCurrency}>
+					<Button onClick={onSubmit} disabled={isSubmiting} type="submit" size={'sm'} className="gap-3 px-6 text-sm font-light">
+						{isSubmiting && <LoadingSpinner />}
+						{formType == 'contract' && <>{isSubmiting ? (!!contractData ? 'Updating person' : 'Adding person') : !!contractData ? 'Update person' : 'Add person'}</>}
+						{formType == 'role' && <>{isSubmiting ? (!!openRoleData ? 'Updating role' : 'Creating role') : !!openRoleData ? 'Update role' : 'Create role'}</>}
+					</Button>
+				</ContractDetails>
 			)}
 
 			{!showFormDetails && (
@@ -908,6 +913,11 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 														{policies.map(policy => (
 															<SelectItem key={policy.id} value={String(policy.id)}>
 																{policy.name}
+																{policy.is_default && (
+																	<Badge variant={'outline'} className="ml-2 h-5 text-[10px]">
+																		default
+																	</Badge>
+																)}
 															</SelectItem>
 														))}
 													</SelectContent>

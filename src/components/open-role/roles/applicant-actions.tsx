@@ -4,7 +4,7 @@ import { CalendarDays, Check, ChevronsUpDown, Info, Mail } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { updateApplication } from './application.action';
@@ -12,6 +12,8 @@ import { Tables, TablesUpdate } from '@/type/database.types';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ApplicantBadge } from '@/components/ui/applicant-stage-badge';
+import { createClient } from '@/utils/supabase/client';
+import { LEVEL } from '@/type/roles.types';
 
 const AcceptedApplicantActions = ({ email, name, org }: { email: string; org: string; name: string }) => {
 	const [showMailDialog, toggleMailDialog] = useState(false);
@@ -44,16 +46,31 @@ interface props {
 	className?: string;
 }
 
+const supabase = createClient();
+
 export const UpdateApplication = ({ id, onUpdateItem, stage, org, levels, className }: props) => {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(stage);
 	const [isUpdating, setUpdateState] = useState(false);
 
+	const getDefaultApprovalPolicy = useCallback(async () => {
+		const { data, error } = await supabase.from('approval_policies').select().match({ org, type: 'role_application', is_default: true });
+		if (error) {
+			toast.error('Unable to fetch default application review policy', { description: error.message });
+			return;
+		}
+
+		if (data && data.length > 0) return data[0].levels;
+		return;
+	}, [org]);
+
 	const onUpdateApplication = async (stage: string) => {
 		setUpdateState(true);
 
+		const applicationLevels = levels?.length ? levels : await getDefaultApprovalPolicy();
+
 		const payload: TablesUpdate<'job_applications'> = { stage };
-		if (stage == 'interview') payload.levels = levels;
+		if (stage == 'interview' && applicationLevels) payload.levels = applicationLevels as any;
 
 		const response = await updateApplication(id, payload, org);
 		setUpdateState(false);
@@ -74,7 +91,8 @@ export const UpdateApplication = ({ id, onUpdateItem, stage, org, levels, classN
 		};
 
 		if (stage == 'applicant') setToReview();
-	}, [id, onUpdateItem, org, stage]);
+		if (!levels) getDefaultApprovalPolicy();
+	}, [getDefaultApprovalPolicy, id, levels, onUpdateItem, org, stage]);
 
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
@@ -115,7 +133,7 @@ export const UpdateApplication = ({ id, onUpdateItem, stage, org, levels, classN
 													</div>
 												</TooltipTrigger>
 												<TooltipContent>
-													<p className="max-w-32 text-muted-foreground">This option will start application policy process, if any.</p>
+													<p className="max-w-32 text-[10px] text-muted-foreground">This option will start application policy process, if any.</p>
 												</TooltipContent>
 											</Tooltip>
 										</TooltipProvider>

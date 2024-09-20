@@ -1,48 +1,25 @@
 'use client';
 
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Tables, TablesUpdate } from '@/type/database.types';
+import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/client';
-import { ArrowUpRight, CalendarRange, ChevronLeft, ChevronRight, CloudDownload, Mail, MessageSquareReply, PanelRightOpenIcon, X } from 'lucide-react';
+import { ArrowUpRight, PanelRightOpenIcon, X } from 'lucide-react';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
-import { Document, Page } from 'react-pdf';
-import { pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useResizeObserver } from '@wojtekmaj/react-hooks';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import Image from 'next/image';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { UpdateApplication } from './applicant-actions';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import React from 'react';
-import { updateApplication } from './application.action';
-import { LoadingSpinner } from '@/components/ui/loader';
-import { ComposeMailDialog } from '@/components/ui/mail-dialog';
 import { NavLink } from '@/components/ui/link';
+import { APPLICANT, DOCUMENT, LEVEL } from '@/type/roles.types';
+import { ApplicantDocuments } from './applicant-documents';
+import { LevelsAction } from './level-actions';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-
-interface LEVEL {
-	action?: string;
-	id: string;
-	level: number;
-	type: string;
-	first_name?: string;
-	last_name?: string;
-	created_at?: Date;
-	feedback?: string;
-	is_employee?: boolean;
-}
 interface props {
 	data: Tables<'job_applications'> & { org: { name: string; subdomain: string }; role: Tables<'open_roles'> & { policy: Tables<'approval_policies'> }; levels: LEVEL[] };
 	onUpdate?: () => void;
@@ -51,36 +28,15 @@ interface props {
 	userRole?: 'admin' | 'manager';
 }
 
-interface DOCUMENT {
-	name: string;
-	url?: string;
-	text?: string;
-	format?: string;
-}
-
-const options = {
-	cMapUrl: '/cmaps/',
-	standardFontDataUrl: '/standard_fonts/'
-};
-
 const supabase = createClient();
-const resizeObserverOptions = {};
-const maxWidth = 420;
 
 export const ApplicantDetails = ({ data, onUpdate, children, className, userRole }: props) => {
-	const [numberOfPages, setNumberOfPages] = useState<number>(0);
-	const [activePageNumber, setActivePageNumber] = useState<number>(1);
-	const [applicantData, setApplicantData] = useState<Tables<'job_applications'> & { org: { name: string; subdomain: string }; role: Tables<'open_roles'> & { policy: Tables<'approval_policies'> }; levels: LEVEL[] }>(data);
+	const [applicantData, setApplicantData] = useState<APPLICANT>(data);
 	const [role, setRole] = useState<'admin' | 'manager' | 'employee' | null>(userRole || null);
 	const [userId, setUserId] = useState<string>();
 	const [levels, updateLevels] = useState<LEVEL[]>(applicantData.levels);
-	const [isSubmiting, setSubmitState] = useState({ reject: false, approve: false });
 	const [isDetailOpen, setDetailState] = useState(false);
-	const [showFeedback, setFeedbackState] = useState(false);
-
 	const [documents, setDocuments] = useState<DOCUMENT[]>([]);
-	const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
-	const [containerWidth, setContainerWidth] = useState<number>();
 	const router = useRouter();
 
 	const getUserId = useCallback(async () => {
@@ -94,49 +50,11 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 		return user?.id;
 	}, [router]);
 
-	const onDocumentLoadSuccess = ({ numPages }: { numPages: number }): void => {
-		setNumberOfPages(numPages);
-	};
-
-	const onResize = useCallback<ResizeObserverCallback>(entries => {
-		const [entry] = entries;
-
-		if (entry) {
-			setContainerWidth(entry.contentRect.width);
-		}
-	}, []);
-
-	const gatherDocuments = useCallback(() => {
-		const allDocuments: DOCUMENT[] = [];
-
-		const resumeWithURL = applicantData.documents?.find((doc: any) => doc.name == 'resume');
-		if (!resumeWithURL && applicantData.resume) allDocuments.push({ name: 'resume', text: applicantData.resume });
-
-		const textCoverLetter = applicantData.documents?.find((doc: any) => doc.name == 'cover letter');
-		if (!textCoverLetter && applicantData.cover_letter) allDocuments.push({ name: 'cover letter', text: applicantData.cover_letter });
-
-		const getDocumentLink = (url: string) => {
-			const { data } = supabase.storage.from('job-applications').getPublicUrl(url);
-			const breakDownString = data.publicUrl.split('.');
-			return { url: data.publicUrl, format: breakDownString[breakDownString.length - 1] };
-		};
-
-		if (applicantData.documents?.length) {
-			applicantData.documents?.forEach((doc: any) => {
-				const docData = getDocumentLink(doc.path);
-				allDocuments.push({ ...docData, name: doc.name });
-				setDocuments(allDocuments);
-			});
-		} else {
-			setDocuments(allDocuments);
-		}
-	}, [applicantData]);
-
 	const getPeopleInLevels = useCallback(async (profileId: string) => {
-		const { data, error } = await supabase.from('profiles').select('first_name, last_name').eq('id', profileId).single();
+		const { data, error } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(first_name, last_name)').eq('id', profileId).single();
 		if (error) return;
 
-		return data;
+		return data.profile;
 	}, []);
 
 	const getManagerStatus = async (team: number, org: string, profile: string) => {
@@ -165,152 +83,21 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 	);
 
 	useEffect(() => {
-		gatherDocuments();
-
 		if (isDetailOpen) {
 			getUserId().then(async userId => {
 				if (role !== 'admin' && applicantData.role?.team && applicantData.org && userId) await getManagerStatus(applicantData.role.team, applicantData.org.subdomain, userId);
 				if (applicantData.levels) processLevels(applicantData.levels);
 			});
 		}
-	}, [applicantData, gatherDocuments, getUserId, processLevels, userId, isDetailOpen, userRole, role]);
-
-	useResizeObserver(containerRef, resizeObserverOptions, onResize);
+	}, [applicantData, getUserId, processLevels, userId, isDetailOpen, userRole, role]);
 
 	const onClose = (isClose: boolean) => {
 		if (isClose == false) data.stage !== applicantData.stage || data.levels !== applicantData.levels ? onUpdate && onUpdate() : router.refresh();
 	};
 
-	const onUpdateApplication = async (id: number, payload: TablesUpdate<'job_applications'>) => {
-		const response = await updateApplication(id, payload, applicantData.org.subdomain);
-		if (typeof response == 'string') return toast.error('Error updating application', { description: response });
-		setApplicantData(() => response as any);
-	};
-
-	const LevelsAction = ({ index, level }: { index: number; level: LEVEL }) => {
-		const [feedback, setFeedback] = useState('');
-
-		const submitFeedback = async (level: LEVEL, action: string, index: number) => {
-			if (!feedback) return;
-			setSubmitState({ ...isSubmiting, [action]: true });
-
-			const newLevels = (applicantData.levels as unknown as LEVEL[]).map(lv => {
-				const item: LEVEL = { id: lv.id, level: lv.level, type: lv.type };
-				lv.action && (item.action = lv.action);
-				lv.created_at && (item.created_at = lv.created_at);
-				lv.feedback && (item.feedback = lv.feedback);
-				return item;
-			});
-
-			const newLevel: LEVEL = { id: userId as string, level: level.level, type: level.type, action, feedback, created_at: new Date() };
-			newLevels[index] = newLevel;
-			await onUpdateApplication(applicantData.id, { levels: newLevels as any });
-			setFeedback('');
-			setSubmitState({ ...isSubmiting, [action]: false });
-		};
-
-		if (levels[index - 1]?.action == 'reject')
-			return (
-				<li className="relative flex w-full gap-4">
-					<div className="mt-2 h-2 w-2 rounded-full bg-foreground"></div>
-					<div className="w-full space-y-2">
-						<h3 className="text-sm capitalize">{level.type == 'employee' ? `${level.first_name} ${level.last_name}` : level.type}</h3>
-						<p className="text-xs text-muted-foreground">Application has been rejected</p>
-					</div>
-					{index !== levels.length - 1 && <Separator className="absolute left-[3px] top-10" orientation="vertical" />}
-				</li>
-			);
-
-		if ((levels[index - 1] && !levels[index - 1].action) || (!level.action && level.type != role && !level.is_employee))
-			return (
-				<li className="relative flex w-full gap-4">
-					<div className="mt-2 h-2 w-2 rounded-full bg-foreground"></div>
-					<div className="w-full space-y-2">
-						<h3 className="text-sm capitalize">{level.type}</h3>
-						<p className="text-xs text-muted-foreground">Pending review</p>
-					</div>
-					{index !== levels.length - 1 && <Separator className="absolute left-[3px] top-10" orientation="vertical" />}
-				</li>
-			);
-
-		if (!level.action && (level.type == role || level.is_employee) && levels[index - 1]?.action !== 'reject')
-			return (
-				<li className="relative flex w-full gap-4">
-					<div className="mt-2 h-2 w-2 rounded-full bg-foreground"></div>
-					<div className="w-full space-y-2">
-						<div className="flex flex-col justify-between gap-y-4">
-							<h3 className="text-sm capitalize">{level.type == 'employee' ? `${level.first_name} ${level.last_name}` : level.type}</h3>
-
-							{!showFeedback && (
-								<div className="space-y-4">
-									<Button className="w-full gap-2 py-5 sm:max-w-80 sm:justify-start" variant={'outline'}>
-										<CalendarRange size={12} /> Interview
-									</Button>
-
-									<ComposeMailDialog
-										title={`Send message to ${applicantData.first_name}`}
-										onClose={state => state == 'success' && toast.success(`Message sent to ${applicantData.first_name}`)}
-										recipients={[applicantData.email]}
-										name={`Message from ${applicantData.org}`}>
-										<Button className="w-full gap-2 py-5 sm:max-w-80 sm:justify-start" variant={'outline'}>
-											<Mail size={12} /> Message
-										</Button>
-									</ComposeMailDialog>
-									<Button onClick={() => setFeedbackState(!showFeedback)} className="w-full gap-2 py-5 sm:max-w-80 sm:justify-start" variant={'outline'}>
-										<MessageSquareReply size={12} /> Give feedback
-									</Button>
-								</div>
-							)}
-						</div>
-
-						{showFeedback && (
-							<form className="w-full space-y-2" onSubmit={event => event.preventDefault()}>
-								<Label htmlFor="feedback">Feedback</Label>
-								<Textarea placeholder="Feedback from applicant review/interview." onChange={event => setFeedback(event.target.value)} value={feedback} required className="w-full" id="feedback" name="feedback" />
-
-								<div className="flex items-center justify-between">
-									<Button type="button" variant={'ghost'} onClick={() => setFeedbackState(!showFeedback)}>
-										Cancel
-									</Button>
-
-									<div className="flex items-center gap-2">
-										<Button disabled={isSubmiting.approve || isSubmiting.reject} onClick={() => submitFeedback(level, 'reject', index)} size={'sm'} variant={'outline'}>
-											{isSubmiting.reject && <LoadingSpinner />}
-											Reject
-										</Button>
-										<Button disabled={isSubmiting.approve || isSubmiting.reject} onClick={() => submitFeedback(level, 'approve', index)} size={'sm'}>
-											{isSubmiting.approve && <LoadingSpinner />}
-											Approve
-										</Button>
-									</div>
-								</div>
-							</form>
-						)}
-					</div>
-					{index !== levels.length - 1 && <Separator className="absolute left-[3px] top-10" orientation="vertical" />}
-				</li>
-			);
-
-		if (level.action && levels[index - 1]?.action !== 'reject' && levels.find(level => level?.action !== 'reject'))
-			return (
-				<li className="relative flex w-full gap-4">
-					<div className="mt-2 h-2 w-2 rounded-full bg-foreground"></div>
-					<div className="w-full space-y-2">
-						<div className="flex items-center gap-2">
-							<h3 className="text-sm capitalize">
-								{level.first_name} {level.last_name}
-							</h3>
-							<Badge variant={level.action == 'approve' ? 'secondary-success' : level.action == 'reject' ? 'secondary-destructive' : 'secondary'} className="px-2 py-px text-[10px]">
-								{level.action}
-							</Badge>
-						</div>
-						<p className="text-xs capitalize text-muted-foreground">{level.type}</p>
-						<Card className="max-h-28 overflow-y-auto p-2 text-xs font-light leading-5 text-muted-foreground">{level.feedback}</Card>
-					</div>
-					{index !== levels.length - 1 && <Separator className="absolute left-[3px] top-10" orientation="vertical" />}
-				</li>
-			);
-	};
+	const onSetDocuments = useCallback((documents: DOCUMENT[]) => {
+		setDocuments(documents);
+	}, []);
 
 	return (
 		<Sheet
@@ -338,7 +125,7 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 							{applicantData?.first_name} {applicantData?.last_name}
 						</SheetTitle>
 						<SheetDescription>
-							<NavLink target="_blank" org={applicantData.org.subdomain} href={`/jobs/${applicantData.role.id}`} className="flex items-center gap-1 underline decoration-dashed underline-offset-2">
+							<NavLink target="_blank" org={applicantData.org.subdomain} href={`/jobs/${applicantData.role.id}`} className="flex items-center gap-1 text-foreground underline decoration-dashed underline-offset-2">
 								Role: {applicantData?.role.job_title} <ArrowUpRight className="-mb-1" size={12} />
 							</NavLink>
 						</SheetDescription>
@@ -379,7 +166,7 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 						</TabsList>
 
 						<TabsContent value="overview">
-							<ul className="space-y-16">{levels?.map((level, index) => <LevelsAction key={index} level={level} index={index} />)}</ul>
+							<ul className="space-y-16">{levels?.map((level, index) => <LevelsAction key={index} level={level} index={index} role={role} levels={levels} userId={userId} applicantData={applicantData} setApplicantData={setApplicantData} />)}</ul>
 						</TabsContent>
 
 						<TabsContent value="details">
@@ -478,59 +265,8 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 							</div>
 						</TabsContent>
 
-						{documents.length > 0 &&
-							documents.map((document, index) => (
-								<TabsContent key={index} value={document.name} className="w-[420px]">
-									{document.format == 'pdf' && (
-										<div className="group relative h-fit">
-											<div ref={setContainerRef}>
-												<Document options={options} loading={<Skeleton className="h-[554px] w-[448px]" />} className={'drop-shadow-2xl'} file={document.url} onLoadSuccess={onDocumentLoadSuccess}>
-													<Page pageNumber={activePageNumber} loading={<Skeleton className="h-[554px] w-[448px]" />} width={containerWidth ? Math.min(containerWidth, maxWidth) : maxWidth} />
-												</Document>
-
-												{numberOfPages > 1 && (
-													<div className="pointer-events-none absolute bottom-16 left-1/2 flex -translate-x-1/2 items-center gap-4 opacity-0 transition-all duration-500 group-hover:pointer-events-auto group-hover:opacity-100">
-														<Button variant={'secondary'} disabled={activePageNumber <= 1} onClick={() => setActivePageNumber(activePageNumber - 1)} className="rounded-full">
-															<ChevronLeft size={12} />
-														</Button>
-														<Button variant={'secondary'} disabled={activePageNumber >= numberOfPages} onClick={() => setActivePageNumber(activePageNumber + 1)} className="rounded-full">
-															<ChevronRight size={12} />
-														</Button>
-													</div>
-												)}
-
-												<p className="mt-8 text-xs">
-													Page {activePageNumber} of {numberOfPages}
-												</p>
-											</div>
-										</div>
-									)}
-
-									{(document.format == 'png' || document.format == 'jpg' || document.format == 'jpeg') && document.url && (
-										<div className="group relative h-fit">
-											<Image src={document.url} alt={`applicant's ${document.name}`} width={350} height={500} className="object-contain" />
-										</div>
-									)}
-
-									{document.format !== 'png' && document.format !== 'jpg' && document.format !== 'jpeg' && document.format !== 'pdf' && document.url && (
-										<div className="flex w-full max-w-[350px] flex-col items-center justify-center gap-4 text-center text-xs">
-											<p>Unable to open preview of this document format, sorry for the inconvinience, we&apos;re working on it.</p>
-											<p>Please download document to preview</p>
-
-											<div className="flex w-full items-center justify-center">
-												<Link href={document.url} target="_blank" referrerPolicy="no-referrer" className={cn(buttonVariants(), 'flex gap-3')}>
-													<CloudDownload size={14} /> Download Document
-												</Link>
-											</div>
-										</div>
-									)}
-
-									{document.text && <div className="max-h-[500px] overflow-auto text-xs leading-7">{document.text}</div>}
-								</TabsContent>
-							))}
+						<ApplicantDocuments applicantData={applicantData} setDocuments={onSetDocuments} documents={documents} />
 					</Tabs>
-
-					{documents.length < 1 && <Skeleton className="mx-auto h-full max-h-[554px] w-full max-w-[350px]" />}
 				</section>
 			</SheetContent>
 		</Sheet>

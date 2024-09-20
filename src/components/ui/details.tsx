@@ -15,9 +15,10 @@ interface props {
 	formType: 'role' | 'contract';
 	isManager?: boolean;
 	team?: string;
+	currency?: string;
 }
 
-export const Details = ({ data, back, formType, openCompensationDialog, openBenefitsDialog, openScheduleDialog, isManager, team }: props) => {
+export const Details = ({ data, back, formType, openCompensationDialog, openBenefitsDialog, openScheduleDialog, isManager, team, currency }: props) => {
 	return (
 		<>
 			{data.first_name && (
@@ -200,7 +201,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 								</Button>
 							)}
 						</h2>
-						<p className="text-sm font-light">{currencyFormat({ value: data.salary, currency: data.entity?.incorporation_country?.currency_code })}</p>
+						<p className="text-sm font-light">{currencyFormat({ value: data.salary, currency: currency || data.entity?.incorporation_country?.currency_code })}</p>
 					</li>
 
 					<li className="grid gap-3">
@@ -212,7 +213,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 								</Button>
 							)}
 						</h2>
-						<p className="text-sm font-light">{data?.signing_bonus ? currencyFormat({ value: data?.signing_bonus, currency: data.entity?.incorporation_country?.currency_code }) : '--'}</p>
+						<p className="text-sm font-light">{data?.signing_bonus ? currencyFormat({ value: data?.signing_bonus, currency: currency || data.entity?.incorporation_country?.currency_code }) : '--'}</p>
 					</li>
 
 					{data?.additional_offerings?.length > 0 && (
@@ -245,7 +246,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 									<li key={index}>
 										<div className="flex items-baseline justify-between p-1 font-light">
 											<div>
-												{allowance.name} • <span className="text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(allowance.amount), currency: data.entity.incorporation_country.currency_code })}</span>
+												{allowance.name} • <span className="text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(allowance.amount), currency: currency || data.entity.incorporation_country.currency_code })}</span>
 											</div>
 											<div className="text-xs capitalize text-muted-foreground">{allowance.frequency.replace('-', ' ')}</div>
 										</div>

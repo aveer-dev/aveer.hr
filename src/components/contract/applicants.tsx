@@ -47,10 +47,12 @@ export const Applicants = async ({ org, contract }: props) => {
 								<ApplicantDetails data={applicant as any} className="w-full text-left">
 									<Card className="flex w-full items-center justify-between border-none p-3 transition-all duration-500 group-hover:bg-accent/80 group-focus:bg-accent/80 group-focus-visible:bg-accent/80">
 										<div className="space-y-2">
-											<h2 className="text-xs">
-												{applicant?.first_name} {applicant?.last_name}
+											<div className="flex items-center gap-2">
+												<h2 className="text-xs">
+													{applicant?.first_name} {applicant?.last_name}
+												</h2>
 												<ApplicantBadge stage={applicant.stage} />
-											</h2>
+											</div>
 											<p className="text-xs text-muted-foreground">{applicant.role.job_title}</p>
 										</div>
 

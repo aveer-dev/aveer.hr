@@ -20,9 +20,10 @@ interface props {
 	title?: string;
 	description?: string;
 	children?: ReactNode;
+	replyTo?: string;
 }
 
-export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, recipients, onClose, name, title, description, children }: props) => {
+export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, recipients, onClose, name, title, description, children, replyTo }: props) => {
 	const sendMessage = async (form: FormData) => {
 		const mailMessage = form.get('message') as string;
 		const mailSubject = subject || (form.get('subject') as string);
@@ -32,7 +33,8 @@ export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, reci
 			from: `${name} <contracts@notification.aveer.hr>`,
 			to: recipients,
 			subject: mailSubject,
-			text: mailMessage
+			text: mailMessage,
+			replyTo
 		});
 
 		if (error) return toast.error(error.message);
