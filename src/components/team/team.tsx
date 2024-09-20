@@ -13,7 +13,6 @@ import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { BriefcaseBusiness, Check, ChevronRightIcon, ChevronsUpDown, CircleMinus, Plus } from 'lucide-react';
 import { Tables, TablesInsert } from '@/type/database.types';
 import { toast } from 'sonner';
-import { useFormStatus } from 'react-dom';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
@@ -74,17 +73,6 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 		if (onCreate) onCreate();
 	};
 
-	const SubmitButton = () => {
-		const { pending } = useFormStatus();
-
-		return (
-			<Button type="submit" disabled={pending || isUpdating} size={'sm'} className="w-full gap-3 px-4 text-xs font-light">
-				{(pending || isUpdating) && <LoadingSpinner />}
-				{pending || isUpdating ? (data ? 'Updating team' : 'Creating team') : data ? 'Update team' : 'Create team'}
-			</Button>
-		);
-	};
-
 	const getManagers = useCallback(
 		async (team: number, org: string) => {
 			const { data, error } = await supabase.from('managers').select().match({ org, team });
@@ -142,6 +130,11 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 		const formManagers = form.getValues('managers');
 		formManagers.splice(index, 1);
 		form.setValue('managers', formManagers);
+	};
+
+	const addManager = () => {
+		setManagers([...managers, { id: managers.length + 1 }]);
+		form.setValue('managers', [...form.getValues('managers'), { team: (data?.id as number) || null, person: '', profile: '', org, role: 1 }]);
 	};
 
 	return (
@@ -285,6 +278,16 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 													)}
 												/>
 											))}
+
+											{managers.length == 0 && (
+												<div className="flex min-h-32 flex-col items-center justify-center gap-3 rounded-md bg-accent/70 text-xs text-muted-foreground">
+													<p>No managers added yet</p>
+													<Button type="button" className="gap-2" variant={'outline'} onClick={addManager}>
+														<Plus size={12} />
+														Add manager
+													</Button>
+												</div>
+											)}
 										</div>
 
 										<FormMessage />
@@ -292,21 +295,19 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 								)}
 							/>
 
-							<Button
-								type="button"
-								variant={'secondary'}
-								className="gap-2"
-								onClick={() => {
-									setManagers([...managers, { id: managers.length + 1 }]);
-									form.setValue('managers', [...form.getValues('managers'), { team: (data?.id as number) || null, person: '', profile: '', org, role: 1 }]);
-								}}>
-								<Plus size={12} />
-								<Separator orientation="vertical" />
-								Add manager
-								<BriefcaseBusiness size={12} />
-							</Button>
+							{managers.length > 0 && (
+								<Button type="button" variant={'secondary'} className="gap-2" onClick={addManager}>
+									<Plus size={12} />
+									<Separator orientation="vertical" />
+									Add manager
+									<BriefcaseBusiness size={12} />
+								</Button>
+							)}
 
-							<SubmitButton />
+							<Button type="submit" disabled={isUpdating} size={'sm'} className="w-full gap-3 px-4 text-xs font-light">
+								{isUpdating && <LoadingSpinner />}
+								{isUpdating ? (data ? 'Updating team' : 'Creating team') : data ? 'Update team' : 'Create team'}
+							</Button>
 						</form>
 					</Form>
 				</section>
