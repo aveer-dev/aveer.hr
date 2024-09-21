@@ -34,3 +34,11 @@ export const getRoles = async ({ org }: { org: string }) => {
 
 	return res;
 };
+
+export const getPolicies = async ({ org }: { org: string }) => {
+	const supabase = createClient();
+
+	const res = await supabase.from('approval_policies').select().match({ org, type: 'role_application' });
+
+	return res;
+};

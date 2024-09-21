@@ -3,10 +3,18 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
 import { BackButton } from '@/components/ui/back-button';
 import { ContractForm } from '@/components/forms/contract/form';
+import { getFormEntities, getOrgLevels, getTeams, getRoles } from '@/utils/form-data-init';
 
 export default async function EditContractPage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
-	const { data, error } = await supabase.from('open_roles').select().match({ org: params.org, id: params.role }).single();
+
+	const [{ data, error }, entities, levels, teams, roles] = await Promise.all([
+		await supabase.from('open_roles').select().match({ org: params.org, id: params.role }).single(),
+		await getFormEntities({ org: params.org }),
+		await getOrgLevels({ org: params.org }),
+		await getTeams({ org: params.org }),
+		await getRoles({ org: params.org })
+	]);
 
 	if (error) {
 		return (
@@ -33,7 +41,7 @@ export default async function EditContractPage({ params }: { params: { [key: str
 						<Skeleton className="h-60 w-full max-w-4xl"></Skeleton>
 					</div>
 				}>
-				<ContractForm formType="role" openRoleData={data} />
+				<ContractForm formType="role" openRoleData={data} entitiesData={entities as any} levels={levels} teamsData={teams} rolesData={roles} />
 			</Suspense>
 		</div>
 	);

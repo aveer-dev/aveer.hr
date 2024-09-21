@@ -2,18 +2,20 @@ import { Suspense } from 'react';
 import { ContractForm } from '@/components/forms/contract/form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
-import { TablesUpdate } from '@/type/database.types';
 import { BackButton } from '@/components/ui/back-button';
 import { PageLoader } from '@/components/ui/page-loader';
+import { getFormEntities, getOrgLevels, getTeams, getRoles } from '@/utils/form-data-init';
 
 export default async function Home({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
-	let contractDetails: TablesUpdate<'contracts'> = {};
 	const supabase = createClient();
 
-	if (searchParams.duplicate) {
-		const { data } = await supabase.from('contracts').select().match({ id: searchParams.duplicate, org: params.org }).single();
-		if (data) contractDetails = data;
-	}
+	const [contract, entities, levels, teams, roles] = await Promise.all([
+		searchParams.duplicate ? await supabase.from('contracts').select().match({ id: searchParams.duplicate, org: params.org }).single() : undefined,
+		await getFormEntities({ org: params.org }),
+		await getOrgLevels({ org: params.org }),
+		await getTeams({ org: params.org }),
+		await getRoles({ org: params.org })
+	]);
 
 	const { data } = await supabase.from('org_settings').select().eq('org', params.org).single();
 
@@ -35,7 +37,7 @@ export default async function Home({ params, searchParams }: { params: { [key: s
 							<Skeleton className="h-60 w-full max-w-4xl"></Skeleton>
 						</div>
 					}>
-					<ContractForm orgBenefits={data} contractDuplicate={contractDetails} />
+					<ContractForm orgBenefits={data} contractData={contract?.data ? contract.data : undefined} entitiesData={entities as any} levels={levels} teamsData={teams} rolesData={roles} />
 				</Suspense>
 			</div>
 		</Suspense>

@@ -55,24 +55,23 @@ interface props {
 	orgBenefits?: Tables<'org_settings'> | null;
 	contractData?: TablesUpdate<'contracts'>;
 	openRoleData?: TablesUpdate<'open_roles'>;
-	contractDuplicate?: TablesUpdate<'contracts'>;
-	openRoleDuplicate?: TablesUpdate<'open_roles'>;
 	formType?: 'role' | 'contract';
 	entitiesData: { eorEntities: ENTITY[] | null; entities: ENTITY[] | null };
 	levels: PostgrestSingleResponse<Tables<'employee_levels'>[]>;
 	teamsData: PostgrestSingleResponse<Tables<'teams'>[]>;
 	rolesData?: PostgrestSingleResponse<Tables<'open_roles'>[]>;
 	manager?: PostgrestSingleResponse<Tables<'managers'>[]>;
+	policiesData?: PostgrestSingleResponse<Tables<'approval_policies'>[]>;
 }
 
-export const ContractForm = ({ contractData, openRoleData, contractDuplicate, openRoleDuplicate, orgBenefits, levels, formType = 'contract', entitiesData, teamsData, rolesData, manager }: props) => {
+export const ContractForm = ({ contractData, openRoleData, orgBenefits, levels, formType = 'contract', entitiesData, teamsData, rolesData, manager, policiesData }: props) => {
 	const [entities] = useState<ENTITY[]>(entitiesData?.entities ? entitiesData.entities : []);
 	const [entityCurrency, setCurrency] = useState('');
 	const [roles] = useState<Tables<'open_roles'>[]>(rolesData?.data ?? []);
 	const [orgJobLevels] = useState<TablesInsert<'employee_levels'>[]>(levels.data ?? []);
 	const [eorEntities] = useState<Tables<'legal_entities'>[]>(entitiesData?.eorEntities ? entitiesData.eorEntities : []);
-	const [showSigningBonus, toggleShowSigningBonus] = useState(!!contractData?.signing_bonus || !!contractDuplicate?.signing_bonus || !!openRoleData?.signing_bonus || !!openRoleDuplicate?.signing_bonus);
-	const [showFixedIncome, toggleShowFixedIncome] = useState(!!contractData?.fixed_allowance || !!contractDuplicate?.fixed_allowance || !!openRoleData?.fixed_allowance || !!openRoleDuplicate?.fixed_allowance);
+	const [showSigningBonus, toggleShowSigningBonus] = useState(!!contractData?.signing_bonus || !!openRoleData?.signing_bonus);
+	const [showFixedIncome, toggleShowFixedIncome] = useState(!!contractData?.fixed_allowance || !!openRoleData?.fixed_allowance);
 	const [indefiniteEndDate, toggleIndefiniteEndDate] = useState(!contractData?.end_date);
 	const [isSubmiting, toggleSubmitState] = useState(false);
 	const params = useParams<{ org: string }>();
@@ -82,16 +81,14 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	const [showNewRoleDialog, toggleNewRoleDialog] = useState(false);
 	const [newContractId, setNewContractId] = useState(0);
 	const [newRoleId, setNewRoleId] = useState(0);
-	const [showRolesOption, toggleRoleOption] = useState(formType == 'contract' ? !!(contractData || contractDuplicate)?.role : false);
+	const [showRolesOption, toggleRoleOption] = useState(formType == 'contract' ? !!contractData?.role : false);
 	const [showFormDetails, toggleFormDetails] = useState(false);
-	const [isManager, toggleManagerState] = useState(openRoleData ? !!openRoleData?.is_manager : openRoleDuplicate ? !!openRoleDuplicate?.is_manager : false);
+	const [isManager, toggleManagerState] = useState(openRoleData ? !!openRoleData?.is_manager : false);
 	const [teams, updateTeam] = useState<Tables<'teams'>[]>(teamsData.data ?? []);
-	const [policies, setPolicies] = useState<Tables<'approval_policies'>[]>([]);
+	const [policies, setPolicies] = useState<Tables<'approval_policies'>[]>(policiesData?.data ?? []);
 	const [selectedLevel, setActiveLevel] = useState<TablesInsert<'employee_levels'>>();
-	const [showAdditionalOffering, toggleAdditionalOffering] = useState(
-		!!contractData?.additional_offerings?.length || !!contractDuplicate?.additional_offerings?.length || !!openRoleData?.additional_offerings?.length || !!openRoleDuplicate?.additional_offerings?.length || !!orgBenefits?.additional_offerings?.length
-	);
-	const [showManualSystem, setManualSystem] = useState(!(contractData?.level || contractDuplicate?.level || openRoleData?.level || openRoleDuplicate?.level));
+	const [showAdditionalOffering, toggleAdditionalOffering] = useState(!!contractData?.additional_offerings?.length || !!openRoleData?.additional_offerings?.length || !!orgBenefits?.additional_offerings?.length);
+	const [showManualSystem, setManualSystem] = useState(!(contractData?.level || openRoleData?.level));
 
 	const formSchema = z.object({
 		first_name: formType == 'contract' ? z.string() : z.string().optional(),
@@ -131,79 +128,30 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			first_name: formType == 'contract' ? (contractData?.profile as any)?.first_name || '' : undefined,
 			last_name: formType == 'contract' ? (contractData?.profile as any)?.last_name || '' : undefined,
 			email: formType == 'contract' ? (contractData?.profile as any)?.email || '' : undefined,
-			level_name: contractData?.level_name || contractDuplicate?.level_name || '',
-			additional_offerings:
-				(contractData?.additional_offerings as string[]) ||
-				(contractDuplicate?.additional_offerings as string[]) ||
-				(openRoleData?.additional_offerings as string[]) ||
-				(openRoleDuplicate?.additional_offerings as string[]) ||
-				(orgBenefits?.additional_offerings as string[]) ||
-				[],
-			responsibilities: (contractData?.responsibilities as string[]) || (contractDuplicate?.responsibilities as string[]) || (openRoleData?.responsibilities as string[]) || (openRoleDuplicate?.responsibilities as string[]) || [],
-			fixed_allowance: (contractData?.fixed_allowance as any) || (contractDuplicate?.fixed_allowance as any) || (openRoleData?.fixed_allowance as any) || (openRoleDuplicate?.fixed_allowance as any) || [],
+			level_name: contractData?.level_name || '',
+			additional_offerings: (contractData?.additional_offerings as string[]) || (openRoleData?.additional_offerings as string[]) || (orgBenefits?.additional_offerings as string[]) || [],
+			responsibilities: (contractData?.responsibilities as string[]) || (openRoleData?.responsibilities as string[]) || [],
+			fixed_allowance: (contractData?.fixed_allowance as any) || (openRoleData?.fixed_allowance as any) || [],
 			start_date: contractData?.start_date ? new Date(contractData?.start_date) : new Date(),
-			end_date: contractData?.end_date ? new Date(contractData?.end_date) : contractDuplicate?.end_date ? new Date(contractDuplicate?.end_date) : undefined,
-			probation_period: contractData?.probation_period || contractDuplicate?.probation_period || openRoleData?.probation_period || openRoleDuplicate?.probation_period || orgBenefits?.probation || 90,
-			paid_leave: contractData?.paid_leave || contractDuplicate?.paid_leave || openRoleData?.paid_leave || openRoleDuplicate?.paid_leave || orgBenefits?.paid_time_off || 20,
-			sick_leave: contractData?.sick_leave || contractDuplicate?.sick_leave || openRoleData?.sick_leave || openRoleDuplicate?.sick_leave || orgBenefits?.sick_leave || 20,
-			work_schedule: contractData?.work_schedule || contractDuplicate?.work_schedule || openRoleData?.work_schedule || openRoleDuplicate?.work_schedule || orgBenefits?.work_schedule || '8',
-			work_shedule_interval: contractData?.work_shedule_interval || contractDuplicate?.work_shedule_interval || openRoleData?.work_shedule_interval || openRoleDuplicate?.work_shedule_interval || orgBenefits?.work_shedule_interval || 'daily',
-			salary:
-				formType == 'contract'
-					? contractData?.salary
-						? String(contractData?.salary)
-						: contractDuplicate?.salary
-							? String(contractDuplicate?.salary)
-							: ''
-					: openRoleData?.salary
-						? String(openRoleData?.salary)
-						: openRoleDuplicate?.salary
-							? String(openRoleDuplicate?.salary)
-							: '',
-			signing_bonus:
-				formType == 'contract'
-					? contractData?.signing_bonus
-						? String(contractData?.signing_bonus)
-						: contractDuplicate?.signing_bonus
-							? String(contractDuplicate?.signing_bonus)
-							: undefined
-					: openRoleData?.signing_bonus
-						? String(openRoleData?.signing_bonus)
-						: openRoleDuplicate?.signing_bonus
-							? String(openRoleDuplicate?.signing_bonus)
-							: undefined,
-			employment_type: contractData?.employment_type || contractDuplicate?.employment_type || openRoleData?.employment_type || openRoleDuplicate?.employment_type || undefined,
-			job_title: contractData?.job_title || contractDuplicate?.job_title || openRoleData?.job_title || openRoleDuplicate?.job_title || '',
-			entity:
-				formType == 'contract'
-					? contractData?.entity
-						? String(contractData?.entity)
-						: contractDuplicate?.entity
-							? String(contractDuplicate?.entity)
-							: undefined
-					: openRoleData?.entity
-						? String(openRoleData?.entity)
-						: openRoleDuplicate?.entity
-							? String(openRoleDuplicate?.entity)
-							: undefined,
-			level:
-				formType == 'contract'
-					? contractData?.level
-						? String(contractData?.level)
-						: contractDuplicate?.level
-							? String(contractDuplicate?.level)
-							: undefined
-					: openRoleData?.level
-						? String(openRoleData?.level)
-						: openRoleDuplicate?.level
-							? String(openRoleDuplicate?.level)
-							: undefined,
-			work_location: contractData?.work_location || contractDuplicate?.work_location || openRoleData?.work_location || openRoleDuplicate?.work_location || undefined,
-			requirements: (openRoleData?.requirements as string[]) || (openRoleDuplicate?.requirements as string[]) || [],
-			years_of_experience: openRoleData?.years_of_experience || openRoleDuplicate?.years_of_experience || Number(''),
+			end_date: contractData?.end_date ? new Date(contractData?.end_date) : undefined,
+			probation_period: contractData?.probation_period || openRoleData?.probation_period || orgBenefits?.probation || 90,
+			paid_leave: contractData?.paid_leave || openRoleData?.paid_leave || orgBenefits?.paid_time_off || 20,
+			sick_leave: contractData?.sick_leave || openRoleData?.sick_leave || orgBenefits?.sick_leave || 20,
+			work_schedule: contractData?.work_schedule || openRoleData?.work_schedule || orgBenefits?.work_schedule || '8',
+			work_shedule_interval: contractData?.work_shedule_interval || openRoleData?.work_shedule_interval || orgBenefits?.work_shedule_interval || 'daily',
+			salary: formType == 'contract' ? (contractData?.salary ? String(contractData?.salary) : '') : openRoleData?.salary ? String(openRoleData?.salary) : '',
+			signing_bonus: formType == 'contract' ? (contractData?.signing_bonus ? String(contractData?.signing_bonus) : undefined) : openRoleData?.signing_bonus ? String(openRoleData?.signing_bonus) : undefined,
+			employment_type: contractData?.employment_type || openRoleData?.employment_type || undefined,
+			job_title: contractData?.job_title || openRoleData?.job_title || '',
+			entity: formType == 'contract' ? (contractData?.entity ? String(contractData?.entity) : undefined) : openRoleData?.entity ? String(openRoleData?.entity) : undefined,
+			level: formType == 'contract' ? (contractData?.level ? String(contractData?.level) : undefined) : openRoleData?.level ? String(openRoleData?.level) : undefined,
+			work_location: contractData?.work_location || openRoleData?.work_location || undefined,
+			requirements: (openRoleData?.requirements as string[]) || [],
+			years_of_experience: openRoleData?.years_of_experience || Number(''),
 			customFields: [],
-			team: String(contractData?.team || contractDuplicate?.team || openRoleData?.team || openRoleDuplicate?.team || ''),
-			manager: openRoleData?.is_manager || openRoleDuplicate?.is_manager
+			team: String(contractData?.team || openRoleData?.team || ''),
+			manager: openRoleData?.is_manager,
+			policy: String(openRoleData?.id || policies[0].id)
 		}
 	});
 
@@ -214,18 +162,6 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 			form.setValue('policy', String(data.find(item => item.is_default)?.id || ''));
 		}
 	}, [form, params.org]);
-
-	const checkIfManager = useCallback(
-		async (person: number, profile: string, team: number) => {
-			const { data, error } = await supabase.from('managers').select().match({ org: params.org, person, profile, team });
-
-			if (!error) {
-				toggleManagerState(!!data);
-				form.setValue('manager', !!data);
-			}
-		},
-		[form, params.org]
-	);
 
 	const isEntityEOR = async (entityId: number) => {
 		const entity = eorEntities.find(entity => entity.id === Number(entityId));
@@ -368,14 +304,10 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	};
 
 	useEffect(() => {
-		// if (error) toast.error('🫤 Error', { description: `Unable to fetch existing org levels ${error.message}` });
-
 		if (manager?.data?.length) {
 			toggleManagerState(true);
 			form.setValue('manager', true);
 		}
-
-		if (formType == 'role') getPolicies();
 	}, [form, formType, getPolicies, manager?.data]);
 
 	const onSetLevel = (level: TablesInsert<'employee_levels'> | undefined) => {
@@ -503,7 +435,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 												<FormItem>
 													<FormLabel>First name</FormLabel>
 													<FormControl>
-														<Input disabled={!!contractData} type="text" placeholder="Enter first name" {...field} required />
+														<Input disabled={!!(contractData?.profile as any)?.first_name} type="text" placeholder="Enter first name" {...field} required />
 													</FormControl>
 													<FormMessage />
 												</FormItem>
@@ -517,7 +449,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 												<FormItem>
 													<FormLabel>Last name</FormLabel>
 													<FormControl>
-														<Input disabled={!!contractData} type="text" placeholder="Enter last name" {...field} required />
+														<Input disabled={!!(contractData?.profile as any)?.last_name} type="text" placeholder="Enter last name" {...field} required />
 													</FormControl>
 													<FormMessage />
 												</FormItem>
@@ -531,7 +463,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 												<FormItem className="col-span-2">
 													<FormLabel>Email</FormLabel>
 													<FormControl>
-														<Input disabled={!!contractData} type="email" placeholder="Enter email" {...field} required />
+														<Input disabled={!!(contractData?.profile as any)?.email} type="email" placeholder="Enter email" {...field} required />
 													</FormControl>
 													<FormMessage />
 												</FormItem>
