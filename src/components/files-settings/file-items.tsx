@@ -16,7 +16,7 @@ export const FileItems = async ({ path }: props) => {
 
 	return files.data && files.data.length > 0 ? (
 		files.data?.map(file => (
-			<li key={file.id} className="flex items-center gap-3 rounded-md border-b px-2 py-2 last-of-type:border-none hover:bg-muted/40">
+			<li key={file.id} className="flex w-full items-center gap-3 rounded-md border-b px-2 py-2 last-of-type:border-none hover:bg-muted/40">
 				<File size={14} />
 				<div className="text-sm font-light">{file.name}</div>
 

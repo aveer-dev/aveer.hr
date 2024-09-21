@@ -30,9 +30,9 @@ export const Files = async ({ org, orgId }: props) => {
 					</AccordionTrigger>
 
 					<AccordionContent>
-						<FileDropZone path={`${orgId}`}>
+						<FileDropZone path={`${orgId}/org-${orgId}`}>
 							<ul className="space-y-3">
-								<FileItems path={`${orgId}`} />
+								<FileItems path={`${orgId}/org-${orgId}`} />
 							</ul>
 						</FileDropZone>
 					</AccordionContent>

@@ -94,7 +94,7 @@ export const FileDropZone = ({ children, path }: props) => {
 	};
 
 	return (
-		<div className={cn('relative grid gap-10 pt-0')} onDrop={dropHandler}>
+		<div className={cn('relative grid w-full gap-10 pt-0')} onDrop={dropHandler}>
 			{children}
 
 			<div className={cn('pointer-events-none absolute bottom-0 left-0 right-0 top-0 flex flex-col items-center justify-center space-y-4 rounded-md border bg-background text-center opacity-0 transition-all duration-500', dragIsActive && 'pointer-events-auto opacity-100')}>
