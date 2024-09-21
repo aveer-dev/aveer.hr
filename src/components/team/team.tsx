@@ -44,7 +44,7 @@ const formSchema = z.object({
 
 const supabase = createClient();
 
-export const Team = ({ data, org, onCreate, children, className }: { org: string; data?: Tables<'teams'>; onCreate?: () => void; children?: ReactNode; className?: string }) => {
+export const Team = ({ data, org, onCreate, children, className }: { org: string; data?: Tables<'teams'>; onCreate?: (data?: Tables<'teams'>) => void; children?: ReactNode; className?: string }) => {
 	const [isUpdating, setUpdateState] = useState(false);
 	const [isDialogOpen, toggleDialogState] = useState(false);
 	const [teamMembers, setTeamMembers] = useState(0);
@@ -65,12 +65,13 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 		const response = data ? await updateTeam(org, data.id, { ...team, updated_at: new Date() as any }, managersPayload) : await createTeam(org, team, managersPayload);
 		setUpdateState(false);
 
-		if (response !== true) return toast.error('Error', { description: response });
+		if (typeof response == 'string') return toast.error('Error', { description: response });
+
 		toast.success('Teams updated');
 		toggleDialogState(false);
 
 		if (!onCreate) router.refresh();
-		if (onCreate) onCreate();
+		if (onCreate) response !== true ? onCreate(response) : onCreate();
 	};
 
 	const getManagers = useCallback(

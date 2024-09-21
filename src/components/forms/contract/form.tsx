@@ -40,8 +40,16 @@ import { ApprovalPolicy } from '@/components/approval-policies/approval-policy';
 import { NavLink } from '@/components/ui/link';
 import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/ui/loader';
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
 
 const supabase = createClient();
+
+type ENTITY = Tables<'legal_entities'> & {
+	incorporation_country: {
+		currency_code: string;
+		name: string;
+	};
+};
 
 interface props {
 	orgBenefits?: Tables<'org_settings'> | null;
@@ -50,14 +58,19 @@ interface props {
 	contractDuplicate?: TablesUpdate<'contracts'>;
 	openRoleDuplicate?: TablesUpdate<'open_roles'>;
 	formType?: 'role' | 'contract';
+	entitiesData: { eorEntities: ENTITY[] | null; entities: ENTITY[] | null };
+	levels: PostgrestSingleResponse<Tables<'employee_levels'>[]>;
+	teamsData: PostgrestSingleResponse<Tables<'teams'>[]>;
+	rolesData?: PostgrestSingleResponse<Tables<'open_roles'>[]>;
+	manager?: PostgrestSingleResponse<Tables<'managers'>[]>;
 }
 
-export const ContractForm = ({ contractData, openRoleData, contractDuplicate, openRoleDuplicate, orgBenefits, formType = 'contract' }: props) => {
-	const [entities, setEntities] = useState<Tables<'legal_entities'>[]>([]);
+export const ContractForm = ({ contractData, openRoleData, contractDuplicate, openRoleDuplicate, orgBenefits, levels, formType = 'contract', entitiesData, teamsData, rolesData, manager }: props) => {
+	const [entities] = useState<ENTITY[]>(entitiesData?.entities ? entitiesData.entities : []);
 	const [entityCurrency, setCurrency] = useState('');
-	const [roles, setRoles] = useState<Tables<'open_roles'>[]>([]);
-	const [orgJobLevels, updateOrgJobLevels] = useState<TablesInsert<'employee_levels'>[]>([]);
-	const [eorEntities, setEorEntities] = useState<Tables<'legal_entities'>[]>([]);
+	const [roles] = useState<Tables<'open_roles'>[]>(rolesData?.data ?? []);
+	const [orgJobLevels] = useState<TablesInsert<'employee_levels'>[]>(levels.data ?? []);
+	const [eorEntities] = useState<Tables<'legal_entities'>[]>(entitiesData?.eorEntities ? entitiesData.eorEntities : []);
 	const [showSigningBonus, toggleShowSigningBonus] = useState(!!contractData?.signing_bonus || !!contractDuplicate?.signing_bonus || !!openRoleData?.signing_bonus || !!openRoleDuplicate?.signing_bonus);
 	const [showFixedIncome, toggleShowFixedIncome] = useState(!!contractData?.fixed_allowance || !!contractDuplicate?.fixed_allowance || !!openRoleData?.fixed_allowance || !!openRoleDuplicate?.fixed_allowance);
 	const [indefiniteEndDate, toggleIndefiniteEndDate] = useState(!contractData?.end_date);
@@ -72,7 +85,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	const [showRolesOption, toggleRoleOption] = useState(formType == 'contract' ? !!(contractData || contractDuplicate)?.role : false);
 	const [showFormDetails, toggleFormDetails] = useState(false);
 	const [isManager, toggleManagerState] = useState(openRoleData ? !!openRoleData?.is_manager : openRoleDuplicate ? !!openRoleDuplicate?.is_manager : false);
-	const [teams, setTeams] = useState<Tables<'teams'>[]>([]);
+	const [teams, updateTeam] = useState<Tables<'teams'>[]>(teamsData.data ?? []);
 	const [policies, setPolicies] = useState<Tables<'approval_policies'>[]>([]);
 	const [selectedLevel, setActiveLevel] = useState<TablesInsert<'employee_levels'>>();
 	const [showAdditionalOffering, toggleAdditionalOffering] = useState(
@@ -194,28 +207,6 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		}
 	});
 
-	const getEntities = useCallback(async () => {
-		const { data, error } = await supabase.from('legal_entities').select('*, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)').eq('org', params.org);
-		const { data: eorData, error: eorError } = await supabase.from('legal_entities').select('*, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)').eq('is_eor', true);
-
-		if (!error && data) {
-			setEntities(data);
-			const entity = data.find(entity => entity.id == Number(form.getValues('entity')));
-			if (entity && entity.incorporation_country.currency_code) setCurrency(entity.incorporation_country.currency_code);
-		}
-
-		if (!eorError && eorData) {
-			setEorEntities(eorData);
-			const entity = eorData.find(entity => entity.id == Number(form.getValues('entity')));
-			if (entity && entity.incorporation_country.currency_code) setCurrency(entity.incorporation_country.currency_code);
-		}
-	}, [form, params.org]);
-
-	const getTeams = useCallback(async () => {
-		const { data, error } = await supabase.from('teams').select().eq('org', params.org);
-		if (!error && data) setTeams(data);
-	}, [params.org]);
-
 	const getPolicies = useCallback(async () => {
 		const { data, error } = await supabase.from('approval_policies').select().match({ org: params.org, type: 'role_application' });
 		if (!error && data) {
@@ -235,17 +226,6 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 		},
 		[form, params.org]
 	);
-
-	const getRoles = useCallback(async () => {
-		const { data, error } = await supabase.from('open_roles').select().eq('org', params.org);
-		if (!error) setRoles(data);
-	}, [params.org]);
-
-	const getOrgLevels = useCallback(async () => {
-		const { data, error } = await supabase.from('employee_levels').select().match({ org: params.org });
-		if (error) toast.error('🫤 Error', { description: `Unable to fetch existing org levels ${error.message}` });
-		if (data?.length) updateOrgJobLevels(data);
-	}, [params]);
 
 	const isEntityEOR = async (entityId: number) => {
 		const entity = eorEntities.find(entity => entity.id === Number(entityId));
@@ -388,21 +368,15 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 	};
 
 	useEffect(() => {
-		getEntities();
-		getOrgLevels();
-		getTeams();
+		// if (error) toast.error('🫤 Error', { description: `Unable to fetch existing org levels ${error.message}` });
 
-		if (formType == 'contract') {
-			const contractId = contractData?.id || contractDuplicate?.id;
-			const profileId = contractData?.profile || contractDuplicate?.profile;
-			const team = contractData?.team || contractDuplicate?.team;
-			if (contractId && profileId && team) checkIfManager(contractId, profileId, team);
-
-			getRoles();
+		if (manager?.data?.length) {
+			toggleManagerState(true);
+			form.setValue('manager', true);
 		}
 
 		if (formType == 'role') getPolicies();
-	}, [getEntities, getRoles, getOrgLevels, getTeams, checkIfManager, contractData, contractDuplicate, formType, getPolicies]);
+	}, [form, formType, getPolicies, manager?.data]);
 
 	const onSetLevel = (level: TablesInsert<'employee_levels'> | undefined) => {
 		setActiveLevel(level);
@@ -716,7 +690,7 @@ export const ContractForm = ({ contractData, openRoleData, contractDuplicate, op
 										<FormItem>
 											<FormLabel className="flex items-center justify-between">
 												Team
-												<Team org={params.org} onCreate={getTeams} className="inline-flex w-fit items-center gap-2 rounded-md bg-accent px-2 py-1">
+												<Team org={params.org} onCreate={team => team && updateTeam([...teams, team])} className="inline-flex w-fit items-center gap-2 rounded-md bg-accent px-2 py-1">
 													Create team <PanelRightOpen size={12} />
 												</Team>
 											</FormLabel>
