@@ -3,8 +3,8 @@
 import { createClient } from '@/utils/supabase/client';
 import { FileDown } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '../../ui/button';
-import { LoadingSpinner } from '../../ui/loader';
+import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from '@/components/ui/loader';
 
 interface props {
 	path: string;

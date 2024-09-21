@@ -4,10 +4,11 @@ import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/client';
 import { CloudUpload, FilePlus2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { DragEvent, ReactNode, useEffect, useState } from 'react';
+import { ButtonHTMLAttributes, DragEvent, ReactNode, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loader';
+import { VariantProps } from 'class-variance-authority';
 
 interface props {
 	children?: ReactNode;
@@ -35,7 +36,7 @@ const uploadFile = async (file: File, fileName: string) => {
 	});
 	toast.dismiss(loadingToast);
 
-	if (uploadResponse.error) toast.error(`Error uploading ${file.name}`, { description: uploadResponse.error.message });
+	if (uploadResponse.error) return toast.error(`Error uploading ${file.name}`, { description: uploadResponse.error.message });
 	toast.success('Uploaded!', { description: `${file.name} has been uploaded successfully.` });
 	return uploadResponse;
 };
@@ -58,6 +59,7 @@ export const FileDropZone = ({ children, path }: props) => {
 		window.addEventListener('dragover', dragOverHandler);
 		window.addEventListener('dragend', dragEndHandler);
 		window.addEventListener('dragleave', dragEndHandler);
+		window.addEventListener('drop', dragEndHandler);
 
 		return () => {
 			window.removeEventListener('dragover', dragOverHandler);
@@ -97,15 +99,19 @@ export const FileDropZone = ({ children, path }: props) => {
 		<div className={cn('relative grid w-full gap-10 pt-0')} onDrop={dropHandler}>
 			{children}
 
-			<div className={cn('pointer-events-none absolute bottom-0 left-0 right-0 top-0 flex flex-col items-center justify-center space-y-4 rounded-md border bg-background text-center opacity-0 transition-all duration-500', dragIsActive && 'pointer-events-auto opacity-100')}>
-				<CloudUpload size={30} />
+			<div
+				className={cn(
+					'pointer-events-none absolute bottom-0 left-0 right-0 top-0 flex min-h-32 flex-col items-center justify-center space-y-4 rounded-md border bg-background text-center opacity-0 transition-all duration-500',
+					dragIsActive && 'pointer-events-auto opacity-100'
+				)}>
+				<CloudUpload size={20} />
 				<div className="text-xs text-muted-foreground">Drop file here to upload</div>
 			</div>
 		</div>
 	);
 };
 
-export const FileUpload = ({ path }: props) => {
+export const FileUpload = ({ path, className, variant, children }: props & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof buttonVariants>) => {
 	const router = useRouter();
 
 	const openFilePicker = () => {
@@ -129,9 +135,21 @@ export const FileUpload = ({ path }: props) => {
 	};
 
 	return (
-		<Button onClick={openFilePicker} variant={'secondary'} className="h-9 gap-3">
-			Add file
-			<FilePlus2 size={14} />
+		<Button
+			onClick={event => {
+				openFilePicker();
+				event.stopPropagation();
+			}}
+			variant={variant || 'secondary'}
+			className={cn('h-9 gap-3', className)}>
+			{!children && (
+				<>
+					Add file
+					<FilePlus2 size={14} />
+				</>
+			)}
+
+			{children ?? ''}
 		</Button>
 	);
 };
