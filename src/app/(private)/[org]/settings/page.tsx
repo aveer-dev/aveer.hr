@@ -13,6 +13,7 @@ import { FormSection, FormSectionDescription, InputsContainer } from '@/componen
 import { ApprovalPolicies } from '@/components/approval-policies';
 import { Teams } from '@/components/team/teams';
 import { Boardings } from '@/components/boarding-settings';
+import { Files } from '@/components/files-settings';
 
 export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -57,6 +58,9 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 						</TabsTrigger>
 						<TabsTrigger value="org" className="h-6">
 							Organisation
+						</TabsTrigger>
+						<TabsTrigger value="files" className="h-6">
+							Files
 						</TabsTrigger>
 					</TabsList>
 				</div>
@@ -111,6 +115,10 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 
 					{profileResponse.data && <ProfileForm data={profileResponse.data} />}
 					{profileResponse.error && <div className="grid w-full border-t border-t-border py-10 text-center text-xs text-muted-foreground">Unable to fetch user data</div>}
+				</TabsContent>
+
+				<TabsContent value="files">
+					<Suspense fallback={<Skeleton className="h-56 w-full" />}>{organisationResponse?.data && <Files orgId={organisationResponse.data?.id} org={params.org} />}</Suspense>
 				</TabsContent>
 			</Tabs>
 		</div>

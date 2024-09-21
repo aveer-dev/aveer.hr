@@ -136,11 +136,11 @@ export const ContractOverview = async ({ data }: props) => {
 					<h2 className="flex items-center justify-between text-xl font-bold">Documents</h2>
 
 					<div className="flex items-center gap-2">
-						<FileUpload orgId={data.org.id} employeeProfileId={data.profile?.id} />
+						<FileUpload path={`${data.org.id}/${data.profile?.id}`} />
 					</div>
 				</div>
 
-				<FileDropZone orgId={data.org.id} employeeProfileId={data.profile?.id}>
+				<FileDropZone path={`${data.org.id}/${data.profile?.id}`}>
 					{files.data && files.data.length > 0 && (
 						<ul className="grid gap-2 rounded-md bg-secondary/50 p-2 text-sm font-light">
 							{files.data?.map(file => (

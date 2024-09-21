@@ -6,13 +6,12 @@ import { CloudUpload, FilePlus2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { DragEvent, ReactNode, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Button } from '../../ui/button';
-import { LoadingSpinner } from '../../ui/loader';
+import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from '@/components/ui/loader';
 
 interface props {
 	children?: ReactNode;
-	orgId: number;
-	employeeProfileId: string;
+	path: string;
 }
 
 const supabase = createClient();
@@ -41,7 +40,7 @@ const uploadFile = async (file: File, fileName: string) => {
 	return uploadResponse;
 };
 
-export const FileDropZone = ({ children, orgId, employeeProfileId }: props) => {
+export const FileDropZone = ({ children, path }: props) => {
 	const [dragIsActive, setDragState] = useState(false);
 	const router = useRouter();
 
@@ -64,6 +63,7 @@ export const FileDropZone = ({ children, orgId, employeeProfileId }: props) => {
 			window.removeEventListener('dragover', dragOverHandler);
 			window.removeEventListener('dragend', dragEndHandler);
 			window.removeEventListener('dragleave', dragEndHandler);
+			setDragState(false);
 		};
 	}, []);
 
@@ -78,14 +78,14 @@ export const FileDropZone = ({ children, orgId, employeeProfileId }: props) => {
 					const file = item.getAsFile();
 					if (!file) return;
 
-					const fileName = `${orgId}/${employeeProfileId}/${file?.name}`;
+					const fileName = `${path}/${file?.name}`;
 					await uploadFile(file, fileName);
 				}
 			});
 		} else {
 			// Use DataTransfer interface to access the file(s)
 			[...ev.dataTransfer.files].forEach(async (file, i) => {
-				const fileName = `${orgId}/${employeeProfileId}/${file?.name}`;
+				const fileName = `${path}/${file?.name}`;
 				await uploadFile(file, fileName);
 			});
 		}
@@ -105,7 +105,7 @@ export const FileDropZone = ({ children, orgId, employeeProfileId }: props) => {
 	);
 };
 
-export const FileUpload = ({ orgId, employeeProfileId }: props) => {
+export const FileUpload = ({ path }: props) => {
 	const router = useRouter();
 
 	const openFilePicker = () => {
@@ -118,7 +118,7 @@ export const FileUpload = ({ orgId, employeeProfileId }: props) => {
 			for (const file of event.target.files) {
 				if (!file) return;
 
-				const fileName = `${orgId}/${employeeProfileId}/${file?.name}`;
+				const fileName = `${path}/${file?.name}`;
 				uploadFile(file, fileName);
 			}
 
