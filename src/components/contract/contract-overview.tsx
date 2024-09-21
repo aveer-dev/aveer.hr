@@ -1,16 +1,14 @@
-import { Button } from '@/components/ui/button';
-import { EllipsisVertical, FileText } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { Database, Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LeaveRequestDialog, LeaveRequests } from './leave';
 import { differenceInBusinessDays } from 'date-fns';
 import { FileDropZone, FileUpload } from '@/components/file-management/file-upload-zone';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { DeleteFile } from '@/components/file-management/delete-file';
-import { DownloadFile } from '@/components/file-management/download-file';
 import { Separator } from '@/components/ui/separator';
 import { cn, currencyFormat } from '@/lib/utils';
+import { FileItems } from '@/components/file-management/file-items';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface props {
 	data: Tables<'contracts'> & { profile: Tables<'profiles'>; org: Tables<'organisations'>; entity: Tables<'legal_entities'> & { incorporation_country: { currency_code: string } } };
@@ -132,53 +130,37 @@ export const ContractOverview = async ({ data }: props) => {
 
 			{/* documents */}
 			<div className="w-full">
-				<div className="mb-4 flex items-center justify-between">
-					<h2 className="flex items-center justify-between text-xl font-bold">Documents</h2>
-
-					<div className="flex items-center gap-2">
-						<FileUpload path={`${data.org.id}/${data.profile?.id}`} />
-					</div>
+				<div className="mb-4">
+					<h2 className="flex items-center justify-between text-xl font-bold">Files</h2>
 				</div>
 
-				<FileDropZone path={`${data.org.id}/${data.profile?.id}`}>
-					{files.data && files.data.length > 0 && (
-						<ul className="grid gap-2 rounded-md bg-secondary/50 p-2 text-sm font-light">
-							{files.data?.map(file => (
-								<li key={file.id} className="flex items-center justify-between gap-1 rounded-lg px-4 py-2 text-sm transition-all hover:bg-accent">
-									<div className="flex items-center gap-2">
-										<FileText size={12} className="text-muted-foreground" />
-										{file.name}
-									</div>
+				<h2 className="mb-3 text-sm font-normal text-muted-foreground">Organisation shared files</h2>
+				<ul className="space-y-3">
+					<FileItems readonly path={`${data.org.id}/org-${data.org.id}`} />
+				</ul>
 
-									<div className="text-muted-foreground">
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button variant="ghost" className="h-8 w-8" size={'icon'}>
-													<EllipsisVertical size={12} />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent className="w-fit" align="end">
-												<DropdownMenuItem asChild>
-													<DownloadFile path={`${data.org.id}/${data.profile?.id}/${file.name}`} />
-												</DropdownMenuItem>
+				<FileDropZone path={`${data.org.id}/${data.profile?.id}`} className="mt-16 gap-3">
+					<div className="flex items-center gap-2">
+						<h2 className="text-sm font-normal text-muted-foreground">Your files</h2>
 
-												<DropdownMenuItem asChild>
-													<DeleteFile path={`${data.org.id}/${data.profile?.id}/${file.name}`} />
-												</DropdownMenuItem>
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</div>
-								</li>
-							))}
-						</ul>
-					)}
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild className="text-muted-foreground">
+									<Info size={12} />
+								</TooltipTrigger>
 
-					{!files.data ||
-						(files.data.length == 0 && (
-							<div className="flex h-full min-h-44 w-full items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">
-								<p>No file has been uploaded yet</p>
-							</div>
-						))}
+								<TooltipContent>
+									<p className="max-w-36 text-left text-muted-foreground">Files added here will be visible to organisation admins</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+
+						<div className="ml-auto flex items-center gap-2">
+							<FileUpload path={`${data.org.id}/${data.profile?.id}`} />
+						</div>
+					</div>
+
+					<FileItems path={`${data.org.id}/${data.profile?.id}`} />
 				</FileDropZone>
 			</div>
 		</section>

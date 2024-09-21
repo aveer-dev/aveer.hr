@@ -2,7 +2,7 @@ import { FilePlus2, Folder, Info } from 'lucide-react';
 import { Suspense } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { createClient } from '@/utils/supabase/server';
-import { FileItems } from './file-items';
+import { FileItems } from '@/components/file-management/file-items';
 import { FileDropZone, FileUpload } from '@/components/file-management/file-upload-zone';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -38,7 +38,7 @@ export const Files = async ({ org, orgId }: props) => {
 				<AccordionItem value="org">
 					<AccordionTrigger>
 						<div className="flex items-center gap-2">
-							<h2 className="text-sm font-normal text-muted-foreground">Organisation files</h2>
+							<h2 className="text-sm font-normal text-muted-foreground">Organisation shared files</h2>
 
 							<FileUpload variant={'secondary'} path={`${orgId}/org-${orgId}`} className="ml-auto h-7 w-7 p-0">
 								<FilePlus2 size={12} />
@@ -60,9 +60,7 @@ export const Files = async ({ org, orgId }: props) => {
 
 					<AccordionContent>
 						<FileDropZone path={`${orgId}/org-${orgId}`}>
-							<ul className="space-y-3">
-								<FileItems path={`${orgId}/org-${orgId}`} />
-							</ul>
+							<FileItems path={`${orgId}/org-${orgId}`} />
 						</FileDropZone>
 					</AccordionContent>
 				</AccordionItem>
@@ -99,9 +97,7 @@ export const Files = async ({ org, orgId }: props) => {
 
 							<AccordionContent>
 								<FileDropZone path={`${orgId}/${employee.profile?.id}`}>
-									<ul className="space-y-3">
-										<FileItems path={`${orgId}/${employee.profile?.id}`} />
-									</ul>
+									<FileItems path={`${orgId}/${employee.profile?.id}`} />
 								</FileDropZone>
 							</AccordionContent>
 						</AccordionItem>

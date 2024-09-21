@@ -13,6 +13,7 @@ import { VariantProps } from 'class-variance-authority';
 interface props {
 	children?: ReactNode;
 	path: string;
+	className?: string;
 }
 
 const supabase = createClient();
@@ -41,7 +42,7 @@ const uploadFile = async (file: File, fileName: string) => {
 	return uploadResponse;
 };
 
-export const FileDropZone = ({ children, path }: props) => {
+export const FileDropZone = ({ children, path, className }: props) => {
 	const [dragIsActive, setDragState] = useState(false);
 	const router = useRouter();
 
@@ -96,7 +97,7 @@ export const FileDropZone = ({ children, path }: props) => {
 	};
 
 	return (
-		<div className={cn('relative grid w-full gap-10 pt-0')} onDrop={dropHandler}>
+		<div className={cn('relative grid w-full gap-10 pt-0', className)} onDrop={dropHandler}>
 			{children}
 
 			<div
@@ -145,7 +146,7 @@ export const FileUpload = ({ path, className, variant, children }: props & Butto
 			{!children && (
 				<>
 					Add file
-					<FilePlus2 size={14} />
+					<FilePlus2 className="stroke-1" size={14} />
 				</>
 			)}
 
