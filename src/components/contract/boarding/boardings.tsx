@@ -16,12 +16,12 @@ export const Boardings = async ({ org, onboardingId, offboardingId, contract, us
 
 	const [onboarding, offboarding] = await Promise.all([
 		await supabase
-			.from('boaring_check_list')
+			.from('boarding_check_lists')
 			.select('*')
 			.match(onboardingId ? { org, id: onboardingId } : { org, is_default: true, type: 'on' }),
 		(contract.terminated_by || (contract.end_date && differenceInBusinessDays(contract.end_date, new Date()) <= 20)) &&
 			(await supabase
-				.from('boaring_check_list')
+				.from('boarding_check_lists')
 				.select('*')
 				.match(offboardingId ? { org, id: offboardingId } : { org, is_default: true, type: 'off' }))
 	]);

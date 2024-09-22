@@ -3,7 +3,7 @@ import { createClient } from './supabase/server';
 export const getFormEntities = async ({ org }: { org: string }) => {
 	const supabase = createClient();
 
-	const [{ data: eorEntities }, { data: entities }] = await Promise.all([
+	const [{ data: entities }, { data: eorEntities }] = await Promise.all([
 		await supabase.from('legal_entities').select('*, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)').eq('org', org),
 		await supabase.from('legal_entities').select('*, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)').eq('is_eor', true)
 	]);

@@ -13,7 +13,7 @@ export const FirstContractDialog = ({ isOpen, toggle, org }: props) => {
 		<AlertDialog open={isOpen} onOpenChange={toggle}>
 			<AlertDialogContent className="gap-8">
 				<AlertDialogHeader className="gap-3">
-					<AlertDialogTitle>👋🏾 Hi there, if you don&apos;t mind</AlertDialogTitle>
+					<AlertDialogTitle>👋🏾 Hi there</AlertDialogTitle>
 					<AlertDialogDescription>For the purpose of saving you some time when adding people and creating contracts, we&apos;ve enabled you to setup some organisation wide configurations.</AlertDialogDescription>
 					<AlertDialogDescription>All you&apos;ll need to do is set them once, breeze through forms and never worry about them again, unless your company policies change.</AlertDialogDescription>
 				</AlertDialogHeader>

@@ -13,11 +13,13 @@ import { Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { HTMLAttributes, ReactNode, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { approveBoarding } from './boarding.action';
 
 interface props {
 	children?: ReactNode | string;
 	data: Tables<'contract_check_list'> & { contract: Tables<'contracts'> };
 	reviewType: string;
+	onReview?: (data: Tables<'contract_check_list'>) => void;
 }
 
 interface LEVEL {
@@ -33,7 +35,7 @@ interface LEVEL {
 
 const supabase = createClient();
 
-export const BoardingReview = ({ data, reviewType, children, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
+export const BoardingReview = ({ data, reviewType, children, onReview, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
 	const [levels, updateLevels] = useState<LEVEL[]>([]);
 	const [userId, setUserId] = useState<string>();
 	const [isReviewOpen, setReviewState] = useState(false);
@@ -100,20 +102,17 @@ export const BoardingReview = ({ data, reviewType, children, ...props }: props &
 		}
 	}, [data, getManagerStatus, getUserId, isReviewOpen, processLevels, reviewType, userId]);
 
-	const updateLeave = async (levels: LEVEL[]) => {
+	const updateBoarding = async (levels: LEVEL[]) => {
 		const isAllApproved = !levels.find(level => !level.action);
 
-		const { error } = await supabase
-			.from('contract_check_list')
-			.update({ levels: levels as any, state: isAllApproved ? 'approved' : 'pending' })
-			.eq('id', data.id);
-
+		const response = await approveBoarding({ isAllApproved, levels: levels, id: data.id });
 		setUpdateState({ denying: false, approving: false });
-		if (error) return toast.error('Unable to approve boarding', { description: error.message });
+		if (typeof response == 'string') return toast.error('Unable to approve boarding', { description: response });
 
 		toast.success('Boarding approved');
 		setReviewState(false);
 		router.refresh();
+		onReview && onReview(response);
 	};
 
 	const Actions = ({ className, index, level }: { className?: string; index: number; level: LEVEL }) => {
@@ -130,7 +129,7 @@ export const BoardingReview = ({ data, reviewType, children, ...props }: props &
 			const newLevel: LEVEL = { id: userId as string, level: level.level, type: level.type, action, created_at: new Date() };
 			newLevels[index] = newLevel;
 
-			updateLeave(newLevels);
+			updateBoarding(newLevels);
 		};
 
 		return (

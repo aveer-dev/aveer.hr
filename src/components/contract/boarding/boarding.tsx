@@ -34,7 +34,6 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType,
 	const [userState, updateUserState] = useState(state);
 
 	useEffect(() => {
-		updateUserState(state);
 		if (!userState) return updateItems(data);
 
 		const newItems = data.map(item => {
@@ -45,7 +44,7 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType,
 		});
 
 		updateItems(newItems as any);
-	}, [data, userState, state]);
+	}, [data, userState]);
 
 	const onCheckChange = async (value: boolean | string, index: number) => {
 		const checklist = structuredClone(items);
@@ -77,17 +76,15 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType,
 
 		const payload = userState;
 		payload.state = 'pending';
-
 		if (policy) {
 			const levels = await getApprovalLevels();
 			if (levels) payload.levels = levels;
 		}
 
-		const response = await updateEmployeeBoarding(payload, org);
-
+		const response = await updateEmployeeBoarding({ ...payload, checklist: items as any }, org);
 		setRequestState(false);
-		if (typeof response == 'string') return toast.error('Unable send approval request', { description: response });
 
+		if (typeof response == 'string') return toast.error('Unable send approval request', { description: response });
 		updateUserState(response as any);
 		toast.success('Approval request sent');
 	};
@@ -105,11 +102,11 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType,
 						Checked {userState?.checklist?.length || 0}/{data.length}
 					</div>
 
-					{userState?.state == 'approved' && (
+					{userState?.state == 'pending' && (
 						<>
 							<Separator orientation="vertical" className="h-3" />
 
-							<BoardingReview data={state as any} reviewType={userType == 'org' ? 'admin' : ''}>
+							<BoardingReview onReview={data => updateUserState(data as any)} data={state as any} reviewType={userType == 'org' ? 'admin' : ''}>
 								<Button className="flex h-7 gap-2" variant={'secondary'}>
 									Review
 									<PanelRightOpen size={12} />
@@ -132,13 +129,13 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType,
 								id={`onboarding-${index}`}
 							/>
 
-							<label htmlFor={`onboarding-${index}`} className="peer-disabled:opacity-7 w-full space-y-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed">
-								<div className="flex w-full">
+							<label htmlFor={`onboarding-${index}`} className="peer-disabled:opacity-7 flex w-full text-sm font-medium leading-none peer-disabled:cursor-not-allowed">
+								<div className="space-y-2">
 									<h4>{item.item}</h4>
-									{item.created_at && <p className="ml-auto text-xs font-light text-muted-foreground">{format(item.created_at, 'PP')}</p>}
+									<p className="text-xs font-light leading-5 text-muted-foreground">{item.description}</p>
 								</div>
 
-								<p className="text-xs font-light leading-5 text-muted-foreground">{item.description}</p>
+								{item.created_at && <p className="ml-auto min-w-20 text-xs font-light text-muted-foreground">{format(item.created_at, 'PP')}</p>}
 							</label>
 						</li>
 					))}

@@ -10,8 +10,8 @@ interface props {
 export const Boardings = async ({ org }: props) => {
 	const supabase = createClient();
 
-	const { data, error } = await supabase.from('boaring_check_list').select().eq('org', org);
-	if (!data || error) return;
+	const { data, error } = await supabase.from('boarding_check_lists').select().eq('org', org);
+	if (!data || error) return error.message;
 
 	return (
 		<Suspense>

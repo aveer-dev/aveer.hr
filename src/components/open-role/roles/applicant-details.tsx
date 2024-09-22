@@ -125,8 +125,8 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 							{applicantData?.first_name} {applicantData?.last_name}
 						</SheetTitle>
 						<SheetDescription>
-							<NavLink target="_blank" org={applicantData.org.subdomain} href={`/jobs/${applicantData.role.id}`} className="flex items-center gap-1 text-foreground underline decoration-dashed underline-offset-2">
-								Role: {applicantData?.role.job_title} <ArrowUpRight className="-mb-1" size={12} />
+							<NavLink target="_blank" org={applicantData.org.subdomain} href={`/jobs/${applicantData.role?.id}`} className="flex items-center gap-1 text-foreground underline decoration-dashed underline-offset-2">
+								Role: {applicantData?.role?.job_title} <ArrowUpRight className="-mb-1" size={12} />
 							</NavLink>
 						</SheetDescription>
 					</div>

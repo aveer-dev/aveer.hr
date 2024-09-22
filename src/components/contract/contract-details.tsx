@@ -26,6 +26,7 @@ import { Teams } from './teams';
 import { Timeoff } from './time-off';
 import { Applicants } from './applicants';
 import { Boardings } from './boarding';
+import { BoardingsReview } from './boarding-review';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -268,6 +269,8 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 						<Timeoff reviewType="employee" contract={data.id} org={org} team={data?.team} />
 
 						<Applicants contract={data as any} org={org} />
+
+						<BoardingsReview contract={data} org={org} />
 					</TabsContent>
 				)}
 

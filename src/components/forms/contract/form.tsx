@@ -151,7 +151,7 @@ export const ContractForm = ({ contractData, openRoleData, orgBenefits, levels, 
 			customFields: [],
 			team: String(contractData?.team || openRoleData?.team || ''),
 			manager: openRoleData?.is_manager,
-			policy: String(openRoleData?.id || policies[0].id)
+			policy: String(openRoleData?.id || policies[0]?.id)
 		}
 	});
 

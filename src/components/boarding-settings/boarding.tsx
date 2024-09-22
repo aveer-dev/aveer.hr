@@ -26,7 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { generateRandomString } from '@/utils/generate-string';
 
 interface props {
-	data?: Tables<'boaring_check_list'>;
+	data?: Tables<'boarding_check_lists'>;
 	children?: ReactNode;
 	className?: string;
 	org: string;
@@ -48,7 +48,7 @@ export const Boarding = ({ data, children, className, org }: props) => {
 	const [isUpdating, setUpdateState] = useState(false);
 	const [isDeleting, setDeleteState] = useState(false);
 	const [items, updateItems] = useState<{ item: string; description: string; created_at?: string }[]>([]);
-	const [defaultBoarding, setDefaultBoarding] = useState<Tables<'boaring_check_list'>[]>();
+	const [defaultBoarding, setDefaultBoarding] = useState<Tables<'boarding_check_lists'>[]>();
 	const [policies, setPolicies] = useState<Tables<'approval_policies'>[]>();
 	const [isDialogOpen, toggleDialogState] = useState(false);
 	const router = useRouter();
@@ -60,7 +60,7 @@ export const Boarding = ({ data, children, className, org }: props) => {
 
 	const getDefaultBoarding = useCallback(
 		async (type: string) => {
-			const { data, error } = await supabase.from('boaring_check_list').select().match({ type, org, is_default: true });
+			const { data, error } = await supabase.from('boarding_check_lists').select().match({ type, org, is_default: true });
 			if (error) toast.error('Error checking default on/off-boading', { description: error.message });
 			if (data) setDefaultBoarding(data);
 		},
@@ -75,7 +75,7 @@ export const Boarding = ({ data, children, className, org }: props) => {
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setUpdateState(true);
-		const payload: TablesInsert<'boaring_check_list'> = { ...values, is_default: !!values.is_default, policy: Number(values.policy) };
+		const payload: TablesInsert<'boarding_check_lists'> = { ...values, is_default: !!values.is_default, policy: Number(values.policy) };
 		const response = data ? await updateBoarding(payload, data.id, org) : await createBoarding(payload, org);
 		setUpdateState(false);
 
