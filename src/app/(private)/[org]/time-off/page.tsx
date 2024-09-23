@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import { Suspense } from 'react';
 import { columns } from '@/components/leave/column';
 import { LeaveCalendar } from '@/components/leave/leave-calendar';
+import { ROLE } from '@/type/contract.types';
 
 interface props {
 	params: { [key: string]: string };
@@ -25,6 +26,7 @@ export default async function TimeOffPage({ params }: props) {
 	if (calendarError) return calendarError.message;
 
 	const result = [];
+	const reviewType: ROLE = 'admin';
 
 	for (const item of calendar) {
 		const startDate = new Date(item.from);
@@ -33,14 +35,7 @@ export default async function TimeOffPage({ params }: props) {
 		const status = item.status;
 		const data = item;
 
-		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) {
-			result.push({
-				date: new Date(date),
-				name,
-				status,
-				data
-			});
-		}
+		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) result.push({ date: new Date(date), name, status, data });
 	}
 
 	return (
@@ -51,7 +46,7 @@ export default async function TimeOffPage({ params }: props) {
 				<h1 className="text-2xl font-medium">Leave History</h1>
 			</div>
 
-			<DataTable data={data.map(item => ({ ...item, reviewType: 'admin' }))} columns={columns} />
+			<DataTable data={data.map(item => ({ ...item, reviewType }))} columns={columns} />
 		</Suspense>
 	);
 }
