@@ -9,8 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Calendar } from '@/components/ui/calendar';
 import { HardHat, MinusCircle, NotebookPen, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { addDays, differenceInBusinessDays, format } from 'date-fns';
-import { useEffect, useState } from 'react';
+import { addBusinessDays, addDays, differenceInBusinessDays, format, isWeekend } from 'date-fns';
+import { ReactNode, useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,27 +35,43 @@ const supabase = createClient();
 interface props {
 	onCreateLeave?: () => void;
 	contract: Tables<'contracts'>;
+	children?: ReactNode;
+	data?: Tables<'time_off'>;
 }
 
-export const LeaveRequestDialog = ({ onCreateLeave, contract }: props) => {
+export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data }: props) => {
 	const [creatingRequest, setCreatingState] = useState(false);
 	const [isDialoagOpen, toggleDialog] = useState(false);
-	const [showNote, setNoteState] = useState(false);
-	const [showHandover, setHandoverState] = useState(false);
-	const [employees, setEmployees] = useState<{ id: number; profile: { first_name: string; last_name: string } }[]>([]);
+	const [showNote, setNoteState] = useState(!!data?.note);
+	const [showHandover, setHandoverState] = useState(!!data?.hand_over);
+	const [employees, setEmployees] = useState<{ id: number; job_title: string; profile: { first_name: string; last_name: string } }[]>([]);
 	const [approvalPolicy, setPolicyDetails] = useState<any[]>([]);
-	const [date, setDate] = useState<DateRange | undefined>({
-		from: new Date(),
-		to: addDays(new Date(), 5)
-	});
 	const router = useRouter();
+
+	const getNextBusinessDay = (date: Date) => {
+		while (isWeekend(date)) {
+			date = addBusinessDays(date, 1);
+		}
+
+		return date;
+	};
+
+	const [date, setDate] = useState<DateRange | undefined>({
+		from: data?.from ? new Date(data?.from) : getNextBusinessDay(new Date()),
+		to: data?.to ? new Date(data?.to) : getNextBusinessDay(addDays(new Date(), 5))
+	});
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			leave_type: 'paid',
-			note: '',
-			hand_over_note: ''
+			leave_type: data?.leave_type || 'paid',
+			note: data?.note || '',
+			hand_over_note: data?.hand_over_note || '',
+			hand_over: data?.hand_over ? String((data?.hand_over as any)?.id || data?.hand_over) : '',
+			dates: {
+				from: data?.from ? new Date(data?.from) : date?.from,
+				to: data?.to ? new Date(data?.to) : date?.to
+			}
 		}
 	});
 
@@ -100,7 +116,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract }: props) => {
 		const getEmployees = async () => {
 			const { data, error } = await supabase
 				.from('contracts')
-				.select('id, profile:profiles!contracts_profile_fkey(first_name, last_name)')
+				.select('id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)')
 				.match({ org: (contract.org as any).subdomain, status: 'signed' });
 			if (!data || error) return toast('🥺 Error', { description: 'Unable to fetch list of colleagues for leave request form' });
 			if (data.length) setEmployees(() => data as any);
@@ -110,7 +126,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract }: props) => {
 			const { data, error } = await supabase
 				.from('approval_policies')
 				.select()
-				.match({ org: (contract.org as any).subdomain, is_default: true });
+				.match({ org: (contract.org as any).subdomain, is_default: true, type: 'time_off' });
 			if (!data || error) return toast('🥺 Error', { description: 'Unable to fetch list of colleagues for leave request form' });
 			setPolicyDetails(() => data[0]?.levels || []);
 		};
@@ -123,9 +139,13 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract }: props) => {
 
 	return (
 		<Sheet onOpenChange={toggleDialog} open={isDialoagOpen}>
-			<SheetTrigger asChild>
-				<Button variant="secondary">Request leave</Button>
-			</SheetTrigger>
+			{!children && (
+				<SheetTrigger asChild>
+					<Button variant="secondary">Request leave</Button>
+				</SheetTrigger>
+			)}
+
+			{children && <SheetTrigger asChild>{children}</SheetTrigger>}
 
 			<SheetContent className="overflow-auto">
 				<SheetHeader>
@@ -183,7 +203,6 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract }: props) => {
 											</div>
 										</FormControl>
 										<Calendar className="!mt-10" mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1} />
-										{/* <FormDescription>Select the date range you'll like to have your leave</FormDescription> */}
 										<FormMessage />
 									</FormItem>
 								)}
@@ -235,7 +254,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract }: props) => {
 														<SelectContent>
 															{employees.map(employee => (
 																<SelectItem key={employee.id} value={String(employee.id)}>
-																	{employee.profile.first_name} {employee.profile.last_name}
+																	{employee.profile.first_name} {employee.profile.last_name} - {employee.job_title}
 																</SelectItem>
 															))}
 														</SelectContent>

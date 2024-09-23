@@ -9,12 +9,11 @@ import { ApplicantBadge } from '@/components/ui/applicant-stage-badge';
 interface props {
 	org: string;
 	contract: Tables<'contracts'> & { profile: Tables<'profiles'>; role: Tables<'open_roles'> };
+	manager?: Tables<'managers'> | null;
 }
 
-export const Applicants = async ({ org, contract }: props) => {
+export const Applicants = async ({ org, contract, manager }: props) => {
 	const supabase = createClient();
-
-	const managers = await supabase.from('managers').select().match({ org, profile: contract.profile.id });
 
 	const { data, error } = await supabase
 		.from('job_applications')
@@ -28,7 +27,7 @@ export const Applicants = async ({ org, contract }: props) => {
 	const filtereddata = data?.filter(applicant => {
 		const levels: any[] = applicant.levels;
 
-		return managers?.data?.length ? applicant.role.team == contract.team || levels.find(level => level.id == contract.profile.id) : levels.find(level => level.id == contract.profile.id);
+		return manager ? applicant.role.team == contract.team || levels.find(level => level.id == contract.profile.id) : levels.find(level => level.id == contract.profile.id);
 	});
 
 	return (

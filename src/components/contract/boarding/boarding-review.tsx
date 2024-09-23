@@ -14,11 +14,12 @@ import { useRouter } from 'next/navigation';
 import { HTMLAttributes, ReactNode, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { approveBoarding } from './boarding.action';
+import { ROLE } from '@/type/contract.types';
 
 interface props {
 	children?: ReactNode | string;
 	data: Tables<'contract_check_list'> & { contract: Tables<'contracts'> };
-	reviewType: string;
+	reviewType: ROLE;
 	onReview?: (data: Tables<'contract_check_list'>) => void;
 }
 

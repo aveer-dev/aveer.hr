@@ -2,17 +2,21 @@ import { LeaveReview } from '@/components/leave/leave-review';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { ROLE } from '@/type/contract.types';
 import { createClient } from '@/utils/supabase/server';
 import { format } from 'date-fns';
-import { ChevronRight, Edit, List, Trash2 } from 'lucide-react';
+import { ChevronRight, List } from 'lucide-react';
+import { LeaveActions } from './leave-actions';
+import { Tables } from '@/type/database.types';
 
 interface props {
 	org: string;
-	contractId: number;
+	contract: Tables<'contracts'>;
+	reviewType: ROLE;
 }
 
-export const LeaveRequests = async ({ org, contractId }: props) => {
+export const LeaveRequests = async ({ org, contract, reviewType }: props) => {
 	const supabase = createClient();
 
 	const { data, error } = await supabase
@@ -20,7 +24,7 @@ export const LeaveRequests = async ({ org, contractId }: props) => {
 		.select(
 			'*, hand_over:contracts!time_off_hand_over_fkey(id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)), contract:contracts!time_off_contract_fkey(job_title,id, team, unpaid_leave_used, sick_leave_used, paternity_leave_used, paid_leave_used, maternity_leave_used), profile:profiles!time_off_profile_fkey(*)'
 		)
-		.match({ org, contract: contractId });
+		.match({ org, contract: contract.id });
 
 	if (error) return error.message;
 
@@ -38,40 +42,41 @@ export const LeaveRequests = async ({ org, contractId }: props) => {
 					<SheetDescription>Review, update and cancel leave requests here.</SheetDescription>
 				</SheetHeader>
 
-				<ul className="mt-10 grid gap-4 py-4">
-					{data.map(leave => (
-						<li key={leave.id}>
-							<LeaveReview data={leave as any} reviewType={'employee'}>
-								<button className="w-full">
-									<Card className="flex items-center justify-between p-4 text-left">
-										<div className="space-y-3 text-xs text-muted-foreground">
-											<div>
-												From <span className="text-foreground">{format(leave.from, 'PP')}</span>
+				{data.length > 0 && (
+					<ul className="mt-10 grid gap-4 py-4">
+						{data.map(leave => (
+							<li key={leave.id}>
+								<LeaveReview data={leave as any} reviewType={reviewType}>
+									<button className="w-full">
+										<Card className="flex items-center justify-between p-4 text-left">
+											<div className="space-y-3 text-xs text-muted-foreground">
+												<div>
+													From <span className="text-foreground">{format(leave.from, 'PP')}</span>
+												</div>
+												<div>
+													To <span className="text-foreground">{format(leave.to, 'PP')}</span>
+												</div>
 											</div>
-											<div>
-												To <span className="text-foreground">{format(leave.to, 'PP')}</span>
+
+											<div className="flex items-center gap-2">
+												<Badge variant={'secondary'}>{leave.leave_type} leave</Badge>
+												<ChevronRight size={12} />
 											</div>
-										</div>
+										</Card>
+									</button>
+								</LeaveReview>
 
-										<div className="flex items-center gap-2">
-											<Badge variant={'secondary'}>{leave.leave_type} leave</Badge>
-											<ChevronRight size={12} />
-										</div>
-									</Card>
-								</button>
-							</LeaveReview>
+								<LeaveActions contract={contract} data={leave} org={org} id={leave.id} />
+							</li>
+						))}
+					</ul>
+				)}
 
-							<div className="mt-2 flex items-center gap-1">
-								<Button variant={'ghost'} className="h-6 text-destructive hover:bg-destructive/10 hover:text-destructive focus:ring-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive">
-									<Trash2 size={12} />
-								</Button>
-								<Button variant={'ghost'} className="h-6">
-									<Edit size={12} />
-								</Button>
-							</div>
-						</li>
-					))}
-				</ul>
+				{data.length == 0 && (
+					<div className="mt-10 flex min-h-32 items-center justify-center rounded-md bg-accent/80 text-xs text-muted-foreground">
+						<p>You do not have any leave request, yet</p>
+					</div>
+				)}
 			</SheetContent>
 		</Sheet>
 	);

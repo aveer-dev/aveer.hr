@@ -9,14 +9,11 @@ import { Badge } from '../ui/badge';
 interface props {
 	org: string;
 	contract: Tables<'contracts'>;
+	manager?: Tables<'managers'> | null;
 }
 
-export const BoardingsReview = async ({ org, contract }: props) => {
+export const BoardingsReview = async ({ org, contract, manager }: props) => {
 	const supabase = createClient();
-
-	const query = supabase.from('managers').select().match({ org, person: contract.id });
-	if (contract.team) query.eq('team', contract.team);
-	const managers = await query;
 
 	const { data, error } = await supabase.from('contract_check_list').select('*, contract:contracts!contract_check_list_contract_fkey(id, job_title, team, profile:profiles!contracts_profile_fkey(first_name, last_name, id))').eq('org', org);
 
@@ -29,7 +26,7 @@ export const BoardingsReview = async ({ org, contract }: props) => {
 	const filtereddata = data?.filter(boarding => {
 		const levels: any[] = boarding.levels;
 
-		return managers?.data?.length ? managers?.data[0].person !== boarding.contract.id && (boarding.contract.team == contract.team || levels.find(level => level.id == contract.id)) : levels.find(level => level.id == contract.id);
+		return manager ? manager.person !== boarding.contract.id && (boarding.contract.team == contract.team || levels.find(level => level.id == contract.id)) : levels.find(level => level.id == contract.id);
 	});
 
 	return (
@@ -45,7 +42,7 @@ export const BoardingsReview = async ({ org, contract }: props) => {
 					<ul className="space-y-10">
 						{filtereddata.map(boarding => (
 							<li key={boarding.id}>
-								<BoardingReview data={boarding as any} className="w-full text-left" reviewType={managers?.data?.length ? 'manager' : 'employee'}>
+								<BoardingReview data={boarding as any} className="w-full text-left" reviewType={manager ? 'manager' : 'employee'}>
 									<Button variant={'outline'} className="flex h-fit w-full items-center justify-between px-3 py-4 text-left">
 										<div className="space-y-2">
 											<div className="flex items-center gap-2">

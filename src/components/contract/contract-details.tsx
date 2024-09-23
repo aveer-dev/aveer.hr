@@ -52,6 +52,8 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 		);
 	}
 
+	const manager = (await supabase.from('managers').select().match({ org, person: id, team: data.team })).data;
+
 	const signContract = async (payload: FormData): Promise<string> => {
 		'use server';
 		const supabase = createClient();
@@ -253,11 +255,11 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				)}
 
 				<TabsContent value="overview">
-					<ContractOverview data={data as any} />
+					<ContractOverview reviewType={manager?.length ? 'manager' : 'employee'} data={data as any} />
 				</TabsContent>
 
 				<TabsContent value="onboarding">
-					<Boardings contract={data} org={org} onboardingId={data.onboarding} offboardingId={data.offboarding} userType={signatureType} />
+					<Boardings contract={data} org={org} onboardingId={data.onboarding} offboardingId={data.offboarding} reviewType={signatureType == 'org' ? 'admin' : manager?.length ? 'manager' : 'employee'} />
 				</TabsContent>
 
 				<TabsContent value="profile">
@@ -266,11 +268,11 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 
 				{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && (
 					<TabsContent value="requests">
-						<Timeoff reviewType="employee" contract={data.id} org={org} team={data?.team} />
+						<Timeoff manager={manager && manager[0]} reviewType={manager?.length ? 'manager' : 'employee'} contract={data} org={org} team={data?.team} />
 
-						<Applicants contract={data as any} org={org} />
+						<Applicants contract={data as any} org={org} manager={manager && manager[0]} />
 
-						<BoardingsReview contract={data} org={org} />
+						<BoardingsReview manager={manager && manager[0]} contract={data} org={org} />
 					</TabsContent>
 				)}
 

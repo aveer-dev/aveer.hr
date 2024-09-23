@@ -7,8 +7,9 @@ import { differenceInBusinessDays, format } from 'date-fns';
 import { Tables } from '@/type/database.types';
 import { Badge } from '@/components/ui/badge';
 import { LeaveReview } from './leave-review';
+import { ROLE } from '@/type/contract.types';
 
-export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles'>; reviewType: string }>[] = [
+export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles'>; reviewType: ROLE }>[] = [
 	{
 		id: 'select',
 		header: ({ table }) => (

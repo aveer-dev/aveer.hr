@@ -14,6 +14,7 @@ import { PanelRightOpen } from 'lucide-react';
 import { BoardingReview } from './boarding-review';
 import { createClient } from '@/utils/supabase/client';
 import { format } from 'date-fns';
+import { ROLE } from '@/type/contract.types';
 
 interface props {
 	data: CHECKLIST[];
@@ -22,13 +23,13 @@ interface props {
 	contract: number;
 	boarding: number;
 	org: string;
-	userType: 'profile' | 'org';
+	reviewType: ROLE;
 	policy: number;
 }
 
 const supabase = createClient();
 
-export const Boarding = ({ data, type, state, contract, boarding, org, userType, policy }: props) => {
+export const Boarding = ({ data, type, state, contract, boarding, org, reviewType, policy }: props) => {
 	const [items, updateItems] = useState<CHECKLIST[]>([]);
 	const [requestingApproval, setRequestState] = useState(false);
 	const [userState, updateUserState] = useState(state);
@@ -106,7 +107,7 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType,
 						<>
 							<Separator orientation="vertical" className="h-3" />
 
-							<BoardingReview onReview={data => updateUserState(data as any)} data={state as any} reviewType={userType == 'org' ? 'admin' : ''}>
+							<BoardingReview onReview={data => updateUserState(data as any)} data={state as any} reviewType={reviewType}>
 								<Button className="flex h-7 gap-2" variant={'secondary'}>
 									Review
 									<PanelRightOpen size={12} />
@@ -122,7 +123,7 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType,
 					{items?.map((item, index) => (
 						<li key={index} className="flex gap-4">
 							<Checkbox
-								disabled={userState?.state == 'pending' || userState?.state == 'approved' || userType == 'org'}
+								disabled={userState?.state == 'pending' || userState?.state == 'approved' || reviewType == 'admin'}
 								onCheckedChange={value => onCheckChange(value, index)}
 								checked={!!item.created_at}
 								className="h-6 w-6 rounded-full border-border"
@@ -140,7 +141,7 @@ export const Boarding = ({ data, type, state, contract, boarding, org, userType,
 						</li>
 					))}
 
-					{!items.find(itm => !itm.created_at) && userType == 'profile' && userState?.state !== 'approved' && (
+					{!items.find(itm => !itm.created_at) && reviewType !== 'admin' && userState?.state !== 'approved' && (
 						<Button onClick={requestApproval} className="h-8 gap-2" disabled={!!items.find(itm => !itm.created_at) || userState?.state == 'pending' || requestingApproval}>
 							{requestingApproval && <LoadingSpinner />} Request approval
 						</Button>

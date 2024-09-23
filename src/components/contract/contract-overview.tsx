@@ -9,12 +9,14 @@ import { Separator } from '@/components/ui/separator';
 import { cn, currencyFormat } from '@/lib/utils';
 import { FileItems } from '@/components/file-management/file-items';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ROLE } from '@/type/contract.types';
 
 interface props {
 	data: Tables<'contracts'> & { profile: Tables<'profiles'>; org: Tables<'organisations'>; entity: Tables<'legal_entities'> & { incorporation_country: { currency_code: string } } };
+	reviewType: ROLE;
 }
 
-export const ContractOverview = async ({ data }: props) => {
+export const ContractOverview = async ({ data, reviewType }: props) => {
 	const supabase = createClient();
 
 	const chartData: { label: Database['public']['Enums']['leave_type_enum']; total: number; days: number }[] = [
@@ -29,8 +31,6 @@ export const ContractOverview = async ({ data }: props) => {
 		.select()
 		.match({ org: data.org.subdomain, profile: (data.profile as any).id, status: 'pending' });
 	if (error) return 'Error';
-
-	const files = await supabase.storage.from('documents').list(`${data.org.id}/${data.profile?.id}`);
 
 	const pendingLeaveDays = (type: Database['public']['Enums']['leave_type_enum']) => {
 		const requests = timeOffRequests.filter(request => request.leave_type == type);
@@ -83,7 +83,7 @@ export const ContractOverview = async ({ data }: props) => {
 						{data.status == 'signed' && (
 							<>
 								<LeaveRequestDialog contract={data} />
-								<LeaveRequests org={data.org.subdomain} contractId={data.id} />
+								<LeaveRequests reviewType={reviewType} org={data.org.subdomain} contract={data} />
 							</>
 						)}
 					</div>

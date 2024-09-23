@@ -2,16 +2,17 @@ import { createClient } from '@/utils/supabase/server';
 import { Boarding } from './boarding';
 import { Tables } from '@/type/database.types';
 import { differenceInBusinessDays } from 'date-fns';
+import { ROLE } from '@/type/contract.types';
 
 interface props {
 	org: string;
 	onboardingId?: number | null;
 	offboardingId?: number | null;
 	contract: Tables<'contracts'>;
-	userType: 'profile' | 'org';
+	reviewType: ROLE;
 }
 
-export const Boardings = async ({ org, onboardingId, offboardingId, contract, userType }: props) => {
+export const Boardings = async ({ org, onboardingId, offboardingId, contract, reviewType }: props) => {
 	const supabase = createClient();
 
 	const [onboarding, offboarding] = await Promise.all([
@@ -41,7 +42,7 @@ export const Boardings = async ({ org, onboardingId, offboardingId, contract, us
 					contract={contract.id}
 					boarding={onboarding?.data[0]?.id}
 					org={org}
-					userType={userType}
+					reviewType={reviewType}
 					policy={onboarding.data[0]?.policy}
 				/>
 			)}
@@ -54,7 +55,7 @@ export const Boardings = async ({ org, onboardingId, offboardingId, contract, us
 					contract={contract.id}
 					boarding={offboarding?.data[0]?.id}
 					org={org}
-					userType={userType}
+					reviewType={reviewType}
 					policy={offboarding.data[0]?.policy}
 				/>
 			)}

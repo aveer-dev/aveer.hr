@@ -13,3 +13,5 @@ export interface CONTRACT {
 	profile_signed: string;
 	end_date?: string;
 }
+
+export type ROLE = 'admin' | 'employee' | 'manager';

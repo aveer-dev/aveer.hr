@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { ROLE } from '@/type/contract.types';
 import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/client';
 import { differenceInBusinessDays, format } from 'date-fns';
@@ -17,7 +18,7 @@ import { toast } from 'sonner';
 interface props {
 	children: ReactNode | string;
 	data: Tables<'time_off'> & { profile: Tables<'profiles'>; contract: Tables<'contracts'> };
-	reviewType: string;
+	reviewType: ROLE;
 }
 interface LEVEL {
 	action?: string;
@@ -38,7 +39,7 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 	const [isReviewOpen, setReviewState] = useState(false);
 	const [isAnyLevelDenied, setDeniedLevelState] = useState(false);
 	const [isUpdating, setUpdateState] = useState({ denying: false, approving: false });
-	const [role, setRole] = useState<'admin' | 'manager'>();
+	const [role] = useState<ROLE>(reviewType);
 	const router = useRouter();
 
 	const getUserId = useCallback(async () => {
@@ -54,8 +55,9 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 		return user?.id;
 	}, [router, userId]);
 
-	const getPeopleInLevels = useCallback(async (profileId: string) => {
-		const { data, error } = await supabase.from('profiles').select('first_name, last_name').eq('id', profileId).single();
+	const getPeopleInLevels = useCallback(async (contractId: string) => {
+		console.log('🚀 ~ getPeopleInLevels ~ contractId:', contractId);
+		const { data, error } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(first_name, last_name)').eq('id', contractId).single();
 		if (error) return;
 
 		return data;
@@ -63,6 +65,7 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 
 	const processLevels = useCallback(
 		async (dataLevels: any[]) => {
+			console.log('🚀 ~ dataLevels:', dataLevels);
 			const newLevels: any = [];
 			for (let i = 0; i < dataLevels.length; i++) {
 				const level = dataLevels[i];
@@ -82,22 +85,12 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 		[getPeopleInLevels, role, userId]
 	);
 
-	const getManagerStatus = useCallback(async (team: number, org: string, profile: string) => {
-		const { data, error } = await supabase.from('managers').select('id').match({ team, org, profile });
-		if (error) return toast.error('Unable to check manager status', { description: error.message });
-		if (data && data.length) setRole(() => 'manager');
-	}, []);
-
 	useEffect(() => {
-		if (reviewType == 'admin') setRole(() => 'admin');
-
 		if (isReviewOpen) {
-			getUserId().then(async userId => {
-				if (reviewType !== 'admin' && data.contract?.team && data.org && userId) await getManagerStatus(data.contract.team, data.org, userId);
-				if (data.levels) processLevels(data.levels);
-			});
+			getUserId();
+			if (data.levels) processLevels(data.levels);
 		}
-	}, [data, getManagerStatus, getUserId, isReviewOpen, processLevels, reviewType, userId]);
+	}, [data, getUserId, isReviewOpen, processLevels]);
 
 	const updateLeave = async (levels: LEVEL[]) => {
 		const isAnyDenied = !!levels.find(level => level.action == 'denied');
