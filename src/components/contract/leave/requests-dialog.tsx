@@ -50,6 +50,7 @@ export const LeaveRequests = async ({ org, contract, reviewType }: props) => {
 									<button className="w-full">
 										<Card className="flex items-center justify-between p-4 text-left">
 											<div className="space-y-3 text-xs text-muted-foreground">
+												<h3 className="font-semibold capitalize text-foreground">{leave.leave_type} leave</h3>
 												<div>
 													From <span className="text-foreground">{format(leave.from, 'PP')}</span>
 												</div>
@@ -59,7 +60,7 @@ export const LeaveRequests = async ({ org, contract, reviewType }: props) => {
 											</div>
 
 											<div className="flex items-center gap-2">
-												<Badge variant={'secondary'}>{leave.leave_type} leave</Badge>
+												<Badge variant={leave.status == 'approved' ? 'secondary-success' : leave.status == 'denied' ? 'secondary-destructive' : leave.status == 'pending' ? 'secondary-warn' : 'secondary'}>{leave.status}</Badge>
 												<ChevronRight size={12} />
 											</div>
 										</Card>

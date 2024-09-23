@@ -532,13 +532,7 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 											<FormItem>
 												<FormLabel>{question}</FormLabel>
 												<FormControl>
-													<Input
-														onChange={event => {
-															form.setValue(`custom_answers.${index}`, { ...form.getValues(`custom_answers.${index}`), answer: event.target.value });
-															console.log(form.getValues('custom_answers'));
-														}}
-														placeholder="Enter answers here"
-													/>
+													<Input onChange={event => form.setValue(`custom_answers.${index}`, { ...form.getValues(`custom_answers.${index}`), answer: event.target.value })} placeholder="Enter answers here" />
 												</FormControl>
 												<FormMessage />
 											</FormItem>

@@ -26,6 +26,7 @@ import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
+import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
 	name: z.string().min(1),
@@ -128,7 +129,15 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 					{!children && data && (
 						<Card className="flex w-full items-center justify-between p-4">
 							<div className="space-y-1 text-left">
-								<h4 className="text-xs font-semibold">{data.name}</h4>
+								<div className="flex items-center gap-2">
+									<h4 className="text-xs font-semibold">{data.name}</h4>
+									{data.is_default && (
+										<Badge variant={'secondary'} className="h-5 text-muted-foreground">
+											default
+										</Badge>
+									)}
+								</div>
+
 								<p className="text-xs capitalize text-muted-foreground">{data.type.replace('_', '-')} policy</p>
 							</div>
 

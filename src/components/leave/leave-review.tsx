@@ -56,7 +56,6 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 	}, [router, userId]);
 
 	const getPeopleInLevels = useCallback(async (contractId: string) => {
-		console.log('🚀 ~ getPeopleInLevels ~ contractId:', contractId);
 		const { data, error } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(first_name, last_name)').eq('id', contractId).single();
 		if (error) return;
 
@@ -65,7 +64,6 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 
 	const processLevels = useCallback(
 		async (dataLevels: any[]) => {
-			console.log('🚀 ~ dataLevels:', dataLevels);
 			const newLevels: any = [];
 			for (let i = 0; i < dataLevels.length; i++) {
 				const level = dataLevels[i];
