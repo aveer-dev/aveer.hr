@@ -39,16 +39,14 @@ export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles
 	{
 		accessorKey: 'leave_type',
 		header: 'Leave type',
-		cell: ({ row }) => (
-			<Badge className="capitalize" variant={'secondary'}>
-				{row.original.leave_type} leave
-			</Badge>
-		)
+		cell: ({ row }) => <span className="capitalize">{row.original.leave_type} leave</span>,
+		size: 80
 	},
 	{
 		id: 'status',
 		header: 'Status',
-		cell: ({ row }) => <Badge variant={row.original.status == 'approved' ? 'secondary-success' : row.original.status == 'denied' ? 'secondary-destructive' : row.original.status == 'pending' ? 'secondary-warn' : 'secondary'}>{row.original.status}</Badge>
+		cell: ({ row }) => <Badge variant={row.original.status == 'approved' ? 'secondary-success' : row.original.status == 'denied' ? 'secondary-destructive' : row.original.status == 'pending' ? 'secondary-warn' : 'secondary'}>{row.original.status}</Badge>,
+		size: 80
 	},
 	{
 		id: 'duration',
@@ -63,7 +61,8 @@ export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles
 	{
 		id: 'days',
 		header: 'Days',
-		cell: ({ row }) => <span className="whitespace-nowrap">{differenceInBusinessDays(row.original.to, row.original.from) + 1}</span>
+		cell: ({ row }) => <span className="whitespace-nowrap">{differenceInBusinessDays(row.original.to, row.original.from) + 1}</span>,
+		size: 50
 	},
 	{
 		id: 'actions',
@@ -75,6 +74,7 @@ export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles
 					</Button>
 				</LeaveReview>
 			);
-		}
+		},
+		size: 50
 	}
 ];

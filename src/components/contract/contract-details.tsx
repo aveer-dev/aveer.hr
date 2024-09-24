@@ -181,7 +181,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 	};
 
 	return (
-		<section className="mx-auto grid max-w-4xl gap-10 pb-6 pt-0">
+		<div className="container max-w-4xl space-y-10 px-0 pb-6 pt-0">
 			<div className="relative">
 				<BackButton className="mb-6" />
 
@@ -238,20 +238,18 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				</div>
 			</div>
 
-			<Tabs defaultValue={data.profile_signed && data.org_signed ? 'overview' : 'contract'} className="grid gap-6">
+			<Tabs defaultValue={data.profile_signed && data.org_signed ? 'overview' : 'contract'} className="space-y-6">
 				{data.profile_signed && data.org_signed && (
-					<TabsList
-						className={cn('grid w-fit')}
-						style={{
-							gridTemplateColumns: `repeat(${4 + (!!data.team && ((!data.terminated_by || (data.end_date && !isPast(data.end_date))) as any)) + (signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))))}, minmax(0, 1fr))`
-						}}>
-						<TabsTrigger value="overview">Overview</TabsTrigger>
-						<TabsTrigger value="profile">Profile</TabsTrigger>
-						{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="team">Team</TabsTrigger>}
-						{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="requests">Requests</TabsTrigger>}
-						<TabsTrigger value="contract">Contract</TabsTrigger>
-						<TabsTrigger value="onboarding">Boarding</TabsTrigger>
-					</TabsList>
+					<div className="no-scrollbar flex items-center overflow-x-auto">
+						<TabsList className={cn('flex')}>
+							<TabsTrigger value="overview">Overview</TabsTrigger>
+							<TabsTrigger value="profile">Profile</TabsTrigger>
+							{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="team">Team</TabsTrigger>}
+							{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="requests">Requests</TabsTrigger>}
+							<TabsTrigger value="contract">Contract</TabsTrigger>
+							<TabsTrigger value="onboarding">Boarding</TabsTrigger>
+						</TabsList>
+					</div>
 				)}
 
 				<TabsContent value="overview">
@@ -291,6 +289,6 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					</section>
 				</TabsContent>
 			</Tabs>
-		</section>
+		</div>
 	);
 };

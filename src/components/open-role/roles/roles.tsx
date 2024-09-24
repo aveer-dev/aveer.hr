@@ -51,12 +51,12 @@ export const Roles = async ({ orgId, type }: props) => {
 				<h1 className="text-2xl font-medium">Open roles</h1>
 
 				{type == 'role' && (
-					<div className="ml-auto flex gap-4">
-						<Link href={'./jobs'} target="_blank" className={cn(buttonVariants({ variant: 'secondary' }), 'gap-4')}>
+					<div className="fixed bottom-0 left-0 z-10 ml-auto flex w-full gap-4 border-t bg-background p-4 sm:relative sm:w-fit sm:border-none">
+						<Link href={'./jobs'} target="_blank" className={cn(buttonVariants({ variant: 'secondary' }), 'w-full gap-4 sm:w-fit')}>
 							Jobs page
 							<ArrowUpRight size={12} />
 						</Link>
-						<Link href={`./open-roles/new`} className={cn(buttonVariants({ size: 'sm' }), 'h-8 gap-4')}>
+						<Link href={`./open-roles/new`} className={cn(buttonVariants({ size: 'sm' }), 'h-8 w-full gap-4 sm:w-fit')}>
 							<Plus size={12} />
 							Create role
 						</Link>
