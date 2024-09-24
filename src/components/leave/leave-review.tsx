@@ -126,18 +126,19 @@ export const LeaveReview = ({ data, reviewType, children, contractId, ...props }
 	};
 
 	const Approvals = ({ index, level }: { index: number; level: LEVEL }) => {
-		if (levels[index - 1] && levels[index - 1]?.action == 'denied') return <span className="text-xs font-light capitalize text-muted-foreground">Denied</span>;
-
 		if (!levels[index - 1] && !level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role)) return <span className="text-xs font-light capitalize text-muted-foreground">Pending approval</span>;
 
-		if (levels[index - 1] && levels[index - 1].action && !level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role)) return <span className="text-xs font-light capitalize text-muted-foreground">Pending approval</span>;
+		if (levels[index - 1] && levels[index - 1].action && !level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role) && !isAnyLevelDenied) return <span className="text-xs font-light capitalize text-muted-foreground">Pending approval</span>;
 
-		if ((levels[index - 1] && !levels[index - 1].action) || (!level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role))) return <span className="text-xs font-light capitalize text-muted-foreground">Pending level {index} approval</span>;
+		if (((levels[index - 1] && !levels[index - 1].action) || (!level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role))) && !isAnyLevelDenied)
+			return <span className="text-xs font-light capitalize text-muted-foreground">Pending level {index} approval</span>;
 
-		if (!level.action && (level.type == 'employee' ? level.is_employee : level.type == role) && ((levels[index - 1] && levels[index - 1]?.action && levels[index - 1]?.action !== 'denied') || !levels[index - 1]))
+		if (!level.action && (level.type == 'employee' ? level.is_employee : level.type == role) && ((levels[index - 1] && levels[index - 1]?.action && levels[index - 1]?.action !== 'denied') || !levels[index - 1]) && !isAnyLevelDenied)
 			return <LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'pointer-events-none opacity-30')} />;
 
-		if (level.action && levels[index - 1]?.action !== 'denied' && levels.find(level => level?.action !== 'denied')) return <span className="text-xs font-light capitalize text-muted-foreground">{level.action}</span>;
+		if (level.action && levels[index - 1]?.action !== 'denied') return <span className="text-xs font-light capitalize text-muted-foreground">{level.action}</span>;
+
+		if ((levels[index - 1] && levels[index - 1]?.action == 'denied') || isAnyLevelDenied) return <span className="text-xs font-light capitalize text-muted-foreground">Denied</span>;
 	};
 
 	return (
