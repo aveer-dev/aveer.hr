@@ -46,7 +46,7 @@ export const LeaveRequests = async ({ org, contract, reviewType }: props) => {
 					<ul className="mt-10 grid gap-4 py-4">
 						{data.map(leave => (
 							<li key={leave.id}>
-								<LeaveReview data={leave as any} reviewType={reviewType}>
+								<LeaveReview data={leave as any} reviewType={reviewType} contractId={contract.id}>
 									<button className="w-full">
 										<Card className="flex items-center justify-between p-4 text-left">
 											<div className="space-y-3 text-xs text-muted-foreground">

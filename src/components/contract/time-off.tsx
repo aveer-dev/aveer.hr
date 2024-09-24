@@ -9,7 +9,7 @@ import { LEVEL } from '@/type/roles.types';
 
 interface props {
 	org: string;
-	team: number | null;
+	team?: number | null;
 	contract: Tables<'contracts'>;
 	reviewType: ROLE;
 	manager?: Tables<'managers'> | null;
@@ -45,7 +45,7 @@ export const Timeoff = async ({ org, contract, reviewType, manager }: props) => 
 
 			<Suspense>
 				<Separator className="mb-4 mt-2" />
-				<DataTable data={filtereddata.map(item => ({ ...item, reviewType }))} columns={columns} />
+				<DataTable data={filtereddata.map(item => ({ ...item, reviewType, activeUserContract: contract.id }))} columns={columns} />
 			</Suspense>
 		</section>
 	);

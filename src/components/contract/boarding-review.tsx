@@ -42,7 +42,7 @@ export const BoardingsReview = async ({ org, contract, manager }: props) => {
 					<ul className="space-y-10">
 						{filtereddata.map(boarding => (
 							<li key={boarding.id}>
-								<BoardingReview data={boarding as any} className="w-full text-left" reviewType={manager ? 'manager' : 'employee'}>
+								<BoardingReview data={boarding as any} contractId={contract.id} className="w-full text-left" reviewType={manager ? 'manager' : 'employee'}>
 									<Button variant={'outline'} className="flex h-fit w-full items-center justify-between px-3 py-4 text-left">
 										<div className="space-y-2">
 											<div className="flex items-center gap-2">

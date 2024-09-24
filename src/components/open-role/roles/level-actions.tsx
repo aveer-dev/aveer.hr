@@ -20,12 +20,12 @@ interface props {
 	levels: LEVEL[];
 	index: number;
 	level: LEVEL;
-	userId?: string;
+	contractId?: number;
 	applicantData: APPLICANT;
 	setApplicantData: (data: APPLICANT) => void;
 }
 
-export const LevelsAction = ({ index, level, userId, applicantData, setApplicantData, levels, role }: props) => {
+export const LevelsAction = ({ index, level, contractId, applicantData, setApplicantData, levels, role }: props) => {
 	const [feedback, setFeedback] = useState('');
 	const [isSubmiting, setSubmitState] = useState({ reject: false, approve: false });
 	const [showFeedback, setFeedbackState] = useState(false);
@@ -48,7 +48,7 @@ export const LevelsAction = ({ index, level, userId, applicantData, setApplicant
 			return item;
 		});
 
-		const newLevel: LEVEL = { id: userId as string, level: level.level, type: level.type, action, feedback, created_at: new Date() };
+		const newLevel: LEVEL = { id: String(contractId), level: level.level, type: level.type, action, feedback, created_at: new Date() };
 		newLevels[index] = newLevel;
 		await onUpdateApplication(applicantData.id, { levels: newLevels as any });
 		setFeedback('');

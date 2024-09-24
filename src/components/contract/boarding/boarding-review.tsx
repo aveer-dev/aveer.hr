@@ -21,6 +21,7 @@ interface props {
 	data: Tables<'contract_check_list'> & { contract: Tables<'contracts'> };
 	reviewType: ROLE;
 	onReview?: (data: Tables<'contract_check_list'>) => void;
+	contractId?: number;
 }
 
 interface LEVEL {
@@ -36,72 +37,45 @@ interface LEVEL {
 
 const supabase = createClient();
 
-export const BoardingReview = ({ data, reviewType, children, onReview, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
+export const BoardingReview = ({ data, reviewType, children, contractId, onReview, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
 	const [levels, updateLevels] = useState<LEVEL[]>([]);
-	const [userId, setUserId] = useState<string>();
 	const [isReviewOpen, setReviewState] = useState(false);
 	const [isAnyLevelDenied, setDeniedLevelState] = useState(false);
 	const [isUpdating, setUpdateState] = useState({ denying: false, approving: false });
-	const [role, setRole] = useState<'admin' | 'manager'>();
+	const [role] = useState<ROLE>(reviewType);
 	const router = useRouter();
 
-	const getUserId = useCallback(async () => {
-		if (userId) return userId;
-
-		const {
-			data: { user },
-			error
-		} = await supabase.auth.getUser();
-		if (error) return router.push('/login');
-		setUserId(() => user?.id);
-
-		return user?.id;
-	}, [router, userId]);
-
-	const getPeopleInLevels = useCallback(async (profileId: string) => {
-		const { data, error } = await supabase.from('profiles').select('first_name, last_name').eq('id', profileId).single();
+	const getPeopleInLevels = useCallback(async (id: string) => {
+		const { data, error } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(first_name, last_name)').eq('id', id).single();
 		if (error) return;
 
-		return data;
+		return data.profile;
 	}, []);
 
 	const processLevels = useCallback(
-		async (dataLevels: any[]) => {
+		async (dataLevels: LEVEL[]) => {
 			const newLevels: any = [];
 			for (let i = 0; i < dataLevels.length; i++) {
 				const level = dataLevels[i];
 
-				if (level?.id) {
+				if (level.id) {
 					const details = await getPeopleInLevels(level?.id);
-					newLevels.push({ ...level, ...details, enabled: level.type == role, is_employee: role != 'admin' && level.id == userId });
+					newLevels.push({ ...level, ...details, enabled: level.type == role, is_employee: role != 'admin' && level.id == String(contractId) });
 
 					if (level.action == 'denied') setDeniedLevelState(true);
 				} else {
-					newLevels.push({ ...level, enabled: level.type == role, is_employee: role != 'admin' && level.id == userId });
+					newLevels.push({ ...level, enabled: level.type == role, is_employee: role != 'admin' && level.id == String(contractId) });
 				}
 			}
 
 			updateLevels(() => newLevels);
 		},
-		[getPeopleInLevels, role, userId]
+		[contractId, getPeopleInLevels, role]
 	);
 
-	const getManagerStatus = useCallback(async (team: number, org: string, profile: string) => {
-		const { data, error } = await supabase.from('managers').select('id').match({ team, org, profile });
-		if (error) return toast.error('Unable to check manager status', { description: error.message });
-		if (data && data.length) setRole(() => 'manager');
-	}, []);
-
 	useEffect(() => {
-		if (reviewType == 'admin') setRole(() => 'admin');
-
-		if (isReviewOpen) {
-			getUserId().then(async userId => {
-				if (reviewType !== 'admin' && data.contract?.team && data.org && userId) await getManagerStatus(data.contract.team, data.org, userId);
-				if (data.levels) processLevels(data.levels);
-			});
-		}
-	}, [data, getManagerStatus, getUserId, isReviewOpen, processLevels, reviewType, userId]);
+		if (isReviewOpen && data.levels) processLevels(data.levels as any);
+	}, [data, isReviewOpen, processLevels, reviewType]);
 
 	const updateBoarding = async (levels: LEVEL[]) => {
 		const isAllApproved = !levels.find(level => !level.action);
@@ -118,8 +92,6 @@ export const BoardingReview = ({ data, reviewType, children, onReview, ...props 
 
 	const Actions = ({ className, index, level }: { className?: string; index: number; level: LEVEL }) => {
 		const onAction = (action: 'approved' | 'denied') => {
-			if (!userId) return toast.error('User not found');
-
 			setUpdateState({ denying: action == 'denied', approving: action == 'approved' });
 			const newLevels = levels.map(lv => {
 				const item: LEVEL = { id: lv.id, level: lv.level, type: lv.type };
@@ -127,7 +99,7 @@ export const BoardingReview = ({ data, reviewType, children, onReview, ...props 
 				lv.created_at && (item.created_at = lv.created_at);
 				return item;
 			});
-			const newLevel: LEVEL = { id: userId as string, level: level.level, type: level.type, action, created_at: new Date() };
+			const newLevel: LEVEL = { id: String(contractId), level: level.level, type: level.type, action, created_at: new Date() };
 			newLevels[index] = newLevel;
 
 			updateBoarding(newLevels);

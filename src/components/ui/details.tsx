@@ -135,12 +135,13 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						</p>
 					</li>
 
-					{team && (
-						<li className="grid gap-3">
-							<h2 className="text-sm font-medium">Team</h2>
-							<p className="text-sm font-light">{team}</p>
-						</li>
-					)}
+					{team ||
+						(data.team && (
+							<li className="grid gap-3">
+								<h2 className="text-sm font-medium">Team</h2>
+								<p className="text-sm font-light">{team || data.team.name}</p>
+							</li>
+						))}
 					{isManager && (
 						<li className="grid gap-3">
 							<h2 className="text-sm font-medium">Team manager</h2>

@@ -103,11 +103,11 @@ export const Boarding = ({ data, type, state, contract, boarding, org, reviewTyp
 						Checked {userState?.checklist?.length || 0}/{data.length}
 					</div>
 
-					{userState?.state == 'pending' && (
+					{userState?.state !== 'initial' && (
 						<>
 							<Separator orientation="vertical" className="h-3" />
 
-							<BoardingReview onReview={data => updateUserState(data as any)} data={state as any} reviewType={reviewType}>
+							<BoardingReview contractId={contract} onReview={data => updateUserState(data as any)} data={state as any} reviewType={reviewType}>
 								<Button className="flex h-7 gap-2" variant={'secondary'}>
 									Review
 									<PanelRightOpen size={12} />

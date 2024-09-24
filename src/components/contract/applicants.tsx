@@ -43,7 +43,7 @@ export const Applicants = async ({ org, contract, manager }: props) => {
 					<ul className="space-y-10">
 						{filtereddata.map(applicant => (
 							<li key={applicant.id}>
-								<ApplicantDetails data={applicant as any} className="w-full text-left">
+								<ApplicantDetails userRole={manager ? 'manager' : 'employee'} contractId={contract.id} data={applicant as any} className="w-full text-left">
 									<Card className="flex w-full items-center justify-between border-none p-3 transition-all duration-500 group-hover:bg-accent/80 group-focus:bg-accent/80 group-focus-visible:bg-accent/80">
 										<div className="space-y-2">
 											<div className="flex items-center gap-2">

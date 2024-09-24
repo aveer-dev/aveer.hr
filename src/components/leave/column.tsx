@@ -8,8 +8,17 @@ import { Tables } from '@/type/database.types';
 import { Badge } from '@/components/ui/badge';
 import { LeaveReview } from './leave-review';
 import { ROLE } from '@/type/contract.types';
+import { PanelRightOpen } from 'lucide-react';
 
-export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles'>; reviewType: ROLE }>[] = [
+type LEAVE_COLUMN = ColumnDef<
+	Tables<'time_off'> & {
+		profile: Tables<'profiles'>;
+		reviewType: ROLE;
+		activeUserContract?: number;
+	}
+>;
+
+export const columns: LEAVE_COLUMN[] = [
 	{
 		id: 'select',
 		header: ({ table }) => (
@@ -68,9 +77,10 @@ export const columns: ColumnDef<Tables<'time_off'> & { profile: Tables<'profiles
 		id: 'actions',
 		cell: ({ row }) => {
 			return (
-				<LeaveReview reviewType={row.original.reviewType} data={row.original as any}>
-					<Button variant={'secondary'} className="h-6">
+				<LeaveReview reviewType={row.original.reviewType} data={row.original as any} contractId={row.original.activeUserContract}>
+					<Button variant={'outline'} className="h-8 gap-3">
 						Review
+						<PanelRightOpen size={12} />
 					</Button>
 				</LeaveReview>
 			);

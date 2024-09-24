@@ -38,7 +38,8 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
             entity:legal_entities!contracts_entity_fkey(incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name), address_state, street_address, address_code),
             profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)),
             signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email),
-            terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email)`
+            terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email),
+            team:teams!contracts_team_fkey(id, name)`
 		)
 		.match({ org, id })
 		.single();
@@ -52,7 +53,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 		);
 	}
 
-	const manager = (await supabase.from('managers').select().match({ org, person: id, team: data.team })).data;
+	const manager = (await supabase.from('managers').select().match({ org, person: id, team: data.team?.id })).data;
 
 	const signContract = async (payload: FormData): Promise<string> => {
 		'use server';
@@ -266,7 +267,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 
 				{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && (
 					<TabsContent value="requests">
-						<Timeoff manager={manager && manager[0]} reviewType={manager?.length ? 'manager' : 'employee'} contract={data} org={org} team={data?.team} />
+						<Timeoff manager={manager && manager[0]} reviewType={manager?.length ? 'manager' : 'employee'} contract={data} org={org} team={data?.team?.id} />
 
 						<Applicants contract={data as any} org={org} manager={manager && manager[0]} />
 
@@ -274,7 +275,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					</TabsContent>
 				)}
 
-				<TabsContent value="team">{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <Teams contractId={data.id} org={org} team={data.team} />}</TabsContent>
+				<TabsContent value="team">{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <Teams name={data.team.name} contractId={data.id} org={org} team={data.team.id} />}</TabsContent>
 
 				<TabsContent value="contract">
 					<section className="grid gap-14">
@@ -285,7 +286,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 							</div>
 						)}
 
-						<Details formType="contract" data={data} />
+						<Details formType="contract" data={data} isManager={!!(manager && manager?.length > 0)} />
 					</section>
 				</TabsContent>
 			</Tabs>

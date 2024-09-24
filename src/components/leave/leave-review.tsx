@@ -19,6 +19,7 @@ interface props {
 	children: ReactNode | string;
 	data: Tables<'time_off'> & { profile: Tables<'profiles'>; contract: Tables<'contracts'> };
 	reviewType: ROLE;
+	contractId?: number;
 }
 interface LEVEL {
 	action?: string;
@@ -33,33 +34,19 @@ interface LEVEL {
 
 const supabase = createClient();
 
-export const LeaveReview = ({ data, reviewType, children, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
+export const LeaveReview = ({ data, reviewType, children, contractId, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
 	const [levels, updateLevels] = useState<LEVEL[]>([]);
-	const [userId, setUserId] = useState<string>();
 	const [isReviewOpen, setReviewState] = useState(false);
 	const [isAnyLevelDenied, setDeniedLevelState] = useState(false);
 	const [isUpdating, setUpdateState] = useState({ denying: false, approving: false });
 	const [role] = useState<ROLE>(reviewType);
 	const router = useRouter();
 
-	const getUserId = useCallback(async () => {
-		if (userId) return userId;
-
-		const {
-			data: { user },
-			error
-		} = await supabase.auth.getUser();
-		if (error) return router.push('/login');
-		setUserId(() => user?.id);
-
-		return user?.id;
-	}, [router, userId]);
-
 	const getPeopleInLevels = useCallback(async (contractId: string) => {
 		const { data, error } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(first_name, last_name)').eq('id', contractId).single();
 		if (error) return;
 
-		return data;
+		return data.profile;
 	}, []);
 
 	const processLevels = useCallback(
@@ -70,25 +57,22 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 
 				if (level?.id) {
 					const details = await getPeopleInLevels(level?.id);
-					newLevels.push({ ...level, ...details, enabled: level.type == role, is_employee: role != 'admin' && level.id == userId });
+					newLevels.push({ ...level, ...details, enabled: level.type == role, is_employee: role != 'admin' && level.id == contractId });
 
 					if (level.action == 'denied') setDeniedLevelState(true);
 				} else {
-					newLevels.push({ ...level, enabled: level.type == role, is_employee: role != 'admin' && level.id == userId });
+					newLevels.push({ ...level, enabled: level.type == role, is_employee: role != 'admin' && level.id == contractId });
 				}
 			}
 
 			updateLevels(() => newLevels);
 		},
-		[getPeopleInLevels, role, userId]
+		[contractId, getPeopleInLevels, role]
 	);
 
 	useEffect(() => {
-		if (isReviewOpen) {
-			getUserId();
-			if (data.levels) processLevels(data.levels);
-		}
-	}, [data, getUserId, isReviewOpen, processLevels]);
+		if (isReviewOpen && data.levels) processLevels(data.levels);
+	}, [data, isReviewOpen, processLevels]);
 
 	const updateLeave = async (levels: LEVEL[]) => {
 		const isAnyDenied = !!levels.find(level => level.action == 'denied');
@@ -115,8 +99,6 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 
 	const LeaveActions = ({ className, index, level }: { className?: string; index: number; level: LEVEL }) => {
 		const onAction = (action: 'approved' | 'denied') => {
-			if (!userId) return toast.error('User not found');
-
 			setUpdateState({ denying: action == 'denied', approving: action == 'approved' });
 			const newLevels = levels.map(lv => {
 				const item: LEVEL = { id: lv.id, level: lv.level, type: lv.type };
@@ -124,7 +106,7 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 				lv.created_at && (item.created_at = lv.created_at);
 				return item;
 			});
-			const newLevel: LEVEL = { id: userId as string, level: level.level, type: level.type, action, created_at: new Date() };
+			const newLevel: LEVEL = { id: contractId ? String(contractId) : '', level: level.level, type: level.type, action, created_at: new Date() };
 			newLevels[index] = newLevel;
 
 			updateLeave(newLevels);
@@ -141,6 +123,21 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 				</Button>
 			</div>
 		);
+	};
+
+	const Approvals = ({ index, level }: { index: number; level: LEVEL }) => {
+		if (levels[index - 1] && levels[index - 1]?.action == 'denied') return <span className="text-xs font-light capitalize text-muted-foreground">Denied</span>;
+
+		if (!levels[index - 1] && !level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role)) return <span className="text-xs font-light capitalize text-muted-foreground">Pending approval</span>;
+
+		if (levels[index - 1] && levels[index - 1].action && !level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role)) return <span className="text-xs font-light capitalize text-muted-foreground">Pending approval</span>;
+
+		if ((levels[index - 1] && !levels[index - 1].action) || (!level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role))) return <span className="text-xs font-light capitalize text-muted-foreground">Pending level {index} approval</span>;
+
+		if (!level.action && (level.type == 'employee' ? level.is_employee : level.type == role) && ((levels[index - 1] && levels[index - 1]?.action && levels[index - 1]?.action !== 'denied') || !levels[index - 1]))
+			return <LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'pointer-events-none opacity-30')} />;
+
+		if (level.action && levels[index - 1]?.action !== 'denied' && levels.find(level => level?.action !== 'denied')) return <span className="text-xs font-light capitalize text-muted-foreground">{level.action}</span>;
 	};
 
 	return (
@@ -229,9 +226,9 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 							<h1 className="text-base font-bold">Approvals</h1>
 							<ul className="mb-20 space-y-8">
 								{levels?.map((level, index) => (
-									<li key={index} className={cn('flex items-center justify-between', level.action && '-ml-2 border-l-4 pl-1', level.action == 'approved' ? 'border-l-green-200' : level.action == 'denied' ? 'border-l-red-200' : 'border-l-gray-200')}>
+									<li key={index} className={cn('flex items-center justify-between', level.action && '-ml-2 border-l-4 pl-1', level.action == 'approved' ? 'border-l-green-200' : level.action == 'denied' ? 'border-l-red-300' : 'border-l-gray-200')}>
 										<div className="space-y-1 capitalize">
-											<h2 className="text-xs">{level?.type}</h2>
+											<h2 className="text-xs">{level?.type == 'employee' && !level.action ? `${level.first_name} ${level.last_name}` : level?.type}</h2>
 											{level.action && (
 												<p className="text-xs text-muted-foreground empty:hidden">
 													{level.first_name} {level.last_name}
@@ -240,23 +237,7 @@ export const LeaveReview = ({ data, reviewType, children, ...props }: props & HT
 											{!level.action && <p className="text-xs font-light text-muted-foreground empty:hidden">Approval Level {index + 1}</p>}
 										</div>
 
-										{level.type !== role && !level.is_employee ? (
-											<span className="text-xs font-light capitalize text-muted-foreground">{level.action || 'Pending approval'}</span>
-										) : index == 0 ? (
-											levels[0].action ? (
-												<span className="text-xs font-light capitalize text-muted-foreground">{level.action}</span>
-											) : (
-												<LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'opacity-30')} />
-											)
-										) : levels[index - 1].action ? (
-											!level.action ? (
-												<LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'opacity-30')} />
-											) : (
-												<span className="text-xs font-light capitalize text-muted-foreground">{level.action}</span>
-											)
-										) : (
-											<span className="text-xs font-light capitalize text-muted-foreground">Pending level {index} approval</span>
-										)}
+										<Approvals index={index} level={level} />
 									</li>
 								))}
 

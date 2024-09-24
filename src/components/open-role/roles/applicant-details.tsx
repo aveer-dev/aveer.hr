@@ -19,36 +19,26 @@ import { NavLink } from '@/components/ui/link';
 import { APPLICANT, DOCUMENT, LEVEL } from '@/type/roles.types';
 import { ApplicantDocuments } from './applicant-documents';
 import { LevelsAction } from './level-actions';
+import { ROLE } from '@/type/contract.types';
 
 interface props {
 	data: Tables<'job_applications'> & { org: { name: string; subdomain: string }; role: Tables<'open_roles'> & { policy: Tables<'approval_policies'> }; levels: LEVEL[] };
 	onUpdate?: () => void;
 	children?: ReactNode;
 	className?: string;
-	userRole?: 'admin' | 'manager';
+	userRole: ROLE;
+	contractId: number;
 }
 
 const supabase = createClient();
 
-export const ApplicantDetails = ({ data, onUpdate, children, className, userRole }: props) => {
+export const ApplicantDetails = ({ data, onUpdate, children, className, userRole, contractId }: props) => {
 	const [applicantData, setApplicantData] = useState<APPLICANT>(data);
-	const [role, setRole] = useState<'admin' | 'manager' | 'employee' | null>(userRole || null);
-	const [userId, setUserId] = useState<string>();
+	const [role] = useState(userRole);
 	const [levels, updateLevels] = useState<LEVEL[]>(applicantData.levels);
 	const [isDetailOpen, setDetailState] = useState(false);
 	const [documents, setDocuments] = useState<DOCUMENT[]>([]);
 	const router = useRouter();
-
-	const getUserId = useCallback(async () => {
-		const {
-			data: { user },
-			error
-		} = await supabase.auth.getUser();
-		if (error) return router.push('/login');
-		setUserId(() => user?.id);
-
-		return user?.id;
-	}, [router]);
 
 	const getPeopleInLevels = useCallback(async (profileId: string) => {
 		const { data, error } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(first_name, last_name)').eq('id', profileId).single();
@@ -57,39 +47,28 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 		return data.profile;
 	}, []);
 
-	const getManagerStatus = async (team: number, org: string, profile: string) => {
-		const { data, error } = await supabase.from('managers').select('id').match({ team, org, profile });
-		if (error) return toast.error('Unable to check manager status', { description: error.message });
-		if (data && data.length) setRole('manager');
-	};
-
 	const processLevels = useCallback(
-		async (dataLevels: any[]) => {
+		async (dataLevels: LEVEL[]) => {
 			const newLevels: any = [];
 			for (let i = 0; i < dataLevels.length; i++) {
 				const level = dataLevels[i];
 
 				if (level?.id) {
 					const details = await getPeopleInLevels(level?.id);
-					newLevels.push({ ...level, ...details, is_employee: role != 'admin' && level.id == userId });
+					newLevels.push({ ...level, ...details, is_employee: role != 'admin' && level.id == String(contractId) });
 				} else {
-					newLevels.push({ ...level, enabled: level.type == role, is_employee: role != 'admin' && level.id == userId });
+					newLevels.push({ ...level, enabled: level.type == role, is_employee: role != 'admin' && level.id == String(contractId) });
 				}
 			}
 
 			updateLevels(() => newLevels);
 		},
-		[getPeopleInLevels, role, userId]
+		[contractId, getPeopleInLevels, role]
 	);
 
 	useEffect(() => {
-		if (isDetailOpen) {
-			getUserId().then(async userId => {
-				if (role !== 'admin' && applicantData.role?.team && applicantData.org && userId) await getManagerStatus(applicantData.role.team, applicantData.org.subdomain, userId);
-				if (applicantData.levels) processLevels(applicantData.levels);
-			});
-		}
-	}, [applicantData, getUserId, processLevels, userId, isDetailOpen, userRole, role]);
+		if (isDetailOpen && applicantData.levels) processLevels(applicantData.levels);
+	}, [applicantData, processLevels, isDetailOpen, userRole, role]);
 
 	const onClose = (isClose: boolean) => {
 		if (isClose == false) data.stage !== applicantData.stage || data.levels !== applicantData.levels ? onUpdate && onUpdate() : router.refresh();
@@ -166,7 +145,7 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 						</TabsList>
 
 						<TabsContent value="overview">
-							<ul className="space-y-16">{levels?.map((level, index) => <LevelsAction key={index} level={level} index={index} role={role} levels={levels} userId={userId} applicantData={applicantData} setApplicantData={setApplicantData} />)}</ul>
+							<ul className="space-y-16">{levels?.map((level, index) => <LevelsAction key={index} level={level} index={index} role={role} levels={levels} contractId={contractId} applicantData={applicantData} setApplicantData={setApplicantData} />)}</ul>
 						</TabsContent>
 
 						<TabsContent value="details">
