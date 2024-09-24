@@ -34,7 +34,11 @@ export const Header = async ({ orgId }: { orgId?: string }) => {
 				</div>
 			</div>
 
-			<div className="no-scrollbar flex items-center overflow-x-auto px-6 pt-4">{orgId && data?.user && <NavMenu orgId={orgId} />}</div>
+			{orgId && data?.user && (
+				<div className="no-scrollbar flex items-center overflow-x-auto px-6 pt-4">
+					<NavMenu orgId={orgId} />
+				</div>
+			)}
 		</header>
 	);
 };
