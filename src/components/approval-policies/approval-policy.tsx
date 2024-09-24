@@ -315,13 +315,14 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 																			<Command>
 																				<CommandList>
 																					<CommandGroup>
-																						{employeeTypes.map((type, index) => (
+																						{employeeTypes.map((type, idx) => (
 																							<CommandItem
-																								key={index}
+																								key={idx}
 																								value={type.type}
 																								onSelect={value => {
 																									form.setValue(`levels.${index}.type`, value);
 																									if (value !== 'employee') form.setValue(`levels.${index}.id`, '');
+
 																									levels[index] = { ...levels[index], type: value, isopen: false };
 																									updateLevels([...levels]);
 																								}}>
