@@ -3,7 +3,7 @@
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/client';
-import { ArrowUpRight, PanelRightOpenIcon, X } from 'lucide-react';
+import { ArrowUpRight, CalendarRange, Mail, PanelRightOpenIcon, Phone, X } from 'lucide-react';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { UpdateApplication } from './applicant-actions';
-import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { NavLink } from '@/components/ui/link';
@@ -20,6 +19,8 @@ import { APPLICANT, DOCUMENT, LEVEL } from '@/type/roles.types';
 import { ApplicantDocuments } from './applicant-documents';
 import { LevelsAction } from './level-actions';
 import { ROLE } from '@/type/contract.types';
+import { ComposeMailDialog } from '@/components/ui/mail-dialog';
+import { toast } from 'sonner';
 
 interface props {
 	data: Tables<'job_applications'> & { org: { name: string; subdomain: string }; role: Tables<'open_roles'> & { policy: Tables<'approval_policies'> }; levels: LEVEL[] };
@@ -27,7 +28,7 @@ interface props {
 	children?: ReactNode;
 	className?: string;
 	userRole: ROLE;
-	contractId: number;
+	contractId?: number;
 }
 
 const supabase = createClient();
@@ -55,9 +56,9 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 
 				if (level?.id) {
 					const details = await getPeopleInLevels(level?.id);
-					newLevels.push({ ...level, ...details, is_employee: role != 'admin' && level.id == String(contractId) });
+					newLevels.push({ ...level, ...details, is_employee: role != 'admin' && level.id == (contractId ? String(contractId) : '') });
 				} else {
-					newLevels.push({ ...level, enabled: level.type == role, is_employee: role != 'admin' && level.id == String(contractId) });
+					newLevels.push({ ...level, enabled: level.type == role, is_employee: role != 'admin' && level.id == (contractId ? String(contractId) : '') });
 				}
 			}
 
@@ -98,28 +99,42 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 			</SheetTrigger>
 
 			<SheetContent hideClose className="overflow-y-auto p-0 sm:max-w-2xl">
-				<SheetHeader className="flex-col justify-between gap-y-6 rounded-md bg-accent/70 p-6 text-left sm:flex-row">
-					<div className="space-y-1">
-						<SheetTitle className="text-xl">
-							{applicantData?.first_name} {applicantData?.last_name}
-						</SheetTitle>
-						<SheetDescription>
-							<NavLink target="_blank" org={applicantData.org.subdomain} href={`/jobs/${applicantData.role?.id}`} className="flex items-center gap-1 text-foreground underline decoration-dashed underline-offset-2">
-								Role: {applicantData?.role?.job_title} <ArrowUpRight className="-mb-1" size={12} />
-							</NavLink>
-						</SheetDescription>
-					</div>
+				<SheetHeader className="relative rounded-md bg-accent/70 p-6 text-left">
+					<div className="flex flex-col justify-between gap-y-6 sm:flex-row">
+						<div className="space-y-1">
+							<SheetTitle className="max-w-64 truncate text-xl">
+								{applicantData?.first_name} {applicantData?.last_name}
+							</SheetTitle>
+							<SheetDescription>
+								<NavLink target="_blank" org={applicantData.org.subdomain} href={`/jobs/${applicantData.role?.id}`} className="flex items-center gap-1 text-foreground underline decoration-dashed underline-offset-2">
+									Role: {applicantData?.role?.job_title} <ArrowUpRight className="-mb-1" size={12} />
+								</NavLink>
+							</SheetDescription>
+						</div>
 
-					<div className="flex gap-2">
-						{role == 'admin' && (
-							<UpdateApplication className="w-full sm:w-[200px]" levels={applicantData.role?.policy?.levels} stage={applicantData.stage} onUpdateItem={data => setApplicantData(data as any)} id={applicantData.id} org={(applicantData.org as any)?.subdomain} />
-						)}
+						<div className="flex gap-2">
+							<Link href={`mailto:${applicantData.email}`} className={cn(buttonVariants({ variant: 'outline', size: 'icon' }), 'order-2 flex h-9 items-center justify-center gap-2 sm:order-1 sm:max-w-80')}>
+								<CalendarRange size={12} />
+							</Link>
 
-						<SheetClose asChild>
-							<Button className="absolute right-2 top-4 h-9 w-9 rounded-full sm:static" variant={'outline'} size={'icon'}>
-								<X size={14} />
-							</Button>
-						</SheetClose>
+							<ComposeMailDialog
+								title={`Send message to ${applicantData.first_name}`}
+								onClose={state => state == 'success' && toast.success(`Message sent to ${applicantData.first_name}`)}
+								recipients={[applicantData.email]}
+								name={`Message from ${applicantData.org}`}>
+								<Button size={'icon'} className="order-3 flex h-9 items-center justify-center gap-2 sm:order-2 sm:max-w-80" variant={'outline'}>
+									<Mail size={12} />
+								</Button>
+							</ComposeMailDialog>
+
+							{role == 'admin' && <UpdateApplication applicant={applicantData as any} className="order-1 w-full sm:order-3 sm:w-44" onUpdateItem={data => setApplicantData(data as any)} />}
+
+							<SheetClose asChild>
+								<Button className="absolute right-2 top-4 order-4 h-9 w-9 rounded-full sm:static" variant={'outline'} size={'icon'}>
+									<X size={14} />
+								</Button>
+							</SheetClose>
+						</div>
 					</div>
 				</SheetHeader>
 
@@ -161,11 +176,17 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 										</li>
 										<li className="grid gap-3">
 											<p className="text-sm font-medium">Email</p>
-											<p className="text-sm font-light">{applicantData?.email}</p>
+											<a href={`mailto:${applicantData?.email}`} className="flex items-center gap-1 text-sm font-light underline decoration-muted-foreground decoration-dashed underline-offset-4">
+												<span className="max-w-52 overflow-hidden text-ellipsis whitespace-nowrap">{applicantData?.email}</span>
+												<Mail size={12} className="text-muted-foreground" />
+											</a>
 										</li>
 										<li className="grid gap-3">
 											<p className="text-sm font-medium">Phone number</p>
-											<p className="text-sm font-light capitalize">{applicantData?.phone_number}</p>
+											<a href={`tel:${applicantData?.phone_number}`} className="flex items-center gap-1 text-sm font-light underline decoration-muted-foreground decoration-dashed underline-offset-4">
+												<span className="max-w-52 overflow-hidden text-ellipsis whitespace-nowrap">{applicantData?.phone_number}</span>
+												<Phone size={12} className="text-muted-foreground" />
+											</a>
 										</li>
 									</ul>
 								</div>
@@ -194,12 +215,13 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 
 								<div>
 									<h1 className="mb-4 text-base font-semibold">Links</h1>
-									<ul className="grid items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
+									<ul className="grid grid-cols-2 items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
 										{(applicantData?.links as any[])?.map(link => (
 											<li key={link.name} className="grid gap-3">
 												<p className="text-sm font-medium capitalize">{link.name}</p>
 												<Link target="_blank" referrerPolicy="no-referrer" href={link.link} className="flex w-fit items-center gap-2 rounded-md bg-secondary p-1 text-sm font-light">
-													{link.link} <ArrowUpRight size={14} className="rounded-sm bg-background" />
+													<span className="max-w-52 overflow-hidden text-ellipsis whitespace-nowrap">{link.link}</span>
+													<ArrowUpRight size={14} className="rounded-sm bg-background" />
 												</Link>
 											</li>
 										))}

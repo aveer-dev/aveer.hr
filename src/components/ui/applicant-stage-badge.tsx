@@ -11,7 +11,8 @@ export const ApplicantBadge = ({ stage }: { stage: string }) => {
 				stage == 'review' && 'bg-blue-100 hover:bg-blue-100',
 				stage == 'interview' && 'bg-violet-100 hover:bg-violet-100',
 				stage == 'offer' && 'bg-indigo-100 hover:bg-indigo-100',
-				stage == 'hired' && 'bg-green-100 hover:bg-green-100'
+				stage == 'hired' && 'bg-green-100 hover:bg-green-100',
+				stage == 'reject' && 'bg-red-100 hover:bg-red-100'
 			)}>
 			{stage || 'Select stage...'}
 		</Badge>

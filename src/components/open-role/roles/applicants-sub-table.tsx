@@ -1,5 +1,4 @@
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { ApplicantDetails } from '@/components/open-role/roles/applicant-details';
 import { Tables } from '@/type/database.types';

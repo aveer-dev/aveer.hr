@@ -1,60 +1,36 @@
 import { ComposeMailDialog } from '@/components/ui/mail-dialog';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, Check, ChevronsUpDown, Info, Mail } from 'lucide-react';
+import { Check, ChevronsUpDown, Info } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
 import { updateApplication } from './application.action';
 import { Tables, TablesUpdate } from '@/type/database.types';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ApplicantBadge } from '@/components/ui/applicant-stage-badge';
 import { createClient } from '@/utils/supabase/client';
-import { LEVEL } from '@/type/roles.types';
 
-const AcceptedApplicantActions = ({ email, name, org }: { email: string; org: string; name: string }) => {
-	const [showMailDialog, toggleMailDialog] = useState(false);
-
-	return (
-		<div className="flex w-full gap-3 lg:justify-center">
-			<Button className="gap-2" size={'icon'} variant="outline" title="Send meeting schedule">
-				<span className="sr-only">Send meeting schedule</span>
-				<CalendarDays size={12} />
-			</Button>
-
-			<Button className="gap-2" onClick={() => toggleMailDialog(true)} size={'icon'} variant="outline" title="Send mail">
-				<span className="sr-only">Send mail</span>
-				<Mail size={12} />
-			</Button>
-
-			<ComposeMailDialog title={`Send message to ${name}`} onClose={state => state == 'success' && toast.success(`Message sent to ${name}`)} isOpen={showMailDialog} toggleDialog={toggleMailDialog} recipients={[email]} name={`Message from ${org}`} />
-		</div>
-	);
-};
-
-const stages = ['review', 'interview', 'offer', 'hired'];
+const stages = ['review', 'interview', 'offer', 'hired', 'reject'];
 
 interface props {
-	levels?: any[];
-	org: string;
-	id: number;
 	onUpdateItem: (data: Tables<'job_applications'> & { role: Tables<'roles'> & { policy: Tables<'approval_policies'> } }) => void;
-	stage: string;
 	className?: string;
+	applicant: Tables<'job_applications'> & { org: Tables<'organisations'> };
 }
 
 const supabase = createClient();
 
-export const UpdateApplication = ({ id, onUpdateItem, stage, org, levels, className }: props) => {
+export const UpdateApplication = ({ onUpdateItem, applicant, className }: props) => {
 	const [open, setOpen] = useState(false);
-	const [value, setValue] = useState(stage);
+	const [value, setValue] = useState(applicant.stage);
 	const [isUpdating, setUpdateState] = useState(false);
+	const [showRejectionDialog, toggleRejectionDialog] = useState(false);
 
 	const getDefaultApprovalPolicy = useCallback(async () => {
-		const { data, error } = await supabase.from('approval_policies').select().match({ org, type: 'role_application', is_default: true });
+		const { data, error } = await supabase.from('approval_policies').select().match({ org: applicant.org.subdomain, type: 'role_application', is_default: true });
 		if (error) {
 			toast.error('Unable to fetch default application review policy', { description: error.message });
 			return;
@@ -62,130 +38,113 @@ export const UpdateApplication = ({ id, onUpdateItem, stage, org, levels, classN
 
 		if (data && data.length > 0) return data[0].levels;
 		return;
-	}, [org]);
+	}, [applicant.org]);
 
 	const onUpdateApplication = async (stage: string) => {
 		setUpdateState(true);
 
-		const applicationLevels = levels?.length ? levels : await getDefaultApprovalPolicy();
+		const applicationLevels = applicant.levels?.length ? applicant.levels : await getDefaultApprovalPolicy();
 
 		const payload: TablesUpdate<'job_applications'> = { stage };
 		if (stage == 'interview' && applicationLevels) payload.levels = applicationLevels as any;
 
-		const response = await updateApplication(id, payload, org);
+		const response = await updateApplication(applicant.id, payload, applicant.org.subdomain);
 		setUpdateState(false);
 
 		if (typeof response == 'string') return toast('😭 Error', { description: response });
 
 		toast.success('Done!', { description: `Applicant has been moved to stage ${stage}` });
+		if (stage == 'reject') toggleRejectionDialog(true);
+
 		onUpdateItem(response as any);
 		setValue(response.stage);
 	};
 
 	useEffect(() => {
 		const setToReview = async () => {
-			const response = await updateApplication(id, { stage: 'review' }, org);
+			const response = await updateApplication(applicant.id, { stage: 'review' }, applicant.org.subdomain);
 			if (typeof response == 'string') return toast('😭 Error', { description: response });
 			onUpdateItem(response as any);
 			setValue(response.stage);
 		};
 
-		if (stage == 'applicant') setToReview();
-		if (!levels) getDefaultApprovalPolicy();
-	}, [getDefaultApprovalPolicy, id, levels, onUpdateItem, org, stage]);
-
-	return (
-		<Popover open={open} onOpenChange={setOpen}>
-			<PopoverTrigger asChild>
-				<Button variant="outline" role="combobox" aria-expanded={open} className={cn('w-[200px] justify-between', className)}>
-					Stage:
-					<div className="flex items-center gap-1">
-						{isUpdating && <LoadingSpinner />}
-						<ApplicantBadge stage={value} />
-						<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-					</div>
-				</Button>
-			</PopoverTrigger>
-			<PopoverContent className="w-[200px] p-0">
-				<Command>
-					<CommandList>
-						<CommandEmpty>No stage found.</CommandEmpty>
-						<CommandGroup>
-							{stages.map(stage => (
-								<CommandItem
-									className="items-center gap-1"
-									key={stage}
-									value={stage}
-									onSelect={currentValue => {
-										onUpdateApplication(currentValue);
-										setOpen(false);
-									}}>
-									<Check className={cn('mr-2 h-4 w-4', value === stage ? 'opacity-100' : 'opacity-0')} />
-
-									<ApplicantBadge stage={stage} />
-
-									{stage == 'interview' && (
-										<TooltipProvider>
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<div className="flex h-4 w-4 items-center justify-center p-0 text-muted-foreground">
-														<Info size={12} />
-													</div>
-												</TooltipTrigger>
-												<TooltipContent>
-													<p className="max-w-32 text-[10px] text-muted-foreground">This option will start application policy process, if any.</p>
-												</TooltipContent>
-											</Tooltip>
-										</TooltipProvider>
-									)}
-								</CommandItem>
-							))}
-						</CommandGroup>
-					</CommandList>
-				</Command>
-			</PopoverContent>
-		</Popover>
-	);
-};
-
-export const ApplicantActions = ({ id, onUpdateItem, name, stage, email, orgName, className }: { className?: string; name: string; id: number; email: string; orgName: string; onUpdateItem: (stage: string) => void; stage: string }) => {
-	const [showRejectionDialog, toggleRejectionDialog] = useState(false);
+		if (applicant.stage == 'applicant') setToReview();
+		if (!applicant.levels) getDefaultApprovalPolicy();
+	}, [getDefaultApprovalPolicy, onUpdateItem, applicant]);
 
 	return (
 		<>
-			{/* {stage == 'applicant' && (
-				<UpdateApplication
-					id={id}
-					onUpdateItem={stage => {
-						if (stage !== 'rejected') return onUpdateItem(stage);
-						toggleRejectionDialog(stage == 'rejected');
-					}}
-					stage={stage}
-				/>
-			)} */}
+			<Popover open={open} onOpenChange={setOpen}>
+				<PopoverTrigger asChild>
+					<Button variant="outline" role="combobox" aria-expanded={open} className={cn('w-40 justify-between', className)}>
+						Stage:
+						<div className="flex items-center gap-1">
+							{isUpdating && <LoadingSpinner />}
+							<ApplicantBadge stage={value} />
+							<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+						</div>
+					</Button>
+				</PopoverTrigger>
+				<PopoverContent className="w-40 p-0" align="start">
+					<Command>
+						<CommandList>
+							<CommandEmpty>No stage found.</CommandEmpty>
+							<CommandGroup>
+								{stages.map(stage => (
+									<CommandItem
+										className="items-center gap-1"
+										key={stage}
+										value={stage}
+										onSelect={currentValue => {
+											onUpdateApplication(currentValue);
+											setOpen(false);
+										}}>
+										<Check className={cn('mr-2 h-4 w-4', value === stage ? 'opacity-100' : 'opacity-0')} />
 
-			{stage !== 'rejected' && stage != 'applicant' && <AcceptedApplicantActions name={name} org={orgName} email={email} />}
+										<ApplicantBadge stage={stage} />
+
+										{stage == 'interview' && (
+											<TooltipProvider>
+												<Tooltip>
+													<TooltipTrigger asChild>
+														<div className="flex h-4 w-4 items-center justify-center p-0 text-muted-foreground">
+															<Info size={12} />
+														</div>
+													</TooltipTrigger>
+													<TooltipContent>
+														<p className="max-w-32 text-[10px] text-muted-foreground">This option will start application policy process, if any.</p>
+													</TooltipContent>
+												</Tooltip>
+											</TooltipProvider>
+										)}
+									</CommandItem>
+								))}
+							</CommandGroup>
+						</CommandList>
+					</Command>
+				</PopoverContent>
+			</Popover>
 
 			<ComposeMailDialog
 				isOpen={showRejectionDialog}
 				toggleDialog={toggleRejectionDialog}
 				subject={`${name} application update`}
-				recipients={[email]}
-				name={`Update from ${orgName}`}
+				recipients={[applicant.email]}
+				name={`Update from ${applicant.org.name}`}
 				onClose={state => {
-					onUpdateItem(stage);
+					// onUpdateItem(applicant.stage);
 					if (state == 'success') toast.success('Application update sent');
 				}}
 				title="Send rejection email"
 				description="Send a message to applicant about this rejection."
-				message={`Hey ${name},
+				message={`Hey ${applicant.first_name},
 
-Thanks for taking the time to meet with us recently and for your interest in ${orgName}. We appreciate the chance to get to know you.
+Thanks for taking the time to meet with us recently and for your interest in ${applicant.org.name}. We appreciate the chance to get to know you.
 
 We've received many applications for the role and decided to consider other applicants for now. We will certainly reach out if new opportunities arise in the future.
 
 All the best.
-HR at ${orgName}`}
+HR at ${applicant.org.name}`}
 			/>
 		</>
 	);

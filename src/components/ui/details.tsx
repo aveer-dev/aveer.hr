@@ -135,13 +135,13 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						</p>
 					</li>
 
-					{team ||
-						(data.team && (
-							<li className="grid gap-3">
-								<h2 className="text-sm font-medium">Team</h2>
-								<p className="text-sm font-light">{team || data.team.name}</p>
-							</li>
-						))}
+					{(!!team || !!data.team) && (
+						<li className="grid gap-3">
+							<h2 className="text-sm font-medium">Team</h2>
+							<p className="text-sm font-light">{team || data.team.name}</p>
+						</li>
+					)}
+
 					{isManager && (
 						<li className="grid gap-3">
 							<h2 className="text-sm font-medium">Team manager</h2>
@@ -247,7 +247,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 									<li key={index}>
 										<div className="flex items-baseline justify-between p-1 font-light">
 											<div>
-												{allowance.name} • <span className="text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(allowance.amount), currency: currency || data.entity.incorporation_country.currency_code })}</span>
+												{allowance.name} • <span className="text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(allowance.amount), currency: currency || data.entity.incorporation_country?.currency_code })}</span>
 											</div>
 											<div className="text-xs capitalize text-muted-foreground">{allowance.frequency.replace('-', ' ')}</div>
 										</div>

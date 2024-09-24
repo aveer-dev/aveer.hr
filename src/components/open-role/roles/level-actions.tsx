@@ -48,7 +48,7 @@ export const LevelsAction = ({ index, level, contractId, applicantData, setAppli
 			return item;
 		});
 
-		const newLevel: LEVEL = { id: String(contractId), level: level.level, type: level.type, action, feedback, created_at: new Date() };
+		const newLevel: LEVEL = { id: contractId ? String(contractId) : '', level: level.level, type: level.type, action, feedback, created_at: new Date() };
 		newLevels[index] = newLevel;
 		await onUpdateApplication(applicantData.id, { levels: newLevels as any });
 		setFeedback('');

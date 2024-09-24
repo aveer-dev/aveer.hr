@@ -8,7 +8,7 @@ import { ApplicantBadge } from '@/components/ui/applicant-stage-badge';
 
 interface props {
 	org: string;
-	contract: Tables<'contracts'> & { profile: Tables<'profiles'>; role: Tables<'open_roles'> };
+	contract: Tables<'contracts'> & { profile: Tables<'profiles'>; role: Tables<'open_roles'>; team: { id: number; name: string } };
 	manager?: Tables<'managers'> | null;
 }
 
@@ -18,7 +18,10 @@ export const Applicants = async ({ org, contract, manager }: props) => {
 	const { data, error } = await supabase
 		.from('job_applications')
 		.select(
-			'*, country_location:countries!job_applications_country_location_fkey(name, country_code), org:organisations!job_applications_org_fkey(subdomain, name), role:open_roles!job_applications_role_fkey(job_title, team, id, policy:approval_policies!open_roles_policy_fkey(levels))'
+			`*,
+            country_location:countries!job_applications_country_location_fkey(name, country_code),
+            org:organisations!job_applications_org_fkey(subdomain, name),
+            role:open_roles!job_applications_role_fkey(job_title, team, id, policy:approval_policies!open_roles_policy_fkey(levels))`
 		)
 		.match({ org, stage: 'interview' });
 
@@ -27,7 +30,7 @@ export const Applicants = async ({ org, contract, manager }: props) => {
 	const filtereddata = data?.filter(applicant => {
 		const levels: any[] = applicant.levels;
 
-		return manager ? applicant.role.team == contract.team || levels.find(level => level.id == contract.profile.id) : levels.find(level => level.id == contract.profile.id);
+		return manager ? applicant.role.team == contract.team?.id || levels.find(level => level.id == contract.profile.id) : levels.find(level => level.id == contract.profile.id);
 	});
 
 	return (
