@@ -23,7 +23,7 @@ export const FileItems = async ({ path, readonly }: props) => {
 				<li key={file.id} className="flex w-full items-center justify-between rounded-md border-b px-2 py-2 last-of-type:border-none hover:bg-muted/40 focus-visible:bg-muted/40">
 					<div className="flex items-center gap-3">
 						<File size={14} />
-						<div className="text-sm font-light">{file.name}</div>
+						<div className="max-w-64 truncate text-sm font-light sm:max-w-96">{file.name}</div>
 					</div>
 
 					<div className="text-muted-foreground">
