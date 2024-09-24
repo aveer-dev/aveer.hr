@@ -21,14 +21,18 @@ export const Teams = async ({ org, team, contractId }: props) => {
 				<h2 className="flex items-center justify-between text-xl font-bold">Team</h2>
 			</div>
 
-			<div className="">
-				<ul className="">
+			{filteredTeam.length > 0 && (
+				<ul>
 					{filteredTeam.map(person => (
 						<li key={person.id}>
 							<TeamMember person={person as any} />
 						</li>
 					))}
 				</ul>
+			)}
+
+			<div className="flex h-32 w-full items-center justify-center rounded-md bg-accent/80 text-xs text-muted-foreground">
+				<p>You do not have any team member</p>
 			</div>
 		</section>
 	);
