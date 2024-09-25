@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { ArrowUpRight, EllipsisVertical, File } from 'lucide-react';
+import { ArrowUpRight, EllipsisVertical, File, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { DownloadFile } from '@/components/file-management/download-file';
@@ -15,11 +15,14 @@ interface props {
 	readonly?: boolean;
 }
 
-const Item = ({ children, name, className }: { children?: ReactNode; name: string; className?: string }) => {
+const Item = ({ children, name, className, description }: { children?: ReactNode; name: string; className?: string; description?: ReactNode }) => {
 	return (
 		<li className={cn('flex min-h-12 items-center gap-3 rounded-md border-b px-4 py-2 transition-all focus-within:bg-foreground/[0.02] hover:bg-foreground/[0.02] focus:bg-foreground/[0.02] focus-visible:bg-foreground/[0.02]', className)}>
 			<File size={14} className="text-muted-foreground" />
-			<span className="max-w-64 truncate text-xs font-light sm:max-w-96">{name}</span>
+			<div>
+				<h4 className="max-w-64 truncate text-xs font-light sm:max-w-96">{name}</h4>
+				{!!description && <p className="mt-1 text-xs font-light text-muted-foreground">{description}</p>}
+			</div>
 			{children}
 		</li>
 	);
@@ -73,8 +76,15 @@ export const FileLinks = ({ links, org }: { links?: Tables<'links'>[]; org?: str
 	return links && links.length > 0 ? (
 		<ul className="h-72 space-y-1 overflow-y-auto rounded-md bg-muted/70 px-2 pb-10 pt-4">
 			{links?.map(file => (
-				<Link href={file.link} key={file.id} legacyBehavior passHref>
-					<Item name={file.name} className="cursor-pointer">
+				<Link href={file.link} key={file.id} legacyBehavior passHref target="_blank" referrerPolicy="no-referrer">
+					<Item
+						name={file.name}
+						className="cursor-pointer"
+						description={
+							<div className="flex items-center gap-2">
+								<Link2 size={10} /> <span className="max-w-64 truncate sm:max-w-96">{file.link}</span>
+							</div>
+						}>
 						<div className="ml-auto flex items-center gap-3">
 							{org && <DeleteLink org={org} id={file.id} />}
 							<ArrowUpRight size={12} className="mt-1" />
