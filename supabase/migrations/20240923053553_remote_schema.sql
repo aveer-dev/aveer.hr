@@ -1,5 +1,3 @@
-grant insert on table "storage"."objects" to "PUBLIC";
-
 create policy "Allow public uploads to job-applications"
 on "storage"."objects"
 as permissive

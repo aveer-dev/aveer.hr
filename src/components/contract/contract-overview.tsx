@@ -1,15 +1,17 @@
 import { Info } from 'lucide-react';
-import { Database, Tables } from '@/type/database.types';
+import { Database, Tables, TablesInsert } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LeaveRequestDialog, LeaveRequests } from './leave';
 import { differenceInBusinessDays } from 'date-fns';
-import { FileDropZone, FileUpload } from '@/components/file-management/file-upload-zone';
+import { FileDropZone } from '@/components/file-management/file-upload-zone';
 import { Separator } from '@/components/ui/separator';
 import { cn, currencyFormat } from '@/lib/utils';
-import { FileItems } from '@/components/file-management/file-items';
+import { FileItems, FileLinks } from '@/components/file-management/file-items';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROLE } from '@/type/contract.types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AddFile } from '../file-management/add-file-link';
 
 interface props {
 	data: Tables<'contracts'> & { profile: Tables<'profiles'>; org: Tables<'organisations'>; entity: Tables<'legal_entities'> & { incorporation_country: { currency_code: string } } };
@@ -38,6 +40,9 @@ export const ContractOverview = async ({ data, reviewType }: props) => {
 		requests.forEach(request => (days = days + (differenceInBusinessDays(request.to, request.from) + 1)));
 		return days;
 	};
+
+	const files = await supabase.from('links').select().match({ org: data.org.subdomain });
+	const getLinks = (path: string) => files.data?.filter(file => file.path == path);
 
 	const LeaveStat = ({ days, total, label }: { days: number; total: number; label: Database['public']['Enums']['leave_type_enum'] }) => {
 		const percentage = (days / total) * 100;
@@ -76,6 +81,17 @@ export const ContractOverview = async ({ data, reviewType }: props) => {
 				</div>
 			</div>
 		);
+	};
+
+	const addLink = async (payload: TablesInsert<'links'>) => {
+		'use server';
+
+		const supabase = createClient();
+
+		const { error } = await supabase.from('links').upsert({ ...payload, org: data.org.subdomain });
+		if (error) return error.code == '23505' ? `Link with name '${payload.name}' already exists` : error.message;
+
+		return true;
 	};
 
 	return (
@@ -140,34 +156,79 @@ export const ContractOverview = async ({ data, reviewType }: props) => {
 					<h2 className="flex items-center justify-between text-xl font-bold">Files</h2>
 				</div>
 
-				<h2 className="mb-3 text-sm font-normal text-muted-foreground">Organisation shared files</h2>
-				<ul className="space-y-3">
-					<FileItems readonly path={`${data.org.id}/org-${data.org.id}`} />
-				</ul>
-
-				<FileDropZone path={`${data.org.id}/${data.profile?.id}`} className="mt-16 gap-3">
-					<div className="flex items-center gap-2">
-						<h2 className="text-sm font-normal text-muted-foreground">Your files</h2>
+				<section className="relative mt-8">
+					<div className="mb-6 flex items-center gap-2">
+						<h2 className="text-sm font-light text-muted-foreground">Organisation files</h2>
 
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild className="text-muted-foreground">
-									<Info size={12} />
+									<button>
+										<Info size={12} />
+									</button>
 								</TooltipTrigger>
 
 								<TooltipContent>
-									<p className="max-w-36 text-left text-muted-foreground">Files added here will be visible to organisation admins</p>
+									<p className="max-w-36 text-left text-muted-foreground">Files added here will be visible to every employee</p>
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>
-
-						<div className="ml-auto flex items-center gap-2">
-							<FileUpload path={`${data.org.id}/${data.profile?.id}`} />
-						</div>
 					</div>
 
-					<FileItems path={`${data.org.id}/${data.profile?.id}`} />
-				</FileDropZone>
+					<Tabs defaultValue="files" className="w-full">
+						<TabsList className="flex w-fit">
+							<TabsTrigger value="files">Files</TabsTrigger>
+							<TabsTrigger value="links">Links</TabsTrigger>
+						</TabsList>
+
+						<TabsContent value="files">
+							<FileItems readonly path={`${data.org.id}/org-${data.org.id}`} />
+						</TabsContent>
+
+						<TabsContent value="links">
+							<FileLinks links={getLinks(`${data.org.id}/org-${data.org.id}`)} />
+						</TabsContent>
+					</Tabs>
+				</section>
+
+				<section className="relative mt-16">
+					<div className="mb-6 flex items-center gap-2">
+						<h2 className="text-sm font-light text-muted-foreground">Your files</h2>
+
+						<TooltipProvider>
+							<Tooltip>
+								<TooltipTrigger asChild className="text-muted-foreground">
+									<button>
+										<Info size={12} />
+									</button>
+								</TooltipTrigger>
+
+								<TooltipContent>
+									<p className="max-w-36 text-left text-muted-foreground">Files added here is visible to company admin</p>
+								</TooltipContent>
+							</Tooltip>
+						</TooltipProvider>
+					</div>
+
+					<Tabs defaultValue="files" className="w-full">
+						<TabsList className="flex w-fit">
+							<TabsTrigger value="files">Files</TabsTrigger>
+							<TabsTrigger value="links">Links</TabsTrigger>
+						</TabsList>
+
+						<TabsContent value="files">
+							<FileDropZone path={`${data.org.id}/${data.profile?.id}`}>
+								<FileItems path={`${data.org.id}/${data.profile?.id}`} />
+							</FileDropZone>
+						</TabsContent>
+
+						<TabsContent value="links">
+							<FileLinks org={data.org.subdomain} links={getLinks(`${data.org.id}/${data.profile?.id}`)} />
+						</TabsContent>
+					</Tabs>
+
+					<AddFile path={`${data.org.id}/${data.profile?.id}`} addLink={addLink} />
+				</section>
 			</div>
 		</section>
 	);

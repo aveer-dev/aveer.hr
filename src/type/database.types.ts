@@ -695,6 +695,54 @@ export type Database = {
 					}
 				];
 			};
+			links: {
+				Row: {
+					created_at: string;
+					entity: number | null;
+					id: number;
+					link: string;
+					name: string;
+					org: string;
+					path: string;
+					updated_at: string;
+				};
+				Insert: {
+					created_at?: string;
+					entity?: number | null;
+					id?: number;
+					link: string;
+					name: string;
+					org: string;
+					path: string;
+					updated_at?: string;
+				};
+				Update: {
+					created_at?: string;
+					entity?: number | null;
+					id?: number;
+					link?: string;
+					name?: string;
+					org?: string;
+					path?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'links_entity_fkey';
+						columns: ['entity'];
+						isOneToOne: false;
+						referencedRelation: 'legal_entities';
+						referencedColumns: ['id'];
+					},
+					{
+						foreignKeyName: 'links_org_fkey';
+						columns: ['org'];
+						isOneToOne: false;
+						referencedRelation: 'organisations';
+						referencedColumns: ['subdomain'];
+					}
+				];
+			};
 			managers: {
 				Row: {
 					created_at: string;

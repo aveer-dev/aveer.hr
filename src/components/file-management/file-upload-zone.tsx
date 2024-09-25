@@ -2,13 +2,14 @@
 
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/client';
-import { CloudUpload, FilePlus2 } from 'lucide-react';
+import { CloudUpload, UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ButtonHTMLAttributes, DragEvent, ReactNode, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { VariantProps } from 'class-variance-authority';
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
 interface props {
 	children?: ReactNode;
@@ -136,21 +137,13 @@ export const FileUpload = ({ path, className, variant, children }: props & Butto
 	};
 
 	return (
-		<Button
+		<DropdownMenuItem
 			onClick={event => {
 				openFilePicker();
 				event.stopPropagation();
-			}}
-			variant={variant || 'secondary'}
-			className={cn('h-9 gap-3', className)}>
-			{!children && (
-				<>
-					Add file
-					<FilePlus2 className="stroke-1" size={14} />
-				</>
-			)}
-
-			{children ?? ''}
-		</Button>
+			}}>
+			<UploadCloud size={12} className="mr-2 text-muted-foreground" />
+			<span>Upload document</span>
+		</DropdownMenuItem>
 	);
 };
