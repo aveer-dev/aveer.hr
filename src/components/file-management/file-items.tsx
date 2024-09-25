@@ -18,32 +18,28 @@ export const FileItems = async ({ path, readonly }: props) => {
 	const files = await supabase.storage.from('documents').list(path);
 
 	return files.data && files.data.length > 0 ? (
-		<ul className="space-y-3 rounded-md bg-secondary/40 p-2 text-sm font-light">
+		<ul className="h-72 space-y-1 overflow-y-auto rounded-md bg-muted px-2 pb-10 pt-4">
 			{files.data?.map(file => (
-				<li key={file.id} className="flex w-full items-center justify-between border-b px-2 py-2 last-of-type:border-none hover:bg-muted/40 focus-visible:bg-muted/40">
-					<div className="flex items-center gap-3">
-						<File size={14} />
-						<div className="max-w-64 truncate text-sm font-light sm:max-w-96">{file.name}</div>
-					</div>
+				<li key={file.id} className="flex items-center gap-3 rounded-md px-4 py-2 transition-all focus-within:bg-foreground/[0.02] hover:bg-foreground/[0.02] focus:bg-foreground/[0.02] focus-visible:bg-foreground/[0.02]">
+					<File size={14} className="text-muted-foreground" />
+					<span className="max-w-64 truncate text-sm font-light sm:max-w-96">{file.name}</span>
 
-					<div className="text-muted-foreground">
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="outline" className="h-8 w-8" size={'icon'}>
-									<EllipsisVertical size={12} />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent className="w-fit" align="end">
-								<DropdownMenuItem asChild>
-									<DownloadFile path={`${path}/${file.name}`} />
-								</DropdownMenuItem>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="secondary" className="ml-auto h-8 w-8" size={'icon'}>
+								<EllipsisVertical size={12} />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent className="w-fit" align="end">
+							<DropdownMenuItem asChild>
+								<DownloadFile path={`${path}/${file.name}`} />
+							</DropdownMenuItem>
 
-								<DropdownMenuItem asChild>
-									<DeleteFile path={`${path}/${file.name}`} />
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</div>
+							<DropdownMenuItem asChild>
+								<DeleteFile path={`${path}/${file.name}`} />
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</li>
 			))}
 		</ul>

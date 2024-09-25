@@ -1,10 +1,13 @@
-import { FilePlus2, Folder, Info } from 'lucide-react';
+import { Info, Link, Plus, UploadCloud } from 'lucide-react';
 import { Suspense } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { createClient } from '@/utils/supabase/server';
 import { FileItems } from '@/components/file-management/file-items';
 import { FileDropZone, FileUpload } from '@/components/file-management/file-upload-zone';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Separator } from '@/components/ui/separator';
 
 interface props {
 	org: string;
@@ -30,75 +33,98 @@ export const Files = async ({ org, orgId }: props) => {
 
 	return (
 		<Suspense>
-			<div className="mb-6 flex w-full items-center justify-between border-t py-8 pb-3">
-				<h1 className="text-base font-medium">Files</h1>
-			</div>
+			<Separator />
 
-			<Accordion type="multiple" defaultValue={['org']} className="w-full">
-				<AccordionItem value="org">
-					<AccordionTrigger>
-						<div className="flex items-center gap-2">
-							<h2 className="text-sm font-normal text-muted-foreground">Organisation shared files</h2>
+			<section className="relative mt-8 rounded-md border bg-muted/40 pt-4 shadow-sm">
+				<div className="mb-6 flex items-center justify-between px-4">
+					<h2 className="text-sm font-light text-muted-foreground">Organisation files</h2>
 
-							<FileUpload variant={'secondary'} path={`${orgId}/org-${orgId}`} className="ml-auto h-7 w-7 p-0">
-								<FilePlus2 size={12} />
-							</FileUpload>
-						</div>
-
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild className="ml-auto mr-3 text-muted-foreground">
+					<TooltipProvider>
+						<Tooltip>
+							<TooltipTrigger asChild className="text-muted-foreground">
+								<button>
 									<Info size={12} />
-								</TooltipTrigger>
+								</button>
+							</TooltipTrigger>
 
-								<TooltipContent>
-									<p className="max-w-36 text-left text-muted-foreground">Files added here will be visible to every employee</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</AccordionTrigger>
+							<TooltipContent>
+								<p className="max-w-36 text-left text-muted-foreground">Files added here will be visible to every employee</p>
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				</div>
 
-					<AccordionContent>
-						<FileDropZone path={`${orgId}/org-${orgId}`}>
-							<FileItems path={`${orgId}/org-${orgId}`} />
-						</FileDropZone>
-					</AccordionContent>
-				</AccordionItem>
+				<FileDropZone path={`${orgId}/org-${orgId}`}>
+					<FileItems path={`${orgId}/org-${orgId}`} />
+				</FileDropZone>
 
-				<h2 className="mt-16 text-sm font-normal text-muted-foreground">Employees folders</h2>
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button className="absolute bottom-2 right-2 rounded-full">
+							<Plus size={12} />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent className="w-fit" align="end" side="top">
+						<DropdownMenuItem>
+							<Link size={12} className="mr-2 text-muted-foreground" />
+							<span>Add link</span>
+						</DropdownMenuItem>
+						<DropdownMenuItem>
+							<UploadCloud size={12} className="mr-2 text-muted-foreground" />
+							<span>Upload document</span>
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			</section>
+
+			<h2 className="mb-4 mt-16 text-sm font-normal text-muted-foreground">Employees folders</h2>
+			<Accordion type="multiple" defaultValue={['org']} className="w-full space-y-4">
 				{employees?.data &&
 					employees?.data.length > 0 &&
 					removeDuplicatesByProperty(employees.data)?.map(employee => (
-						<AccordionItem value={String(employee.id)} className="my-4" key={employee.id}>
-							<AccordionTrigger className="py-4">
-								<div className="flex items-center gap-3">
-									<Folder size={14} className="fill-foreground" />
-									<div className="text-sm font-light">
+						<AccordionItem value={String(employee.id)} className="rounded-md border bg-muted/40 shadow-sm" key={employee.id}>
+							<AccordionTrigger className="px-2">
+								<div className="flex items-center justify-between gap-1 px-4">
+									<h2 className="text-sm font-light text-muted-foreground">
 										{employee.profile?.first_name} {employee.profile?.last_name} - {employee.job_title}
-									</div>
+									</h2>
 
-									<FileUpload variant={'secondary'} path={`${orgId}/${employee.profile?.id}`} className="ml-auto h-7 w-7 p-0">
-										<FilePlus2 size={12} />
-									</FileUpload>
+									<TooltipProvider>
+										<Tooltip>
+											<TooltipTrigger asChild className="ml-auto mr-3 text-muted-foreground">
+												<Info size={12} />
+											</TooltipTrigger>
+
+											<TooltipContent>
+												<p className="max-w-36 text-left text-muted-foreground">Files added here will be visible to only this employee</p>
+											</TooltipContent>
+										</Tooltip>
+									</TooltipProvider>
 								</div>
-
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild className="ml-auto mr-3 text-muted-foreground">
-											<Info size={12} />
-										</TooltipTrigger>
-
-										<TooltipContent>
-											<p className="max-w-36 text-left text-muted-foreground">Files added here will be visible to only this employee</p>
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
 							</AccordionTrigger>
 
-							<AccordionContent>
+							<AccordionContent className="relative">
 								<FileDropZone path={`${orgId}/${employee.profile?.id}`}>
 									<FileItems path={`${orgId}/${employee.profile?.id}`} />
 								</FileDropZone>
+
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button className="absolute bottom-2 right-2 rounded-full">
+											<Plus size={12} />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent className="w-fit" align="end" side="top">
+										<DropdownMenuItem>
+											<Link size={12} className="mr-2 text-muted-foreground" />
+											<span>Add link</span>
+										</DropdownMenuItem>
+										<DropdownMenuItem>
+											<UploadCloud size={12} className="mr-2 text-muted-foreground" />
+											<span>Upload document</span>
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</AccordionContent>
 						</AccordionItem>
 					))}
