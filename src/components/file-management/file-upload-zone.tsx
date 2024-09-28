@@ -6,7 +6,7 @@ import { CloudUpload, UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ButtonHTMLAttributes, DragEvent, ReactNode, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { VariantProps } from 'class-variance-authority';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -113,7 +113,7 @@ export const FileDropZone = ({ children, path, className }: props) => {
 	);
 };
 
-export const FileUpload = ({ path, className, variant, children }: props & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof buttonVariants>) => {
+export const FileUpload = ({ path, className, variant, children, button }: props & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof buttonVariants> & { button?: boolean }) => {
 	const router = useRouter();
 
 	const openFilePicker = () => {
@@ -137,13 +137,28 @@ export const FileUpload = ({ path, className, variant, children }: props & Butto
 	};
 
 	return (
-		<DropdownMenuItem
-			onClick={event => {
-				openFilePicker();
-				event.stopPropagation();
-			}}>
-			<UploadCloud size={12} className="mr-2 text-muted-foreground" />
-			<span>Upload document</span>
-		</DropdownMenuItem>
+		<>
+			{!button ? (
+				<DropdownMenuItem
+					onClick={event => {
+						openFilePicker();
+						event.stopPropagation();
+					}}>
+					<UploadCloud size={12} className="mr-2 text-muted-foreground" />
+					<span>Upload document</span>
+				</DropdownMenuItem>
+			) : (
+				<Button variant={variant} className={cn(className)}>
+					{children ? (
+						children
+					) : (
+						<>
+							<UploadCloud size={12} className="mr-2 text-muted-foreground" />
+							Upload document
+						</>
+					)}
+				</Button>
+			)}
+		</>
 	);
 };

@@ -36,14 +36,14 @@ export function NavMenu({ orgId }: { orgId: string }) {
 						</NavigationMenuLink>
 					</NavLink>
 				</NavigationMenuItem>
-				{/* <NavigationMenuItem>
+				<NavigationMenuItem>
 					<NavLink org={orgId} href={`/performance`} legacyBehavior passHref>
 						<NavigationMenuLink active={path.includes('/performance')} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
 							<ChartPie size={16} />
 							Performance
 						</NavigationMenuLink>
 					</NavLink>
-				</NavigationMenuItem> */}
+				</NavigationMenuItem>
 				<NavigationMenuItem>
 					<NavLink org={orgId} href={`/settings`} legacyBehavior passHref>
 						<NavigationMenuLink active={path.includes('/settings')} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>

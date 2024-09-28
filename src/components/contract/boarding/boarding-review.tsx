@@ -149,7 +149,7 @@ export const BoardingReview = ({ data, reviewType, children, contractId, onRevie
 				<section className="mt-10 grid gap-4 py-4">
 					<h1 className="text-base font-bold">Checklist</h1>
 					<ul className="mb-10 space-y-6">
-						{(data.checklist as unknown as CHECKLIST[]).map(item => (
+						{(data?.checklist as unknown as CHECKLIST[])?.map(item => (
 							<li key={item.id} className="list-disc space-y-2">
 								<h2 className="text-xs">{item.item}</h2>
 								<p className="text-xs leading-6 text-muted-foreground">{item.description}</p>
@@ -157,7 +157,7 @@ export const BoardingReview = ({ data, reviewType, children, contractId, onRevie
 						))}
 					</ul>
 
-					{data.levels && data.levels.length > 0 && (
+					{data?.levels && data.levels.length > 0 && (
 						<>
 							<h1 className="text-base font-bold">Approvals</h1>
 							<ul className="mb-20 space-y-8">

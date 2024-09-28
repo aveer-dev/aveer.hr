@@ -65,7 +65,7 @@ export const FileItems = async ({ path, readonly }: props) => {
 			{!readonly && (
 				<>
 					<p className="text-xs text-muted-foreground">Drag and drop files here to upload or click the button below</p>
-					<FileUpload variant={'outline'} className="mt-4" path={path} />
+					<FileUpload button variant={'outline'} className="mt-4" path={path} />
 				</>
 			)}
 		</div>
