@@ -5,13 +5,13 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar, CalendarProps } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useState } from 'react';
 import { FormControl } from './form';
 import { ControllerRenderProps } from 'react-hook-form';
 
-export function DatePicker({ onSetDate, selected, field }: { onSetDate: (date: Date | undefined) => void; selected?: Date; field?: ControllerRenderProps<any> }) {
+export function DatePicker({ onSetDate, selected, field, ...calendarProps }: { onSetDate: (date: Date) => void; selected?: Date; field?: ControllerRenderProps<any> } & CalendarProps) {
 	const [date, setDate] = useState(selected);
 	const [isOpen, toggleOpenState] = useState(false);
 
@@ -28,8 +28,9 @@ export function DatePicker({ onSetDate, selected, field }: { onSetDate: (date: D
 
 			<PopoverContent className="w-auto pt-8">
 				<Calendar
+					{...calendarProps}
 					mode="single"
-					className="p-0"
+					className={cn('p-0')}
 					selected={date}
 					onSelect={event => {
 						if (event) {
