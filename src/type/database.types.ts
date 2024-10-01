@@ -34,6 +34,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      appraisal_questions: {
+        Row: {
+          created_at: string
+          entity: number | null
+          group: string
+          id: number
+          options: Json[]
+          org: string
+          question: string
+          required: boolean
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          entity?: number | null
+          group: string
+          id?: number
+          options: Json[]
+          org: string
+          question: string
+          required?: boolean
+          type: string
+        }
+        Update: {
+          created_at?: string
+          entity?: number | null
+          group?: string
+          id?: number
+          options?: Json[]
+          org?: string
+          question?: string
+          required?: boolean
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_questions_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_questions_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       approval_policies: {
         Row: {
           created_at: string

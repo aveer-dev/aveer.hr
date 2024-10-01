@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormSection, FormSectionDescription, InputsContainer } from '@/components/forms/form-section';
 import { OKRs } from '@/components/okr/okrs';
+import { AppraisalQuestions } from './appraisal-questions';
 
 export default async function PerformancePage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	return (
@@ -33,6 +34,18 @@ export default async function PerformancePage({ params }: { params: { [key: stri
 							<OKRs org={params.org} />
 						</InputsContainer>
 					</FormSection>
+				</TabsContent>
+
+				<TabsContent value="appraisal">
+					<AppraisalQuestions org={params.org}>
+						<h2 className="mb-1 font-normal">Employees</h2>
+						<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Default employee appraisal questions for all employees accross the organisation</p>
+					</AppraisalQuestions>
+
+					<AppraisalQuestions org={params.org} group="managers">
+						<h2 className="mb-1 font-normal">Managers</h2>
+						<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Appraisal questions for team managers accross the organisation</p>
+					</AppraisalQuestions>
 				</TabsContent>
 			</Tabs>
 		</section>
