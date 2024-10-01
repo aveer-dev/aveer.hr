@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FormSection, FormSectionDescription, InputsContainer } from '@/components/forms/form-section';
 import { OKRs } from '@/components/okr/okrs';
-import { AppraisalQuestions } from './appraisal-questions';
+import { AppraisalQuestions } from '@/components/appraisal-forms/appraisal-questions';
 
 export default async function PerformancePage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	return (
