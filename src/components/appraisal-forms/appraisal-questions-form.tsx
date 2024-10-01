@@ -8,24 +8,22 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { ReactNode, useState } from 'react';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, Check, ChevronDown, ChevronsUpDown, ChevronUp, CircleCheckBig, CircleMinus, Clock, FileUp, Hash, Plus, SquareCheckBig, Text, TextCursorInputIcon, Trash2 } from 'lucide-react';
+import { Calendar, Check, ChevronDown, ChevronsUpDown, ChevronUp, CircleCheckBig, CircleMinus, FileUp, Grip, Hash, Plus, SquareCheckBig, Text, TextCursorInputIcon, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card } from '@/components/ui/card';
-import { FORM_INPUT_TYPE } from '@/type/performance.types';
+import { FORM_INPUT_TYPE, INPUT_TYPE_ZOD } from '@/type/performance.types';
 import { TablesInsert } from '@/type/database.types';
 import { createQuestions, deleteQuestion } from './appraisal.actions';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
-const inputType = z.enum(['text', 'number', 'textarea', 'multiselect', 'select', 'date', 'time', 'file']);
-
 interface INPUT_TYPE {
-	type: z.infer<typeof inputType>;
+	type: z.infer<typeof INPUT_TYPE_ZOD>;
 	label: string;
 	icon: ReactNode;
 }
@@ -37,7 +35,6 @@ const inputTypes: INPUT_TYPE[] = [
 	{ type: 'multiselect', label: 'Mutiselect', icon: <SquareCheckBig size={12} /> },
 	{ type: 'select', label: 'select', icon: <CircleCheckBig size={12} /> },
 	{ type: 'date', label: 'Date', icon: <Calendar size={12} /> },
-	{ type: 'time', label: 'Time', icon: <Clock size={12} /> },
 	{ type: 'file', label: 'File', icon: <FileUp size={12} /> }
 ];
 
@@ -45,7 +42,7 @@ const q = z
 	.object({
 		question: z.string().min(2),
 		options: z.string().min(2).array().optional(),
-		type: inputType,
+		type: INPUT_TYPE_ZOD,
 		isTypeOpen: z.boolean().optional(),
 		required: z.boolean().optional(),
 		id: z.number().optional(),
@@ -86,7 +83,7 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 			options: question.options && question.options.length > 0 ? question.options : [],
 			org,
 			type: question.type,
-			required: question.required,
+			required: !!question.required,
 			group,
 			id: question.id
 		}));
@@ -97,8 +94,11 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 		if (typeof response == 'string') return toast.error('Error creating / updating questions', { description: response });
 
 		toast.success('Questions updated');
-		console.log({ q: response as any });
 		updateQuestions({ q: (response as any[]).sort((a, b) => a.id - b.id) });
+		form.setValue(
+			'q',
+			(response as any[]).sort((a, b) => a.id - b.id)
+		);
 	};
 
 	const AddQuestionButton = ({ children, className, type }: { children: ReactNode; className: string; type: FORM_INPUT_TYPE }) => {
@@ -226,7 +226,9 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 											name={`q.${index}.question`}
 											render={({ field }) => (
 												<FormItem className="w-full">
-													<FormLabel className="flex min-h-6 items-center">Question</FormLabel>
+													<FormLabel className="flex min-h-6 items-center gap-2">
+														<Grip size={12} /> Question
+													</FormLabel>
 													<FormControl className="">
 														<Input placeholder="Enter question here" {...field} />
 													</FormControl>
@@ -255,7 +257,7 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 														<PopoverTrigger asChild>
 															<FormControl>
 																<Button type="button" variant="outline" role="combobox" className={cn('w-fit justify-between', !form.getValues(`q.${index}.type`) && 'text-muted-foreground')}>
-																	<InputType hideLabel input={inputTypes.find(inputType => inputType.type === form.getValues(`q.${index}.type`))} />
+																	<InputType hideLabel input={inputTypes.find(INPUT_TYPE_ZOD => INPUT_TYPE_ZOD.type === form.getValues(`q.${index}.type`))} />
 																	<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 																</Button>
 															</FormControl>
@@ -264,10 +266,10 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 															<Command>
 																<CommandList>
 																	<CommandGroup>
-																		{inputTypes.map(inputType => (
-																			<CommandItem value={inputType.type} key={inputType.type} onSelect={() => onChangeInputType(inputType.type, index)}>
-																				<Check size={12} className={cn('mr-2', inputType.type === form.getValues(`q.${index}.type`) ? 'opacity-100' : 'opacity-0')} />
-																				<InputType iconFirst input={inputType} />
+																		{inputTypes.map(INPUT_TYPE_ZOD => (
+																			<CommandItem value={INPUT_TYPE_ZOD.type} key={INPUT_TYPE_ZOD.type} onSelect={() => onChangeInputType(INPUT_TYPE_ZOD.type, index)}>
+																				<Check size={12} className={cn('mr-2', INPUT_TYPE_ZOD.type === form.getValues(`q.${index}.type`) ? 'opacity-100' : 'opacity-0')} />
+																				<InputType iconFirst input={INPUT_TYPE_ZOD} />
 																			</CommandItem>
 																		))}
 																	</CommandGroup>
@@ -357,9 +359,9 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 						</div>
 
 						<div className={cn('no-scrollbar flex w-full max-w-[27.5rem] gap-4 overflow-x-auto', showAddOptions && 'flex-wrap')}>
-							{inputTypes.map(inputType => (
-								<AddQuestionButton key={inputType.type} type={inputType.type} className="group">
-									{inputType.label} {inputType.icon}
+							{inputTypes.map(INPUT_TYPE_ZOD => (
+								<AddQuestionButton key={INPUT_TYPE_ZOD.type} type={INPUT_TYPE_ZOD.type} className="group">
+									{INPUT_TYPE_ZOD.label} {INPUT_TYPE_ZOD.icon}
 								</AddQuestionButton>
 							))}
 						</div>
