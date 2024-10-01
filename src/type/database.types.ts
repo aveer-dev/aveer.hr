@@ -34,6 +34,64 @@ export type Database = {
   }
   public: {
     Tables: {
+      appraisal_answers: {
+        Row: {
+          answers: Json[]
+          contract: number
+          created_at: string
+          date: string
+          entity: number | null
+          group: string
+          id: number
+          is_submitted: boolean
+          org: string | null
+        }
+        Insert: {
+          answers?: Json[]
+          contract: number
+          created_at?: string
+          date: string
+          entity?: number | null
+          group: string
+          id?: number
+          is_submitted?: boolean
+          org?: string | null
+        }
+        Update: {
+          answers?: Json[]
+          contract?: number
+          created_at?: string
+          date?: string
+          entity?: number | null
+          group?: string
+          id?: number
+          is_submitted?: boolean
+          org?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_answers_contract_fkey"
+            columns: ["contract"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_answers_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_answers_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       appraisal_questions: {
         Row: {
           created_at: string

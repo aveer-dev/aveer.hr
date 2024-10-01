@@ -27,6 +27,7 @@ import { Timeoff } from './time-off';
 import { Applicants } from './applicants';
 import { Boardings } from './boarding';
 import { BoardingsReview } from './boarding-review';
+import { Appraisals } from './appraisal/appraisals';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -248,6 +249,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 							{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="team">Team</TabsTrigger>}
 							{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="requests">Requests</TabsTrigger>}
 							<TabsTrigger value="contract">Contract</TabsTrigger>
+							<TabsTrigger value="appraisal">Appraisal</TabsTrigger>
 							<TabsTrigger value="onboarding">Boarding</TabsTrigger>
 						</TabsList>
 					</div>
@@ -276,6 +278,10 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				)}
 
 				<TabsContent value="team">{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <Teams name={data.team.name} contractId={data.id} org={org} team={data.team.id} />}</TabsContent>
+
+				<TabsContent value="appraisal">
+					<Appraisals org={org} group={'employee'} />
+				</TabsContent>
 
 				<TabsContent value="contract">
 					<section className="grid gap-14">
