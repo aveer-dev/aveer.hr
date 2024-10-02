@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,11 @@ import { createQuestions, deleteQuestion } from './appraisal.actions';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import React from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface INPUT_TYPE {
 	type: z.infer<typeof INPUT_TYPE_ZOD>;
@@ -45,8 +50,9 @@ const q = z
 		type: INPUT_TYPE_ZOD,
 		isTypeOpen: z.boolean().optional(),
 		required: z.boolean().optional(),
-		id: z.number().optional(),
-		isDeleting: z.boolean().optional()
+		id: z.number(),
+		isDeleting: z.boolean().optional(),
+		order: z.number().optional()
 	})
 	.refine(
 		question => {
@@ -70,7 +76,12 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 	const [showAddOptions, toggleShowAddOptions] = useState(false);
 	const [isFormEnabled, toggleFormState] = useState(false);
 	const [isCreatingQuestions, creationsState] = useState(false);
-	const router = useRouter();
+	const sensors = useSensors(
+		useSensor(PointerSensor),
+		useSensor(KeyboardSensor, {
+			coordinateGetter: sortableKeyboardCoordinates
+		})
+	);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -78,14 +89,15 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
-		const payload: TablesInsert<'appraisal_questions'>[] = values.q.map(question => ({
+		const payload: TablesInsert<'appraisal_questions'>[] = values.q.map((question, index) => ({
 			question: question.question,
 			options: question.options && question.options.length > 0 ? question.options : [],
 			org,
 			type: question.type,
 			required: !!question.required,
 			group,
-			id: question.id
+			id: question.id,
+			order: index
 		}));
 
 		creationsState(true);
@@ -94,11 +106,8 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 		if (typeof response == 'string') return toast.error('Error creating / updating questions', { description: response });
 
 		toast.success('Questions updated');
-		updateQuestions({ q: (response as any[]).sort((a, b) => a.id - b.id) });
-		form.setValue(
-			'q',
-			(response as any[]).sort((a, b) => a.id - b.id)
-		);
+		updateQuestions({ q: response as any[] });
+		form.setValue('q', response as any[]);
 	};
 
 	const AddQuestionButton = ({ children, className, type }: { children: ReactNode; className: string; type: FORM_INPUT_TYPE }) => {
@@ -126,6 +135,92 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 				{children}
 			</Button>
 		);
+	};
+
+	const handleDragEnd = (event: { active: any; over: any }) => {
+		const { active, over } = event;
+
+		if (active.id !== over.id) {
+			updateQuestions(items => {
+				const oldIndex = items.q.findIndex(item => item.id == active.id);
+				const newIndex = items.q.findIndex(item => item.id == over.id);
+
+				form.setValue('q', arrayMove(form.getValues('q'), oldIndex, newIndex));
+				return { q: arrayMove(items.q, oldIndex, newIndex) };
+			});
+		}
+	};
+
+	return (
+		<Form {...form}>
+			{isOptional && (
+				<Card className="flex h-fit flex-row items-center justify-between border-none bg-accent px-4 py-2">
+					<p className="text-xs">Enable</p>
+					<Switch className="scale-75" checked={isFormEnabled} onCheckedChange={toggleFormState} />
+				</Card>
+			)}
+
+			{((isOptional && isFormEnabled) || !isOptional) && (
+				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
+					<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+						<SortableContext items={questions.q} strategy={verticalListSortingStrategy}>
+							{questions.q?.map((id, index) => <Questions question={questions.q[index]} index={index} key={id.id} id={id.id} updateQuestions={updateQuestions} org={org} questions={questions} form={form} />)}
+						</SortableContext>
+					</DndContext>
+
+					{questions.q?.length == 0 && (
+						<div className="flex h-36 w-full items-center justify-center rounded-md bg-accent/60">
+							<p className="text-xs text-muted-foreground">No appraisal question added yet</p>
+						</div>
+					)}
+
+					<Separator />
+
+					<div>
+						<div className="mb-4 flex items-center justify-between">
+							<h3 className="text-sm">Add question field</h3>
+
+							<Button type="button" onClick={() => toggleShowAddOptions(!showAddOptions)} variant={'ghost'} className="h-6 w-6 p-0">
+								{!showAddOptions && <ChevronDown size={12} />}
+								{showAddOptions && <ChevronUp size={12} />}
+							</Button>
+						</div>
+
+						<div className={cn('no-scrollbar flex w-full max-w-[27.5rem] gap-4 overflow-x-auto', showAddOptions && 'flex-wrap')}>
+							{inputTypes.map(INPUT_TYPE_ZOD => (
+								<AddQuestionButton key={INPUT_TYPE_ZOD.type} type={INPUT_TYPE_ZOD.type} className="group">
+									{INPUT_TYPE_ZOD.label} {INPUT_TYPE_ZOD.icon}
+								</AddQuestionButton>
+							))}
+						</div>
+					</div>
+
+					<Button type="submit" className="w-full gap-3" disabled={isCreatingQuestions}>
+						{isCreatingQuestions && <LoadingSpinner />} Save changes
+					</Button>
+				</form>
+			)}
+		</Form>
+	);
+};
+
+interface questionsProps {
+	question: z.infer<typeof q>;
+	index: number;
+	id: number;
+	org: string;
+	questions: z.infer<typeof formSchema>;
+	form: UseFormReturn<z.infer<typeof formSchema>>;
+	updateQuestions: (questions: z.infer<typeof formSchema>) => void;
+}
+
+const Questions = ({ questions, form, updateQuestions, org, id, index, question }: questionsProps) => {
+	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+	const router = useRouter();
+
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition
 	};
 
 	const addOption = (questionIndex: number) => {
@@ -202,176 +297,134 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 	};
 
 	return (
-		<Form {...form}>
-			{isOptional && (
-				<Card className="flex h-fit flex-row items-center justify-between border-none bg-accent px-4 py-2">
-					<p className="text-xs">Enable</p>
-					<Switch className="scale-75" checked={isFormEnabled} onCheckedChange={toggleFormState} />
-				</Card>
-			)}
+		<div ref={setNodeRef} style={style} className="bg-background/30 backdrop-blur-sm">
+			<FormField
+				control={form.control}
+				name={`q.${index}`}
+				render={() => (
+					<FormItem className="space-y-8">
+						<div className="flex gap-2">
+							<FormField
+								control={form.control}
+								key={index}
+								name={`q.${index}.question`}
+								render={({ field }) => (
+									<FormItem className="w-full">
+										<FormLabel className="flex min-h-6 items-center gap-2">
+											<button {...attributes} {...listeners}>
+												<Grip size={12} />
+											</button>
+											Question
+										</FormLabel>
+										<FormControl className="">
+											<Input placeholder="Enter question here" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-			{((isOptional && isFormEnabled) || !isOptional) && (
-				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
-					{questions.q?.map((question, index) => (
+							<FormField
+								control={form.control}
+								name={`q.${index}.type`}
+								render={() => (
+									<FormItem className="flex flex-col">
+										<div className="text-right">
+											<Button type="button" onClick={() => onDeleteQuestion(index)} variant={'ghost_destructive'} className="h-5 w-5 p-0">
+												{!question.isDeleting && <Trash2 size={12} />}
+												{question.isDeleting && <LoadingSpinner className="text-destructive" />}
+											</Button>
+										</div>
+										<Popover
+											open={question.isTypeOpen}
+											onOpenChange={state => {
+												questions.q[index].isTypeOpen = state;
+												updateQuestions({ ...questions });
+											}}>
+											<PopoverTrigger asChild>
+												<FormControl>
+													<Button type="button" variant="outline" role="combobox" className={cn('w-fit justify-between', !form.getValues(`q.${index}.type`) && 'text-muted-foreground')}>
+														<InputType hideLabel input={inputTypes.find(INPUT_TYPE_ZOD => INPUT_TYPE_ZOD.type === form.getValues(`q.${index}.type`))} />
+														<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+													</Button>
+												</FormControl>
+											</PopoverTrigger>
+											<PopoverContent align="end" className="w-[150px] p-0">
+												<Command>
+													<CommandList>
+														<CommandGroup>
+															{inputTypes.map(INPUT_TYPE_ZOD => (
+																<CommandItem value={INPUT_TYPE_ZOD.type} key={INPUT_TYPE_ZOD.type} onSelect={() => onChangeInputType(INPUT_TYPE_ZOD.type, index)}>
+																	<Check size={12} className={cn('mr-2', INPUT_TYPE_ZOD.type === form.getValues(`q.${index}.type`) ? 'opacity-100' : 'opacity-0')} />
+																	<InputType iconFirst input={INPUT_TYPE_ZOD} />
+																</CommandItem>
+															))}
+														</CommandGroup>
+													</CommandList>
+												</Command>
+											</PopoverContent>
+										</Popover>
+
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+
+						{(question.type == 'multiselect' || question.type == 'select') && (
+							<>
+								{question.options && question.options.length > 0 && (
+									<ul className="space-y-4">
+										{question.options.map((_option, idx) => (
+											<FormField
+												control={form.control}
+												key={idx}
+												name={`q.${index}.options.${idx}`}
+												render={({ field }) => (
+													<FormItem className="w-full">
+														<li className="flex items-center gap-2">
+															<Checkbox className={cn(question.type == 'select' && 'rounded-full', 'disabled:cursor-default disabled:opacity-35')} disabled />
+															<FormControl className="">
+																<Input aria-label="option" placeholder="Enter option here" {...field} />
+															</FormControl>
+
+															<Button type="button" onClick={() => onDeleteOption(idx, index)} variant={'ghost_destructive'} className="h-6 w-6 p-0">
+																<CircleMinus size={12} />
+															</Button>
+														</li>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										))}
+									</ul>
+								)}
+
+								<Button type="button" className="w-full gap-2" variant={'outline'} onClick={() => addOption(index)}>
+									<Plus size={12} /> Add option
+								</Button>
+							</>
+						)}
+
+						<FormMessage />
+
 						<FormField
 							control={form.control}
-							key={index}
-							name={`q.${index}`}
-							render={() => (
-								<FormItem className="space-y-8">
-									<div className="flex gap-2">
-										<FormField
-											control={form.control}
-											key={index}
-											name={`q.${index}.question`}
-											render={({ field }) => (
-												<FormItem className="w-full">
-													<FormLabel className="flex min-h-6 items-center gap-2">
-														<Grip size={12} /> Question
-													</FormLabel>
-													<FormControl className="">
-														<Input placeholder="Enter question here" {...field} />
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-
-										<FormField
-											control={form.control}
-											name={`q.${index}.type`}
-											render={() => (
-												<FormItem className="flex flex-col">
-													<div className="text-right">
-														<Button type="button" onClick={() => onDeleteQuestion(index)} variant={'ghost_destructive'} className="h-5 w-5 p-0">
-															{!question.isDeleting && <Trash2 size={12} />}
-															{question.isDeleting && <LoadingSpinner className="text-destructive" />}
-														</Button>
-													</div>
-													<Popover
-														open={question.isTypeOpen}
-														onOpenChange={state => {
-															questions.q[index].isTypeOpen = state;
-															updateQuestions({ ...questions });
-														}}>
-														<PopoverTrigger asChild>
-															<FormControl>
-																<Button type="button" variant="outline" role="combobox" className={cn('w-fit justify-between', !form.getValues(`q.${index}.type`) && 'text-muted-foreground')}>
-																	<InputType hideLabel input={inputTypes.find(INPUT_TYPE_ZOD => INPUT_TYPE_ZOD.type === form.getValues(`q.${index}.type`))} />
-																	<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-																</Button>
-															</FormControl>
-														</PopoverTrigger>
-														<PopoverContent align="end" className="w-[150px] p-0">
-															<Command>
-																<CommandList>
-																	<CommandGroup>
-																		{inputTypes.map(INPUT_TYPE_ZOD => (
-																			<CommandItem value={INPUT_TYPE_ZOD.type} key={INPUT_TYPE_ZOD.type} onSelect={() => onChangeInputType(INPUT_TYPE_ZOD.type, index)}>
-																				<Check size={12} className={cn('mr-2', INPUT_TYPE_ZOD.type === form.getValues(`q.${index}.type`) ? 'opacity-100' : 'opacity-0')} />
-																				<InputType iconFirst input={INPUT_TYPE_ZOD} />
-																			</CommandItem>
-																		))}
-																	</CommandGroup>
-																</CommandList>
-															</Command>
-														</PopoverContent>
-													</Popover>
-
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
-
-									{(question.type == 'multiselect' || question.type == 'select') && (
-										<>
-											{question.options && question.options.length > 0 && (
-												<ul className="space-y-4">
-													{question.options.map((_option, idx) => (
-														<FormField
-															control={form.control}
-															key={idx}
-															name={`q.${index}.options.${idx}`}
-															render={({ field }) => (
-																<FormItem className="w-full">
-																	<li className="flex items-center gap-2">
-																		<Checkbox className={cn(question.type == 'select' && 'rounded-full', 'disabled:cursor-default disabled:opacity-35')} disabled />
-																		<FormControl className="">
-																			<Input aria-label="option" placeholder="Enter option here" {...field} />
-																		</FormControl>
-
-																		<Button type="button" onClick={() => onDeleteOption(idx, index)} variant={'ghost_destructive'} className="h-6 w-6 p-0">
-																			<CircleMinus size={12} />
-																		</Button>
-																	</li>
-																	<FormMessage />
-																</FormItem>
-															)}
-														/>
-													))}
-												</ul>
-											)}
-
-											<Button type="button" className="w-full gap-2" variant={'outline'} onClick={() => addOption(index)}>
-												<Plus size={12} /> Add option
-											</Button>
-										</>
-									)}
-
-									<FormMessage />
-
-									<FormField
-										control={form.control}
-										name={`q.${index}.required`}
-										render={({ field }) => (
-											<FormItem className="flex flex-row items-center justify-between">
-												<FormLabel className="w-full">Required question</FormLabel>
-												<FormControl>
-													<Switch className="!m-0 scale-75" checked={field.value} onCheckedChange={field.onChange} />
-												</FormControl>
-											</FormItem>
-										)}
-									/>
-
-									{index !== questions.q.length - 1 && <Separator className="mt-10" />}
+							name={`q.${index}.required`}
+							render={({ field }) => (
+								<FormItem className="flex flex-row items-center justify-between">
+									<FormLabel className="w-full">Required question</FormLabel>
+									<FormControl>
+										<Switch className="!m-0 scale-75" checked={form.getValues(`q.${index}.required`) == true} onCheckedChange={field.onChange} />
+									</FormControl>
 								</FormItem>
 							)}
 						/>
-					))}
 
-					{(!questions.q || questions.q?.length == 0) && (
-						<div className="flex h-36 w-full items-center justify-center rounded-md bg-accent/60">
-							<p className="text-xs text-muted-foreground">No appraisal question added yet</p>
-						</div>
-					)}
-
-					<Separator />
-
-					<div>
-						<div className="mb-4 flex items-center justify-between">
-							<h3 className="text-sm">Add question field</h3>
-
-							<Button type="button" onClick={() => toggleShowAddOptions(!showAddOptions)} variant={'ghost'} className="h-6 w-6 p-0">
-								{!showAddOptions && <ChevronDown size={12} />}
-								{showAddOptions && <ChevronUp size={12} />}
-							</Button>
-						</div>
-
-						<div className={cn('no-scrollbar flex w-full max-w-[27.5rem] gap-4 overflow-x-auto', showAddOptions && 'flex-wrap')}>
-							{inputTypes.map(INPUT_TYPE_ZOD => (
-								<AddQuestionButton key={INPUT_TYPE_ZOD.type} type={INPUT_TYPE_ZOD.type} className="group">
-									{INPUT_TYPE_ZOD.label} {INPUT_TYPE_ZOD.icon}
-								</AddQuestionButton>
-							))}
-						</div>
-					</div>
-
-					<Button type="submit" className="w-full gap-3" disabled={isCreatingQuestions}>
-						{isCreatingQuestions && <LoadingSpinner />} Save changes
-					</Button>
-				</form>
-			)}
-		</Form>
+						{index !== questions.q.length - 1 && <Separator className="mt-10" />}
+					</FormItem>
+				)}
+			/>
+		</div>
 	);
 };

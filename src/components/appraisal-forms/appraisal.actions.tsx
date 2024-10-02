@@ -30,7 +30,7 @@ export const createQuestions = async (payload: TablesInsert<'appraisal_questions
 		if (updateRes.error) return updateRes.error.message;
 	}
 
-	return [...updateRes.data, ...inserRes.data];
+	return [...updateRes.data, ...inserRes.data].sort((a, b) => a.order - b.order);
 };
 
 export const createAppraisalSettings = async (payload: TablesInsert<'appraisal_settings'>) => {

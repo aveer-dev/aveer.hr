@@ -13,7 +13,7 @@ interface props {
 export const AppraisalQuestions = async ({ org, children, group = 'employee' }: props) => {
 	const supabase = createClient();
 
-	const { data } = await supabase.from('appraisal_questions').select().match({ org, group }).order('id');
+	const { data } = await supabase.from('appraisal_questions').select().match({ org, group }).order('order');
 
 	// const questions: { type: FORM_INPUT_TYPE; question: string; options: string[]; required?: boolean }[] = [];
 
