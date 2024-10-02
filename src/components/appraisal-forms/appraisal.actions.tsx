@@ -1,6 +1,6 @@
 'use server';
 
-import { TablesInsert } from '@/type/database.types';
+import { TablesInsert, TablesUpdate } from '@/type/database.types';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { createClient } from '@/utils/supabase/server';
 
@@ -31,4 +31,28 @@ export const createQuestions = async (payload: TablesInsert<'appraisal_questions
 	}
 
 	return [...updateRes.data, ...inserRes.data];
+};
+
+export const createAppraisalSettings = async (payload: TablesInsert<'appraisal_settings'>) => {
+	const canUser = await doesUserHaveAdequatePermissions({ orgId: payload.org });
+	if (canUser !== true) return canUser;
+
+	const supabase = createClient();
+	const { error, data } = await supabase.from('appraisal_settings').insert(payload).select();
+
+	if (error) return error.message;
+
+	return data;
+};
+
+export const updateAppraisalSettings = async (payload: TablesUpdate<'appraisal_settings'>, id: number, org: string) => {
+	const canUser = await doesUserHaveAdequatePermissions({ orgId: org });
+	if (canUser !== true) return canUser;
+
+	const supabase = createClient();
+	const { data, error } = await supabase.from('appraisal_settings').update(payload).match({ org, id }).select();
+
+	if (error) return error.message;
+
+	return data;
 };

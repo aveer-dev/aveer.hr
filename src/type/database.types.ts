@@ -99,6 +99,7 @@ export type Database = {
           group: string
           id: number
           options: Json[]
+          order: number
           org: string
           question: string
           required: boolean
@@ -110,6 +111,7 @@ export type Database = {
           group: string
           id?: number
           options: Json[]
+          order?: number
           org: string
           question: string
           required?: boolean
@@ -121,6 +123,7 @@ export type Database = {
           group?: string
           id?: number
           options?: Json[]
+          order?: number
           org?: string
           question?: string
           required?: boolean
@@ -138,6 +141,48 @@ export type Database = {
             foreignKeyName: "appraisal_questions_org_fkey"
             columns: ["org"]
             isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
+      appraisal_settings: {
+        Row: {
+          created_at: string
+          entity: number | null
+          frequency: string
+          id: number
+          org: string
+          start_date: string | null
+        }
+        Insert: {
+          created_at?: string
+          entity?: number | null
+          frequency: string
+          id?: number
+          org: string
+          start_date?: string | null
+        }
+        Update: {
+          created_at?: string
+          entity?: number | null
+          frequency?: string
+          id?: number
+          org?: string
+          start_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_settings_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_settings_org_fkey"
+            columns: ["org"]
+            isOneToOne: true
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
           },
