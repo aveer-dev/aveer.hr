@@ -15,10 +15,14 @@ import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
+import { Input } from '../ui/input';
 
 const formSchema = z.object({
 	frequency: z.string().min(2, { message: 'Select how often employees will answer appraisal questions' }),
-	start_date: z.string().optional()
+	start_date: z.string().optional(),
+	timeline: z.number()
 });
 
 interface props {
@@ -37,7 +41,8 @@ export const AppraisalSettingsForm = ({ org, settings }: props) => {
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			frequency: settings?.frequency || 'annually',
-			start_date: settings?.start_date || ''
+			start_date: settings?.start_date || '',
+			timeline: settings?.timeline || 2
 		}
 	});
 
@@ -63,6 +68,7 @@ export const AppraisalSettingsForm = ({ org, settings }: props) => {
 		toast.success('Appraisal has been setup successfully');
 		setAppraisalSettings(response[0]);
 		form.setValue('frequency', response[0].frequency);
+		form.setValue('timeline', response[0].timeline);
 		router.refresh();
 	};
 
@@ -127,6 +133,39 @@ export const AppraisalSettingsForm = ({ org, settings }: props) => {
 						/>
 					)}
 				</div>
+
+				<FormField
+					control={form.control}
+					name="timeline"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel className="flex items-center gap-2">
+								Appraisal span
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<button>
+												<Info size={10} />
+											</button>
+										</TooltipTrigger>
+										<TooltipContent>
+											<p className="max-w-[200px]">How long appraisal form will be open to employees</p>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+							</FormLabel>
+
+							<div className="relative">
+								<FormControl>
+									<Input type="number" placeholder="Enter appraisal timeline" {...field} />
+								</FormControl>
+
+								<p className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">weeks</p>
+							</div>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 
 				<Button type="submit">{isUpdatingAppraisal && <LoadingSpinner />} Save changes</Button>
 			</form>

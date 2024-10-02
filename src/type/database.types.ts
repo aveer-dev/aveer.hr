@@ -92,6 +92,51 @@ export type Database = {
           },
         ]
       }
+      appraisal_history: {
+        Row: {
+          created_at: string
+          end_date: string
+          entity: number | null
+          group: string
+          id: number
+          org: string
+          start_date: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          entity?: number | null
+          group: string
+          id?: number
+          org: string
+          start_date?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          entity?: number | null
+          group?: string
+          id?: number
+          org?: string
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_history_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_history_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       appraisal_questions: {
         Row: {
           created_at: string
@@ -154,6 +199,7 @@ export type Database = {
           id: number
           org: string
           start_date: string | null
+          timeline: number
         }
         Insert: {
           created_at?: string
@@ -162,6 +208,7 @@ export type Database = {
           id?: number
           org: string
           start_date?: string | null
+          timeline?: number
         }
         Update: {
           created_at?: string
@@ -170,6 +217,7 @@ export type Database = {
           id?: number
           org?: string
           start_date?: string | null
+          timeline?: number
         }
         Relationships: [
           {
