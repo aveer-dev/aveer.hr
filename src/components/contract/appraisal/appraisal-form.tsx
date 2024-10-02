@@ -5,142 +5,79 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Tables } from '@/type/database.types';
+import { Tables, TablesInsert } from '@/type/database.types';
+import { updateAnswer } from './appraisal.actions';
+import { toast } from 'sonner';
+import { Clock, Save, SendHorizonal } from 'lucide-react';
+import { useState } from 'react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { add, format } from 'date-fns';
+import { LoadingSpinner } from '@/components/ui/loader';
+import { InputFields } from './appraisal-form-input-fields';
+import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { DatePicker } from '@/components/ui/date-picker';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Slider } from '@/components/ui/slider';
 
 interface props {
 	questions: Tables<'appraisal_questions'>[];
+	contract: number;
+	org: string;
+	dbAnswer?: Tables<'appraisal_answers'>;
+	appraisalStartDate: string;
+	appraisal: number;
 }
 
-export const AppraisalForm = ({ questions }: props) => {
-	const formSchema = z.object({
-		answers: z
-			.object({ id: z.number(), answer: z.string().optional(), group: z.string(), required: z.boolean() })
-			.array()
-			.refine(
-				answers => {
-					console.log(answers.filter(answer => answer.required && !answer.answer));
-					return !answers.filter(answer => answer.required && !answer.answer).length;
-				},
-				{ message: 'You must answer all required questions' }
-			)
-	});
+const answerType = z.object({ id: z.number(), answer: z.string().optional(), required: z.boolean() });
+
+const formSchema = z.object({
+	answers: answerType.array().refine(answers => !answers.filter(answer => answer.required && !answer.answer).length, { message: 'You must answer all required questions' }),
+	note: z.string().optional(),
+	score: z.number().max(100)
+});
+
+export const AppraisalForm = ({ questions, contract, org, dbAnswer, appraisalStartDate, appraisal }: props) => {
+	const [answer, setAnswer] = useState(dbAnswer);
+	const [isSaving, setSaveState] = useState(false);
+	const [isSubmitting, setSubmitState] = useState(false);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			answers: questions.map(question => ({ answer: '', id: question.id, group: question.group, required: question.required }))
+			answers: answer
+				? questions.map(question => {
+						const questionsAnswer = (answer.answers as z.infer<typeof answerType>[]).find(ans => ans.id == question.id);
+						return { answer: questionsAnswer?.answer || '', id: question.id, group: question.group, required: question.required };
+					})
+				: questions.map(question => ({ answer: '', id: question.id, group: question.group, required: question.required })),
+			note: answer?.note || '',
+			score: answer?.contract_score || 50
 		}
 	});
 
-	const onSubmit = (values: z.infer<typeof formSchema>) => {
-		console.log(values);
-	};
+	const onSubmit = async (values: z.infer<typeof formSchema>, submit?: boolean) => {
+		const payload: TablesInsert<'appraisal_answers'> = { answers: values.answers, org, contract, group: questions[0].group, appraisal, note: values.note, contract_score: values.score };
+		if (submit) payload.submission_date = new Date().toISOString();
+		if (answer) payload.id = answer.id;
 
-	const InputFields = ({ question, field }: { question: Tables<'appraisal_questions'>; field: any }) => {
-		if (question.type == 'text') {
-			return (
-				<FormControl>
-					<Input type="text" placeholder="Enter answer here" required={question.required} {...field} />
-				</FormControl>
-			);
-		}
+		submit ? setSubmitState(true) : setSaveState(true);
+		const response = await updateAnswer(payload);
+		submit ? setSubmitState(false) : setSaveState(false);
 
-		if (question.type == 'number') {
-			return (
-				<FormControl>
-					<Input type="number" placeholder="Enter answer here" required={question.required} {...field} />
-				</FormControl>
-			);
-		}
+		if (typeof response == 'string') return toast.error('Error updating appraisal', { description: response });
 
-		if (question.type == 'textarea') {
-			return (
-				<FormControl>
-					<Textarea placeholder="Enter answer here" required={question.required} {...field} />
-				</FormControl>
-			);
-		}
-
-		if (question.type == 'date') {
-			return (
-				<FormControl>
-					<DatePicker onSetDate={field.onChange} selected={field.value ? new Date(field.value) : undefined} />
-				</FormControl>
-			);
-		}
-
-		if (question.type == 'file') {
-			return (
-				<FormControl>
-					<Input type="file" placeholder="Select file" required={question.required} {...field} />
-				</FormControl>
-			);
-		}
-
-		if (question.type == 'select') {
-			return (
-				<FormControl>
-					<RadioGroup required={question.required} onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-2">
-						{(question.options as string[])?.map((option, index) => (
-							<FormItem key={index} className="flex items-center space-x-3 space-y-0">
-								<FormControl>
-									<RadioGroupItem value={option} />
-								</FormControl>
-								<FormLabel className="font-normal">{option}</FormLabel>
-							</FormItem>
-						))}
-					</RadioGroup>
-				</FormControl>
-			);
-		}
-
-		if (question.type == 'multiselect') {
-			return (question.options as string[])?.map((option, index) => {
-				const isChecked = field.value.includes(option) || field.value == option;
-
-				return (
-					<FormItem key={index} className="flex items-center space-x-3 space-y-0">
-						<FormControl>
-							<Checkbox
-								checked={isChecked}
-								onCheckedChange={value => {
-									const currentValue = field.value;
-									const answer = currentValue ? currentValue.split(',') : option;
-									if (typeof answer !== 'string') answer.push(option);
-									const finalAnswer = answer.toString();
-
-									value
-										? field.onChange(finalAnswer)
-										: field.onChange(
-												currentValue
-													.split(',')
-													.filter((answer: string) => answer !== option)
-													.toString()
-											);
-								}}
-							/>
-						</FormControl>
-						<FormLabel className="font-normal">{option}</FormLabel>
-					</FormItem>
-				);
-			});
-		}
-
-		return (
-			<FormControl>
-				<Input type="text" placeholder="Enter answer here" {...field} />
-			</FormControl>
-		);
+		toast.success(submit ? 'Appraisal submitted successfully' : 'Appraisal saved successfully');
+		setAnswer(response[0]);
 	};
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+			<Alert>
+				<Clock size={14} className="stroke-muted-foreground" />
+				<AlertTitle className="text-xs">Heads up!</AlertTitle>
+				<AlertDescription className="text-xs font-light">You&apos;re required complete appraisal before {format(add(appraisalStartDate, { weeks: 2 }), 'PP')}</AlertDescription>
+			</Alert>
+
+			<form onSubmit={form.handleSubmit(value => onSubmit(value, false))} className="space-y-8">
 				<FormField
 					control={form.control}
 					name={`answers`}
@@ -157,7 +94,7 @@ export const AppraisalForm = ({ questions }: props) => {
 												{question.required && <span className="mr-1 text-sm text-destructive">*</span>}
 												{question.question}
 											</FormLabel>
-											<InputFields question={question} field={field} />
+											<InputFields isSubmitted={!!answer?.submission_date} question={question} field={field} />
 											<FormMessage />
 										</FormItem>
 									)}
@@ -168,11 +105,74 @@ export const AppraisalForm = ({ questions }: props) => {
 					)}
 				/>
 
+				<Separator />
+
+				<div className="space-y-2">
+					<h3 className="font-medium">Appraisal score</h3>
+					<p className="text-xs text-muted-foreground">What will you score yourself for this appraisal period</p>
+				</div>
+
+				<div className="space-y-6">
+					<FormField
+						control={form.control}
+						name="score"
+						render={({ field }) => (
+							<FormItem className="space-y-4">
+								<FormLabel className="flex items-center justify-between">
+									<div>
+										<span className="mr-1 text-sm text-destructive">*</span>Score
+									</div>
+
+									<div className="font-medium text-foreground">{field.value} / 100</div>
+								</FormLabel>
+
+								<div>
+									<FormControl>
+										<Slider max={100} min={0} step={1} disabled={!!answer?.submission_date} onValueChange={value => field.onChange(value[0])} defaultValue={[field.value || 0]} />
+									</FormControl>
+									<div className="flex items-center justify-between text-[10px] text-muted-foreground">
+										<div>0</div>
+										<div>50</div>
+										<div>100</div>
+									</div>
+								</div>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="note"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Note</FormLabel>
+								<FormControl>
+									<Textarea disabled={!!answer?.submission_date} placeholder="Enter appraisal note here" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
+
 				<FormDescription>
 					<span className="mr-1 text-sm text-destructive">* </span> Indicates required fields
 				</FormDescription>
 
-				<Button type="submit">Submit</Button>
+				<div className="flex items-center justify-end gap-4">
+					<Button disabled={!!answer?.submission_date} className="w-full max-w-[90px] gap-3" variant={'outline'} type="submit">
+						{isSaving && <LoadingSpinner />}
+						Save
+						<Save size={12} />
+					</Button>
+
+					<Button disabled={!!answer?.submission_date} className="w-full max-w-[130px] gap-3" onClick={form.handleSubmit(value => onSubmit(value, true))} type="button">
+						{isSubmitting && <LoadingSpinner />}
+						Submit
+						<SendHorizonal size={12} />
+					</Button>
+				</div>
 			</form>
 		</Form>
 	);

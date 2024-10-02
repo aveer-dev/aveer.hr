@@ -280,7 +280,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				<TabsContent value="team">{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <Teams name={data.team.name} contractId={data.id} org={org} team={data.team.id} />}</TabsContent>
 
 				<TabsContent value="appraisal">
-					<Appraisals org={org} group={'employee'} />
+					<Appraisals org={org} contract={data.id} group={'employee'} />
 				</TabsContent>
 
 				<TabsContent value="contract">

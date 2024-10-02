@@ -37,38 +37,51 @@ export type Database = {
       appraisal_answers: {
         Row: {
           answers: Json[]
+          appraisal: number
           contract: number
+          contract_score: number
           created_at: string
-          date: string
           entity: number | null
           group: string
           id: number
-          is_submitted: boolean
+          note: string | null
           org: string | null
+          submission_date: string | null
         }
         Insert: {
           answers?: Json[]
+          appraisal: number
           contract: number
+          contract_score?: number
           created_at?: string
-          date: string
           entity?: number | null
           group: string
           id?: number
-          is_submitted?: boolean
+          note?: string | null
           org?: string | null
+          submission_date?: string | null
         }
         Update: {
           answers?: Json[]
+          appraisal?: number
           contract?: number
+          contract_score?: number
           created_at?: string
-          date?: string
           entity?: number | null
           group?: string
           id?: number
-          is_submitted?: boolean
+          note?: string | null
           org?: string | null
+          submission_date?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "appraisal_answers_appraisal_fkey"
+            columns: ["appraisal"]
+            isOneToOne: false
+            referencedRelation: "appraisal_history"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appraisal_answers_contract_fkey"
             columns: ["contract"]
@@ -149,6 +162,7 @@ export type Database = {
           question: string
           required: boolean
           type: string
+          updateded_at: string | null
         }
         Insert: {
           created_at?: string
@@ -161,6 +175,7 @@ export type Database = {
           question: string
           required?: boolean
           type: string
+          updateded_at?: string | null
         }
         Update: {
           created_at?: string
@@ -173,6 +188,7 @@ export type Database = {
           question?: string
           required?: boolean
           type?: string
+          updateded_at?: string | null
         }
         Relationships: [
           {
