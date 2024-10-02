@@ -39,8 +39,7 @@ const inputTypes: INPUT_TYPE[] = [
 	{ type: 'textarea', label: 'Textarea', icon: <Text size={12} /> },
 	{ type: 'multiselect', label: 'Mutiselect', icon: <SquareCheckBig size={12} /> },
 	{ type: 'select', label: 'select', icon: <CircleCheckBig size={12} /> },
-	{ type: 'date', label: 'Date', icon: <Calendar size={12} /> },
-	{ type: 'file', label: 'File', icon: <FileUp size={12} /> }
+	{ type: 'date', label: 'Date', icon: <Calendar size={12} /> }
 ];
 
 const q = z
@@ -97,7 +96,8 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 			required: !!question.required,
 			group,
 			id: question.id,
-			order: index
+			order: index,
+			updateded_at: new Date().toISOString()
 		}));
 
 		creationsState(true);
