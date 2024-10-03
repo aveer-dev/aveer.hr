@@ -10,11 +10,12 @@ interface props {
 	org: string;
 	group: string;
 	contract: number;
+	managerContract?: number;
 	full?: boolean;
 	isOwner?: boolean;
 }
 
-export const Appraisals = async ({ org, group, contract, full = true, isOwner }: props) => {
+export const Appraisals = async ({ org, group, managerContract, contract, full = true, isOwner }: props) => {
 	const supabase = createClient();
 
 	const [appraisals, okrs] = await Promise.all([await supabase.from('appraisal_history').select().match({ org }), await supabase.from('okrs').select().match({ org })]);
@@ -28,7 +29,7 @@ export const Appraisals = async ({ org, group, contract, full = true, isOwner }:
 		);
 	}
 
-	const [{ data }, answers] = await Promise.all([await supabase.from('appraisal_questions').select().match({ org, group }).order('order'), await supabase.from('appraisal_answers').select().match({ org, group, contract })]);
+	const [{ data }, answers] = await Promise.all([await supabase.from('appraisal_questions').select().match({ org, group }).order('order'), await supabase.from('appraisal_answers').select().match({ org, contract })]);
 
 	const processOKRs = async () => {
 		if (!okrs?.data) return false;
@@ -56,9 +57,9 @@ export const Appraisals = async ({ org, group, contract, full = true, isOwner }:
 				<AccordionTrigger>
 					<div className={cn('flex items-center gap-3', !full && 'text-sm')}>
 						Appraisal {index + 1}
-						{!!answers.data && !!answers.data[0]?.submission_date && (
+						{!!answers.data && (managerContract ? !!answers.data[0]?.manager_submission_date : !!answers.data[0]?.submission_date) && (
 							<Badge className="text-[10px]" variant={'secondary-success'}>
-								Submitted
+								{answers.data[0].org_submission_date ? answers.data[0].org_score || answers.data[0].manager_score : 'Submitted'}
 							</Badge>
 						)}
 					</div>
@@ -96,7 +97,9 @@ export const Appraisals = async ({ org, group, contract, full = true, isOwner }:
 							</FormSectionDescription>
 						)}
 
-						<InputsContainer>{data && <AppraisalForm isOwner={isOwner} dbAnswer={answers.data ? answers.data[0] : undefined} appraisal={appraisal.id} appraisalStartDate={appraisal.start_date} contract={contract} org={org} questions={data} />}</InputsContainer>
+						<InputsContainer>
+							{data && <AppraisalForm managerContract={managerContract} isOwner={isOwner} dbAnswer={answers.data ? answers.data[0] : undefined} appraisal={appraisal.id} appraisalStartDate={appraisal.start_date} contract={contract} org={org} questions={data} />}
+						</InputsContainer>
 					</FormSection>
 				</AccordionContent>
 			</AccordionItem>

@@ -39,39 +39,66 @@ export type Database = {
           answers: Json[]
           appraisal: number
           contract: number
+          contract_note: string | null
           contract_score: number
           created_at: string
           entity: number | null
           group: string
           id: number
-          note: string | null
+          manager_answers: Json[] | null
+          manager_contract: number | null
+          manager_note: string | null
+          manager_score: number | null
+          manager_submission_date: string | null
           org: string | null
+          org_note: string | null
+          org_profile: string | null
+          org_score: number | null
+          org_submission_date: string | null
           submission_date: string | null
         }
         Insert: {
           answers?: Json[]
           appraisal: number
           contract: number
+          contract_note?: string | null
           contract_score?: number
           created_at?: string
           entity?: number | null
           group: string
           id?: number
-          note?: string | null
+          manager_answers?: Json[] | null
+          manager_contract?: number | null
+          manager_note?: string | null
+          manager_score?: number | null
+          manager_submission_date?: string | null
           org?: string | null
+          org_note?: string | null
+          org_profile?: string | null
+          org_score?: number | null
+          org_submission_date?: string | null
           submission_date?: string | null
         }
         Update: {
           answers?: Json[]
           appraisal?: number
           contract?: number
+          contract_note?: string | null
           contract_score?: number
           created_at?: string
           entity?: number | null
           group?: string
           id?: number
-          note?: string | null
+          manager_answers?: Json[] | null
+          manager_contract?: number | null
+          manager_note?: string | null
+          manager_score?: number | null
+          manager_submission_date?: string | null
           org?: string | null
+          org_note?: string | null
+          org_profile?: string | null
+          org_score?: number | null
+          org_submission_date?: string | null
           submission_date?: string | null
         }
         Relationships: [
@@ -97,11 +124,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "appraisal_answers_manager_contract_fkey"
+            columns: ["manager_contract"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "appraisal_answers_org_fkey"
             columns: ["org"]
             isOneToOne: false
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "appraisal_answers_org_profile_fkey"
+            columns: ["org_profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }

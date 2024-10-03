@@ -50,7 +50,7 @@ export const Teams = async ({ org, team, contractId, name, currentUser }: props)
 							</div>
 
 							<div className="flex items-center gap-2">
-								{!!managers?.length && currentUser !== 'org' && <TeamMemberAppraisalsDialog org={org} contract={person} />}
+								{!!managers?.length && currentUser !== 'org' && <TeamMemberAppraisalsDialog managerContract={contractId} org={org} contract={person} />}
 								<TeamMember person={person as any} />
 							</div>
 						</li>

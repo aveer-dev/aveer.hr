@@ -8,9 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 interface props {
 	org: string;
 	contract: Tables<'contracts'>;
+	managerContract: number;
 }
 
-export const TeamMemberAppraisalsDialog = ({ org, contract }: props) => {
+export const TeamMemberAppraisalsDialog = ({ org, contract, managerContract }: props) => {
 	return (
 		<Sheet>
 			<SheetTrigger className="flex items-center" asChild>
@@ -36,7 +37,7 @@ export const TeamMemberAppraisalsDialog = ({ org, contract }: props) => {
 					</TabsContent>
 
 					<TabsContent value="manager">
-						<Appraisals full={false} org={org} contract={contract.id} isOwner={true} group={'manager'} />
+						<Appraisals managerContract={managerContract} full={false} org={org} contract={contract.id} isOwner={true} group={'manager'} />
 					</TabsContent>
 				</Tabs>
 			</SheetContent>

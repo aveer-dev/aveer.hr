@@ -8,7 +8,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Tables, TablesInsert } from '@/type/database.types';
 import { updateAnswer } from './appraisal.actions';
 import { toast } from 'sonner';
-import { Clock, Save, SendHorizonal } from 'lucide-react';
+import { Clock, Loader, Save, SendHorizonal } from 'lucide-react';
 import { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { add, format } from 'date-fns';
@@ -17,6 +17,7 @@ import { InputFields } from './appraisal-form-input-fields';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
+import { useRouter } from 'next/navigation';
 
 interface props {
 	questions: Tables<'appraisal_questions'>[];
@@ -25,6 +26,7 @@ interface props {
 	dbAnswer?: Tables<'appraisal_answers'>;
 	appraisalStartDate: string;
 	appraisal: number;
+	managerContract?: number;
 	isOwner?: boolean;
 }
 
@@ -36,28 +38,39 @@ const formSchema = z.object({
 	score: z.number().max(100)
 });
 
-export const AppraisalForm = ({ isOwner, questions, contract, org, dbAnswer, appraisalStartDate, appraisal }: props) => {
+export const AppraisalForm = ({ isOwner, questions, managerContract, contract, org, dbAnswer, appraisalStartDate, appraisal }: props) => {
 	const [answer, setAnswer] = useState(dbAnswer);
 	const [isSaving, setSaveState] = useState(false);
 	const [isSubmitting, setSubmitState] = useState(false);
+	const router = useRouter();
+	const formDisabled = (managerContract ? !!answer?.manager_submission_date : !!answer?.submission_date) || !isOwner || (!!managerContract && !answer);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			answers: answer
 				? questions.map(question => {
-						const questionsAnswer = (answer.answers as z.infer<typeof answerType>[]).find(ans => ans.id == question.id);
+						const questionsAnswer = managerContract
+							? (answer.manager_answers as z.infer<typeof answerType>[])?.find(ans => ans.id == question.id) || { answer: '', id: question.id, group: question.group, required: question.required }
+							: (answer.answers as z.infer<typeof answerType>[]).find(ans => ans.id == question.id);
 						return { answer: questionsAnswer?.answer || '', id: question.id, group: question.group, required: question.required };
 					})
 				: questions.map(question => ({ answer: '', id: question.id, group: question.group, required: question.required })),
-			note: answer?.note || '',
-			score: answer?.contract_score || 50
+			note: managerContract ? answer?.manager_note || '' : answer?.contract_note || '',
+			score: managerContract ? answer?.manager_score || 50 : answer?.contract_score || 50
 		}
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>, submit?: boolean) => {
-		const payload: TablesInsert<'appraisal_answers'> = { answers: values.answers, org, contract, group: questions[0].group, appraisal, note: values.note, contract_score: values.score };
-		if (submit) payload.submission_date = new Date().toISOString();
+		const payload: TablesInsert<'appraisal_answers'> = {
+			...(managerContract ? { manager_answers: values.answers, manager_note: values.note, manager_score: values.score, manager_contract: managerContract } : { answers: values.answers, contract_note: values.note, contract_score: values.score }),
+			org,
+			contract,
+			group: questions[0].group,
+			appraisal
+		};
+		if (submit && !managerContract) payload.submission_date = new Date().toISOString();
+		if (submit && managerContract) payload.manager_submission_date = new Date().toISOString();
 		if (answer) payload.id = answer.id;
 
 		submit ? setSubmitState(true) : setSaveState(true);
@@ -68,15 +81,26 @@ export const AppraisalForm = ({ isOwner, questions, contract, org, dbAnswer, app
 
 		toast.success(submit ? 'Appraisal submitted successfully' : 'Appraisal saved successfully');
 		setAnswer(response[0]);
+		router.refresh();
 	};
 
 	return (
 		<Form {...form}>
-			{isOwner && (
-				<Alert className="py-3">
-					<Clock size={14} className="stroke-muted-foreground" />
-					<AlertTitle className="text-xs">Heads up!</AlertTitle>
-					<AlertDescription className="text-xs font-light">You&apos;re required complete appraisal before {format(add(appraisalStartDate, { weeks: 2 }), 'PP')}</AlertDescription>
+			{isOwner && managerContract
+				? !answer?.manager_submission_date
+				: !answer?.submission_date && (
+						<Alert className="py-3">
+							<Clock size={14} className="stroke-muted-foreground" />
+							<AlertTitle className="text-xs">Heads up!</AlertTitle>
+							<AlertDescription className="text-xs font-light">You&apos;re required complete appraisal before {format(add(appraisalStartDate, { weeks: 2 }), 'PP')}</AlertDescription>
+						</Alert>
+					)}
+
+			{!!managerContract && !answer && (
+				<Alert className="py-3" variant={'warn'}>
+					<Loader size={14} />
+					<AlertTitle className="text-xs">It&apos;s almost ready</AlertTitle>
+					<AlertDescription className="text-xs font-light">Employee must self appraise before getting managers&apos;. You can give them a nudge to get to it.</AlertDescription>
 				</Alert>
 			)}
 
@@ -97,7 +121,7 @@ export const AppraisalForm = ({ isOwner, questions, contract, org, dbAnswer, app
 												{question.required && <span className="mr-1 text-sm text-destructive">*</span>}
 												{question.question}
 											</FormLabel>
-											<InputFields disabled={!!answer?.submission_date || !isOwner} question={question} field={field} />
+											<InputFields disabled={formDisabled} question={question} field={field} />
 											<FormMessage />
 										</FormItem>
 									)}
@@ -131,7 +155,7 @@ export const AppraisalForm = ({ isOwner, questions, contract, org, dbAnswer, app
 
 								<div>
 									<FormControl>
-										<Slider max={100} min={0} step={1} disabled={!!answer?.submission_date || !isOwner} onValueChange={value => field.onChange(value[0])} defaultValue={[field.value || 0]} />
+										<Slider max={100} min={0} step={1} disabled={formDisabled} onValueChange={value => field.onChange(value[0])} defaultValue={[field.value || 0]} />
 									</FormControl>
 									<div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
 										<div>0</div>
@@ -151,7 +175,7 @@ export const AppraisalForm = ({ isOwner, questions, contract, org, dbAnswer, app
 							<FormItem>
 								<FormLabel>Note</FormLabel>
 								<FormControl>
-									<Textarea disabled={!!answer?.submission_date || !isOwner} placeholder="Enter appraisal note here" {...field} />
+									<Textarea disabled={formDisabled} placeholder="Enter appraisal note here" {...field} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -166,13 +190,13 @@ export const AppraisalForm = ({ isOwner, questions, contract, org, dbAnswer, app
 						</FormDescription>
 
 						<div className="flex items-center justify-end gap-4">
-							<Button disabled={!!answer?.submission_date} className="w-full max-w-[90px] gap-3" variant={'outline'} type="submit">
+							<Button disabled={formDisabled} className="w-full max-w-[90px] gap-3" variant={'outline'} type="submit">
 								{isSaving && <LoadingSpinner />}
 								Save
 								<Save size={12} />
 							</Button>
 
-							<Button disabled={!!answer?.submission_date} className="w-full max-w-[130px] gap-3" onClick={form.handleSubmit(value => onSubmit(value, true))} type="button">
+							<Button disabled={formDisabled} className="w-full max-w-[130px] gap-3" onClick={form.handleSubmit(value => onSubmit(value, true))} type="button">
 								{isSubmitting && <LoadingSpinner />}
 								Submit
 								<SendHorizonal size={12} />
