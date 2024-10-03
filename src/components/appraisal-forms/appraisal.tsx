@@ -30,6 +30,11 @@ export const Appraisal = async ({ org }: props) => {
 				<h2 className="mb-1 font-normal">Appraisal questions</h2>
 				<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Default employee appraisal questions for all employees accross the organisation</p>
 			</AppraisalQuestions>
+
+			<AppraisalQuestions group="manager" org={org}>
+				<h2 className="mb-1 font-normal">Managers: Appraisal questions</h2>
+				<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Default managers - employees appraisal questions for managers to access employees</p>
+			</AppraisalQuestions>
 		</>
 	);
 };

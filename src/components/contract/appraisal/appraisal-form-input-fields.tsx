@@ -7,13 +7,13 @@ import { FormControl, FormItem, FormLabel } from '@/components/ui/form';
 import { Tables } from '@/type/database.types';
 import { FORM_INPUT_TYPE } from '@/type/performance.types';
 
-export const InputFields = ({ question, field, isSubmitted }: { question: Tables<'appraisal_questions'>; field: any; isSubmitted: boolean }) => {
+export const InputFields = ({ question, field, disabled }: { question: Tables<'appraisal_questions'>; field: any; disabled: boolean }) => {
 	const type: FORM_INPUT_TYPE = question.type as any;
 
 	if (type == 'text') {
 		return (
 			<FormControl>
-				<Input disabled={isSubmitted} type="text" placeholder="Enter answer here" required={question.required} {...field} />
+				<Input disabled={disabled} type="text" placeholder="Enter answer here" required={question.required} {...field} />
 			</FormControl>
 		);
 	}
@@ -21,7 +21,7 @@ export const InputFields = ({ question, field, isSubmitted }: { question: Tables
 	if (type == 'number') {
 		return (
 			<FormControl>
-				<Input disabled={isSubmitted} type="number" placeholder="Enter answer here" required={question.required} {...field} />
+				<Input disabled={disabled} type="number" placeholder="Enter answer here" required={question.required} {...field} />
 			</FormControl>
 		);
 	}
@@ -29,7 +29,7 @@ export const InputFields = ({ question, field, isSubmitted }: { question: Tables
 	if (type == 'textarea') {
 		return (
 			<FormControl>
-				<Textarea disabled={isSubmitted} placeholder="Enter answer here" required={question.required} {...field} />
+				<Textarea disabled={disabled} placeholder="Enter answer here" required={question.required} {...field} />
 			</FormControl>
 		);
 	}
@@ -37,7 +37,7 @@ export const InputFields = ({ question, field, isSubmitted }: { question: Tables
 	if (type == 'date') {
 		return (
 			<FormControl>
-				<DatePicker disableButton={isSubmitted} onSetDate={date => field.onChange(date.toISOString())} selected={field.value ? new Date(field.value) : undefined} />
+				<DatePicker disableButton={disabled} onSetDate={date => field.onChange(date.toISOString())} selected={field.value ? new Date(field.value) : undefined} />
 			</FormControl>
 		);
 	}
@@ -49,7 +49,7 @@ export const InputFields = ({ question, field, isSubmitted }: { question: Tables
 					{(question.options as string[])?.map((option, index) => (
 						<FormItem key={index} className="flex items-center space-x-3 space-y-0">
 							<FormControl>
-								<RadioGroupItem disabled={isSubmitted} value={option} />
+								<RadioGroupItem disabled={disabled} value={option} />
 							</FormControl>
 							<FormLabel className="font-normal">{option}</FormLabel>
 						</FormItem>
@@ -67,7 +67,7 @@ export const InputFields = ({ question, field, isSubmitted }: { question: Tables
 				<FormItem key={index} className="flex items-center space-x-3 space-y-0">
 					<FormControl>
 						<Checkbox
-							disabled={isSubmitted}
+							disabled={disabled}
 							checked={isChecked}
 							onCheckedChange={value => {
 								const currentValue = field.value;
@@ -94,7 +94,7 @@ export const InputFields = ({ question, field, isSubmitted }: { question: Tables
 
 	return (
 		<FormControl>
-			<Input disabled={isSubmitted} type="text" placeholder="Enter answer here" {...field} />
+			<Input disabled={disabled} type="text" placeholder="Enter answer here" {...field} />
 		</FormControl>
 	);
 };

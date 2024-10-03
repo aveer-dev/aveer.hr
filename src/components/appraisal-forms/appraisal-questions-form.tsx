@@ -26,6 +26,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { generateRandomString } from '@/utils/generate-string';
 
 interface INPUT_TYPE {
 	type: z.infer<typeof INPUT_TYPE_ZOD>;
@@ -73,7 +74,7 @@ interface props {
 export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }: props) => {
 	const [questions, updateQuestions] = useState<z.infer<typeof formSchema>>(questionsData && questionsData.q?.length > 0 ? (questionsData as any) : { q: [] });
 	const [showAddOptions, toggleShowAddOptions] = useState(false);
-	const [isFormEnabled, toggleFormState] = useState(false);
+	const [isFormEnabled, toggleFormState] = useState(!!questionsData?.q.length);
 	const [isCreatingQuestions, creationsState] = useState(false);
 	const sensors = useSensors(
 		useSensor(PointerSensor),
@@ -112,16 +113,15 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 
 	const AddQuestionButton = ({ children, className, type }: { children: ReactNode; className: string; type: FORM_INPUT_TYPE }) => {
 		const add = () => {
-			const newItem: any = { question: '', type };
+			const newItem: any = { question: '', type, id: generateRandomString(4) };
 			if (type == 'select' || type == 'multiselect') newItem.options = ['Option one'];
 
 			questions.q.push(newItem);
 			updateQuestions({ ...questions });
 
 			const formValues = form.getValues(`q`) || [];
-			formValues.push(newItem);
+			formValues.push({ ...newItem, id: 0 });
 			form.setValue(`q`, formValues);
-			console.log(form.getValues());
 		};
 
 		return (
@@ -164,7 +164,7 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
 					<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 						<SortableContext items={questions.q} strategy={verticalListSortingStrategy}>
-							{questions.q?.map((id, index) => <Questions question={questions.q[index]} index={index} key={id.id} id={id.id} updateQuestions={updateQuestions} org={org} questions={questions} form={form} />)}
+							{questions.q?.map((id, index) => <Questions question={questions.q[index]} index={index} key={Math.random()} id={id.id} updateQuestions={updateQuestions} org={org} questions={questions} form={form} />)}
 						</SortableContext>
 					</DndContext>
 

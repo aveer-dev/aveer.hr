@@ -19,8 +19,13 @@ export const createQuestions = async (payload: TablesInsert<'appraisal_questions
 	const canUser = await doesUserHaveAdequatePermissions({ orgId: payload[0].org });
 	if (canUser !== true) return canUser;
 
-	const payloadWithId = payload.filter(item => !!item.id);
-	const payloadWithoutId = payload.filter(item => !item.id);
+	const payloadWithId = payload.filter(item => item.id != 0 || !!item.id);
+	const payloadWithoutId = payload
+		.filter(item => item.id == 0 || !item.id)
+		.map(item => {
+			delete item.id;
+			return item;
+		});
 
 	const supabase = createClient();
 	const [updateRes, inserRes] = await Promise.all([await supabase.from('appraisal_questions').upsert(payloadWithId).select(), await supabase.from('appraisal_questions').insert(payloadWithoutId).select()]);

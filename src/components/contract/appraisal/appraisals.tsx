@@ -4,14 +4,17 @@ import { FormSection, FormSectionDescription, InputsContainer } from '@/componen
 import { AppraisalForm } from './appraisal-form';
 import { format, isWithinInterval } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface props {
 	org: string;
 	group: string;
 	contract: number;
+	full?: boolean;
+	isOwner?: boolean;
 }
 
-export const Appraisals = async ({ org, group, contract }: props) => {
+export const Appraisals = async ({ org, group, contract, full = true, isOwner }: props) => {
 	const supabase = createClient();
 
 	const [appraisals, okrs] = await Promise.all([await supabase.from('appraisal_history').select().match({ org }), await supabase.from('okrs').select().match({ org })]);
@@ -48,12 +51,16 @@ export const Appraisals = async ({ org, group, contract }: props) => {
 	const OKRs = await processOKRs();
 
 	return appraisals.data.map((appraisal, index) => (
-		<Accordion key={appraisal.id} type="single" collapsible className="w-full">
-			<AccordionItem value={`appraisal-${index}`} disabled={answers.data ? !!answers.data[0].submission_date : false}>
+		<Accordion key={appraisal.id} type="single" collapsible className="w-full space-y-8">
+			<AccordionItem value={`appraisal-${index}`}>
 				<AccordionTrigger>
-					<div className="flex items-center gap-3">
+					<div className={cn('flex items-center gap-3', !full && 'text-sm')}>
 						Appraisal {index + 1}
-						<Badge variant={'secondary-success'}>Submitted</Badge>
+						{!!answers.data && !!answers.data[0]?.submission_date && (
+							<Badge className="text-[10px]" variant={'secondary-success'}>
+								Submitted
+							</Badge>
+						)}
 					</div>
 
 					<span className="ml-auto mr-3 text-xs text-muted-foreground">
@@ -62,32 +69,34 @@ export const Appraisals = async ({ org, group, contract }: props) => {
 				</AccordionTrigger>
 
 				<AccordionContent>
-					<FormSection className="md:py-12">
-						<FormSectionDescription className="sticky top-10 max-w-xs">
-							<h2 className="mb-5 text-base font-medium">Related OKR</h2>
+					<FormSection className={cn('md:py-12', !full && 'md:grid-cols-1 md:py-8')}>
+						{full && (
+							<FormSectionDescription className="sticky top-10 max-w-xs">
+								<h2 className="mb-5 text-base font-medium">Related OKR</h2>
 
-							{typeof OKRs !== 'string' && typeof OKRs !== 'boolean' && (
-								<ul className="space-y-8 overflow-y-auto text-muted-foreground">
-									{OKRs.map(okr => (
-										<li key={okr.id} className="space-y-2">
-											<h4 className="text-xs">{okr.objective}</h4>
+								{typeof OKRs !== 'string' && typeof OKRs !== 'boolean' && (
+									<ul className="space-y-8 overflow-y-auto text-muted-foreground">
+										{OKRs.map(okr => (
+											<li key={okr.id} className="space-y-2">
+												<h4 className="text-xs">{okr.objective}</h4>
 
-											<ul className="ml-4 list-disc space-y-2">
-												{okr.results.map((result, idx) => (
-													<li className="text-xs font-light leading-6" key={idx}>
-														{result}
-													</li>
-												))}
-											</ul>
-										</li>
-									))}
-								</ul>
-							)}
+												<ul className="ml-4 list-disc space-y-2">
+													{okr.results.map((result, idx) => (
+														<li className="text-xs font-light leading-6" key={idx}>
+															{result}
+														</li>
+													))}
+												</ul>
+											</li>
+										))}
+									</ul>
+								)}
 
-							{(typeof OKRs == 'string' || typeof OKRs == 'boolean') && <p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">{typeof OKRs == 'string' ? OKRs : 'None OKR set for this appraisal timeline'}</p>}
-						</FormSectionDescription>
+								{(typeof OKRs == 'string' || typeof OKRs == 'boolean') && <p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">{typeof OKRs == 'string' ? OKRs : 'None OKR set for this appraisal timeline'}</p>}
+							</FormSectionDescription>
+						)}
 
-						<InputsContainer>{data && <AppraisalForm dbAnswer={answers.data ? answers.data[0] : undefined} appraisal={appraisal.id} appraisalStartDate={appraisal.start_date} contract={contract} org={org} questions={data} />}</InputsContainer>
+						<InputsContainer>{data && <AppraisalForm isOwner={isOwner} dbAnswer={answers.data ? answers.data[0] : undefined} appraisal={appraisal.id} appraisalStartDate={appraisal.start_date} contract={contract} org={org} questions={data} />}</InputsContainer>
 					</FormSection>
 				</AccordionContent>
 			</AccordionItem>

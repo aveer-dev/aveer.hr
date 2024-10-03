@@ -1,37 +1,18 @@
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
-import { ChevronRight } from 'lucide-react';
-import { Tables } from '@/type/database.types';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Tables } from '@/type/database.types';
+import { BookUser } from 'lucide-react';
 
 interface props {
 	person: Tables<'contracts'> & { profile: Tables<'profiles'>; level: Tables<'employee_levels'> };
-	isManager: boolean;
 }
 
-export const TeamMember = ({ person, isManager }: props) => {
+export const TeamMember = ({ person }: props) => {
 	return (
 		<Sheet>
-			<SheetTrigger asChild>
-				<Button variant={'outline'} className="flex w-full items-center justify-between border-t bg-card py-10 text-left text-card-foreground outline-none transition-all duration-500 focus-visible:bg-accent/60">
-					<div className="ml-2 space-y-2">
-						<h2 className="text-xs">
-							{person.profile?.first_name} {person.profile?.last_name}
-							{(person.level || person.level_name) && (
-								<Badge className="ml-2 py-px text-[10px]" variant={'outline'}>
-									{person.level?.level || person.level_name}
-								</Badge>
-							)}
-							{isManager && (
-								<Badge className="ml-2 py-px text-[10px]" variant={'outline'}>
-									manager
-								</Badge>
-							)}
-						</h2>
-						<p className="text-xs text-muted-foreground">{person.job_title}</p>
-					</div>
-
-					<ChevronRight className="mr-2" size={12} />
+			<SheetTrigger className="flex items-center" asChild>
+				<Button variant={'outline'}>
+					<BookUser size={12} className="mr-2" /> View details
 				</Button>
 			</SheetTrigger>
 
