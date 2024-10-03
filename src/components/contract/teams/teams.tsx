@@ -9,9 +9,10 @@ interface props {
 	team: number;
 	contractId: number;
 	currentUser: 'profile' | 'org';
+	isManager: boolean;
 }
 
-export const Teams = async ({ org, team, contractId, name, currentUser }: props) => {
+export const Teams = async ({ org, team, contractId, name, currentUser, isManager }: props) => {
 	const supabase = createClient();
 
 	const { data, error } = await supabase.from('contracts').select('*, level:employee_levels!contracts_level_fkey(*), profile:profiles!contracts_profile_fkey(*)').match({ org, team, status: 'signed' });
@@ -41,7 +42,7 @@ export const Teams = async ({ org, team, contractId, name, currentUser }: props)
 										</Badge>
 									)}
 									{!!managers?.find(manager => manager.person == person.id) && (
-										<Badge className="ml-2 py-px text-[10px]" variant={'outline'}>
+										<Badge className="py-px text-[10px]" variant={'outline'}>
 											manager
 										</Badge>
 									)}
@@ -50,7 +51,7 @@ export const Teams = async ({ org, team, contractId, name, currentUser }: props)
 							</div>
 
 							<div className="flex items-center gap-2">
-								{!!managers?.length && currentUser !== 'org' && <TeamMemberAppraisalsDialog managerContract={contractId} org={org} contract={person} />}
+								{isManager && currentUser !== 'org' && <TeamMemberAppraisalsDialog managerContract={contractId} org={org} contract={person} />}
 								<TeamMember person={person as any} />
 							</div>
 						</li>
