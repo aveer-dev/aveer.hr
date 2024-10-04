@@ -96,12 +96,12 @@ const Contract = async ({ contract, appraisal, org, userId }: { userId?: string;
 				<Separator orientation="vertical" className="h-3" />
 				<div>
 					<div>Employee</div>
-					<div>{(!!data && data[0].submission_date && data[0].contract_score) || '-'}</div>
+					<div>{(!!data && data[0]?.submission_date && data[0].contract_score) || '-'}</div>
 				</div>
 				<Separator orientation="vertical" className="h-3" />
 				<div>
 					<div>Manager</div>
-					<div>{(!!data && data[0].manager_submission_date && data[0].manager_score) || '-'}</div>
+					<div>{(!!data && data[0]?.manager_submission_date && data[0].manager_score) || '-'}</div>
 				</div>
 
 				<Separator orientation="vertical" className="h-3" />

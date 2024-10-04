@@ -115,7 +115,7 @@ export const EmployeeAppraisals = async ({ org, adminId, group, managerContract,
 						)}
 
 						<InputsContainer>
-							{answers.data && answers.data[0].submission_date && (
+							{answers.data && answers.data[0]?.submission_date && (
 								<Alert className="flex items-center justify-between bg-accent p-2">
 									<AlertDescription className="text-xs font-light">Review manager&apos;s appraisal and appraisal result</AlertDescription>
 									<AppraisalsDialog role={'employee'} org={org} variant={{ variant: 'outline' }} contract={contract}>

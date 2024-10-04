@@ -78,13 +78,13 @@ export const Appraisals = async ({ org, adminId, group, managerContract, contrac
 								<Separator className="h-3" orientation="vertical" />
 							</>
 						)}
-						{answers.data && formType == 'manager' && answers.data[0].manager_submission_date && (
+						{answers.data && formType == 'manager' && answers.data[0]?.manager_submission_date && (
 							<>
 								Score: {answers.data[0].manager_score}
 								<Separator className="h-3" orientation="vertical" />
 							</>
 						)}
-						{answers.data && formType == 'employee' && answers.data[0].submission_date && (
+						{answers.data && formType == 'employee' && answers.data[0]?.submission_date && (
 							<>
 								Score: {answers.data[0].contract_score}
 								<Separator className="h-3" orientation="vertical" />
