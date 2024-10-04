@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { TeamMember } from './team-member-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { TeamMemberAppraisalsDialog } from './team-member-appraisals-dialog';
+import { AppraisalsDialog } from '@/components/appraisal/appraisals-dialog';
 interface props {
 	org: string;
 	name: string;
@@ -51,7 +51,7 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 							</div>
 
 							<div className="flex items-center gap-2">
-								{isManager && currentUser !== 'org' && <TeamMemberAppraisalsDialog managerContract={contractId} org={org} contract={person} />}
+								{isManager && currentUser !== 'org' && <AppraisalsDialog role="manager" managerContract={contractId} org={org} contract={person} />}
 								<TeamMember person={person as any} />
 							</div>
 						</li>

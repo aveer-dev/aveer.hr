@@ -5,17 +5,22 @@ import { AppraisalForm } from './appraisal-form';
 import { format, isWithinInterval } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { ROLE } from '@/type/contract.types';
+import { Separator } from '@/components/ui/separator';
+import { Tables } from '@/type/database.types';
 
 interface props {
 	org: string;
-	group: string;
-	contract: number;
+	group?: string;
+	contract: Tables<'contracts'>;
 	managerContract?: number;
 	full?: boolean;
-	isOwner?: boolean;
+	role: ROLE;
+	formType: ROLE;
+	adminId?: string;
 }
 
-export const Appraisals = async ({ org, group, managerContract, contract, full = true, isOwner }: props) => {
+export const Appraisals = async ({ org, adminId, group, managerContract, contract, formType, role, full = true }: props) => {
 	const supabase = createClient();
 
 	const [appraisals, okrs] = await Promise.all([await supabase.from('appraisal_history').select().match({ org }), await supabase.from('okrs').select().match({ org })]);
@@ -29,7 +34,7 @@ export const Appraisals = async ({ org, group, managerContract, contract, full =
 		);
 	}
 
-	const [{ data }, answers] = await Promise.all([await supabase.from('appraisal_questions').select().match({ org, group }).order('order'), await supabase.from('appraisal_answers').select().match({ org, contract })]);
+	const [questions, answers] = await Promise.all([!!group && (await supabase.from('appraisal_questions').select().match({ org, group }).order('order')), await supabase.from('appraisal_answers').select().match({ org, contract: contract.id })]);
 
 	const processOKRs = async () => {
 		if (!okrs?.data) return false;
@@ -51,22 +56,42 @@ export const Appraisals = async ({ org, group, managerContract, contract, full =
 
 	const OKRs = await processOKRs();
 
+	const isSubmitted = !!answers.data && (group == 'manager' ? !!answers.data[0]?.manager_submission_date : group == 'employee' ? !!answers.data[0]?.submission_date : !!answers.data[0]?.org_submission_date);
+
 	return appraisals.data.map((appraisal, index) => (
 		<Accordion key={appraisal.id} type="single" collapsible className="w-full space-y-8">
 			<AccordionItem value={`appraisal-${index}`}>
 				<AccordionTrigger>
 					<div className={cn('flex items-center gap-3', !full && 'text-sm')}>
 						Appraisal {index + 1}
-						{!!answers.data && (managerContract ? !!answers.data[0]?.manager_submission_date : !!answers.data[0]?.submission_date) && (
-							<Badge className="text-[10px]" variant={'secondary-success'}>
-								{answers.data[0].org_submission_date ? answers.data[0].org_score || answers.data[0].manager_score : 'Submitted'}
+						{isSubmitted && (
+							<Badge className="h-5 text-[10px]" variant={'secondary'}>
+								Submitted
 							</Badge>
 						)}
 					</div>
 
-					<span className="ml-auto mr-3 text-xs text-muted-foreground">
+					<div className="ml-auto mr-3 flex items-center gap-2 text-xs font-light text-muted-foreground">
+						{answers.data && formType == 'admin' && answers.data[0].org_submission_date && (
+							<>
+								Score: {answers.data[0].org_score}
+								<Separator className="h-3" orientation="vertical" />
+							</>
+						)}
+						{answers.data && formType == 'manager' && answers.data[0].manager_submission_date && (
+							<>
+								Score: {answers.data[0].manager_score}
+								<Separator className="h-3" orientation="vertical" />
+							</>
+						)}
+						{answers.data && formType == 'employee' && answers.data[0].submission_date && (
+							<>
+								Score: {answers.data[0].contract_score}
+								<Separator className="h-3" orientation="vertical" />
+							</>
+						)}
 						{format(appraisal.created_at, 'MMM')} {format(appraisal.created_at, 'y')}
-					</span>
+					</div>
 				</AccordionTrigger>
 
 				<AccordionContent>
@@ -98,7 +123,17 @@ export const Appraisals = async ({ org, group, managerContract, contract, full =
 						)}
 
 						<InputsContainer>
-							{data && <AppraisalForm managerContract={managerContract} isOwner={isOwner} dbAnswer={answers.data ? answers.data[0] : undefined} appraisal={appraisal.id} appraisalStartDate={appraisal.start_date} contract={contract} org={org} questions={data} />}
+							<AppraisalForm
+								managerContract={managerContract}
+								dbAnswer={answers.data ? answers.data[0] : undefined}
+								appraisal={appraisal}
+								contract={contract.id}
+								org={org}
+								role={role}
+								adminId={adminId}
+								formType={formType}
+								questions={questions ? questions?.data || [] : []}
+							/>
 						</InputsContainer>
 					</FormSection>
 				</AccordionContent>

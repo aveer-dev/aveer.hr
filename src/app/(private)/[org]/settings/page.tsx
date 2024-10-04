@@ -14,6 +14,8 @@ import { ApprovalPolicies } from '@/components/approval-policies';
 import { Teams } from '@/components/team/teams';
 import { Boardings } from '@/components/boarding-settings';
 import { Files } from '@/components/files-settings';
+import { OKRs } from '@/components/okr/okrs';
+import { Appraisal } from '@/components/appraisal-forms/appraisal';
 
 export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -61,6 +63,12 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 						</TabsTrigger>
 						<TabsTrigger value="files" className="h-6">
 							Files
+						</TabsTrigger>
+						<TabsTrigger value="goals" className="h-6">
+							OKRs
+						</TabsTrigger>
+						<TabsTrigger value="appraisal" className="h-6">
+							Appraisal
 						</TabsTrigger>
 					</TabsList>
 				</div>
@@ -119,6 +127,23 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 
 				<TabsContent value="files">
 					<Suspense fallback={<Skeleton className="h-56 w-full" />}>{organisationResponse?.data && <Files orgId={organisationResponse.data?.id} org={params.org} />}</Suspense>
+				</TabsContent>
+
+				<TabsContent value="goals">
+					<FormSection>
+						<FormSectionDescription>
+							<h2 className="mb-1 font-normal">Organisation OKRs</h2>
+							<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Setup regular organisation wide OKRs here, along with each OKR timeline</p>
+						</FormSectionDescription>
+
+						<InputsContainer>
+							<OKRs org={params.org} />
+						</InputsContainer>
+					</FormSection>
+				</TabsContent>
+
+				<TabsContent value="appraisal" className="relative">
+					<Appraisal org={params.org} />
 				</TabsContent>
 			</Tabs>
 		</div>
