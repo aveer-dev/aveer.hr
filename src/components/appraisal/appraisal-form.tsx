@@ -68,13 +68,13 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 
 	if (answer && questions.length) {
 		formDefaultAnswers = questions.map(question => {
-			if (questions.length && question.group == 'manager') {
-				const ans = (answer.manager_answers as z.infer<typeof answerType>[]).find(ans => ans.id == question.id);
+			if (questions.length && role == 'manager') {
+				const ans = (answer?.manager_answers as z.infer<typeof answerType>[])?.find(ans => ans.id == question.id);
 				if (ans) return { ...ans, answer: ans.answer || '' };
 			}
 
-			if (questions.length && question.group == 'employee') {
-				const ans = (answer.answers as z.infer<typeof answerType>[]).find(ans => ans.id == question.id);
+			if (questions.length && role == 'employee') {
+				const ans = (answer?.answers as z.infer<typeof answerType>[])?.find(ans => ans.id == question.id);
 				if (ans) return { ...ans, answer: ans.answer || '' };
 			}
 
@@ -142,7 +142,7 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 				<Alert className="py-3" variant={'warn'}>
 					<Loader size={14} />
 					<AlertTitle className="text-xs">It&apos;s almost ready</AlertTitle>
-					<AlertDescription className="text-xs font-light">Employee must self appraise before getting managers&apos;. You can give them a nudge to get to it.</AlertDescription>
+					<AlertDescription className="text-xs font-light">Employee must self appraise before getting managers&apos;/admin&apos;. You can give them a nudge to get to it.</AlertDescription>
 				</Alert>
 			)}
 
@@ -182,7 +182,7 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 
 				<div className="space-y-2">
 					<h3 className={cn('font-medium', !questions.length && 'text-xs font-normal')}>Appraisal score</h3>
-					{role == formType && <p className="text-xs text-muted-foreground">What will you score yourself for this appraisal period</p>}
+					{role == 'employee' && formType == 'employee' && <p className="text-xs text-muted-foreground">What will you score yourself for this appraisal period</p>}
 				</div>
 
 				<div className="space-y-6">

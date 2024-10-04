@@ -18,13 +18,12 @@ interface props {
 	contract: Tables<'contracts'>;
 	managerContract?: number;
 	full?: boolean;
-	isOwner?: boolean;
 	role: ROLE;
 	formType: ROLE;
 	adminId?: string;
 }
 
-export const EmployeeAppraisals = async ({ org, adminId, group, managerContract, contract, formType, role, full = true, isOwner }: props) => {
+export const EmployeeAppraisals = async ({ org, adminId, group, managerContract, contract, formType, role, full = true }: props) => {
 	const supabase = createClient();
 
 	const [appraisals, okrs] = await Promise.all([await supabase.from('appraisal_history').select().match({ org }), await supabase.from('okrs').select().match({ org })]);
@@ -118,7 +117,7 @@ export const EmployeeAppraisals = async ({ org, adminId, group, managerContract,
 							{answers.data && answers.data[0]?.submission_date && (
 								<Alert className="flex items-center justify-between bg-accent p-2">
 									<AlertDescription className="text-xs font-light">Review manager&apos;s appraisal and appraisal result</AlertDescription>
-									<AppraisalsDialog role={'employee'} org={org} variant={{ variant: 'outline' }} contract={contract}>
+									<AppraisalsDialog activeTab={answers.data[0].org_submission_date ? 'result' : 'employee'} role={'employee'} org={org} variant={{ variant: 'outline' }} contract={contract}>
 										<ChevronRight size={14} />
 									</AppraisalsDialog>
 								</Alert>

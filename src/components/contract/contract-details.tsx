@@ -282,7 +282,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				</TabsContent>
 
 				<TabsContent value="appraisal">
-					<EmployeeAppraisals formType={signatureType == 'profile' ? 'employee' : 'admin'} role={signatureType == 'profile' ? 'employee' : 'admin'} isOwner={signatureType == 'profile'} org={org} contract={data} group={'employee'} />
+					<EmployeeAppraisals formType={'employee'} role={signatureType == 'profile' ? 'employee' : 'admin'} org={org} contract={data} group={'employee'} />
 				</TabsContent>
 
 				<TabsContent value="contract">

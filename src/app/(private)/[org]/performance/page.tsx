@@ -19,7 +19,7 @@ export default async function PerformancePage({ params }: { params: { [key: stri
 		);
 	}
 
-	if (appraisals.length > 0) {
+	if (appraisals.length == 0) {
 		return (
 			<section className="mx-auto max-w-4xl">
 				<div className="mb-6 flex items-center gap-4">

@@ -15,11 +15,12 @@ interface props {
 	role: ROLE;
 	adminId?: string;
 	className?: string;
+	activeTab?: string;
 	children?: ReactNode;
 	variant?: VariantProps<typeof buttonVariants>;
 }
 
-export const AppraisalsDialog = ({ className, variant, children, adminId, org, contract, managerContract, role }: props) => {
+export const AppraisalsDialog = ({ activeTab, className, variant, children, adminId, org, contract, managerContract, role }: props) => {
 	return (
 		<Sheet>
 			<SheetTrigger className="flex items-center" asChild>
@@ -38,7 +39,7 @@ export const AppraisalsDialog = ({ className, variant, children, adminId, org, c
 					<SheetDescription>See appraisals and details below</SheetDescription>
 				</SheetHeader>
 
-				<Tabs defaultValue="employee" className="mt-10 w-full">
+				<Tabs defaultValue={activeTab || 'employee'} className="mt-10 w-full">
 					<TabsList className="mb-8 flex w-fit">
 						{role !== 'employee' && <TabsTrigger value="employee">Employee</TabsTrigger>}
 						<TabsTrigger value="manager">Manager</TabsTrigger>
