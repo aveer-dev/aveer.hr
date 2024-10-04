@@ -76,7 +76,7 @@ export const EmployeeAppraisals = async ({ org, adminId, group, managerContract,
 					</div>
 
 					<div className="ml-auto mr-3 flex items-center gap-2 text-xs font-light text-muted-foreground">
-						{answers.data && answers.data[0].org_submission_date && (
+						{answers.data && answers.data[0]?.org_submission_date && (
 							<>
 								Result: {answers.data[0].org_score}
 								<Separator className="h-3" orientation="vertical" />

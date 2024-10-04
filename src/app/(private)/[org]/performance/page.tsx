@@ -19,6 +19,20 @@ export default async function PerformancePage({ params }: { params: { [key: stri
 		);
 	}
 
+	if (appraisals.length > 0) {
+		return (
+			<section className="mx-auto max-w-4xl">
+				<div className="mb-6 flex items-center gap-4">
+					<h1 className="text-xl font-bold">Appraisal</h1>
+				</div>
+
+				<div className="flex min-h-48 items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">
+					<p>No appraisals yet, keep the ball rolling 🙂‍↕️.</p>
+				</div>
+			</section>
+		);
+	}
+
 	// get user admin profile id for appraisal approval
 	const {
 		data: { user }
@@ -77,7 +91,7 @@ const Contract = async ({ contract, appraisal, org, userId }: { userId?: string;
 			<div className="flex items-center gap-4 text-center text-xs text-muted-foreground *:space-y-2">
 				<div>
 					<div>Result</div>
-					<div>{(!!data && data[0].org_submission_date && data[0].org_score) || '-'}</div>
+					<div>{(!!data && data[0]?.org_submission_date && data[0].org_score) || '-'}</div>
 				</div>
 				<Separator orientation="vertical" className="h-3" />
 				<div>

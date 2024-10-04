@@ -72,7 +72,7 @@ export const Appraisals = async ({ org, adminId, group, managerContract, contrac
 					</div>
 
 					<div className="ml-auto mr-3 flex items-center gap-2 text-xs font-light text-muted-foreground">
-						{answers.data && formType == 'admin' && answers.data[0].org_submission_date && (
+						{answers.data && formType == 'admin' && answers.data[0]?.org_submission_date && (
 							<>
 								Score: {answers.data[0].org_score}
 								<Separator className="h-3" orientation="vertical" />

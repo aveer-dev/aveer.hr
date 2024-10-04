@@ -43,6 +43,12 @@ export const OKRs = async ({ org }: props) => {
 				return <OKR objResult={objectives_results} key={okr.id} okr={okr} org={org} />;
 			})}
 
+			{data.length == 0 && (
+				<div className="flex min-h-48 items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">
+					<p>No OKRs created yet.</p>
+				</div>
+			)}
+
 			<OKR org={org} />
 		</>
 	);
