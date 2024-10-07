@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Switch } from '@/components/ui/switch';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -26,7 +27,7 @@ import { JobResponsibilities } from '@/components/forms/job-responsibilities';
 import { JobRequirements } from '@/components/forms/job-requirements';
 import { createOpenRole, updateRole } from './role.action';
 import { NewRoleDialog } from './new-role-dialog';
-import { ArrowUpRight, PanelRightOpen } from 'lucide-react';
+import { ArrowUpRight, Info, PanelRightOpen } from 'lucide-react';
 import Link from 'next/link';
 import { ContractDetails } from './contract-details';
 import { cn } from '@/lib/utils';
@@ -62,14 +63,16 @@ interface props {
 	rolesData?: PostgrestSingleResponse<Tables<'open_roles'>[]>;
 	manager?: PostgrestSingleResponse<Tables<'managers'>[]>;
 	policiesData?: PostgrestSingleResponse<Tables<'approval_policies'>[]>;
+	employeesData?: PostgrestSingleResponse<Tables<'contracts'>[]>;
 }
 
-export const ContractForm = ({ contractData, openRoleData, orgBenefits, levels, formType = 'contract', entitiesData, teamsData, rolesData, manager, policiesData }: props) => {
+export const ContractForm = ({ employeesData, contractData, openRoleData, orgBenefits, levels, formType = 'contract', entitiesData, teamsData, rolesData, manager, policiesData }: props) => {
 	const [entities] = useState<ENTITY[]>(entitiesData?.entities ? entitiesData.entities : []);
 	const [entityCurrency, setCurrency] = useState('');
 	const [roles] = useState<Tables<'open_roles'>[]>(rolesData?.data ?? []);
 	const [orgJobLevels] = useState<TablesInsert<'employee_levels'>[]>(levels.data ?? []);
 	const [eorEntities] = useState<Tables<'legal_entities'>[]>(entitiesData?.eorEntities ? entitiesData.eorEntities : []);
+	const [employees] = useState<Tables<'contracts'>[]>(employeesData?.data ? employeesData.data : []);
 	const [showSigningBonus, toggleShowSigningBonus] = useState(!!contractData?.signing_bonus || !!openRoleData?.signing_bonus);
 	const [showFixedIncome, toggleShowFixedIncome] = useState(!!contractData?.fixed_allowance || !!openRoleData?.fixed_allowance);
 	const [indefiniteEndDate, toggleIndefiniteEndDate] = useState(!contractData?.end_date);
@@ -119,7 +122,8 @@ export const ContractForm = ({ contractData, openRoleData, orgBenefits, levels, 
 		role: showRolesOption ? z.string() : z.string().optional(),
 		customFields: z.array(z.string()),
 		team: z.string().optional(),
-		policy: z.string().optional()
+		policy: z.string().optional(),
+		direct_report: z.string().optional()
 	});
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -150,8 +154,9 @@ export const ContractForm = ({ contractData, openRoleData, orgBenefits, levels, 
 			years_of_experience: openRoleData?.years_of_experience || Number(''),
 			customFields: [],
 			team: String(contractData?.team || openRoleData?.team || ''),
-			manager: openRoleData?.is_manager,
-			policy: String(openRoleData?.policy || policies[0]?.id)
+			manager: formType == 'contract' ? (manager?.data ? !!manager?.data[0] : false) : openRoleData?.is_manager,
+			policy: String(openRoleData?.policy || policies[0]?.id),
+			direct_report: formType == 'contract' ? (openRoleData?.direct_report ? String(openRoleData?.direct_report) : '') : contractData?.direct_report ? String(contractData?.direct_report) : ''
 		}
 	});
 
@@ -191,7 +196,8 @@ export const ContractForm = ({ contractData, openRoleData, orgBenefits, levels, 
 			custom_fields: values.customFields,
 			team: values.team ? Number(values.team) : null,
 			is_manager: isManager,
-			policy: Number(values.policy)
+			policy: Number(values.policy),
+			direct_report: values.direct_report ? Number(values.direct_report) : null
 		};
 
 		if (showSigningBonus) role.signing_bonus = Number(values.signing_bonus);
@@ -234,7 +240,8 @@ export const ContractForm = ({ contractData, openRoleData, orgBenefits, levels, 
 			role: Number(values.role),
 			work_location: values.work_location,
 			additional_offerings: values.additional_offerings,
-			team: values.team ? Number(values.team) : null
+			team: values.team ? Number(values.team) : null,
+			direct_report: values.direct_report ? Number(values.direct_report) : null
 		};
 
 		if (showSigningBonus) contract.signing_bonus = Number(values.signing_bonus);
@@ -656,6 +663,50 @@ export const ContractForm = ({ contractData, openRoleData, orgBenefits, levels, 
 										<Label htmlFor="isManager">Is this employee a manager on the team?</Label>
 										<Switch checked={isManager} onCheckedChange={toggleManagerState} id="isManager" className="scale-75" />
 									</div>
+								)}
+
+								{isManager && (
+									<FormField
+										control={form.control}
+										name="direct_report"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel className="flex items-center gap-2">
+													Direct report
+													<TooltipProvider>
+														<Tooltip>
+															<TooltipTrigger asChild>
+																<button>
+																	<Info size={12} />
+																</button>
+															</TooltipTrigger>
+															<TooltipContent>
+																<p>Who will this manager report to?</p>
+															</TooltipContent>
+														</Tooltip>
+													</TooltipProvider>
+												</FormLabel>
+
+												<Select onValueChange={field.onChange} defaultValue={field.value}>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select a direct report" />
+														</SelectTrigger>
+													</FormControl>
+
+													<SelectContent>
+														{employees.map(employee => (
+															<SelectItem key={employee.id} value={String(employee.id)}>
+																{(employee.profile as unknown as Tables<'profiles'>)?.first_name} {(employee.profile as unknown as Tables<'profiles'>)?.first_name} - {employee.job_title}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 								)}
 							</InputsContainer>
 						</FormSection>

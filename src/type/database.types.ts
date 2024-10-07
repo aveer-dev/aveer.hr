@@ -457,6 +457,7 @@ export type Database = {
         Row: {
           additional_offerings: Json[] | null
           created_at: string
+          direct_report: number | null
           employment_type: Database["public"]["Enums"]["employment_type"]
           end_date: string | null
           entity: number
@@ -500,6 +501,7 @@ export type Database = {
         Insert: {
           additional_offerings?: Json[] | null
           created_at?: string
+          direct_report?: number | null
           employment_type: Database["public"]["Enums"]["employment_type"]
           end_date?: string | null
           entity: number
@@ -543,6 +545,7 @@ export type Database = {
         Update: {
           additional_offerings?: Json[] | null
           created_at?: string
+          direct_report?: number | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
           end_date?: string | null
           entity?: number
@@ -584,6 +587,13 @@ export type Database = {
           work_shedule_interval?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contracts_direct_report_fkey"
+            columns: ["direct_report"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contracts_entity_fkey"
             columns: ["entity"]
@@ -1233,6 +1243,7 @@ export type Database = {
           applicants: number
           created_at: string
           custom_fields: Json[] | null
+          direct_report: number | null
           employment_type: Database["public"]["Enums"]["employment_type"]
           entity: number
           fixed_allowance: Json | null
@@ -1262,6 +1273,7 @@ export type Database = {
           applicants?: number
           created_at?: string
           custom_fields?: Json[] | null
+          direct_report?: number | null
           employment_type: Database["public"]["Enums"]["employment_type"]
           entity: number
           fixed_allowance?: Json | null
@@ -1291,6 +1303,7 @@ export type Database = {
           applicants?: number
           created_at?: string
           custom_fields?: Json[] | null
+          direct_report?: number | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
           entity?: number
           fixed_allowance?: Json | null
@@ -1316,6 +1329,13 @@ export type Database = {
           years_of_experience?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "open_roles_direct_report_fkey"
+            columns: ["direct_report"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "open_roles_policy_fkey"
             columns: ["policy"]
