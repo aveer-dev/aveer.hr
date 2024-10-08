@@ -77,7 +77,7 @@ export const AppraisalSettingsForm = ({ org, settings }: props) => {
 			{!appraisalSettings && (
 				<div className="absolute bottom-0 left-0 right-0 top-0 z-10 bg-background/30 text-center backdrop-blur-md">
 					<p className="mb-4 mt-[max(200px,20vh)] text-xs">Appraisal not enabled</p>
-					<Button className="gap-3" onClick={createAppraisal}>
+					<Button className="gap-3" disabled={isSettingupAppraisal} onClick={createAppraisal}>
 						{isSettingupAppraisal && <LoadingSpinner />}
 						Enable appraisal
 					</Button>
@@ -167,7 +167,9 @@ export const AppraisalSettingsForm = ({ org, settings }: props) => {
 					)}
 				/>
 
-				<Button type="submit">{isUpdatingAppraisal && <LoadingSpinner />} Save changes</Button>
+				<Button type="submit" disabled={isUpdatingAppraisal}>
+					{isUpdatingAppraisal && <LoadingSpinner />} Save changes
+				</Button>
 			</form>
 		</Form>
 	);

@@ -330,7 +330,7 @@ const Questions = ({ questions, form, updateQuestions, org, id, index, question 
 								render={() => (
 									<FormItem className="flex flex-col">
 										<div className="text-right">
-											<Button type="button" onClick={() => onDeleteQuestion(index)} variant={'ghost_destructive'} className="h-5 w-5 p-0">
+											<Button disabled={question.isDeleting} type="button" onClick={() => onDeleteQuestion(index)} variant={'ghost_destructive'} className="h-5 w-5 p-0">
 												{!question.isDeleting && <Trash2 size={12} />}
 												{question.isDeleting && <LoadingSpinner className="text-destructive" />}
 											</Button>

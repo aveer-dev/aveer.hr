@@ -346,7 +346,7 @@ export const Boarding = ({ data, children, className, org }: props) => {
 
 							<div className="flex items-center gap-4">
 								{data?.id && (
-									<Button type="button" onClick={() => onDeleteBoarding(data?.id)} variant={'secondary_destructive'} size={'icon'} className="w-16 gap-3">
+									<Button type="button" disabled={isDeleting} onClick={() => onDeleteBoarding(data?.id)} variant={'secondary_destructive'} size={'icon'} className="w-16 gap-3">
 										{!isDeleting && <Trash2 size={12} />}
 										{isDeleting && <LoadingSpinner className="text-inherit" />}
 									</Button>

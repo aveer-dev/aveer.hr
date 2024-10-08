@@ -35,7 +35,7 @@ export const LeaveActions = ({ org, id, onDelete, contract, data }: props) => {
 
 	return (
 		<div className="mt-2 flex items-center gap-1">
-			<Button onClick={deleteLeave} variant={'ghost'} className="h-6 text-destructive hover:bg-destructive/10 hover:text-destructive focus:ring-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive">
+			<Button disabled={isDeleting} onClick={deleteLeave} variant={'ghost'} className="h-6 text-destructive hover:bg-destructive/10 hover:text-destructive focus:ring-destructive focus-visible:bg-destructive/10 focus-visible:text-destructive focus-visible:ring-destructive">
 				{isDeleting && <LoadingSpinner />} {!isDeleting && <Trash2 size={12} />}
 			</Button>
 

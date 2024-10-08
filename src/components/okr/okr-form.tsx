@@ -52,6 +52,7 @@ const formSchema = z.object({ id: z.number().optional(), objectives: objectives,
 export const OKRForm = ({ org, okr, objResult, toggleSheet }: props) => {
 	const [okrs, updatedOKRs] = useState<z.infer<typeof objectives>>(objResult?.map(obj => ({ objective: obj.objective, results: obj.results ? obj.results?.map(result => result) : [] })) || []);
 	const [isDeletingOKR, setDeleteOKRState] = useState(false);
+	const [isSubmitingOKR, setSubmitOKRState] = useState(false);
 	const router = useRouter();
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -66,19 +67,30 @@ export const OKRForm = ({ org, okr, objResult, toggleSheet }: props) => {
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
+		setSubmitOKRState(true);
+
+		// create OKR
 		const okr: TablesInsert<'okrs'> = { start: values.start, end: values.end, title: values.title, org };
 		if (values.id) okr.id = values.id;
 		const okrRes = await createOKR(okr);
-		if (typeof okrRes == 'string') return toast.error('Unable to create OKR', { description: okrRes });
+		if (typeof okrRes == 'string') {
+			setSubmitOKRState(false);
+			return toast.error('Unable to create OKR', { description: okrRes });
+		}
 
+		// create OKR objective
 		const okrObjectives: TablesInsert<'okr_objectives'>[] = values.objectives.map(objective => {
 			const data: TablesInsert<'okr_objectives'> = { objective: objective.objective, okr: okrRes[0].id, org };
 			if (objective.id) data.id = objective.id;
 			return data;
 		});
 		const objectivesRes = await createObjective(okrObjectives);
-		if (typeof objectivesRes == 'string') return toast.error('Unable to create OKR', { description: objectivesRes });
+		if (typeof objectivesRes == 'string') {
+			setSubmitOKRState(false);
+			return toast.error('Unable to create OKR', { description: objectivesRes });
+		}
 
+		// create OKR objectives results, if any
 		const results: TablesInsert<'okr_results'>[] = objectivesRes.flatMap(objective => {
 			const matchingObjective = values.objectives.find(obj => obj.objective === objective.objective);
 			return (matchingObjective?.results || []).map(res => {
@@ -94,7 +106,10 @@ export const OKRForm = ({ org, okr, objResult, toggleSheet }: props) => {
 		});
 		if (results.length) {
 			const resultsRes = await createResults(results);
-			if (typeof resultsRes == 'string') return toast.error('Unable to create OKR', { description: resultsRes });
+			if (typeof resultsRes == 'string') {
+				setSubmitOKRState(false);
+				return toast.error('Unable to create OKR', { description: resultsRes });
+			}
 		}
 
 		toast.success('OKR created successfully');
@@ -233,7 +248,7 @@ export const OKRForm = ({ org, okr, objResult, toggleSheet }: props) => {
 																		<FormItem>
 																			<FormLabel className="flex items-center justify-between">
 																				Objective {index + 1}
-																				<Button type="button" variant={'ghost_destructive'} onClick={() => onDeleteObjective(index)} className="h-6 w-6 p-0">
+																				<Button type="button" disabled={okr.isDeleting} variant={'ghost_destructive'} onClick={() => onDeleteObjective(index)} className="h-6 w-6 p-0">
 																					{!okr.isDeleting && <CircleMinus size={12} />}
 																					{okr.isDeleting && <LoadingSpinner className="text-destructive" />}
 																				</Button>
@@ -261,7 +276,7 @@ export const OKRForm = ({ org, okr, objResult, toggleSheet }: props) => {
 																							<FormItem>
 																								<FormLabel className="flex items-center justify-between">
 																									Result {idx + 1}
-																									<Button type="button" variant={'ghost_destructive'} onClick={() => onDeleteResult({ index: idx, objectiveIndex: index })} className="h-6 w-6 p-0">
+																									<Button type="button" disabled={result.isDeleting} variant={'ghost_destructive'} onClick={() => onDeleteResult({ index: idx, objectiveIndex: index })} className="h-6 w-6 p-0">
 																										{!result.isDeleting && <CircleMinus size={12} />}
 																										{result.isDeleting && <LoadingSpinner className="text-destructive" />}
 																									</Button>
@@ -322,13 +337,14 @@ export const OKRForm = ({ org, okr, objResult, toggleSheet }: props) => {
 
 				<SheetFooter className="mt-10">
 					{!!okr && (
-						<Button type="button" onClick={() => onDeleteOKR(okr.id)} variant={'secondary_destructive'}>
+						<Button type="button" disabled={isDeletingOKR} onClick={() => onDeleteOKR(okr.id)} variant={'secondary_destructive'}>
 							{!isDeletingOKR && <Trash2 size={12} />}
 							{isDeletingOKR && <LoadingSpinner className="text-destructive" />}
 						</Button>
 					)}
 
-					<Button type="submit" className="w-full">
+					<Button disabled={isSubmitingOKR} type="submit" className="w-full gap-2">
+						{isSubmitingOKR && <LoadingSpinner />}
 						Save changes
 					</Button>
 				</SheetFooter>

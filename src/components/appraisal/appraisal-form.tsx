@@ -95,7 +95,7 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 			return { note: answer?.contract_note || '', score: answer?.contract_score || 0 };
 		}
 
-		return { note: '', score: 50 };
+		return { note: '', score: 0 };
 	};
 
 	const form = useForm<z.infer<typeof formSchema>>({

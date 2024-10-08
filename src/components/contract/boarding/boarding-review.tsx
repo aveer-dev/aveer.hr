@@ -107,7 +107,7 @@ export const BoardingReview = ({ data, reviewType, children, contractId, onRevie
 
 		return (
 			<div className={cn('flex items-center gap-3', className)}>
-				<Button onClick={() => onAction('approved')} className="flex h-7 items-center gap-2 bg-green-100 text-green-500 hover:bg-green-100 focus:ring-green-400 focus-visible:ring-green-400">
+				<Button disabled={isUpdating.approving} onClick={() => onAction('approved')} className="flex h-7 items-center gap-2 bg-green-100 text-green-500 hover:bg-green-100 focus:ring-green-400 focus-visible:ring-green-400">
 					{!isUpdating.approving && <Check size={12} />} {isUpdating.approving && <LoadingSpinner className="text-green-400" />} Approve
 				</Button>
 			</div>

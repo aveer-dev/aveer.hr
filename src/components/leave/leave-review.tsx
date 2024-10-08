@@ -114,10 +114,10 @@ export const LeaveReview = ({ data, reviewType, children, contractId, ...props }
 
 		return (
 			<div className={cn('flex items-center gap-3', className)}>
-				<Button onClick={() => onAction('approved')} className="flex h-7 items-center gap-2 bg-green-50 text-green-400 hover:bg-green-100 focus:ring-green-400 focus-visible:ring-green-400">
+				<Button onClick={() => onAction('approved')} disabled={isUpdating.approving} className="flex h-7 items-center gap-2 bg-green-50 text-green-400 hover:bg-green-100 focus:ring-green-400 focus-visible:ring-green-400">
 					{!isUpdating.approving && <Check size={12} />} {isUpdating.approving && <LoadingSpinner className="text-green-400" />} Approve
 				</Button>
-				<Button onClick={() => onAction('denied')} className="flex h-7 items-center gap-2 bg-red-50 text-red-400 hover:bg-red-100 focus:ring-red-400 focus-visible:ring-red-400">
+				<Button onClick={() => onAction('denied')} disabled={isUpdating.denying} className="flex h-7 items-center gap-2 bg-red-50 text-red-400 hover:bg-red-100 focus:ring-red-400 focus-visible:ring-red-400">
 					{!isUpdating.denying && <X size={12} />}
 					{isUpdating.denying && <LoadingSpinner className="text-red-400" />} Deny
 				</Button>
