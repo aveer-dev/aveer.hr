@@ -56,7 +56,7 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 								</div>
 
 								<div className="flex items-center gap-2">
-									{isManager && currentUser !== 'org' && <AppraisalsDialog role="manager" managerContract={contractId} org={org} contract={person} />}
+									{isManager && !!managers?.find(manager => manager.person !== person.id) && currentUser !== 'org' && <AppraisalsDialog role="manager" managerContract={contractId} org={org} contract={person} />}
 									<TeamMember person={person as any} />
 								</div>
 							</li>
@@ -114,7 +114,7 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 										</div>
 
 										<div className="flex items-center gap-2">
-											{isManager && currentUser !== 'org' && <AppraisalsDialog role="manager" managerContract={contractId} org={org} contract={person} />}
+											{currentUser !== 'org' && <AppraisalsDialog role="manager" managerContract={contractId} org={org} contract={person} />}
 											<TeamMember person={person as any} />
 										</div>
 									</li>

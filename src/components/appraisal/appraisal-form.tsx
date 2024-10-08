@@ -68,12 +68,12 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 
 	if (answer && questions.length) {
 		formDefaultAnswers = questions.map(question => {
-			if (questions.length && role == 'manager') {
+			if (formType == 'manager' && (formType == role || answer.manager_submission_date)) {
 				const ans = (answer?.manager_answers as z.infer<typeof answerType>[])?.find(ans => ans.id == question.id);
 				if (ans) return { ...ans, answer: ans.answer || '' };
 			}
 
-			if (questions.length && role == 'employee') {
+			if (formType == 'employee' && (formType == role || answer.submission_date)) {
 				const ans = (answer?.answers as z.infer<typeof answerType>[])?.find(ans => ans.id == question.id);
 				if (ans) return { ...ans, answer: ans.answer || '' };
 			}
@@ -82,13 +82,25 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 		});
 	}
 
+	const getScoreAndNote = () => {
+		if (formType == 'admin' && (formType == role || !!answer?.org_submission_date)) {
+			return { note: answer?.org_note || '', score: answer?.org_score || 0 };
+		}
+
+		if (formType == 'manager' && (formType == role || answer?.manager_submission_date)) {
+			return { note: answer?.manager_note || '', score: answer?.manager_score || 0 };
+		}
+
+		if (formType == 'employee' && (formType == role || answer?.submission_date)) {
+			return { note: answer?.contract_note || '', score: answer?.contract_score || 0 };
+		}
+
+		return { note: '', score: 50 };
+	};
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: {
-			answers: formDefaultAnswers,
-			note: formType == 'admin' ? answer?.org_note || answer?.manager_note || '' : formType == 'manager' ? answer?.manager_note || '' : answer?.contract_note || '',
-			score: formType == 'admin' ? answer?.org_score || answer?.manager_score || 50 : formType == 'manager' ? answer?.manager_score || 50 : answer?.contract_score || 50
-		}
+		defaultValues: { answers: formDefaultAnswers, ...getScoreAndNote() }
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>, submit?: boolean) => {
