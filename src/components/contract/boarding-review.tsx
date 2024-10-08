@@ -15,7 +15,7 @@ interface props {
 export const BoardingsReview = async ({ org, contract, manager }: props) => {
 	const supabase = createClient();
 
-	const { data, error } = await supabase.from('contract_check_list').select('*, contract:contracts!contract_check_list_contract_fkey(id, job_title, team, profile:profiles!contracts_profile_fkey(first_name, last_name, id))').eq('org', org);
+	const { data, error } = await supabase.from('contract_check_list').select('*, contract:contracts!contract_check_list_contract_fkey(id, direct_report, job_title, team, profile:profiles!contracts_profile_fkey(first_name, last_name, id))').eq('org', org);
 
 	if (error) return error.message;
 
@@ -26,7 +26,7 @@ export const BoardingsReview = async ({ org, contract, manager }: props) => {
 	const filtereddata = data?.filter(boarding => {
 		const levels: any[] = boarding.levels;
 
-		return manager ? manager.person !== boarding.contract.id && (boarding.contract.team == contract.team || levels.find(level => level.id == contract.id)) : levels.find(level => level.id == contract.id);
+		return manager ? manager.person !== boarding.contract.id && (boarding.contract.team == contract.team || boarding.contract.direct_report == contract.id || levels.find(level => level.id == contract.id)) : levels.find(level => level.id == contract.id);
 	});
 
 	return (
@@ -42,7 +42,7 @@ export const BoardingsReview = async ({ org, contract, manager }: props) => {
 					<ul className="space-y-10">
 						{filtereddata.map(boarding => (
 							<li key={boarding.id}>
-								<BoardingReview data={boarding as any} contractId={contract.id} className="w-full text-left" reviewType={manager ? 'manager' : 'employee'}>
+								<BoardingReview data={boarding as any} contractId={contract.id} className="w-full text-left" reviewType={manager || boarding.contract.direct_report == contract.id ? 'manager' : 'employee'}>
 									<Button variant={'outline'} className="flex h-fit w-full items-center justify-between px-3 py-4 text-left">
 										<div className="space-y-2">
 											<div className="flex items-center gap-2">

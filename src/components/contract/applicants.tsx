@@ -21,7 +21,7 @@ export const Applicants = async ({ org, contract, manager }: props) => {
 			`*,
             country_location:countries!job_applications_country_location_fkey(name, country_code),
             org:organisations!job_applications_org_fkey(subdomain, name),
-            role:open_roles!job_applications_role_fkey(job_title, team, id, policy:approval_policies!open_roles_policy_fkey(levels))`
+            role:open_roles!job_applications_role_fkey(job_title, direct_report, team, id, policy:approval_policies!open_roles_policy_fkey(levels))`
 		)
 		.match({ org, stage: 'interview' });
 
@@ -30,7 +30,7 @@ export const Applicants = async ({ org, contract, manager }: props) => {
 	const filtereddata = data?.filter(applicant => {
 		const levels: any[] = applicant.levels;
 
-		return manager ? applicant.role.team == contract.team?.id || levels.find(level => level.id == contract.profile.id) : levels.find(level => level.id == contract.profile.id);
+		return manager ? applicant.role.team == contract.team?.id || applicant.role.direct_report == contract.id || levels.find(level => level.id == contract.profile.id) : levels.find(level => level.id == contract.profile.id);
 	});
 
 	return (
@@ -46,7 +46,7 @@ export const Applicants = async ({ org, contract, manager }: props) => {
 					<ul className="space-y-10">
 						{filtereddata.map(applicant => (
 							<li key={applicant.id}>
-								<ApplicantDetails userRole={manager ? 'manager' : 'employee'} contractId={contract.id} data={applicant as any} className="w-full text-left">
+								<ApplicantDetails userRole={manager || applicant.role.direct_report == contract.id ? 'manager' : 'employee'} contractId={contract.id} data={applicant as any} className="w-full text-left">
 									<Card className="flex w-full items-center justify-between border-none p-3 transition-all duration-500 group-hover:bg-accent/80 group-focus:bg-accent/80 group-focus-visible:bg-accent/80">
 										<div className="space-y-2">
 											<div className="flex items-center gap-2">

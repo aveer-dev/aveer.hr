@@ -21,7 +21,7 @@ export const Timeoff = async ({ org, contract, reviewType, manager }: props) => 
 	const { data, error } = await supabase
 		.from('time_off')
 		.select(
-			'*, hand_over:contracts!time_off_hand_over_fkey(id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)), contract:contracts!time_off_contract_fkey(job_title,id, team, unpaid_leave_used, sick_leave_used, paternity_leave_used, paid_leave_used, maternity_leave_used), profile:profiles!time_off_profile_fkey(*)'
+			'*, hand_over:contracts!time_off_hand_over_fkey(id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)), contract:contracts!time_off_contract_fkey(job_title, id, team, direct_report, unpaid_leave_used, sick_leave_used, paternity_leave_used, paid_leave_used, maternity_leave_used), profile:profiles!time_off_profile_fkey(*)'
 		)
 		.match({ org });
 
@@ -34,7 +34,7 @@ export const Timeoff = async ({ org, contract, reviewType, manager }: props) => 
 	const filtereddata = data?.filter(timeoff => {
 		const levels = timeoff.levels as unknown as LEVEL[];
 
-		return manager ? manager.person !== timeoff.contract.id && (timeoff.contract.team == contract.team || levels.find(level => level.id == String(contract.id))) : levels.find(level => level.id == String(contract.id));
+		return manager ? manager.person !== timeoff.contract.id && (timeoff.contract.team == contract.team || timeoff.contract.direct_report == contract.id || levels.find(level => level.id == String(contract.id))) : levels.find(level => level.id == String(contract.id));
 	});
 
 	return (
@@ -45,7 +45,7 @@ export const Timeoff = async ({ org, contract, reviewType, manager }: props) => 
 
 			<Suspense>
 				<Separator className="mb-4 mt-2" />
-				<DataTable data={filtereddata.map(item => ({ ...item, reviewType, activeUserContract: contract.id }))} columns={columns} />
+				<DataTable data={filtereddata.map(item => ({ ...item, reviewType: !manager && reviewType !== 'admin' && item.contract.direct_report == contract.id ? 'manager' : reviewType, activeUserContract: contract.id }))} columns={columns} />
 			</Suspense>
 		</section>
 	);
