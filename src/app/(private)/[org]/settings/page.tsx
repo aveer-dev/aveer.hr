@@ -16,6 +16,7 @@ import { Boardings } from '@/components/boarding-settings';
 import { Files } from '@/components/files-settings';
 import { OKRs } from '@/components/okr/okrs';
 import { Appraisal } from '@/components/appraisal-forms/appraisal';
+import { AdminUsers } from '@/components/admin-user/admins';
 
 export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -69,6 +70,9 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 						</TabsTrigger>
 						<TabsTrigger value="appraisal" className="h-6">
 							Appraisal
+						</TabsTrigger>
+						<TabsTrigger value="users" className="h-6">
+							Users
 						</TabsTrigger>
 					</TabsList>
 				</div>
@@ -144,6 +148,10 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 
 				<TabsContent value="appraisal" className="relative">
 					<Appraisal org={params.org} />
+				</TabsContent>
+
+				<TabsContent value="users" className="relative">
+					<AdminUsers org={params.org} />
 				</TabsContent>
 			</Tabs>
 		</div>

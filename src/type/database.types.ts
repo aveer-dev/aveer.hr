@@ -1598,24 +1598,27 @@ export type Database = {
       profiles_roles: {
         Row: {
           created_at: string
+          disable: boolean
           id: number
           organisation: string | null
           profile: string
-          role: string
+          role: Database["public"]["Enums"]["app_role"]
         }
         Insert: {
           created_at?: string
+          disable?: boolean
           id?: number
           organisation?: string | null
           profile?: string
-          role: string
+          role: Database["public"]["Enums"]["app_role"]
         }
         Update: {
           created_at?: string
+          disable?: boolean
           id?: number
           organisation?: string | null
           profile?: string
-          role?: string
+          role?: Database["public"]["Enums"]["app_role"]
         }
         Relationships: [
           {
@@ -1646,19 +1649,19 @@ export type Database = {
           created_at: string
           description: string | null
           id: number
-          name: string
+          name: Database["public"]["Enums"]["app_role"]
         }
         Insert: {
           created_at?: string
           description?: string | null
           id?: number
-          name?: string
+          name?: Database["public"]["Enums"]["app_role"]
         }
         Update: {
           created_at?: string
           description?: string | null
           id?: number
-          name?: string
+          name?: Database["public"]["Enums"]["app_role"]
         }
         Relationships: []
       }
@@ -1835,9 +1838,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      authorize_role: {
+        Args: {
+          org_name: string
+        }
+        Returns: boolean
+      }
+      custom_access_token_hook: {
+        Args: {
+          event: Json
+        }
+        Returns: Json
+      }
     }
     Enums: {
+      app_role: "admin"
       boarding_state: "initial" | "pending" | "approved"
       boarding_type: "on" | "off"
       contract_state:

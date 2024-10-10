@@ -45,7 +45,7 @@ const objectives = z
 		},
 		{ message: 'You can not have one objective twice' }
 	)
-	.refine(inputs => inputs.length > 0, { message: 'Enter at least one objective' });
+	.refine(inputs => inputs.length > 0, { message: 'Add at least one objective' });
 
 const formSchema = z.object({ id: z.number().optional(), objectives: objectives, title: z.string().min(2, { message: 'Enter OKR title' }), start: z.string().min(2, { message: 'Select OKR start date' }), end: z.string().min(2, { message: 'Select OKR expiry date' }) });
 
@@ -104,6 +104,7 @@ export const OKRForm = ({ org, okr, objResult, toggleSheet }: props) => {
 				return data;
 			});
 		});
+
 		if (results.length) {
 			const resultsRes = await createResults(results);
 			if (typeof resultsRes == 'string') {
@@ -313,13 +314,13 @@ export const OKRForm = ({ org, okr, objResult, toggleSheet }: props) => {
 												</div>
 											))}
 
-											<FormMessage />
-
 											<Button onClick={addObjective} type="button" variant={'outline'} className="w-full gap-3 text-xs">
 												<Plus size={10} /> Add objective
 											</Button>
 										</div>
 									)}
+
+									<FormMessage />
 
 									{okrs.length == 0 && (
 										<div className="flex h-36 w-full flex-col items-center justify-center gap-3 rounded-md bg-accent">

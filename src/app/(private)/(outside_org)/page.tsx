@@ -16,9 +16,11 @@ export default async function OrgsPage() {
 	if (!user || userError) redirect('/login');
 
 	const { data, error } = await supabase.from('profiles_roles').select('role, organisations(subdomain)').eq('profile', user.id);
+
 	if (data && data.length) {
-		if (process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true') redirect(`http://${data[0].organisations?.subdomain}.${process.env.NEXT_PUBLIC_DOMAIN}/`);
-		redirect(`/${data[0].organisations?.subdomain}`);
+		if (process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true') return redirect(`http://${data[0].organisations?.subdomain}.${process.env.NEXT_PUBLIC_DOMAIN}/`);
+
+		return redirect(`/${data[0].organisations?.subdomain}`);
 	}
 
 	if (data && !data.length)
