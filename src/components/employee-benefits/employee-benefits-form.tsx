@@ -73,10 +73,10 @@ export const EmployeeBenefitsForm = ({ data, updateBenefits }: { data?: Tables<'
 									name="paid_time_off"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Leave</FormLabel>
+											<FormLabel>Annual leave</FormLabel>
 											<FormControl>
 												<div className="relative h-fit w-full">
-													<Input type="number" placeholder="20" {...field} onChange={event => form.setValue('paid_time_off', Number(event.target.value))} required />
+													<Input type="number" inputMode="numeric" placeholder="20" {...field} onChange={event => form.setValue('paid_time_off', Number(event.target.value))} required />
 													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/year</div>
 												</div>
 											</FormControl>
@@ -93,7 +93,7 @@ export const EmployeeBenefitsForm = ({ data, updateBenefits }: { data?: Tables<'
 											<FormLabel>Sick leave</FormLabel>
 											<FormControl>
 												<div className="relative h-fit w-full">
-													<Input type="number" placeholder="20" {...field} onChange={event => form.setValue('sick_leave', Number(event.target.value))} required />
+													<Input type="number" inputMode="numeric" placeholder="20" {...field} onChange={event => form.setValue('sick_leave', Number(event.target.value))} required />
 													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/year</div>
 												</div>
 											</FormControl>
@@ -110,7 +110,7 @@ export const EmployeeBenefitsForm = ({ data, updateBenefits }: { data?: Tables<'
 											<FormLabel>Maternity leave</FormLabel>
 											<div className="relative h-fit w-full">
 												<FormControl>
-													<Input type="number" placeholder="20" {...field} onChange={event => form.setValue('sick_leave', Number(event.target.value))} required />
+													<Input type="number" inputMode="numeric" placeholder="20" {...field} onChange={event => form.setValue('maternity_leave', Number(event.target.value))} required />
 												</FormControl>
 												<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/year</div>
 											</div>
@@ -127,7 +127,7 @@ export const EmployeeBenefitsForm = ({ data, updateBenefits }: { data?: Tables<'
 											<FormLabel>Paternity leave</FormLabel>
 											<div className="relative h-fit w-full">
 												<FormControl>
-													<Input type="number" placeholder="20" {...field} onChange={event => form.setValue('sick_leave', Number(event.target.value))} required />
+													<Input type="number" inputMode="numeric" placeholder="20" {...field} onChange={event => form.setValue('paternity_leave', Number(event.target.value))} required />
 												</FormControl>
 												<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/year</div>
 											</div>
