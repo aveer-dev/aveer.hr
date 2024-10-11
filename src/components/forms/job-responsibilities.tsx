@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
 
 interface props {
 	form: UseFormReturn<any>;
@@ -24,7 +25,18 @@ export const JobResponsibilities = ({ form }: props) => {
 								<ul className="ml-4 grid gap-2">
 									{form.getValues().responsibilities?.map((offering: string, index: number) => (
 										<li key={index} className="list-disc text-xs text-muted-foreground">
-											{offering}
+											<div className="flex w-full justify-between gap-2">
+												{offering}
+												<button
+													type="button"
+													onClick={() => {
+														const responsibilities = form.getValues('responsibilities');
+														const newValue = responsibilities.filter((item: string) => item !== responsibilities[index]);
+														form.setValue('responsibilities', newValue);
+													}}>
+													<Trash2 className="text-destructive" size={12} />
+												</button>
+											</div>
 										</li>
 									))}
 								</ul>
