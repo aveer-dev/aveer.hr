@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Info } from 'lucide-react';
+import { Info, Trash2 } from 'lucide-react';
 
 interface props {
 	form: UseFormReturn<any>;
@@ -51,7 +51,18 @@ export const AdditionalOffering = ({ form, isToggled, toggle, label, benefits, r
 									<ul className="ml-4 grid gap-2">
 										{(benefits || form.getValues().additional_offerings)?.map((offering: string, index: number) => (
 											<li key={index} className="list-disc text-xs text-muted-foreground">
-												{offering}
+												<div className="flex w-full justify-between gap-2">
+													{offering}
+													<button
+														type="button"
+														onClick={() => {
+															const additional_offerings = form.getValues('additional_offerings');
+															const newValue = additional_offerings.filter((item: string) => item !== additional_offerings[index]);
+															form.setValue('additional_offerings', newValue);
+														}}>
+														<Trash2 className="text-destructive" size={12} />
+													</button>
+												</div>
 											</li>
 										))}
 									</ul>
