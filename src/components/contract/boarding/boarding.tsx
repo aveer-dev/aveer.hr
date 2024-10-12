@@ -103,7 +103,7 @@ export const Boarding = ({ data, type, state, contract, boarding, org, reviewTyp
 						Checked {userState?.checklist?.length || 0}/{data.length}
 					</div>
 
-					{userState?.state !== 'initial' && (
+					{userState && userState?.state !== 'initial' && (
 						<>
 							<Separator orientation="vertical" className="h-3" />
 
