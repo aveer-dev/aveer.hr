@@ -4,22 +4,6 @@ create sequence "public"."boaring_check_list_id_seq";
 
 drop policy "Enable all for authenticated users only" on "public"."okrs";
 
-alter table "public"."roles" drop constraint "roles_name_key";
-
-drop index if exists "public"."roles_name_key";
-
-alter table "public"."profiles_roles" add column "disable" boolean not null default false;
-
-alter table "public"."profiles_roles" alter column "role" set data type app_role using "role"::app_role;
-
-alter table "public"."roles" alter column "name" set default 'admin'::app_role;
-
-alter table "public"."roles" alter column "name" set data type app_role using "name"::app_role;
-
-CREATE UNIQUE INDEX roles_nm_key ON public.roles USING btree (name);
-
-alter table "public"."roles" add constraint "roles_nm_key" UNIQUE using index "roles_nm_key";
-
 set check_function_bodies = off;
 
 CREATE OR REPLACE FUNCTION public.authorize_role(org_name text)
@@ -83,19 +67,6 @@ AS $function$declare
   end;$function$
 ;
 
-grant delete on table "public"."profiles_roles" to "PUBLIC";
-
-grant insert on table "public"."profiles_roles" to "PUBLIC";
-
-grant references on table "public"."profiles_roles" to "PUBLIC";
-
-grant select on table "public"."profiles_roles" to "PUBLIC";
-
-grant trigger on table "public"."profiles_roles" to "PUBLIC";
-
-grant truncate on table "public"."profiles_roles" to "PUBLIC";
-
-grant update on table "public"."profiles_roles" to "PUBLIC";
 
 grant delete on table "public"."profiles_roles" to "supabase_auth_admin";
 
