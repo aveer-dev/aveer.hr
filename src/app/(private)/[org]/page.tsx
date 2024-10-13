@@ -1,14 +1,10 @@
-import { Button, buttonVariants } from '@/components/ui/button';
-import { ChevronRight, ChevronsUpDown, Info, Plus } from 'lucide-react';
 import { DashboardCharts } from './chart.component';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { NavLink } from '@/components/ui/link';
 import { createClient } from '@/utils/supabase/server';
 import { PERSON } from '@/type/person';
 import { ClientTable } from './table';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+import { OnboardingForm } from './onboarding';
 
 export default async function OrgPage(props: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -30,40 +26,14 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 		}
 
 		if (data && !data.length) {
-			const options = [
-				{ link: '/legal-entity/new', label: 'Add legal entity', description: 'This is the option for you if you have a registered legal entity, enabling you to perform subsequent actions with your company details.' },
-				{ link: '/open-roles/new', label: 'Create a role for application', description: 'Get started quickly by opening job application for an open role. No entity yet, you can hire with Aveer as your Employer of Record.' },
-				{ link: '/people/new', label: 'Add Employee', description: 'It&apos;s not a problem if you don&apos;t have a registered legal entity. You can hire with Aveer as your Employer of Record.' }
-			];
-
 			return (
-				<div className="flex min-h-[50vh] flex-col items-center justify-center gap-10 text-center">
-					<div className="grid gap-3">
+				<div className="mx-auto mt-24 flex min-h-[70vh] max-w-md flex-col gap-10">
+					<div className="grid gap-3 text-center">
 						<p className="text-base font-bold">Welcome to aveer.hr</p>
-						<p className="text-xs text-muted-foreground">How will you like to get started with your account?</p>
+						<p className="text-xs text-muted-foreground">Just a few more details to get your account running</p>
 					</div>
 
-					<div className="mx-auto grid items-center gap-6">
-						{options.map((option, index) => (
-							<NavLink href={option.link} key={index} org={props.params.org} className={cn(buttonVariants({ variant: 'outline' }), 'flex h-12 w-[350px] items-center gap-2 rounded-xl px-4 text-left text-xs')}>
-								{option.label}
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<button className="text-muted-foreground">
-												<Info size={12} />
-											</button>
-										</TooltipTrigger>
-										<TooltipContent>
-											<p className="max-w-72 whitespace-break-spaces text-left">{option.description}</p>
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
-
-								<ChevronRight size={12} className="ml-auto" />
-							</NavLink>
-						))}
-					</div>
+					<OnboardingForm org={props.params.org} />
 				</div>
 			);
 		}

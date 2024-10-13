@@ -6,6 +6,8 @@ import './globals.css';
 // to fix Promise.withResolvers issue
 import { polyfillPromiseWithResolvers } from '@/utils/polyfilsResolver';
 import 'core-js/full/promise/with-resolvers.js';
+import { cn } from '@/lib/utils';
+
 polyfillPromiseWithResolvers();
 
 const karla = Karla({ subsets: ['latin'] });
@@ -18,7 +20,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<html lang="en">
-			<body className={karla.className}>
+			<body className={cn(karla.className)}>
 				<Toaster toastOptions={{ className: '!font-thin bg-background text-foreground border-none text-xs font-karla' }} />
 
 				{children}

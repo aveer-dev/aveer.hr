@@ -14,7 +14,7 @@ export const AccountTypeToggle = ({ orgId }: { orgId?: string }) => {
 		<Popover open={isOpen} onOpenChange={toggleOpen}>
 			<PopoverTrigger asChild>
 				<Button variant="secondary" size={'sm'} className="mt-1 h-7 gap-3 rounded-full">
-					<span className="hidden sm:block">{orgId ? 'Organisation' : 'Employee'}</span>
+					<span className="hidden sm:block">{orgId && orgId !== 'employee' ? 'Organisation' : 'Employee'}</span>
 					<ChevronDown size={12} />
 				</Button>
 			</PopoverTrigger>
@@ -27,19 +27,19 @@ export const AccountTypeToggle = ({ orgId }: { orgId?: string }) => {
 					</div>
 
 					<div className="grid gap-2">
-						<Link href={process.env.NEXT_PUBLIC_URL || '/'} passHref={true} onClick={() => toggleOpen(!isOpen)} className={cn(buttonVariants({ variant: orgId ? 'secondary' : 'ghost' }), 'justify-between')}>
+						<Link href={process.env.NEXT_PUBLIC_URL || '/'} passHref={true} onClick={() => toggleOpen(!isOpen)} className={cn(buttonVariants({ variant: orgId && orgId !== 'employee' ? 'secondary' : 'ghost' }), 'justify-between')}>
 							<div className="flex items-center gap-4">
 								<Building2 size={12} />
 								Organisation
 							</div>
-							{orgId && <CheckCheck size={12} />}
+							{orgId && orgId !== 'employee' && <CheckCheck size={12} />}
 						</Link>
 
-						<Link href={`/employee`} onClick={() => toggleOpen(!isOpen)} className={cn(buttonVariants({ variant: !orgId ? 'secondary' : 'ghost' }), 'justify-between')}>
+						<Link href={`/employee`} onClick={() => toggleOpen(!isOpen)} className={cn(buttonVariants({ variant: !orgId || orgId == 'employee' ? 'secondary' : 'ghost' }), 'justify-between')}>
 							<div className="flex items-center gap-4">
 								<UserRound size={12} /> Employee
 							</div>
-							{!orgId && <CheckCheck size={12} />}
+							{(!orgId || orgId == 'employee') && <CheckCheck size={12} />}
 						</Link>
 					</div>
 				</div>

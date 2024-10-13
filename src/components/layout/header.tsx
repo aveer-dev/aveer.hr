@@ -17,7 +17,7 @@ export const Header = async ({ orgId }: { orgId?: string }) => {
 					<NavLink org={orgId} href={'/'} className="font-logo text-xl font-light">
 						aveer.hr
 					</NavLink>
-					{data?.user && <AccountTypeToggle orgId={orgId} />}
+					{data?.user && orgId && <AccountTypeToggle orgId={orgId} />}
 				</div>
 
 				<div className="flex items-center gap-3">
@@ -34,7 +34,7 @@ export const Header = async ({ orgId }: { orgId?: string }) => {
 				</div>
 			</div>
 
-			{orgId && data?.user && (
+			{orgId && orgId !== 'employee' && data?.user && (
 				<div className="no-scrollbar flex items-center overflow-x-auto px-6 pt-4">
 					<NavMenu orgId={orgId} />
 				</div>

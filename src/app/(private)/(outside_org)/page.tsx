@@ -30,6 +30,7 @@ export default async function OrgsPage() {
 					<p className="font-medium">You do not have any organisation, yet. </p>
 					<p className="text-xs text-muted-foreground">Or did you mean to access your account as an employee?</p>
 				</div>
+
 				<div className="mx-auto mt-6 flex items-center gap-4">
 					<Link className={cn(buttonVariants({ size: 'sm', variant: 'outline' }), 'gap-4 text-xs')} href={'/employee'}>
 						<UserRound size={12} /> Employee Portal
