@@ -38,7 +38,7 @@ export const SelectLegalEntity = ({ form, entities, eorEntities, onSelect }: pro
 
 						<SelectContent>
 							<SelectGroup>
-								{entities.length !== 0 && <SelectLabel>Your Legal Entities</SelectLabel>}
+								{entities.length !== 0 && eorEntities.length > 0 && <SelectLabel>Your Legal Entities</SelectLabel>}
 								{entities.map(entity => (
 									<SelectItem key={entity.id} value={String(entity.id)}>
 										{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country.name}</span>

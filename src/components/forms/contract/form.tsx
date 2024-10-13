@@ -147,7 +147,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			signing_bonus: formType == 'contract' ? (contractData?.signing_bonus ? String(contractData?.signing_bonus) : undefined) : openRoleData?.signing_bonus ? String(openRoleData?.signing_bonus) : undefined,
 			employment_type: contractData?.employment_type || openRoleData?.employment_type || undefined,
 			job_title: contractData?.job_title || openRoleData?.job_title || '',
-			entity: formType == 'contract' ? (contractData?.entity ? String(contractData?.entity) : undefined) : openRoleData?.entity ? String(openRoleData?.entity) : undefined,
+			entity: formType == 'contract' ? (contractData?.entity ? String(contractData?.entity) : entities?.length ? String(entities[0].id) : undefined) : openRoleData?.entity ? String(openRoleData?.entity) : entities?.length ? String(entities[0].id) : undefined,
 			level: formType == 'contract' ? (contractData?.level ? String(contractData?.level) : undefined) : openRoleData?.level ? String(openRoleData?.level) : undefined,
 			work_location: contractData?.work_location || openRoleData?.work_location || undefined,
 			requirements: (openRoleData?.requirements as string[]) || [],
@@ -417,7 +417,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 						<FormSection>
 							<FormSectionDescription>
 								<h2 className="font-semibold">Legal entity </h2>
-								<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">You can hire employee through one of your legal entity or through aveer.hr&apos;s, we&apos;ll sort out the compliance for you in that region automatically</p>
+								<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">Aveer allows you to manage employees across your entities around the world. Select which entity this new hire will be under</p>
 							</FormSectionDescription>
 
 							<InputsContainer>

@@ -59,9 +59,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 											{data?.signed_by?.first_name} {data?.signed_by?.last_name}
 										</p>
 										<p>{data?.signed_by?.email}</p>
-										<p>
-											{data?.entity.address_code} {data?.entity.street_address}, {data?.entity.address_state}, {data?.entity.incorporation_country?.name}
-										</p>
+										<p>{data?.entity.incorporation_country?.name}</p>
 									</>
 								)}
 							</div>
