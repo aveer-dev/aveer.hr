@@ -15,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card } from '@/components/ui/card';
-import { FORM_INPUT_TYPE, INPUT_TYPE_ZOD } from '@/type/performance.types';
+import { FORM_INPUT_TYPE, INPUT_TYPE_ZOD, q } from '@/type/appraisal.types';
 import { Tables, TablesInsert } from '@/type/database.types';
 import { createQuestions, deleteQuestion } from './appraisal.actions';
 import { LoadingSpinner } from '@/components/ui/loader';
@@ -42,29 +42,6 @@ const inputTypes: INPUT_TYPE[] = [
 	{ type: 'select', label: 'select', icon: <CircleCheckBig size={12} /> },
 	{ type: 'date', label: 'Date', icon: <Calendar size={12} /> }
 ];
-
-const q = z
-	.object({
-		question: z.string().min(2, { message: 'Question is required' }),
-		options: z.string().min(2).array().optional(),
-		type: INPUT_TYPE_ZOD,
-		isTypeOpen: z.boolean().optional(),
-		isTeamOpen: z.boolean().optional(),
-		required: z.boolean().optional(),
-		id: z.number(),
-		isDeleting: z.boolean().optional(),
-		isArchived: z.boolean().optional(),
-		order: z.number(),
-		created_at: z.string().optional(),
-		team: z.string().optional()
-	})
-	.refine(
-		question => {
-			if (question.type !== 'select' && question.type !== 'multiselect') return true;
-			return question.options && question.options.length > 0;
-		},
-		{ message: 'Provide at least one option' }
-	);
 
 const formSchema = z.object({ q: q.array() });
 
@@ -110,7 +87,6 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group, 
 
 		const payload: TablesInsert<'appraisal_questions'> = { questions, group, org };
 		if (dbQ) payload.id = dbQ?.id;
-		console.log('🚀 ~ onSubmit ~ payload:', payload);
 
 		creationsState(true);
 		const response = await createQuestions(payload);
@@ -121,7 +97,6 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group, 
 		updateQuestions({ q: response.questions as any[] });
 		form.setValue('q', response.questions as any[]);
 		updateDbQ(response);
-		console.log('🚀 ~ onSubmit ~ questionsData:', questionsData);
 	};
 
 	const AddQuestionButton = ({ children, className, type }: { children: ReactNode; className: string; type: FORM_INPUT_TYPE }) => {

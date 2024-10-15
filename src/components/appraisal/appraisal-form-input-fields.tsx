@@ -4,10 +4,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { FormControl, FormItem, FormLabel } from '@/components/ui/form';
-import { Tables } from '@/type/database.types';
-import { FORM_INPUT_TYPE } from '@/type/performance.types';
+import { FORM_INPUT_TYPE, q } from '@/type/appraisal.types';
+import { z } from 'zod';
 
-export const InputFields = ({ question, field, disabled }: { question: Tables<'appraisal_questions'>; field: any; disabled: boolean }) => {
+export const InputFields = ({ question, field, disabled }: { question: z.infer<typeof q>; field: any; disabled: boolean }) => {
 	const type: FORM_INPUT_TYPE = question.type as any;
 
 	if (type == 'text') {
