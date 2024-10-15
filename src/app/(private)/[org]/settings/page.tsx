@@ -27,7 +27,11 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 	} = await supabase.auth.getUser();
 	if (!user || userError) return <div>Unable to fetch user data</div>;
 
-	const [profileResponse, organisationResponse] = await Promise.all([await supabase.from('profiles').select().eq('id', user?.id).single(), await supabase.from('organisations').select().eq('subdomain', params.org).single()]);
+	const [profileResponse, organisationResponse, teamsResponse] = await Promise.all([
+		await supabase.from('profiles').select().eq('id', user?.id).single(),
+		await supabase.from('organisations').select().eq('subdomain', params.org).single(),
+		await supabase.from('teams').select().eq('org', params.org)
+	]);
 
 	const updatePassword = async (password: string) => {
 		'use server';
@@ -106,7 +110,7 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 					</Suspense>
 
 					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
-						<Teams org={params.org} />
+						<Teams org={params.org} teams={teamsResponse} />
 					</Suspense>
 
 					<Suspense fallback={<Skeleton className="h-56 w-full" />}>
@@ -147,7 +151,7 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 				</TabsContent>
 
 				<TabsContent value="appraisal" className="relative">
-					<Appraisal org={params.org} />
+					<Appraisal teams={teamsResponse.data ? teamsResponse.data : []} org={params.org} />
 				</TabsContent>
 
 				<TabsContent value="users" className="relative">

@@ -2,18 +2,19 @@ import { FormSection, FormSectionDescription, InputsContainer } from '@/componen
 import { AppraisalQuestionsForm } from './appraisal-questions-form';
 import { ReactNode } from 'react';
 import { createClient } from '@/utils/supabase/server';
-import { FORM_INPUT_TYPE } from '@/type/performance.types';
+import { Tables } from '@/type/database.types';
 
 interface props {
 	org: string;
 	children: ReactNode;
 	group?: string;
+	teams: Tables<'teams'>[];
 }
 
-export const AppraisalQuestions = async ({ org, children, group = 'employee' }: props) => {
+export const AppraisalQuestions = async ({ org, children, group = 'employee', teams }: props) => {
 	const supabase = createClient();
 
-	const { data } = await supabase.from('appraisal_questions').select().match({ org, group }).order('order');
+	const { data } = await supabase.from('appraisal_questions').select().match({ org, group });
 
 	// const questions: { type: FORM_INPUT_TYPE; question: string; options: string[]; required?: boolean }[] = [];
 
@@ -22,7 +23,7 @@ export const AppraisalQuestions = async ({ org, children, group = 'employee' }: 
 			<FormSectionDescription>{children}</FormSectionDescription>
 
 			<InputsContainer>
-				<AppraisalQuestionsForm questionsData={{ q: data as any }} org={org} group={group} isOptional={group !== 'employee'} />
+				<AppraisalQuestionsForm teams={teams} questionsData={data ? data[0] : undefined} org={org} group={group} isOptional={group !== 'employee'} />
 			</InputsContainer>
 		</FormSection>
 	);

@@ -197,12 +197,8 @@ export type Database = {
           entity: number | null
           group: string
           id: number
-          options: Json[]
-          order: number
           org: string
-          question: string
-          required: boolean
-          type: string
+          questions: Json[]
           updateded_at: string | null
         }
         Insert: {
@@ -210,12 +206,8 @@ export type Database = {
           entity?: number | null
           group: string
           id?: number
-          options: Json[]
-          order?: number
           org: string
-          question: string
-          required?: boolean
-          type: string
+          questions: Json[]
           updateded_at?: string | null
         }
         Update: {
@@ -223,12 +215,8 @@ export type Database = {
           entity?: number | null
           group?: string
           id?: number
-          options?: Json[]
-          order?: number
           org?: string
-          question?: string
-          required?: boolean
-          type?: string
+          questions?: Json[]
           updateded_at?: string | null
         }
         Relationships: [
@@ -1600,7 +1588,7 @@ export type Database = {
           created_at: string
           disable: boolean
           id: number
-          organisation: string | null
+          organisation: string
           profile: string
           role: Database["public"]["Enums"]["app_role"]
         }
@@ -1608,7 +1596,7 @@ export type Database = {
           created_at?: string
           disable?: boolean
           id?: number
-          organisation?: string | null
+          organisation: string
           profile?: string
           role: Database["public"]["Enums"]["app_role"]
         }
@@ -1616,7 +1604,7 @@ export type Database = {
           created_at?: string
           disable?: boolean
           id?: number
-          organisation?: string | null
+          organisation?: string
           profile?: string
           role?: Database["public"]["Enums"]["app_role"]
         }

@@ -15,27 +15,16 @@ export const deleteQuestion = async (query: { id: number; org: string }) => {
 	return true;
 };
 
-export const createQuestions = async (payload: TablesInsert<'appraisal_questions'>[]) => {
-	const canUser = await doesUserHaveAdequatePermissions({ orgId: payload[0].org });
+export const createQuestions = async (payload: TablesInsert<'appraisal_questions'>) => {
+	const canUser = await doesUserHaveAdequatePermissions({ orgId: payload.org });
 	if (canUser !== true) return canUser;
 
-	const payloadWithId = payload.filter(item => item.id != 0 || !!item.id);
-	const payloadWithoutId = payload
-		.filter(item => item.id == 0 || !item.id)
-		.map(item => {
-			delete item.id;
-			return item;
-		});
-
 	const supabase = createClient();
-	const [updateRes, inserRes] = await Promise.all([await supabase.from('appraisal_questions').upsert(payloadWithId).select(), await supabase.from('appraisal_questions').insert(payloadWithoutId).select()]);
+	const { error, data } = await supabase.from('appraisal_questions').upsert(payload).select();
 
-	if (updateRes.error || inserRes.error) {
-		if (inserRes.error) return inserRes.error.message;
-		if (updateRes.error) return updateRes.error.message;
-	}
+	if (error) return error.message;
 
-	return [...updateRes.data, ...inserRes.data].sort((a, b) => a.order - b.order);
+	return data[0];
 };
 
 export const createAppraisalSettings = async (payload: TablesInsert<'appraisal_settings'>) => {
