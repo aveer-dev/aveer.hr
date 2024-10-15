@@ -37,7 +37,7 @@ export const EmployeeAppraisals = async ({ org, adminId, group, managerContract,
 		);
 	}
 
-	const [questions, answers] = await Promise.all([!!group && (await supabase.from('appraisal_questions').select().match({ org, group }).order('order')), await supabase.from('appraisal_answers').select().match({ org, contract: contract.id })]);
+	const [questions, answers] = await Promise.all([!!group && (await supabase.from('appraisal_questions').select().match({ org, group })), await supabase.from('appraisal_answers').select().match({ org, contract: contract.id })]);
 
 	const processOKRs = async () => {
 		if (!okrs?.data) return false;
@@ -124,6 +124,7 @@ export const EmployeeAppraisals = async ({ org, adminId, group, managerContract,
 							)}
 
 							<AppraisalForm
+								team={(contract.team as any).id}
 								managerContract={managerContract}
 								dbAnswer={answers.data ? answers.data[0] : undefined}
 								appraisal={appraisal}
@@ -132,7 +133,7 @@ export const EmployeeAppraisals = async ({ org, adminId, group, managerContract,
 								role={role}
 								adminId={adminId}
 								formType={formType}
-								questions={questions ? questions?.data || [] : []}
+								questionsData={questions && questions?.data ? questions?.data[0] : undefined}
 							/>
 						</InputsContainer>
 					</FormSection>

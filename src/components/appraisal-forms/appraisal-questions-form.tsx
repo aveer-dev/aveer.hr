@@ -8,15 +8,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { ReactNode, useState } from 'react';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, Check, ChevronDown, ChevronsUpDown, ChevronUp, CircleCheckBig, CircleMinus, FileUp, Grip, Hash, Plus, SquareCheckBig, Text, TextCursorInputIcon, Trash2 } from 'lucide-react';
+import { Calendar, Check, ChevronDown, ChevronsUpDown, ChevronUp, CircleCheckBig, CircleMinus, Grip, Hash, Info, Plus, SquareCheckBig, Text, TextCursorInputIcon, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card } from '@/components/ui/card';
-import { FORM_INPUT_TYPE, INPUT_TYPE_ZOD } from '@/type/performance.types';
-import { TablesInsert } from '@/type/database.types';
+import { FORM_INPUT_TYPE, INPUT_TYPE_ZOD, q } from '@/type/appraisal.types';
+import { Tables, TablesInsert } from '@/type/database.types';
 import { createQuestions, deleteQuestion } from './appraisal.actions';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { toast } from 'sonner';
@@ -26,7 +26,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { generateRandomString } from '@/utils/generate-string';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface INPUT_TYPE {
 	type: z.infer<typeof INPUT_TYPE_ZOD>;
@@ -43,38 +43,22 @@ const inputTypes: INPUT_TYPE[] = [
 	{ type: 'date', label: 'Date', icon: <Calendar size={12} /> }
 ];
 
-const q = z
-	.object({
-		question: z.string().min(2),
-		options: z.string().min(2).array().optional(),
-		type: INPUT_TYPE_ZOD,
-		isTypeOpen: z.boolean().optional(),
-		required: z.boolean().optional(),
-		id: z.number(),
-		isDeleting: z.boolean().optional(),
-		order: z.number().optional()
-	})
-	.refine(
-		question => {
-			if (question.type !== 'select' && question.type !== 'multiselect') return true;
-			return question.options && question.options.length > 0;
-		},
-		{ message: 'Provide at least one option' }
-	);
-
 const formSchema = z.object({ q: q.array() });
 
 interface props {
 	org: string;
 	isOptional?: boolean;
-	questionsData?: z.infer<typeof formSchema>;
+	questionsData?: Tables<'appraisal_questions'>;
 	group: string;
+	teams: Tables<'teams'>[];
 }
 
-export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }: props) => {
-	const [questions, updateQuestions] = useState<z.infer<typeof formSchema>>(questionsData && questionsData.q?.length > 0 ? (questionsData as any) : { q: [] });
+export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group, teams }: props) => {
+	const [dbQ, updateDbQ] = useState<Tables<'appraisal_questions'> | undefined>(questionsData);
+	const qts = (dbQ?.questions as any[])?.sort((a, b) => a.order - b.order);
+	const [questions, updateQuestions] = useState<z.infer<typeof formSchema>>(dbQ && qts?.length > 0 ? { q: qts } : { q: [] });
 	const [showAddOptions, toggleShowAddOptions] = useState(false);
-	const [isFormEnabled, toggleFormState] = useState(!!questionsData?.q.length);
+	const [isFormEnabled, toggleFormState] = useState(!!qts?.length);
 	const [isCreatingQuestions, creationsState] = useState(false);
 	const sensors = useSensors(
 		useSensor(PointerSensor),
@@ -85,21 +69,24 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: questionsData && questionsData.q?.length > 0 ? (questionsData as any) : {}
+		defaultValues: dbQ && qts?.length > 0 ? { q: qts } : { q: [] }
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
-		const payload: TablesInsert<'appraisal_questions'>[] = values.q.map((question, index) => ({
+		const questions: z.infer<typeof q>[] = values.q.map((question, index) => ({
 			question: question.question,
 			options: question.options && question.options.length > 0 ? question.options : [],
-			org,
 			type: question.type,
 			required: !!question.required,
-			group,
 			id: question.id,
+			created_at: question.created_at || new Date().toISOString(),
+			isArchived: question.isArchived,
 			order: index,
-			updateded_at: new Date().toISOString()
+			team: question.team
 		}));
+
+		const payload: TablesInsert<'appraisal_questions'> = { questions, group, org };
+		if (dbQ) payload.id = dbQ?.id;
 
 		creationsState(true);
 		const response = await createQuestions(payload);
@@ -107,20 +94,21 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 		if (typeof response == 'string') return toast.error('Error creating / updating questions', { description: response });
 
 		toast.success('Questions updated');
-		updateQuestions({ q: response as any[] });
-		form.setValue('q', response as any[]);
+		updateQuestions({ q: response.questions as any[] });
+		form.setValue('q', response.questions as any[]);
+		updateDbQ(response);
 	};
 
 	const AddQuestionButton = ({ children, className, type }: { children: ReactNode; className: string; type: FORM_INPUT_TYPE }) => {
 		const add = () => {
-			const newItem: any = { question: '', type, id: generateRandomString(4) };
+			const newItem: z.infer<typeof q> = { question: '', type, id: questions.q.length + 1, order: questions.q.length + 1, team: '0' };
 			if (type == 'select' || type == 'multiselect') newItem.options = ['Option one'];
 
 			questions.q.push(newItem);
 			updateQuestions({ ...questions });
 
 			const formValues = form.getValues(`q`) || [];
-			formValues.push({ ...newItem, id: 0 });
+			formValues.push({ ...newItem });
 			form.setValue(`q`, formValues);
 		};
 
@@ -163,8 +151,8 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group }
 			{((isOptional && isFormEnabled) || !isOptional) && (
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
 					<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-						<SortableContext items={questions.q} strategy={verticalListSortingStrategy}>
-							{questions.q?.map((id, index) => <Questions question={questions.q[index]} index={index} key={Math.random()} id={id.id} updateQuestions={updateQuestions} org={org} questions={questions} form={form} />)}
+						<SortableContext items={questions.q.map(item => item.id)} strategy={verticalListSortingStrategy}>
+							{questions.q?.map((id, index) => <Questions teams={teams} question={id} index={index} key={Math.random()} id={id.id} updateQuestions={updateQuestions} org={org} questions={questions} form={form} />)}
 						</SortableContext>
 					</DndContext>
 
@@ -209,12 +197,13 @@ interface questionsProps {
 	index: number;
 	id: number;
 	org: string;
+	teams: Tables<'teams'>[];
 	questions: z.infer<typeof formSchema>;
 	form: UseFormReturn<z.infer<typeof formSchema>>;
 	updateQuestions: (questions: z.infer<typeof formSchema>) => void;
 }
 
-const Questions = ({ questions, form, updateQuestions, org, id, index, question }: questionsProps) => {
+const Questions = ({ questions, form, updateQuestions, org, id, index, question, teams }: questionsProps) => {
 	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 	const router = useRouter();
 
@@ -311,13 +300,14 @@ const Questions = ({ questions, form, updateQuestions, org, id, index, question 
 								render={({ field }) => (
 									<FormItem className="w-full">
 										<FormLabel className="flex min-h-6 items-center gap-2">
-											<button {...attributes} {...listeners}>
+											<button type="button" {...attributes} {...listeners}>
 												<Grip size={12} />
 											</button>
 											Question
 										</FormLabel>
+
 										<FormControl className="">
-											<Input placeholder="Enter question here" {...field} />
+											<Input placeholder="Enter question here" {...field} value={field.value} onChange={event => form.setValue(field.name, event.target.value)} />
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -417,6 +407,78 @@ const Questions = ({ questions, form, updateQuestions, org, id, index, question 
 									<FormControl>
 										<Switch className="!m-0 scale-75" checked={form.getValues(`q.${index}.required`) == true} onCheckedChange={field.onChange} />
 									</FormControl>
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name={`q.${index}.team`}
+							render={({ field }) => (
+								<FormItem className="flex flex-col">
+									<FormLabel className="flex items-center gap-2">
+										Team{' '}
+										<TooltipProvider>
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<button type="button">
+														<Info size={10} />
+													</button>
+												</TooltipTrigger>
+												<TooltipContent>
+													<p className="max-w-[200px]">Set team if this question is meant for a specific team</p>
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+									</FormLabel>
+									<Popover
+										open={question.isTeamOpen}
+										onOpenChange={state => {
+											questions.q[index].isTeamOpen = state;
+											updateQuestions({ ...questions });
+										}}>
+										<PopoverTrigger asChild>
+											<FormControl>
+												<Button type="button" variant="outline" role="combobox" className={cn('w-full justify-between', !form.getValues(`q.${index}.type`) && 'text-muted-foreground')}>
+													{teams.find(team => String(team.id) === form.getValues(field.name))?.name || 'All teams'}
+													<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+												</Button>
+											</FormControl>
+										</PopoverTrigger>
+
+										<PopoverContent align="start" className="w-[150px] p-0">
+											<Command>
+												<CommandList>
+													<CommandGroup>
+														<CommandItem
+															value={'0'}
+															onSelect={() => {
+																field.onChange('0');
+															}}>
+															<Check size={12} className={cn('mr-2', '0' === form.getValues(field.name) || !form.getValues(field.name) ? 'opacity-100' : 'opacity-0')} />
+															All teams
+														</CommandItem>
+
+														{teams.map(team => (
+															<CommandItem
+																value={String(team.id)}
+																key={team.id}
+																onSelect={() => {
+																	field.onChange(String(team.id));
+																	questions.q[index].isTeamOpen = false;
+																	updateQuestions({ ...questions });
+																}}>
+																<Check size={12} className={cn('mr-2', String(team.id) === form.getValues(field.name) ? 'opacity-100' : 'opacity-0')} />
+																{team.name}
+															</CommandItem>
+														))}
+													</CommandGroup>
+												</CommandList>
+											</Command>
+										</PopoverContent>
+									</Popover>
+
+									<FormMessage />
 								</FormItem>
 							)}
 						/>

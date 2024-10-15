@@ -40,7 +40,7 @@ export const TeamMember = ({ person }: props) => {
 						<h4 className="text-xs text-muted-foreground">Country of origin</h4> <p className="font-normal">{(person.profile?.nationality as any)?.name || '-'}</p>
 					</li>
 					<li className="grid gap-1">
-						<h4 className="text-xs text-muted-foreground">Mobile number</h4> <p className="font-normal">{person.profile?.mobile ? `+${person.profile?.mobile}` : '-'}</p>
+						<h4 className="text-xs text-muted-foreground">Mobile number</h4> <p className="font-normal">{person.profile?.mobile ? `${person.profile?.mobile}` : '-'}</p>
 					</li>
 				</ul>
 

@@ -2,12 +2,14 @@ import { FormSection, FormSectionDescription, InputsContainer } from '@/componen
 import { AppraisalQuestions } from '@/components/appraisal-forms/appraisal-questions';
 import { AppraisalSettingsForm } from './appraisal-settings-form';
 import { createClient } from '@/utils/supabase/server';
+import { Tables } from '@/type/database.types';
 
 interface props {
 	org: string;
+	teams: Tables<'teams'>[];
 }
 
-export const Appraisal = async ({ org }: props) => {
+export const Appraisal = async ({ org, teams }: props) => {
 	const supabase = createClient();
 	const { data, error } = await supabase.from('appraisal_settings').select().match({ org });
 
@@ -26,12 +28,12 @@ export const Appraisal = async ({ org }: props) => {
 				</InputsContainer>
 			</FormSection>
 
-			<AppraisalQuestions org={org}>
+			<AppraisalQuestions teams={teams} org={org}>
 				<h2 className="mb-1 font-normal">Appraisal questions</h2>
 				<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Default employee appraisal questions for all employees accross the organisation</p>
 			</AppraisalQuestions>
 
-			<AppraisalQuestions group="manager" org={org}>
+			<AppraisalQuestions teams={teams} group="manager" org={org}>
 				<h2 className="mb-1 font-normal">Managers: Appraisal questions</h2>
 				<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Default managers - employees appraisal questions for managers to access employees</p>
 			</AppraisalQuestions>

@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 import { ROLE } from '@/type/contract.types';
 
 interface props {
-	questions: Tables<'appraisal_questions'>[];
+	questionsData?: Tables<'appraisal_questions'>;
 	contract: number;
 	org: string;
 	dbAnswer?: Tables<'appraisal_answers'>;
@@ -31,6 +31,7 @@ interface props {
 	role?: ROLE;
 	formType: ROLE;
 	adminId?: string;
+	team?: number | null;
 }
 
 const answerType = z.object({ id: z.number(), answer: z.string().optional(), required: z.boolean() });
@@ -41,7 +42,9 @@ const formSchema = z.object({
 	score: z.number().max(100)
 });
 
-export const AppraisalForm = ({ adminId, formType, questions, managerContract, contract, org, dbAnswer, appraisal, role }: props) => {
+export const AppraisalForm = ({ team, adminId, formType, questionsData, managerContract, contract, org, dbAnswer, appraisal, role }: props) => {
+	const questions = (questionsData?.questions as any[])?.filter(question => ((question.isArchived == false || !question.isArchived) && (question.team == String(team) || !question.team)) || question.team == '0')?.sort((a, b) => a.order - b.order);
+
 	const [answer, setAnswer] = useState(dbAnswer);
 	const [isSaving, setSaveState] = useState(false);
 	const [isSubmitting, setSubmitState] = useState(false);
@@ -62,25 +65,27 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 		return true;
 	};
 
-	let formDefaultAnswers: z.infer<typeof answerType>[] = [];
+	const getExistingAnswers = () => {
+		if (!answer && questions?.length) return questions?.map(question => ({ answer: '', id: question.id, group: question.group, required: question.required }));
 
-	if (!answer && questions.length) formDefaultAnswers = questions.map(question => ({ answer: '', id: question.id, group: question.group, required: question.required }));
+		if (answer && questions?.length) {
+			return questions?.map(question => {
+				if (formType == 'manager' && (formType == role || answer.manager_submission_date)) {
+					const ans = (answer?.manager_answers as z.infer<typeof answerType>[])?.find(ans => ans.id == question.id);
+					if (ans) return { ...ans, answer: ans.answer || '' };
+				}
 
-	if (answer && questions.length) {
-		formDefaultAnswers = questions.map(question => {
-			if (formType == 'manager' && (formType == role || answer.manager_submission_date)) {
-				const ans = (answer?.manager_answers as z.infer<typeof answerType>[])?.find(ans => ans.id == question.id);
-				if (ans) return { ...ans, answer: ans.answer || '' };
-			}
+				if (formType == 'employee' && (formType == role || answer.submission_date)) {
+					const ans = (answer?.answers as z.infer<typeof answerType>[])?.find(ans => ans.id == question.id);
+					if (ans) return { ...ans, answer: ans.answer || '' };
+				}
 
-			if (formType == 'employee' && (formType == role || answer.submission_date)) {
-				const ans = (answer?.answers as z.infer<typeof answerType>[])?.find(ans => ans.id == question.id);
-				if (ans) return { ...ans, answer: ans.answer || '' };
-			}
+				return { answer: '', id: question.id, group: question.group, required: question.required };
+			});
+		}
 
-			return { answer: '', id: question.id, group: question.group, required: question.required };
-		});
-	}
+		return [];
+	};
 
 	const getScoreAndNote = () => {
 		if (formType == 'admin' && (formType == role || !!answer?.org_submission_date)) {
@@ -100,7 +105,7 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: { answers: formDefaultAnswers, ...getScoreAndNote() }
+		defaultValues: { answers: getExistingAnswers(), ...getScoreAndNote() }
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>, submit?: boolean) => {
@@ -108,7 +113,7 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 		let response: Tables<'appraisal_answers'>[] | string = '';
 
 		if (role == 'employee') {
-			const payload: TablesInsert<'appraisal_answers'> = { answers: values.answers, contract_note: values.note, contract_score: values.score, org, contract, group: questions[0].group, appraisal: appraisal.id };
+			const payload: TablesInsert<'appraisal_answers'> = { answers: values.answers, contract_note: values.note, contract_score: values.score, org, contract, group: questionsData ? questionsData.group : 'employee', appraisal: appraisal.id };
 			if (answer) payload.id = answer.id;
 			if (submit) payload.submission_date = new Date().toISOString();
 
@@ -159,14 +164,14 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 			)}
 
 			<form onSubmit={form.handleSubmit(value => onSubmit(value, false))} className="space-y-8 px-1">
-				{questions.length > 0 && (
+				{questions?.length > 0 && (
 					<>
 						<FormField
 							control={form.control}
 							name={`answers`}
 							render={() => (
 								<FormItem className="space-y-10">
-									{questions.map((question, index) => (
+									{questions?.map((question, index) => (
 										<FormField
 											control={form.control}
 											key={question.id}
@@ -193,7 +198,7 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 				)}
 
 				<div className="space-y-2">
-					<h3 className={cn('font-medium', !questions.length && 'text-xs font-normal')}>Appraisal score</h3>
+					<h3 className={cn('font-medium', !questions?.length && 'text-xs font-normal')}>Appraisal score</h3>
 					{role == 'employee' && formType == 'employee' && <p className="text-xs text-muted-foreground">What will you score yourself for this appraisal period</p>}
 				</div>
 
@@ -248,13 +253,13 @@ export const AppraisalForm = ({ adminId, formType, questions, managerContract, c
 						</FormDescription>
 
 						<div className="flex items-center justify-end gap-4">
-							<Button disabled={isFormDisabled()} className="w-full max-w-[90px] gap-3" variant={'outline'} type="submit">
+							<Button disabled={isFormDisabled() || isSaving} className="w-full max-w-[90px] gap-3" variant={'outline'} type="submit">
 								{isSaving && <LoadingSpinner />}
 								Save
 								<Save size={12} />
 							</Button>
 
-							<Button disabled={isFormDisabled()} className="w-full max-w-[130px] gap-3" onClick={form.handleSubmit(value => onSubmit(value, true))} type="button">
+							<Button disabled={isFormDisabled() || isSubmitting} className="w-full max-w-[130px] gap-3" onClick={form.handleSubmit(value => onSubmit(value, true))} type="button">
 								{isSubmitting && <LoadingSpinner />}
 								Submit
 								<SendHorizonal size={12} />

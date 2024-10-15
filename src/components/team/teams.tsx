@@ -2,16 +2,20 @@ import { FormSection, FormSectionDescription, InputsContainer } from '@/componen
 import { createClient } from '@/utils/supabase/server';
 import { Suspense } from 'react';
 import { Team } from './team';
+import { Tables } from '@/type/database.types';
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
 
 interface props {
 	org: string;
+	teams?: PostgrestSingleResponse<Tables<'teams'>[]>;
 }
 
-export const Teams = async ({ org }: props) => {
+export const Teams = async ({ org, teams }: props) => {
 	const supabase = createClient();
 
-	const { data, error } = await supabase.from('teams').select().eq('org', org);
-	if (!data || error) return;
+	if (!teams) teams = await supabase.from('teams').select().eq('org', org);
+
+	if (!teams.data || teams.error) return;
 
 	return (
 		<Suspense>
@@ -22,7 +26,7 @@ export const Teams = async ({ org }: props) => {
 				</FormSectionDescription>
 
 				<InputsContainer>
-					{data.map(policy => (
+					{teams.data.map(policy => (
 						<Team key={policy.id} org={org} data={policy} />
 					))}
 					<Team org={org} />

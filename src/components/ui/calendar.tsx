@@ -18,7 +18,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
 				months: 'flex flex-col sm:flex-col space-y-4 sm:space-x-4 sm:space-y-0 relative',
 				month: 'space-y-4 w-full first-of-type:!ml-0',
 				month_caption: 'flex justify-center relative items-center',
-				caption_label: 'text-sm font-medium',
+				caption_label: 'hidden',
 				nav: 'space-x-1 flex items-center w-full z-10 -mb-3',
 				nav_button: cn(buttonVariants({ variant: 'outline' }), 'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'),
 				button_previous: cn(buttonVariants({ variant: 'outline' }), 'w-7 p-0 h-7 absolute left-1'),
@@ -39,6 +39,8 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
 				disabled: 'text-muted-foreground opacity-50',
 				range_middle: 'range-middle aria-selected:bg-accent aria-selected:text-accent-foreground',
 				hidden: 'invisible',
+				dropdown: 'text-sm w-fit',
+				years_dropdown: 'ml-3',
 				...classNames
 			}}
 			disabled={{ dayOfWeek: [0, 6] }}
@@ -46,6 +48,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
 				Chevron: ({ orientation }) => (orientation == 'left' ? <ChevronLeft size={12} /> : <ChevronRight size={12} />)
 			}}
 			{...props}
+			captionLayout="dropdown"
 		/>
 	);
 }
