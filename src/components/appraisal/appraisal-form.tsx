@@ -44,7 +44,6 @@ const formSchema = z.object({
 
 export const AppraisalForm = ({ team, adminId, formType, questionsData, managerContract, contract, org, dbAnswer, appraisal, role }: props) => {
 	const questions = (questionsData?.questions as any[])?.filter(question => ((question.isArchived == false || !question.isArchived) && (question.team == String(team) || !question.team)) || question.team == '0')?.sort((a, b) => a.order - b.order);
-	console.log(questions, questionsData?.questions);
 
 	const [answer, setAnswer] = useState(dbAnswer);
 	const [isSaving, setSaveState] = useState(false);
@@ -67,8 +66,6 @@ export const AppraisalForm = ({ team, adminId, formType, questionsData, managerC
 	};
 
 	const getExistingAnswers = () => {
-		let formDefaultAnswers: z.infer<typeof answerType>[] = [];
-
 		if (!answer && questions?.length) return questions?.map(question => ({ answer: '', id: question.id, group: question.group, required: question.required }));
 
 		if (answer && questions?.length) {

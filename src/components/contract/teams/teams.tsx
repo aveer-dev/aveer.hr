@@ -51,6 +51,11 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 												manager
 											</Badge>
 										)}
+										{contractId == person.id && (
+											<Badge className="py-px text-[10px]" variant={'secondary'}>
+												You
+											</Badge>
+										)}
 									</div>
 									<p className="text-xs text-muted-foreground">{person.job_title}</p>
 								</div>
