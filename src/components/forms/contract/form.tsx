@@ -157,7 +157,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			manager: formType == 'contract' ? (manager?.data ? !!manager?.data[0] : false) : openRoleData?.is_manager,
 			policy: String(openRoleData?.policy || policies[0]?.id),
 			direct_report: formType == 'contract' ? (openRoleData?.direct_report ? String(openRoleData?.direct_report) : '') : contractData?.direct_report ? String(contractData?.direct_report) : '',
-			role: contractData?.role ? String(contractData?.role) : ''
+			role: contractData?.role ? String(contractData?.role) : undefined
 		}
 	});
 
@@ -230,7 +230,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			profile: contractData ? (contractData?.profile as any).id : '',
 			entity: Number(values.entity),
 			org: params.org,
-			role: Number(values.role),
+			role: values.role ? Number(values.role) : null,
 			work_location: values.work_location,
 			additional_offerings: values.additional_offerings,
 			team: values.team ? Number(values.team) : null,
@@ -504,7 +504,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 													</Link>
 												</FormLabel>
 												<Select
-													onValueChange={value => {
+													onValueChange={(value: string) => {
 														field.onChange(value);
 														onSelectRole(value);
 													}}
@@ -723,7 +723,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 										<FormItem className="grid w-full gap-3 rounded-lg bg-accent p-2">
 											<div className="flex items-center justify-between space-x-2">
 												<Label htmlFor="signin-bonus">Add signing bonus</Label>
-												<Switch checked={showSigningBonus} onCheckedChange={event => toggleShowSigningBonus(event)} id="signin-bonus" className="scale-75" />
+												<Switch checked={showSigningBonus} onCheckedChange={toggleShowSigningBonus} id="signin-bonus" className="scale-75" />
 											</div>
 
 											{showSigningBonus && (
@@ -777,7 +777,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 														<Label htmlFor="indefinite">Indefinite</Label>
 														<Switch
 															checked={indefiniteEndDate}
-															onCheckedChange={event => {
+															onCheckedChange={(event: boolean) => {
 																toggleIndefiniteEndDate(event);
 																if (event == true) form.setValue('end_date', undefined);
 															}}
