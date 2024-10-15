@@ -4,7 +4,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Info } from 'lucide-react';
+import { Info, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { currencyFormat } from '@/lib/utils';
@@ -54,7 +54,18 @@ export const FixedAllowance = ({ form, isToggled, toggle, currency }: props) => 
 												<div>
 													{allowance?.name} • <span className="text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(allowance.amount) || 0, currency })}</span>
 												</div>
-												<div className="text-muted-foreground">{allowance.frequency}</div>
+												<div className="flex items-center gap-3 text-muted-foreground">
+													{allowance.frequency}
+													<button
+														type="button"
+														onClick={() => {
+															const fixed_allowance = form.getValues('fixed_allowance');
+															const newValue = fixed_allowance.filter((item: string) => item !== fixed_allowance[index]);
+															form.setValue('fixed_allowance', newValue);
+														}}>
+														<Trash2 className="text-destructive" size={12} />
+													</button>
+												</div>
 											</li>
 										))}
 									</ul>

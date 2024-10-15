@@ -156,17 +156,10 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			team: String(contractData?.team || openRoleData?.team || ''),
 			manager: formType == 'contract' ? (manager?.data ? !!manager?.data[0] : false) : openRoleData?.is_manager,
 			policy: String(openRoleData?.policy || policies[0]?.id),
-			direct_report: formType == 'contract' ? (openRoleData?.direct_report ? String(openRoleData?.direct_report) : '') : contractData?.direct_report ? String(contractData?.direct_report) : ''
+			direct_report: formType == 'contract' ? (openRoleData?.direct_report ? String(openRoleData?.direct_report) : '') : contractData?.direct_report ? String(contractData?.direct_report) : '',
+			role: contractData?.role ? String(contractData?.role) : ''
 		}
 	});
-
-	const getPolicies = useCallback(async () => {
-		const { data, error } = await supabase.from('approval_policies').select().match({ org: params.org, type: 'role_application' });
-		if (!error && data) {
-			setPolicies(data);
-			form.setValue('policy', String(data.find(item => item.is_default)?.id || ''));
-		}
-	}, [form, params.org]);
 
 	const isEntityEOR = async (entityId: number) => {
 		const entity = eorEntities.find(entity => entity.id === Number(entityId));
@@ -315,7 +308,9 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			toggleManagerState(true);
 			form.setValue('manager', true);
 		}
-	}, [form, formType, getPolicies, manager?.data]);
+
+		if (entities.length) setCurrency(() => entities.find(ent => (contractData ? ent.id == contractData?.entity : openRoleData ? ent.id == openRoleData?.entity : entities[0].id))?.incorporation_country.currency_code || '');
+	}, [contractData, entities, form, manager?.data, openRoleData]);
 
 	const onSetLevel = (level: TablesInsert<'employee_levels'> | undefined) => {
 		setActiveLevel(level);
@@ -896,9 +891,19 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 						{formType == 'role' && <CustomFields updateCustomFields={event => form.setValue('customFields', event)} customFields={form.getValues('customFields') as any} />}
 
 						<div className="flex items-center justify-end border-t border-t-border pt-10">
-							<Button disabled={isSubmiting} type="submit" size={'sm'} className="gap-3 px-6 text-sm font-light">
-								Review details
-							</Button>
+							{!contractData && !openRoleData && (
+								<Button disabled={isSubmiting} type="submit" size={'sm'} className="gap-3 px-6 text-sm font-light">
+									Review details
+								</Button>
+							)}
+
+							{(contractData || openRoleData) && (
+								<Button onClick={onSubmit} disabled={isSubmiting} type="submit" size={'sm'} className="gap-3 px-6 text-sm font-light">
+									{isSubmiting && <LoadingSpinner />}
+									{formType == 'contract' && <>{isSubmiting ? (!!contractData ? 'Updating person' : 'Adding person') : !!contractData ? 'Update person' : 'Add person'}</>}
+									{formType == 'role' && <>{isSubmiting ? (!!openRoleData ? 'Updating role' : 'Creating role') : !!openRoleData ? 'Update role' : 'Create role'}</>}
+								</Button>
+							)}
 						</div>
 					</form>
 				</Form>
