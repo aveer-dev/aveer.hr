@@ -7,6 +7,7 @@ import './globals.css';
 import { polyfillPromiseWithResolvers } from '@/utils/polyfilsResolver';
 import 'core-js/full/promise/with-resolvers.js';
 import { cn } from '@/lib/utils';
+import { Analytics } from '@vercel/analytics/react';
 
 polyfillPromiseWithResolvers();
 
@@ -24,6 +25,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 				<Toaster toastOptions={{ className: '!font-thin bg-background text-foreground border-none text-xs font-karla' }} />
 
 				{children}
+
+				<Analytics />
 			</body>
 		</html>
 	);
