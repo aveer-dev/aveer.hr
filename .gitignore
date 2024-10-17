@@ -37,3 +37,6 @@ next-env.d.ts
 
 # supabase
 /supabase/seed.sql
+
+# Sentry Config File
+.env.sentry-build-plugin
