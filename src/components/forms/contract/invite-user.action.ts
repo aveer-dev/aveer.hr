@@ -93,3 +93,16 @@ export const createLevel = async (level: TablesInsert<'employee_levels'>) => {
 	if (error) return error.message;
 	return data.id;
 };
+
+export const generateInvite = async ({ email, first_name, last_name, org }: { email: string; first_name: string; last_name: string; org: string }) => {
+	const role = await doesUserHaveAdequatePermissions({ orgId: org });
+	if (role !== true) return role;
+
+	const supabaseAdmin = createClientAdminServer();
+
+	const { error, data } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, { data: { first_name, last_name }, redirectTo: `${process.env.NEXT_PUBLIC_URL}/set-password?type=employee` });
+
+	if (error) return error.message;
+
+	return data;
+};

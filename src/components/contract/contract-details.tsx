@@ -28,6 +28,7 @@ import { Applicants } from './applicants';
 import { Boardings } from './boarding';
 import { BoardingsReview } from './boarding-review';
 import { EmployeeAppraisals } from './contract-appraisals';
+import { ResendInviteButton } from './resend-invite-button';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
@@ -204,19 +205,24 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 										</PopoverTrigger>
 
 										<PopoverContent align="end" className="w-48 p-2">
+											{(data.status == 'awaiting signatures' || data.status == 'awaiting signature') && <ResendInviteButton email={data.profile.email} last_name={data.profile.last_name} first_name={data.profile.first_name} org={org} />}
+
 											{data.status !== 'inactive' && data.status !== 'terminated' && (
 												<Link href={`./${id}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
 													<FilePenLine size={12} />
 													Edit Contract
 												</Link>
 											)}
+
 											<Link href={`./new?duplicate=${id}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
 												<Copy size={12} />
 												Duplicate
 											</Link>
+
 											{data.status !== 'terminated' && data.status !== 'inactive' && (
 												<TerminateContract first_name={data.profile.first_name} job_title={data.job_title} deleteContract={deleteContract} terminateContract={terminateContract} action={data.status === 'signed' ? 'terminate' : 'delete'} />
 											)}
+
 											{data.status === 'signed' && <ScheduleTermination first_name={data.profile.first_name} job_title={data.job_title} formAction={scheduleTermination} />}
 										</PopoverContent>
 									</Popover>
