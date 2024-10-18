@@ -62,7 +62,7 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 
 								<div className="flex items-center gap-2">
 									{isManager && !!managers?.find(manager => manager.person !== person.id) && currentUser !== 'org' && <AppraisalsDialog role="manager" managerContract={contractId} org={org} contract={person} />}
-									<TeamMember person={person as any} />
+									{contractId !== person.id && <TeamMember person={person as any} />}
 								</div>
 							</li>
 						))}

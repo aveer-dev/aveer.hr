@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { CalendarClock, FilePenLine, FolderOpenDot, House, ListChecks, Signature, UserRoundCog, UsersRound } from 'lucide-react';
+import { CalendarClock, FilePenLine, FileStack, FolderOpenDot, House, ListChecks, Signature, UserRoundCog, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -13,6 +13,7 @@ export const NavMenu = () => {
 		{ label: 'Time-off', icon: CalendarClock, page: 'leave', active: path.includes('/leave') },
 		{ label: 'Profile', icon: UserRoundCog, page: 'profile', active: path.includes('/profile') },
 		{ label: 'Team', icon: UsersRound, page: 'team', active: path.includes('/team') },
+		{ label: 'Requests', icon: FileStack, page: 'requests', active: path.includes('/requests') },
 		{ label: 'Contract', icon: Signature, page: 'contract', active: path.includes('/contract') },
 		{ label: 'Appraisal', icon: FilePenLine, page: 'appraisal', active: path.includes('/appraisal') },
 		{ label: 'Boarding', icon: ListChecks, page: 'boarding', active: path.includes('/boarding') },

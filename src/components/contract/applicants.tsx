@@ -1,10 +1,10 @@
-import { createClient } from '@/utils/supabase/server';
 import { Card } from '@/components/ui/card';
 import { ChevronRight } from 'lucide-react';
 import { ApplicantDetails } from '../open-role/roles/applicant-details';
 import { Tables } from '@/type/database.types';
 import { Separator } from '@/components/ui/separator';
 import { ApplicantBadge } from '@/components/ui/applicant-stage-badge';
+import { getApplicants } from './contract-assignments/utils';
 
 interface props {
 	org: string;
@@ -13,38 +13,20 @@ interface props {
 }
 
 export const Applicants = async ({ org, contract, manager }: props) => {
-	const supabase = createClient();
-
-	const { data, error } = await supabase
-		.from('job_applications')
-		.select(
-			`*,
-            country_location:countries!job_applications_country_location_fkey(name, country_code),
-            org:organisations!job_applications_org_fkey(subdomain, name),
-            role:open_roles!job_applications_role_fkey(job_title, direct_report, team, id, policy:approval_policies!open_roles_policy_fkey(levels))`
-		)
-		.match({ org, stage: 'interview' });
-
-	if (error) return error.message;
-
-	const filtereddata = data?.filter(applicant => {
-		const levels: any[] = applicant.levels;
-
-		return manager ? applicant.role.team == contract.team?.id || applicant.role.direct_report == contract.id || levels.find(level => level.id == contract.profile.id) : levels.find(level => level.id == contract.profile.id);
-	});
+	const applicants = await getApplicants({ org, contract, manager });
 
 	return (
 		<section className="mt-20 w-full">
 			<div className="flex items-center justify-between">
-				<h2 className="flex items-center justify-between text-lg font-medium">Applicant review</h2>
+				<h2 className="text-lg font-semibold text-support">Applicants review</h2>
 			</div>
 
 			<div className="">
 				<Separator className="mb-4 mt-2" />
 
-				{filtereddata.length > 0 && (
+				{typeof applicants !== 'string' && applicants.length > 0 && (
 					<ul className="space-y-10">
-						{filtereddata.map(applicant => (
+						{applicants.map(applicant => (
 							<li key={applicant.id}>
 								<ApplicantDetails userRole={manager || applicant.role.direct_report == contract.id ? 'manager' : 'employee'} contractId={contract.id} data={applicant as any} className="w-full text-left">
 									<Card className="flex w-full items-center justify-between border-none p-3 transition-all duration-500 group-hover:bg-accent/80 group-focus:bg-accent/80 group-focus-visible:bg-accent/80">
@@ -66,7 +48,7 @@ export const Applicants = async ({ org, contract, manager }: props) => {
 					</ul>
 				)}
 
-				{filtereddata.length == 0 && (
+				{typeof applicants !== 'string' && applicants.length == 0 && (
 					<div className="flex min-h-40 items-center justify-center rounded-md bg-accent/50 text-xs text-muted-foreground">
 						<p>You do not have any applianct review request</p>
 					</div>

@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { EllipsisVertical } from 'lucide-react';
+import { Check, EllipsisVertical } from 'lucide-react';
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { createClient } from '@/utils/supabase/server';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { Header } from '@/components/layout/header';
+import { cn } from '@/lib/utils';
 
 export default async function RootLayout({ children, params }: { children: React.ReactNode; params: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -65,6 +66,7 @@ export default async function RootLayout({ children, params }: { children: React
 										<CommandGroup>
 											{data.map(contract => (
 												<CommandItem key={contract.id} value={String(contract.id)}>
+													<Check className={cn('mr-2 h-4 w-4', params.contract === String(contract.id) ? 'opacity-100' : 'opacity-0')} />
 													{contract.org?.name} - {contract.job_title}
 												</CommandItem>
 											))}
@@ -83,8 +85,8 @@ export default async function RootLayout({ children, params }: { children: React
 						<div className="space-y-1">
 							<h1 className="text-2xl font-bold">Hi, Emmanuel</h1>
 							{/* <p className="text-sm font-light text-support">
-						{format(new Date(), 'eeee')}, {format(new Date(), 'LLLL')} {format(new Date(), 'M')}
-					</p> */}
+                                {format(new Date(), 'eeee')}, {format(new Date(), 'LLLL')} {format(new Date(), 'M')}
+                            </p> */}
 							{contract && (
 								<div className="flex items-center gap-3 text-xs font-light">
 									<span className="capitalize">{contract?.job_title}</span> • <span className="capitalize">{contract?.org?.name}</span> • <span className="capitalize">{contract?.employment_type}</span>
