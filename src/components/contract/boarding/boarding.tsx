@@ -100,7 +100,7 @@ export const Boarding = ({ data, type, state, contract, boarding, org, reviewTyp
 
 				<div className="flex items-center gap-2">
 					<div className="text-xs font-light text-muted-foreground">
-						Checked {userState?.checklist?.length || 0}/{data.length}
+						Checked {userState?.checklist ? userState?.checklist?.filter((item: any) => item.created_at).length : 0}/{data.length}
 					</div>
 
 					{userState && userState?.state !== 'initial' && (

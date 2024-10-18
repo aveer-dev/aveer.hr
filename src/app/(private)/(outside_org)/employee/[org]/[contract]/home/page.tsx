@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
 import { Todos } from './todos';
-import { Payments } from '../../../payments';
+import { Payments } from './payments';
 import { Tables } from '@/type/database.types';
 
 export default async function ContractPage({ params }: { params: { [key: string]: string } }) {
@@ -28,43 +28,10 @@ export default async function ContractPage({ params }: { params: { [key: string]
 	return (
 		<Suspense
 			fallback={
-				<div className="grid w-full gap-6">
-					<div className="flex justify-between gap-4">
-						<Skeleton className="h-5 w-5" />
-						<Skeleton className="h-9 w-56" />
-						<Skeleton className="h-6 w-32" />
-						<Skeleton className="h-5 w-20" />
-						<Skeleton className="h-4 w-16" />
-						<Skeleton className="h-4 w-12" />
-						<Skeleton className="h-4 w-12" />
-					</div>
-					<div className="flex justify-between gap-4">
-						<Skeleton className="h-5 w-5" />
-						<Skeleton className="h-9 w-56" />
-						<Skeleton className="h-6 w-32" />
-						<Skeleton className="h-5 w-20" />
-						<Skeleton className="h-4 w-16" />
-						<Skeleton className="h-4 w-12" />
-						<Skeleton className="h-4 w-12" />
-					</div>
-					<div className="flex justify-between gap-4">
-						<Skeleton className="h-5 w-5" />
-						<Skeleton className="h-9 w-56" />
-						<Skeleton className="h-6 w-32" />
-						<Skeleton className="h-5 w-20" />
-						<Skeleton className="h-4 w-16" />
-						<Skeleton className="h-4 w-12" />
-						<Skeleton className="h-4 w-12" />
-					</div>
-					<div className="flex justify-between gap-4">
-						<Skeleton className="h-5 w-5" />
-						<Skeleton className="h-9 w-56" />
-						<Skeleton className="h-6 w-32" />
-						<Skeleton className="h-5 w-20" />
-						<Skeleton className="h-4 w-16" />
-						<Skeleton className="h-4 w-12" />
-						<Skeleton className="h-4 w-12" />
-					</div>
+				<div className="space-y-14">
+					<Skeleton className="h-20 w-full" />
+					<Skeleton className="h-80 w-full" />
+					<Skeleton className="h-32 w-full" />
 				</div>
 			}>
 			<div className="space-y-14">

@@ -1,5 +1,12 @@
-import { PageLoader } from '@/components/ui/page-loader';
+'use client';
 
-export default async function ContractorPage() {
+import { PageLoader } from '@/components/ui/page-loader';
+import { useRouter } from 'next/navigation';
+
+export default function ContractorPage() {
+	const router = useRouter();
+
+	router.push('./home');
+
 	return <PageLoader isLoading={true} />;
 }

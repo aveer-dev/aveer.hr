@@ -50,7 +50,7 @@ export const Applicants = async ({ org, contract, manager }: props) => {
 
 				{typeof applicants !== 'string' && applicants.length == 0 && (
 					<div className="flex min-h-40 items-center justify-center rounded-md bg-accent/50 text-xs text-muted-foreground">
-						<p>You do not have any applianct review request</p>
+						<p>You do not have any applicant review request</p>
 					</div>
 				)}
 			</div>

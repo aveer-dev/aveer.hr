@@ -10,6 +10,7 @@ import { Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { Header } from '@/components/layout/header';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export default async function RootLayout({ children, params }: { children: React.ReactNode; params: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -65,9 +66,11 @@ export default async function RootLayout({ children, params }: { children: React
 									<CommandList>
 										<CommandGroup>
 											{data.map(contract => (
-												<CommandItem key={contract.id} value={String(contract.id)}>
-													<Check className={cn('mr-2 h-4 w-4', params.contract === String(contract.id) ? 'opacity-100' : 'opacity-0')} />
-													{contract.org?.name} - {contract.job_title}
+												<CommandItem key={contract.id} value={String(contract.id)} asChild>
+													<Link href={`../../${contract.org.subdomain}/${contract.id}/home`}>
+														<Check className={cn('mr-2 h-4 w-4', params.contract === String(contract.id) ? 'opacity-100' : 'opacity-0')} />
+														{contract.org?.name} - {contract.job_title}
+													</Link>
 												</CommandItem>
 											))}
 										</CommandGroup>

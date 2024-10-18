@@ -5,6 +5,7 @@ import { columns } from '@/components/leave/column';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/type/contract.types';
 import { createClient } from '@/utils/supabase/server';
+import { Suspense } from 'react';
 
 export default async function TimeoffPage({ params }: { params: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -37,41 +38,49 @@ export default async function TimeoffPage({ params }: { params: { [key: string]:
 	const chartData = getChartData(data);
 
 	return (
-		<div className="w-full">
-			<div className="flex items-center justify-between">
-				<h2 className="flex items-center justify-between text-base font-medium text-support">Leave summary</h2>
-
-				<div className="flex items-center gap-2">
-					<LeaveRequestDialog contract={data} />
+		<Suspense
+			fallback={
+				<div className="space-y-14">
+					<Skeleton className="h-20 w-full" />
+					<Skeleton className="h-80 w-full" />
 				</div>
-			</div>
+			}>
+			<div className="w-full">
+				<div className="flex items-center justify-between">
+					<h2 className="flex items-center justify-between text-base font-medium text-support">Leave summary</h2>
 
-			<div className="mt-14 grid gap-x-10 gap-y-16 sm:grid-cols-2">
-				{chartData.map(stat => (
-					<LeaveStat key={stat.label} {...stat} org={params.org} profile={(data.profile as any).id} />
-				))}
-			</div>
-
-			{chartData.length == 0 && (
-				<div className="flex gap-4">
-					<Skeleton className="h-36 w-20" />
-					<Skeleton className="h-36 w-20" />
-					<Skeleton className="h-36 w-20" />
+					<div className="flex items-center gap-2">
+						<LeaveRequestDialog contract={data} />
+					</div>
 				</div>
-			)}
 
-			<div className="mb-6 mt-24 flex w-full items-center justify-between pb-3">
-				<h2 className="flex items-center justify-between text-base font-medium text-support">Leave requests</h2>
-			</div>
-
-			{timeOffRequest?.error && (
-				<div className="flex min-h-56 flex-col items-center justify-center gap-2 bg-muted text-center text-muted-foreground">
-					<p>Unable to fetch leaves</p>
-					<p>{timeOffRequest?.error?.message}</p>
+				<div className="mt-14 grid gap-x-10 gap-y-16 sm:grid-cols-2">
+					{chartData.map(stat => (
+						<LeaveStat key={stat.label} {...stat} org={params.org} profile={(data.profile as any).id} />
+					))}
 				</div>
-			)}
 
-			<DataTable data={timeOffRequest?.data?.map(item => ({ ...item, reviewType })) || []} columns={columns} />
-		</div>
+				{chartData.length == 0 && (
+					<div className="flex gap-4">
+						<Skeleton className="h-36 w-20" />
+						<Skeleton className="h-36 w-20" />
+						<Skeleton className="h-36 w-20" />
+					</div>
+				)}
+
+				<div className="mb-6 mt-24 flex w-full items-center justify-between pb-3">
+					<h2 className="flex items-center justify-between text-base font-medium text-support">Leave requests</h2>
+				</div>
+
+				{timeOffRequest?.error && (
+					<div className="flex min-h-56 flex-col items-center justify-center gap-2 bg-muted text-center text-muted-foreground">
+						<p>Unable to fetch leaves</p>
+						<p>{timeOffRequest?.error?.message}</p>
+					</div>
+				)}
+
+				<DataTable data={timeOffRequest?.data?.map(item => ({ ...item, reviewType })) || []} columns={columns} />
+			</div>
+		</Suspense>
 	);
 }

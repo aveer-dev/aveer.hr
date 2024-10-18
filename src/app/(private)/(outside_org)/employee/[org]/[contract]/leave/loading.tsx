@@ -1,5 +1,10 @@
-import { PageLoader } from '@/components/ui/page-loader';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Loading() {
-	return <PageLoader isLoading={true} />;
+	return (
+		<div className="space-y-14">
+			<Skeleton className="h-20 w-full" />
+			<Skeleton className="h-80 w-full" />
+		</div>
+	);
 }

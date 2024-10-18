@@ -1,7 +1,9 @@
 import { Applicants } from '@/components/contract/applicants';
 import { BoardingsReview } from '@/components/contract/boarding-review';
 import { Timeoff } from '@/components/contract/time-off';
+import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
+import { Suspense } from 'react';
 
 export default async function ProfilePage({ params }: { params: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -26,12 +28,19 @@ export default async function ProfilePage({ params }: { params: { [key: string]:
 	const manager = (await supabase.from('managers').select().match({ org: params.org, person: params.contract, team: data.team?.id })).data;
 
 	return (
-		<>
+		<Suspense
+			fallback={
+				<div className="space-y-12">
+					<Skeleton className="h-56 w-full" />
+					<Skeleton className="h-56 w-full" />
+					<Skeleton className="h-56 w-full" />
+				</div>
+			}>
 			<Timeoff manager={manager && manager[0]} reviewType={manager?.length ? 'manager' : 'employee'} contract={data} org={params.org} team={data?.team?.id} />
 
 			<Applicants contract={data as any} org={params.org} manager={manager && manager[0]} />
 
 			<BoardingsReview manager={manager && manager[0]} contract={data} org={params.org} />
-		</>
+		</Suspense>
 	);
 }
