@@ -10,7 +10,7 @@ export default async function ContractPage({ params }: { params: { [key: string]
 	const { data, error } = await supabase
 		.from('contracts')
 		.select(
-			'*, profile:profiles!contracts_profile_fkey(first_name, last_name, email, id, nationality:countries!profiles_nationality_fkey(country_code, name)), org:organisations!contracts_org_fkey(name, id, subdomain), entity:legal_entities!contracts_entity_fkey(name, id, incorporation_country:countries!legal_entities_incorporation_country_fkey(country_code, name, currency_code))'
+			'*, profile:profiles!contracts_profile_fkey(first_name, last_name, email, id), org:organisations!contracts_org_fkey(name, id, subdomain), entity:legal_entities!contracts_entity_fkey(name, id, incorporation_country:countries!legal_entities_incorporation_country_fkey(country_code, name, currency_code))'
 		)
 		.eq('id', params.contract)
 		.single();
@@ -67,7 +67,7 @@ export default async function ContractPage({ params }: { params: { [key: string]
 				</div>
 			}>
 			<div className="space-y-14">
-				<Todos />
+				<Todos profileId={data.profile?.id} />
 
 				<Payments contract={data as any} />
 			</div>
