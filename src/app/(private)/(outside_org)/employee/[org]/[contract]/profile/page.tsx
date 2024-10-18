@@ -1,4 +1,4 @@
-import { Profile } from '@/components/contract/profile';
+import { Profile } from '@/components/contract/profile/profile';
 import { createClient } from '@/utils/supabase/server';
 
 export default async function ProfilePage({ params }: { params: { [key: string]: string } }) {

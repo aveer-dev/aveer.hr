@@ -21,7 +21,7 @@ import { ContractStatus } from '@/components/ui/status-badge';
 import { Details } from '@/components/ui/details';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ContractOverview } from './contract-overview';
-import { Profile } from './profile';
+import { Profile } from './profile/profile';
 import { Teams } from './teams';
 import { Timeoff } from './time-off';
 import { Applicants } from './applicants';

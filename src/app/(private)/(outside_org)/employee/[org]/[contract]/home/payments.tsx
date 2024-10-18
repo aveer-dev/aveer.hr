@@ -31,8 +31,8 @@ export const Payments = async ({ contract }: props) => {
 
 			<div className="flex overflow-hidden rounded-3xl bg-muted/60 p-4">
 				<ul className="w-full space-y-4">
-					{tableData.map(payment => (
-						<li key={payment.contract} className="flex w-full items-center justify-between rounded-lg bg-background p-4 text-sm drop-shadow-sm">
+					{tableData.map((payment, index) => (
+						<li key={index} className="flex w-full items-center justify-between rounded-lg bg-background p-4 text-sm drop-shadow-sm">
 							<div className="space-y-2">
 								<div className="flex items-center gap-2">
 									<h4 className="text-sm">{payment.org_name}</h4>

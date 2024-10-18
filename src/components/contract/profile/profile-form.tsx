@@ -11,12 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import { Tables, TablesUpdate } from '@/type/database.types';
-import { SelectCountry } from '../forms/countries-option';
-import { createClient } from '@/utils/supabase/client';
+import { SelectCountry } from '../../forms/countries-option';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
+import { updateProfile } from './profile.actions';
 
 const formSchema = z.object({
 	first_name: z.string().min(2, { message: 'Enter first name' }),
@@ -35,8 +35,6 @@ const formSchema = z.object({
 	medical: z.object({ blood_type: z.string(), gentype: z.string(), allergies: z.string(), medical_condition: z.string(), note: z.string() }),
 	address: z.object({ street_address: z.string(), state: z.string(), code: z.string(), country: z.string() })
 });
-
-const supabase = createClient();
 
 interface props {
 	data: Tables<'profiles'> & { nationality: Tables<'countries'> };
@@ -66,10 +64,10 @@ export const ProfileForm = ({ data }: props) => {
 		setUpdateState(true);
 
 		const payload: TablesUpdate<'profiles'> = { ...values };
-		const { error } = await supabase.from('profiles').update(payload).eq('id', data.id);
+		const response = await updateProfile({ payload, id: data.id });
 		setUpdateState(false);
 
-		if (error) return toast.error('Unable to update details', { description: error.message });
+		if (typeof response == 'string') return toast.error('Unable to update details', { description: response });
 		toast.success('Updated!', { description: 'Profile information updated successfully' });
 		toggleDialog(false);
 		router.refresh();

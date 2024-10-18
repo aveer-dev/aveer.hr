@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { Header } from '@/components/layout/header';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { EmployeeProfileSettings } from './employee-profile-settings';
 
 export default async function RootLayout({ children, params }: { children: React.ReactNode; params: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -56,7 +57,7 @@ export default async function RootLayout({ children, params }: { children: React
 					{data.length > 1 && (
 						<Popover>
 							<PopoverTrigger asChild>
-								<Button variant="outline" className="h-[52px] w-[52px] rounded-full bg-background/5 shadow-md backdrop-blur-sm transition-all duration-500">
+								<Button variant="outline" className="h-12 w-12 rounded-full bg-background shadow-md transition-all duration-500">
 									<EllipsisVertical size={16} />
 								</Button>
 							</PopoverTrigger>
@@ -110,6 +111,8 @@ export default async function RootLayout({ children, params }: { children: React
 							<Button className="h-8 w-8 rounded-2xl border p-0" variant={'secondary'}>
 								<Search size={12} />
 							</Button>
+
+							<EmployeeProfileSettings profile={contract?.profile as any} />
 						</div>
 					</div>
 					{children}
