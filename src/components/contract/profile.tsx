@@ -22,7 +22,7 @@ export const Profile = ({ data, type }: props) => {
 				{type == 'profile' && <ProfileForm data={data as any} />}
 			</div>
 
-			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 border-t border-t-border pt-6 text-sm font-light">
+			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 pt-6 text-sm font-light">
 				<li className="grid gap-1">
 					<h4 className="text-xs text-muted-foreground">First name</h4> <p className="font-normal">{data?.first_name}</p>
 				</li>

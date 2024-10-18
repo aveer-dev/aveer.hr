@@ -8,13 +8,13 @@ import { Tables } from '@/type/database.types';
 type contract = Tables<'contracts'> & { entity: Tables<'legal_entities'> & { incorporation_country: Tables<'countries'> & { currency_code: string } }; org: Tables<'organisations'> };
 
 interface props {
-	contracts: contract[];
+	contract: contract;
 }
 
-export const Payments = async ({ contracts }: props) => {
+export const Payments = async ({ contract }: props) => {
 	const supabase = createClient();
 
-	const tableData: PAYMENT[] = contracts?.map(contract => ({
+	const tableData: PAYMENT[] = [0, 1]?.map(() => ({
 		contract: contract.id,
 		legal_entity: contract.entity.name,
 		amount: contract.salary,

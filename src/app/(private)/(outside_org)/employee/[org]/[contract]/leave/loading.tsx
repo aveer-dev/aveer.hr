@@ -1,5 +1,5 @@
 import { PageLoader } from '@/components/ui/page-loader';
 
-export default async function ContractorPage() {
+export default function Loading() {
 	return <PageLoader isLoading={true} />;
 }

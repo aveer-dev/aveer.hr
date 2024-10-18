@@ -20,9 +20,9 @@ export const Header = async ({ orgId }: { orgId?: string }) => {
 					{data?.user && orgId && <AccountTypeToggle orgId={orgId} />}
 				</div>
 
-				<div className="flex items-center gap-3">
+				<div className="flex items-center gap-4">
 					<button className="flex items-center gap-2 text-xs">
-						<span className="hidden sm:block">Do you need help</span> <CircleHelp className="text-muted-foreground" size={16} />
+						<CircleHelp className="text-muted-foreground" size={16} />
 					</button>
 
 					{data?.user && (

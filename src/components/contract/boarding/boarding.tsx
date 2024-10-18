@@ -91,8 +91,8 @@ export const Boarding = ({ data, type, state, contract, boarding, org, reviewTyp
 	};
 
 	return (
-		<div className="grid gap-4 py-4">
-			<div className="mb-4 flex items-center justify-between border-b pb-3">
+		<div className="grid gap-4 rounded-3xl bg-muted/60 py-4">
+			<div className="mb-4 flex items-center justify-between border-b-4 border-b-background px-6 pb-3">
 				<div className="flex items-center gap-2">
 					<h2 className="text-lg font-medium">{type == 'on' ? 'On' : 'Off'}boarding checklist</h2>
 					{(userState?.state == 'pending' || userState?.state == 'approved') && <Badge variant={userState?.state == 'pending' ? 'secondary-warn' : userState?.state == 'approved' ? 'secondary-success' : 'secondary'}>{userState?.state}</Badge>}
@@ -119,14 +119,14 @@ export const Boarding = ({ data, type, state, contract, boarding, org, reviewTyp
 			</div>
 
 			{items && (
-				<ul className="space-y-8">
+				<ul className="space-y-8 px-6 pb-6">
 					{items?.map((item, index) => (
 						<li key={index} className="flex gap-4">
 							<Checkbox
 								disabled={userState?.state == 'pending' || userState?.state == 'approved' || reviewType == 'admin'}
 								onCheckedChange={value => onCheckChange(value, index)}
 								checked={!!item.created_at}
-								className="h-6 w-6 rounded-full border-border"
+								className="h-6 w-6 rounded-full border-border bg-background"
 								id={`onboarding-${index}`}
 							/>
 
