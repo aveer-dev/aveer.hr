@@ -17,7 +17,7 @@ export const Profile = ({ data, type }: props) => {
 	return (
 		<section className="mt-6">
 			<div className="mb-4 flex items-center justify-between">
-				<h2 className="text-xl font-semibold">Personal Details</h2>
+				<h2 className="text-lg font-semibold text-support">Personal Details</h2>
 
 				{type == 'profile' && <ProfileForm data={data as any} />}
 			</div>
@@ -43,7 +43,7 @@ export const Profile = ({ data, type }: props) => {
 				</li>
 			</ul>
 
-			<h1 className="mb-4 mt-16 text-xl font-semibold">Address</h1>
+			<h2 className="mb-4 mt-16 text-lg font-semibold text-support">Address</h2>
 			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 border-t border-t-border pt-6 text-sm font-light">
 				<li className="grid gap-1">
 					<h4 className="text-xs text-muted-foreground">Country of residence</h4> <p className="font-normal">{data?.address?.country || '-'}</p>
@@ -59,7 +59,7 @@ export const Profile = ({ data, type }: props) => {
 				</li>
 			</ul>
 
-			<h1 className="mb-4 mt-16 text-xl font-semibold">Emergency Contact</h1>
+			<h2 className="mb-4 mt-16 text-lg font-semibold text-support">Emergency Contact</h2>
 			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 border-t border-t-border pt-6 text-sm font-light">
 				<li className="grid gap-1">
 					<h4 className="text-xs text-muted-foreground">First name</h4> <p className="font-normal">{data?.emergency_contact?.first_name || '-'}</p>
@@ -74,11 +74,11 @@ export const Profile = ({ data, type }: props) => {
 					<h4 className="text-xs text-muted-foreground">Email</h4> <p className="font-normal">{data?.emergency_contact?.email || '-'}</p>
 				</li>
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Mobile number</h4> <p className="font-normal">+{data?.emergency_contact?.mobile || '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Mobile number</h4> <p className="font-normal">{data?.emergency_contact?.mobile || '-'}</p>
 				</li>
 			</ul>
 
-			<h1 className="mb-4 mt-16 text-xl font-semibold">Medical Record</h1>
+			<h2 className="mb-4 mt-16 text-lg font-semibold text-support">Medical Record</h2>
 			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 border-t border-t-border pt-6 text-sm font-light">
 				<li className="grid gap-1">
 					<h4 className="text-xs text-muted-foreground">Blood type</h4> <p className="font-normal">{data?.medical?.blood_type || '-'}</p>

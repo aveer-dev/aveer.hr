@@ -39,7 +39,7 @@ export default async function TimeoffPage({ params }: { params: { [key: string]:
 	return (
 		<div className="w-full">
 			<div className="flex items-center justify-between">
-				<h2 className="flex items-center justify-between text-lg font-bold">Leave summary</h2>
+				<h2 className="flex items-center justify-between text-base font-medium text-support">Leave summary</h2>
 
 				<div className="flex items-center gap-2">
 					<LeaveRequestDialog contract={data} />
@@ -61,7 +61,7 @@ export default async function TimeoffPage({ params }: { params: { [key: string]:
 			)}
 
 			<div className="mb-6 mt-24 flex w-full items-center justify-between pb-3">
-				<h1 className="text-lg font-medium">Leave requests</h1>
+				<h2 className="flex items-center justify-between text-base font-medium text-support">Leave requests</h2>
 			</div>
 
 			{timeOffRequest?.error && (

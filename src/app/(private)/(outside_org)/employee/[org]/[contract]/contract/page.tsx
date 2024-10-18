@@ -27,7 +27,7 @@ export default async function ProfilePage({ params }: { params: { [key: string]:
 	return (
 		<section className="grid gap-6">
 			<div className="flex w-full items-center justify-between">
-				<h1 className="text-lg font-bold">Contract details</h1>
+				<h2 className="text-lg font-semibold text-support">Contract details</h2>
 			</div>
 
 			<div className="flex w-fit items-center gap-3 rounded-sm border border-accent bg-accent px-3 py-2 text-xs font-thin">

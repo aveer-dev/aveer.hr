@@ -43,13 +43,9 @@ export default async function ProfilePage({ params }: { params: { [key: string]:
 
 	return (
 		<div className="w-full">
-			<div className="mb-4">
-				<h2 className="flex items-center justify-between text-xl font-bold">Files</h2>
-			</div>
-
 			<section className="relative mt-8">
 				<div className="mb-6 flex items-center gap-2">
-					<h2 className="text-sm font-light text-muted-foreground">Organisation files</h2>
+					<h2 className="text-base font-semibold text-support">Organisation files</h2>
 
 					<TooltipProvider>
 						<Tooltip>
@@ -84,7 +80,7 @@ export default async function ProfilePage({ params }: { params: { [key: string]:
 
 			<section className="relative mt-16">
 				<div className="mb-6 flex items-center gap-2">
-					<h2 className="text-sm font-light text-muted-foreground">Your files</h2>
+					<h2 className="text-base font-semibold text-support">Your files</h2>
 
 					<TooltipProvider>
 						<Tooltip>

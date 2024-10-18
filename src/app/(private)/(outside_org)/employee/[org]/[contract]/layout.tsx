@@ -50,7 +50,7 @@ export default async function RootLayout({ children, params }: { children: React
 			<Header orgId={'employee'} />
 
 			<main className="relative mx-auto mt-[5%] min-h-screen w-full max-w-7xl px-4 py-0 pb-28 sm:px-10">
-				<nav className="fixed bottom-0 left-0 right-0 z-10 flex w-full items-center justify-center gap-4 bg-gradient-to-t from-background to-transparent pb-12 pt-8 shadow-md backdrop-blur-sm">
+				<nav className="fixed bottom-0 left-0 right-0 z-10 flex w-full items-center justify-center gap-4 bg-gradient-to-t from-background to-transparent pb-12 pt-4 shadow-md backdrop-blur-sm">
 					{data.length > 1 && (
 						<Popover>
 							<PopoverTrigger asChild>
