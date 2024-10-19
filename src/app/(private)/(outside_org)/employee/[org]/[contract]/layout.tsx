@@ -1,17 +1,12 @@
-import { Button } from '@/components/ui/button';
-import { Check, EllipsisVertical } from 'lucide-react';
-import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { createClient } from '@/utils/supabase/server';
 import { NavMenu } from './employee-nav-menu';
 import { ContractStatus } from '@/components/ui/status-badge';
 import { Badge } from '@/components/ui/badge';
-import { Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { Header } from '@/components/layout/header';
-import { cn } from '@/lib/utils';
-import Link from 'next/link';
 import { EmployeeProfileSettings } from './employee-profile-settings';
+import { EmployeePageSearch } from './employee-search';
+import { ContractsPopover } from './contracts-popover';
 
 export default async function RootLayout({ children, params }: { children: React.ReactNode; params: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -54,32 +49,7 @@ export default async function RootLayout({ children, params }: { children: React
 
 			<main className="relative mx-auto mt-[5%] min-h-screen w-full max-w-7xl px-4 py-0 pb-28 sm:px-10">
 				<nav className="fixed bottom-0 left-0 right-0 z-10 flex w-full items-center justify-center gap-4 bg-gradient-to-t from-background to-transparent pb-12 pt-4 shadow-md backdrop-blur-sm">
-					{data.length > 1 && (
-						<Popover>
-							<PopoverTrigger asChild>
-								<Button variant="outline" className="h-12 w-12 rounded-full bg-background shadow-md transition-all duration-500">
-									<EllipsisVertical size={16} />
-								</Button>
-							</PopoverTrigger>
-
-							<PopoverContent align="start" sideOffset={10} className="w-56 p-1">
-								<Command>
-									<CommandList>
-										<CommandGroup>
-											{data.map(contract => (
-												<CommandItem key={contract.id} value={String(contract.id)} asChild>
-													<Link href={`../../${contract.org.subdomain}/${contract.id}/home`}>
-														<Check className={cn('mr-2 h-4 w-4', params.contract === String(contract.id) ? 'opacity-100' : 'opacity-0')} />
-														{contract.org?.name} - {contract.job_title}
-													</Link>
-												</CommandItem>
-											))}
-										</CommandGroup>
-									</CommandList>
-								</Command>
-							</PopoverContent>
-						</Popover>
-					)}
+					{data.length > 1 && <ContractsPopover contracts={data} contractId={params.contract} />}
 
 					<NavMenu />
 				</nav>
@@ -87,7 +57,7 @@ export default async function RootLayout({ children, params }: { children: React
 				<section className="mx-auto max-w-3xl">
 					<div className="mb-8 flex items-start justify-between border-b pb-8">
 						<div className="space-y-1">
-							<h1 className="text-2xl font-bold">Hi, Emmanuel</h1>
+							<h1 className="text-2xl font-bold">Hi, {contract?.profile?.first_name}</h1>
 							{/* <p className="text-sm font-light text-support">
                                 {format(new Date(), 'eeee')}, {format(new Date(), 'LLLL')} {format(new Date(), 'M')}
                             </p> */}
@@ -108,9 +78,7 @@ export default async function RootLayout({ children, params }: { children: React
 						</div>
 
 						<div className="flex items-center gap-2">
-							<Button className="h-8 w-8 rounded-2xl border p-0" variant={'secondary'}>
-								<Search size={12} />
-							</Button>
+							<EmployeePageSearch />
 
 							<EmployeeProfileSettings profile={contract?.profile as any} />
 						</div>

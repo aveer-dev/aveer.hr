@@ -30,10 +30,15 @@ const formSchema = z.object({
 		last_name: z.string().min(2, { message: 'Provide emergency contact last name' }),
 		email: z.string().optional(),
 		mobile: z.string().min(8, { message: 'Provide emergency contact mobile number' }),
-		relationship: z.string({ message: 'Select your relationship with emergency contact' })
+		relationship: z.string().min(2, { message: 'Select your relationship with emergency contact' })
 	}),
 	medical: z.object({ blood_type: z.string(), gentype: z.string(), allergies: z.string(), medical_condition: z.string(), note: z.string() }),
-	address: z.object({ street_address: z.string(), state: z.string(), code: z.string(), country: z.string() })
+	address: z.object({
+		street_address: z.string().min(2, { message: 'Enter your street address' }),
+		state: z.string().min(2, { message: 'Enter your state' }),
+		code: z.string().min(2, { message: 'Enter your postcode/zipcode' }),
+		country: z.string().min(2, { message: 'Select your country' })
+	})
 });
 
 interface props {

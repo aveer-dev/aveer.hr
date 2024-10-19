@@ -18,10 +18,11 @@ export const Todos = async ({ profile, contractId, org, team }: { profileId?: st
 		{ id: 'address', label: 'Provide physical address', done: true },
 		{ id: 'medical', label: 'Provide medical details', done: true }
 	];
+
 	if (profile && (!profile.nationality || !profile.email || !profile.gender || !profile.mobile)) profileTodos[0].done = false;
-	if (profile && !profile.emergency_contact) profileTodos[1].done = false;
-	if (profile && !profile.address) profileTodos[2].done = false;
-	if (profile && !profile.medical) profileTodos[3].done = false;
+	if ((profile && !(profile.emergency_contact as any)?.first_name) || !(profile.emergency_contact as any)?.last_name || !(profile.emergency_contact as any)?.mobile || !(profile.emergency_contact as any)?.relationship) profileTodos[1].done = false;
+	if ((profile && !(profile.address as any)?.street_address) || !(profile.address as any)?.state || !(profile.address as any)?.code || !(profile.address as any)?.country) profileTodos[2].done = false;
+	if ((profile && !(profile.medical as any)?.blood_type) || !(profile.medical as any)?.gentype || !(profile.medical as any)?.allergies || !(profile.medical as any)?.medical_condition) profileTodos[3].done = false;
 
 	const manager = (await supabase.from('managers').select().match({ org, person: contractId, team: team })).data;
 

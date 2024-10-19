@@ -1,9 +1,7 @@
-import { currencyFormat } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
 import { PAYMENT } from '@/type/employee.types';
 import { createClient } from '@/utils/supabase/server';
-import { format } from 'date-fns';
 import { Tables } from '@/type/database.types';
+import { HardHat } from 'lucide-react';
 
 type contract = Tables<'contracts'> & { entity: Tables<'legal_entities'> & { incorporation_country: Tables<'countries'> & { currency_code: string } }; org: Tables<'organisations'> };
 
@@ -29,8 +27,8 @@ export const Payments = async ({ contract }: props) => {
 		<section>
 			<h2 className="mb-4 ml-2 text-sm font-normal text-support">Upcoming payments</h2>
 
-			<div className="flex overflow-hidden rounded-3xl bg-muted/60 p-4">
-				<ul className="w-full space-y-4">
+			<div className="flex h-40 flex-col items-center justify-center gap-3 overflow-hidden rounded-3xl bg-muted/60 p-4">
+				{/* <ul className="w-full space-y-4">
 					{tableData.map((payment, index) => (
 						<li key={index} className="flex w-full items-center justify-between rounded-lg bg-background p-4 text-sm drop-shadow-sm">
 							<div className="space-y-2">
@@ -47,7 +45,10 @@ export const Payments = async ({ contract }: props) => {
 							</div>
 						</li>
 					))}
-				</ul>
+				</ul> */}
+
+				<HardHat size={16} />
+				<p className="text-xs font-light text-muted-foreground">This section is almost here. We&apos;re adding a couple of finishing touches. 😉</p>
 			</div>
 		</section>
 	);
