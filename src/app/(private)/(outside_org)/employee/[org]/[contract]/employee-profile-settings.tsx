@@ -6,7 +6,7 @@ import { updatePassword } from '@/api/update-password';
 import { ChangePasswordForm } from '@/app/(private)/[org]/settings/profile-security-form';
 import { ProfileFormComponent } from '@/components/forms/profile-form';
 import { Button } from '@/components/ui/button';
-import { Cog, Info, X } from 'lucide-react';
+import { Cog, Command, Info, X } from 'lucide-react';
 import { Tables } from '@/type/database.types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CommandShortcut } from '@/components/ui/command';
@@ -40,7 +40,9 @@ export const EmployeeProfileSettings = ({ profile }: { profile: Tables<'profiles
 
 					<TooltipContent align="center">
 						<p>
-							<CommandShortcut>S</CommandShortcut>
+							<CommandShortcut className="flex items-center gap-1">
+								<Command size={12} /> S
+							</CommandShortcut>
 						</p>
 					</TooltipContent>
 				</Tooltip>

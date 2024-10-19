@@ -24,8 +24,8 @@ export const EmployeePageSearch = () => {
 	}, []);
 
 	const quickActionCommandItems = [
-		{ label: 'Commads', icon: Building2, shortcut: 'k' },
-		{ label: 'Switch orgs', icon: ArrowRightLeft, shortcut: 'j' }
+		{ label: 'Commads', icon: Building2, shortcut: 'K' },
+		{ label: 'Switch orgs', icon: ArrowRightLeft, shortcut: 'J' }
 	];
 
 	const commandItems = [
@@ -70,7 +70,7 @@ export const EmployeePageSearch = () => {
 					<CommandGroup heading="Quick actions">
 						{quickActionCommandItems.map((item, index) => (
 							<CommandItem key={index} value={item.label} className="gap-2 px-3 transition-all duration-500">
-								<div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted p-1">
+								<div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted p-1">
 									<item.icon className="scale-75 stroke-[1.5] text-accent-foreground" />
 								</div>
 								<span className="text-sm">{item.label}</span>
@@ -84,7 +84,7 @@ export const EmployeePageSearch = () => {
 					<CommandGroup heading="Pages">
 						{commandItems.map((item, index) => (
 							<CommandItem key={index} value={item.label} className="gap-2 px-3 transition-all duration-500">
-								<div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted p-1">
+								<div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted p-1">
 									<item.icon className="scale-75 stroke-[1.5] text-accent-foreground" />
 								</div>
 								<span className="text-sm">{item.label}</span>

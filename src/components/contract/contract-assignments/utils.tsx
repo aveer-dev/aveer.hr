@@ -20,7 +20,9 @@ export const getApplicants = async ({ manager, contract, org }: { manager?: Tabl
 	return data?.filter(applicant => {
 		const levels: any[] = applicant.levels;
 
-		return manager ? applicant.role.team == contract.team?.id || applicant.role.direct_report == contract.id || levels.find(level => level.id == contract.profile.id) : levels.find(level => level.id == contract.profile.id);
+		return manager
+			? applicant.role.team == (contract.team?.id || contract.team) || applicant.role.direct_report == contract.id || levels.find(level => level.id == (contract.profile.id || contract.profile))
+			: levels.find(level => level.id == (contract.profile.id || contract.profile));
 	});
 };
 
@@ -43,7 +45,9 @@ export const getLeaveRequests = async ({ manager, contract, org }: { manager?: T
 	return data?.filter(timeoff => {
 		const levels = timeoff.levels as unknown as LEVEL[];
 
-		return manager ? manager.person !== timeoff.contract.id && (timeoff.contract.team == contract.team || timeoff.contract.direct_report == contract.id || levels.find(level => level.id == String(contract.id))) : levels.find(level => level.id == String(contract.id));
+		return manager
+			? manager.person !== timeoff.contract.id && (timeoff.contract.team == (contract.team?.id || contract.team) || timeoff.contract.direct_report == contract.id || levels.find(level => level.id == String(contract.id)))
+			: levels.find(level => level.id == String(contract.id));
 	});
 };
 
@@ -61,6 +65,6 @@ export const getBoardingRequests = async ({ manager, contract, org }: { manager?
 	return data?.filter(boarding => {
 		const levels: any[] = boarding.levels;
 
-		return manager ? manager.person !== boarding.contract.id && (boarding.contract.team == contract.team || boarding.contract.direct_report == contract.id || levels.find(level => level.id == contract.id)) : levels.find(level => level.id == contract.id);
+		return manager ? manager.person !== boarding.contract.id && (boarding.contract.team == (contract.team?.id || contract.team) || boarding.contract.direct_report == contract.id || levels.find(level => level.id == contract.id)) : levels.find(level => level.id == contract.id);
 	});
 };

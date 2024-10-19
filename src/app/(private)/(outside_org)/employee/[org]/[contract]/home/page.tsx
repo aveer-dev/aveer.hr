@@ -35,7 +35,7 @@ export default async function ContractPage({ params }: { params: { [key: string]
 				</div>
 			}>
 			<div className="space-y-14">
-				<Todos profile={data.profile as Tables<'profiles'>} profileId={data.profile?.id} org={params.org} contractId={data.id} team={data.team as number} />
+				<Todos profile={data.profile as Tables<'profiles'>} contract={data as any} profileId={data.profile?.id} org={params.org} team={data.team as number} />
 
 				<Payments contract={data as any} />
 			</div>

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Tables } from '@/type/database.types';
 
-export const Todos = async ({ profile, contractId, org, team }: { profileId?: string; org: string; contractId: number; team: number; profile: Tables<'profiles'> }) => {
+export const Todos = async ({ profile, contract, org, team }: { profileId?: string; org: string; contract: Tables<'contracts'>; team: number; profile: Tables<'profiles'> }) => {
 	const supabase = createClient();
 
 	if (!profile) return;
@@ -24,13 +24,13 @@ export const Todos = async ({ profile, contractId, org, team }: { profileId?: st
 	if ((profile && !(profile.address as any)?.street_address) || !(profile.address as any)?.state || !(profile.address as any)?.code || !(profile.address as any)?.country) profileTodos[2].done = false;
 	if ((profile && !(profile.medical as any)?.blood_type) || !(profile.medical as any)?.gentype || !(profile.medical as any)?.allergies || !(profile.medical as any)?.medical_condition) profileTodos[3].done = false;
 
-	const manager = (await supabase.from('managers').select().match({ org, person: contractId, team: team })).data;
+	const manager = (await supabase.from('managers').select().match({ org, person: contract.id, team: team })).data;
 
-	const leaveRequests = await getLeaveRequests({ org, contract: contractId, manager: manager && manager.length > 0 ? manager[0] : undefined });
+	const leaveRequests = await getLeaveRequests({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined });
 
-	const applicants = await getApplicants({ org, contract: contractId, manager: manager && manager.length > 0 ? manager[0] : undefined });
+	const applicants = await getApplicants({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined });
 
-	const boardingRequests = await getBoardingRequests({ org, contract: contractId, manager: manager && manager.length > 0 ? manager[0] : undefined });
+	const boardingRequests = await getBoardingRequests({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined });
 
 	return (
 		<section>
