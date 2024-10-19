@@ -25,6 +25,7 @@ const config = {
 				label: 'hsl(var(--label))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				support: 'hsl(var(--support))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'

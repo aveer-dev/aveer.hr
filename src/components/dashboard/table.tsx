@@ -35,7 +35,7 @@ export function DataTable<TData, TValue>({ columns, data, org, loading, subColum
 	});
 
 	return (
-		<div className="overflow-hidden">
+		<div className="w-full overflow-hidden">
 			<Table className="max-w-7xl" style={{ width: `min(100%, 80rem)` }}>
 				<TableHeader>
 					{table.getHeaderGroups().map(headerGroup => (

@@ -1,55 +1,29 @@
-import { Suspense } from 'react';
-import { ContractorTableComponent } from './contractor-table.component';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageLoader } from '@/components/ui/page-loader';
+import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 
 export default async function ContractorPage() {
-	return (
-		<div className="grid gap-5">
-			<h1 className="text-2xl font-medium">Contracts</h1>
+	const supabase = createClient();
 
-			<Suspense
-				fallback={
-					<div className="grid w-full gap-6">
-						<div className="flex justify-between gap-4">
-							<Skeleton className="h-5 w-5" />
-							<Skeleton className="h-9 w-56" />
-							<Skeleton className="h-6 w-32" />
-							<Skeleton className="h-5 w-20" />
-							<Skeleton className="h-4 w-16" />
-							<Skeleton className="h-4 w-12" />
-							<Skeleton className="h-4 w-12" />
-						</div>
-						<div className="flex justify-between gap-4">
-							<Skeleton className="h-5 w-5" />
-							<Skeleton className="h-9 w-56" />
-							<Skeleton className="h-6 w-32" />
-							<Skeleton className="h-5 w-20" />
-							<Skeleton className="h-4 w-16" />
-							<Skeleton className="h-4 w-12" />
-							<Skeleton className="h-4 w-12" />
-						</div>
-						<div className="flex justify-between gap-4">
-							<Skeleton className="h-5 w-5" />
-							<Skeleton className="h-9 w-56" />
-							<Skeleton className="h-6 w-32" />
-							<Skeleton className="h-5 w-20" />
-							<Skeleton className="h-4 w-16" />
-							<Skeleton className="h-4 w-12" />
-							<Skeleton className="h-4 w-12" />
-						</div>
-						<div className="flex justify-between gap-4">
-							<Skeleton className="h-5 w-5" />
-							<Skeleton className="h-9 w-56" />
-							<Skeleton className="h-6 w-32" />
-							<Skeleton className="h-5 w-20" />
-							<Skeleton className="h-4 w-16" />
-							<Skeleton className="h-4 w-12" />
-							<Skeleton className="h-4 w-12" />
-						</div>
-					</div>
-				}>
-				<ContractorTableComponent />
-			</Suspense>
-		</div>
-	);
+	const {
+		data: { user },
+		error: userError
+	} = await supabase.auth.getUser();
+
+	if (!user || userError) return redirect('/login');
+
+	const { data, error } = await supabase.from('contracts').select().eq('profile', user.id);
+
+	if (data && data.length) return redirect(`/employee/${data[0].org}/${data[0].id}/home`);
+
+	if (error || !data || !data.length) {
+		return (
+			<div className="flex min-h-56 flex-col items-center justify-center gap-2 bg-muted text-center text-muted-foreground">
+				<p>Unable to fetch contracts</p>
+				<p>{error?.message}</p>
+			</div>
+		);
+	}
+
+	return <PageLoader isLoading={true} />;
 }
