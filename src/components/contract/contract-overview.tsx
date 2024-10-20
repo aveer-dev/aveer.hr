@@ -72,28 +72,6 @@ export const ContractOverview = async ({ data, reviewType }: props) => {
 
 			<Separator />
 
-			{/* salary */}
-			<div className="w-full">
-				<div className="mb-12 flex items-center justify-between">
-					<h2 className="flex items-center justify-between text-xl font-bold">Salary</h2>
-
-					<div className="flex items-center gap-2">
-						{/* <Button variant={'secondary'} className="h-9 gap-3">
-							History
-							<PanelRightOpen size={14} />
-						</Button> */}
-					</div>
-				</div>
-
-				<h3 className="text-4xl font-bold">{data?.salary ? currencyFormat({ currency: data.entity.incorporation_country?.currency_code, value: data?.salary }) : '00'}</h3>
-
-				<div className="mt-3">
-					<p className="text-xs text-muted-foreground">This is you gross annual pay as stated in your contract</p>
-				</div>
-			</div>
-
-			<Separator />
-
 			{/* documents */}
 			<div className="w-full">
 				<div className="mb-4">
