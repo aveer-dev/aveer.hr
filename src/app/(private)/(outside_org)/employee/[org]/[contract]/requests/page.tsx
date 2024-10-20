@@ -3,6 +3,7 @@ import { BoardingsReview } from '@/components/contract/boarding-review';
 import { Timeoff } from '@/components/contract/time-off';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 
 export default async function ProfilePage({ params }: { params: { [key: string]: string } }) {
@@ -24,6 +25,8 @@ export default async function ProfilePage({ params }: { params: { [key: string]:
 			</div>
 		);
 	}
+
+	if (data.status !== 'signed') redirect('./home');
 
 	const manager = (await supabase.from('managers').select().match({ org: params.org, person: params.contract, team: data.team?.id })).data;
 

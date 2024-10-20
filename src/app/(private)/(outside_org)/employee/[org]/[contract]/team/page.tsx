@@ -1,6 +1,7 @@
 import { Teams } from '@/components/contract/teams';
 import { createClient } from '@/utils/supabase/server';
 import { isPast } from 'date-fns';
+import { redirect } from 'next/navigation';
 
 export default async function ProfilePage({ params }: { params: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -21,6 +22,8 @@ export default async function ProfilePage({ params }: { params: { [key: string]:
 			</div>
 		);
 	}
+
+	if (data.status !== 'signed') redirect('./home');
 
 	const manager = (await supabase.from('managers').select().match({ org: params.org, person: params.contract, team: data.team?.id })).data;
 

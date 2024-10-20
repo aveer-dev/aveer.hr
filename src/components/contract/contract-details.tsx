@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 import { TablesUpdate } from '@/type/database.types';
-import { SignatureDrawer } from './signature-drawer';
+import { SignatureDrawer } from './signature/signature-drawer';
 import { redirect } from 'next/navigation';
 import { ScheduleTermination } from './schedule-termination';
 import { TerminateContract } from './terminate-contract';

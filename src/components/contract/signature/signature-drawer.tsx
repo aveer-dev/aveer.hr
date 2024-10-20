@@ -7,13 +7,14 @@ import './style.scss';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { employeeSignContract } from './contract.action';
 
-export const SignatureDrawer = ({ job_title, first_name, signatureAction }: { job_title: string; first_name: string; signatureAction: (payload: FormData) => Promise<string> }) => {
+export const SignatureDrawer = ({ job_title, id, org, first_name, signatureAction }: { id?: number; org?: string; job_title: string; first_name: string; signatureAction?: (payload: FormData) => Promise<string> }) => {
 	const [drawerIsOpen, toggleDrawerState] = useState(false);
 
 	const signContract = async (formData: FormData) => {
-		const error = await signatureAction(formData);
-		if (error) return toast.error(error);
+		const response = signatureAction ? await signatureAction(formData) : id && org && (await employeeSignContract({ payload: formData, id, org }));
+		if (response) return toast.error(response || 'Unable to sign contract');
 		toggleDrawerState(false);
 	};
 

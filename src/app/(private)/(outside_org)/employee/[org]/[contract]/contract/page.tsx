@@ -1,3 +1,6 @@
+'use server';
+
+import { SignatureDrawer } from '@/components/contract/signature/signature-drawer';
 import { Details } from '@/components/ui/details';
 import { createClient } from '@/utils/supabase/server';
 import { InfoIcon } from 'lucide-react';
@@ -28,7 +31,16 @@ export default async function ProfilePage({ params }: { params: { [key: string]:
 		<section className="grid gap-6">
 			<div className="flex w-full items-center justify-between">
 				<h2 className="text-lg font-semibold text-support">Contract details</h2>
+
+				{data.profile && !data.profile_signed && <SignatureDrawer first_name={data.profile?.first_name} job_title={data.job_title} id={data.id} org={params.org} />}
 			</div>
+
+			{data.status == 'awaiting org signature' && (
+				<div className="flex w-fit items-center gap-3 rounded-sm border border-accent bg-accent px-3 py-2 text-xs font-thin">
+					<InfoIcon size={12} />
+					{`Contract is now pending signature from ${data.org.name}'s rep`}
+				</div>
+			)}
 
 			<div className="flex w-fit items-center gap-3 rounded-sm border border-accent bg-accent px-3 py-2 text-xs font-thin">
 				<InfoIcon size={12} />

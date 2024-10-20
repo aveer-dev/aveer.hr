@@ -1,5 +1,6 @@
 import { EmployeeAppraisals } from '@/components/contract/contract-appraisals';
 import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 
 export default async function ProfilePage({ params }: { params: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -18,6 +19,8 @@ export default async function ProfilePage({ params }: { params: { [key: string]:
 			</div>
 		);
 	}
+
+	if (data.status !== 'signed') redirect('./home');
 
 	return <EmployeeAppraisals formType={'employee'} role={'employee'} org={params.org} contract={data} group={'employee'} />;
 }

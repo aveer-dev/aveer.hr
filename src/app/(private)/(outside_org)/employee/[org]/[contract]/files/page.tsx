@@ -6,6 +6,7 @@ import { FileItems, FileLinks } from '@/components/file-management/file-items';
 import { FileDropZone } from '@/components/file-management/file-upload-zone';
 import { AddFile } from '@/components/file-management/add-file-link';
 import { TablesInsert } from '@/type/database.types';
+import { redirect } from 'next/navigation';
 
 export default async function ProfilePage({ params }: { params: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -26,6 +27,8 @@ export default async function ProfilePage({ params }: { params: { [key: string]:
 			</div>
 		);
 	}
+
+	if (data.status !== 'signed') redirect('./home');
 
 	const files = await supabase.from('links').select().match({ org: params.org });
 	const getLinks = (path: string) => files.data?.filter(file => file.path == path);

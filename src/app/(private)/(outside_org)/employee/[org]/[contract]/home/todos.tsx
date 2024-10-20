@@ -19,43 +19,45 @@ export const Todos = async ({ profile, contract, org, team }: { profileId?: stri
 		{ id: 'medical', label: 'Provide medical details', done: true }
 	];
 
-	if (profile && (!profile.nationality || !profile.email || !profile.gender || !profile.mobile)) profileTodos[0].done = false;
-	if ((profile && !(profile.emergency_contact as any)?.first_name) || !(profile.emergency_contact as any)?.last_name || !(profile.emergency_contact as any)?.mobile || !(profile.emergency_contact as any)?.relationship) profileTodos[1].done = false;
-	if ((profile && !(profile.address as any)?.street_address) || !(profile.address as any)?.state || !(profile.address as any)?.code || !(profile.address as any)?.country) profileTodos[2].done = false;
-	if ((profile && !(profile.medical as any)?.blood_type) || !(profile.medical as any)?.gentype || !(profile.medical as any)?.allergies || !(profile.medical as any)?.medical_condition) profileTodos[3].done = false;
+	if (contract.status == 'signed') {
+		if (profile && (!profile.nationality || !profile.email || !profile.gender || !profile.mobile)) profileTodos[0].done = false;
+		if ((profile && !(profile.emergency_contact as any)?.first_name) || !(profile.emergency_contact as any)?.last_name || !(profile.emergency_contact as any)?.mobile || !(profile.emergency_contact as any)?.relationship) profileTodos[1].done = false;
+		if ((profile && !(profile.address as any)?.street_address) || !(profile.address as any)?.state || !(profile.address as any)?.code || !(profile.address as any)?.country) profileTodos[2].done = false;
+		if ((profile && !(profile.medical as any)?.blood_type) || !(profile.medical as any)?.gentype || !(profile.medical as any)?.allergies || !(profile.medical as any)?.medical_condition) profileTodos[3].done = false;
+	}
 
-	const manager = (await supabase.from('managers').select().match({ org, person: contract.id, team: team })).data;
+	const manager = contract.status == 'signed' && (await supabase.from('managers').select().match({ org, person: contract.id, team: team })).data;
 
-	const leaveRequests = await getLeaveRequests({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined });
+	const leaveRequests = contract.status == 'signed' && (await getLeaveRequests({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined }));
 
-	const applicants = await getApplicants({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined });
+	const applicants = contract.status == 'signed' && (await getApplicants({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined }));
 
-	const boardingRequests = await getBoardingRequests({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined });
+	const boardingRequests = contract.status == 'signed' && (await getBoardingRequests({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined }));
 
 	return (
-		<section>
+		<section className={cn(contract.status !== 'signed' && 'pointer-events-none opacity-50 blur-sm')}>
 			<h2 className="mb-4 ml-2 text-sm font-normal text-support">Todos</h2>
 
 			<div className="flex overflow-hidden rounded-3xl bg-muted/60 p-4">
 				<ul className="max-h-72 min-h-72 w-full max-w-[16rem] space-y-1 overflow-y-auto rounded-2xl bg-background px-8 py-4 text-sm drop-shadow-sm">
 					<li className="w-full">
 						<Link href={`#profile`} className={cn(buttonVariants({ variant: 'ghost' }), 'group h-[unset] w-full justify-between rounded-md p-2 px-3 py-3 font-medium transition-all duration-500')}>
-							Profile <span className="w-6 rounded-md bg-muted p-1 text-center text-[10px] transition-all duration-500 group-hover:bg-foreground/10">{profileTodos.length}</span>
+							Profile <span className="w-6 rounded-md bg-muted p-1 text-center text-[10px] transition-all duration-500 group-hover:bg-foreground/10">{profileTodos && profileTodos.length}</span>
 						</Link>
 					</li>
 					<li className="w-full">
 						<Link href={`#leave`} className={cn(buttonVariants({ variant: 'ghost' }), 'group h-[unset] w-full justify-between rounded-md p-2 px-3 py-3 font-medium transition-all duration-500')}>
-							Leave reviews <span className="w-6 rounded-md bg-muted p-1 text-center text-[10px] transition-all duration-500 group-hover:bg-foreground/10">{leaveRequests?.length || 0}</span>
+							Leave reviews <span className="w-6 rounded-md bg-muted p-1 text-center text-[10px] transition-all duration-500 group-hover:bg-foreground/10">{(leaveRequests && leaveRequests?.length) || 0}</span>
 						</Link>
 					</li>
 					<li className="w-full">
 						<Link href={`#applicants`} className={cn(buttonVariants({ variant: 'ghost' }), 'group h-[unset] w-full justify-between rounded-md p-2 px-3 py-3 font-medium transition-all duration-500')}>
-							Job applicants review <span className="w-6 rounded-md bg-muted p-1 text-center text-[10px] transition-all duration-500 group-hover:bg-foreground/10">{(typeof applicants !== 'string' && applicants?.length) || 0}</span>
+							Job applicants review <span className="w-6 rounded-md bg-muted p-1 text-center text-[10px] transition-all duration-500 group-hover:bg-foreground/10">{(applicants && typeof applicants !== 'string' && applicants?.length) || 0}</span>
 						</Link>
 					</li>
 					<li className="w-full">
 						<Link href={`#boarding`} className={cn(buttonVariants({ variant: 'ghost' }), 'group h-[unset] w-full justify-between rounded-md p-2 px-3 py-3 font-medium transition-all duration-500')}>
-							Boarding review <span className="w-6 rounded-md bg-muted p-1 text-center text-[10px] transition-all duration-500 group-hover:bg-foreground/10">{(typeof boardingRequests !== 'string' && boardingRequests?.length) || 0}</span>
+							Boarding review <span className="w-6 rounded-md bg-muted p-1 text-center text-[10px] transition-all duration-500 group-hover:bg-foreground/10">{(boardingRequests && typeof boardingRequests !== 'string' && boardingRequests?.length) || 0}</span>
 						</Link>
 					</li>
 				</ul>

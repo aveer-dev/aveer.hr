@@ -2,6 +2,7 @@ import { PAYMENT } from '@/type/employee.types';
 import { createClient } from '@/utils/supabase/server';
 import { Tables } from '@/type/database.types';
 import { HardHat } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type contract = Tables<'contracts'> & { entity: Tables<'legal_entities'> & { incorporation_country: Tables<'countries'> & { currency_code: string } }; org: Tables<'organisations'> };
 
@@ -24,7 +25,7 @@ export const Payments = async ({ contract }: props) => {
 	}));
 
 	return (
-		<section>
+		<section className={cn(contract.status !== 'signed' && 'pointer-events-none opacity-50 blur-sm')}>
 			<h2 className="mb-4 ml-2 text-sm font-normal text-support">Upcoming payments</h2>
 
 			<div className="flex h-40 flex-col items-center justify-center gap-3 overflow-hidden rounded-3xl bg-muted/60 p-4">

@@ -5,6 +5,7 @@ import { columns } from '@/components/leave/column';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/type/contract.types';
 import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 
 export default async function TimeoffPage({ params }: { params: { [key: string]: string } }) {
@@ -26,6 +27,8 @@ export default async function TimeoffPage({ params }: { params: { [key: string]:
 			</div>
 		);
 	}
+
+	if (data.status !== 'signed') redirect('./home');
 
 	const timeOffRequest = await supabase
 		.from('time_off')
