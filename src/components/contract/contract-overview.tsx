@@ -1,12 +1,10 @@
 import { Info } from 'lucide-react';
-import { Database, Tables, TablesInsert } from '@/type/database.types';
+import { Tables, TablesInsert } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getChartData, LeaveRequestDialog, LeaveRequests } from './leave';
-import { differenceInBusinessDays } from 'date-fns';
 import { FileDropZone } from '@/components/file-management/file-upload-zone';
 import { Separator } from '@/components/ui/separator';
-import { cn, currencyFormat } from '@/lib/utils';
 import { FileItems, FileLinks } from '@/components/file-management/file-items';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROLE } from '@/type/contract.types';

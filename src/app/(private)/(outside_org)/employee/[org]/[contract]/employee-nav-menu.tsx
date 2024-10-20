@@ -15,7 +15,7 @@ export const NavMenu = ({ contract }: { contract: Tables<'contracts'> }) => {
 
 	const [navItems] = useState([
 		{ label: 'Home', icon: House, page: 'home', shortcut: 'h', enabled: true },
-		{ label: 'Time-off', icon: CalendarClock, page: 'leave', shortcut: 'h', enabled: contract.status == 'signed' },
+		{ label: 'Time-off', icon: CalendarClock, page: 'leave', shortcut: 'l', enabled: contract.status == 'signed' },
 		{ label: 'Profile', icon: UserRoundCog, page: 'profile', shortcut: 'p', enabled: true },
 		{ label: 'Team', icon: UsersRound, page: 'team', shortcut: 't', enabled: contract.status == 'signed' },
 		{ label: 'Requests', icon: FileStack, page: 'requests', shortcut: 'r', enabled: contract.status == 'signed' },
