@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandShortcut } from '@/components/ui/command';
 import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog';
-import { ArrowRightLeft, Building2, CalendarClock, Command, FilePenLine, FileStack, FolderOpenDot, House, ListChecks, Search, Signature, UserRoundCog, UsersRound } from 'lucide-react';
+import { ArrowRightLeft, CalendarClock, Command, Dock, FilePenLine, FileStack, FolderOpenDot, House, ListChecks, Search, Signature, UserRoundCog, UsersRound } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,7 @@ export const EmployeePageSearch = () => {
 	}, []);
 
 	const quickActionCommandItems = [
-		{ label: 'Commads', icon: Building2, shortcut: 'K' },
+		{ label: 'Commads', icon: Dock, shortcut: 'K' },
 		{ label: 'Switch orgs', icon: ArrowRightLeft, shortcut: 'J' }
 	];
 

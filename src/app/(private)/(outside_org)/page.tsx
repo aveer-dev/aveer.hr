@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { PageLoader } from '@/components/ui/page-loader';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
@@ -15,15 +14,9 @@ export default async function OrgsPage() {
 	} = await supabase.auth.getUser();
 	if (!user || userError) redirect('/login');
 
-	const { data, error } = await supabase.from('profiles_roles').select('role, organisations(subdomain)').eq('profile', user.id);
+	const [{ data, error }, { data: contracts }] = await Promise.all([await supabase.from('profiles_roles').select('role, organisation').eq('profile', user.id), await supabase.from('contracts').select('id, org')]);
 
-	if (data && data.length) {
-		if (process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true') return redirect(`http://${data[0].organisations?.subdomain}.${process.env.NEXT_PUBLIC_DOMAIN}/`);
-
-		return redirect(`/${data[0].organisations?.subdomain}`);
-	}
-
-	if (data && !data.length)
+	if (data && !data.length) {
 		return (
 			<div className="flex h-[50vh] flex-col items-center justify-center gap-4 text-center">
 				<div className="grid gap-3">
@@ -42,6 +35,7 @@ export default async function OrgsPage() {
 				</div>
 			</div>
 		);
+	}
 
 	if (error)
 		return (
@@ -55,5 +49,34 @@ export default async function OrgsPage() {
 			</div>
 		);
 
-	return <PageLoader isLoading />;
+	return (
+		<div className="flex h-[50vh] flex-col items-center justify-center gap-4 text-center">
+			<div className="grid gap-3">
+				<p className="font-medium">Hi {user.user_metadata.first_name}, welcome onboard.</p>
+				<p className="text-xs text-muted-foreground">Get started or continue with your account the options?</p>
+			</div>
+
+			<div className="mx-auto mt-6 flex items-center gap-4">
+				{contracts && contracts.length && (
+					<Link className={cn(buttonVariants({ size: 'sm', variant: data.length ? 'outline' : 'default' }), 'gap-4 text-xs')} href={`/employee/${contracts[0].org}/${contracts[0].id}/home`}>
+						<UserRound size={12} /> Employee Platform
+					</Link>
+				)}
+
+				{data && data.length && (
+					<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`/${data[0].organisation}`}>
+						<Building2 size={12} />
+						Admin Platform
+					</Link>
+				)}
+
+				{data && !data.length && (
+					<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={'/create-org'}>
+						<Building2 size={12} />
+						Create Organisation
+					</Link>
+				)}
+			</div>
+		</div>
+	);
 }
