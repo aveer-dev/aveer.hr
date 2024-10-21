@@ -1,12 +1,10 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { CalendarClock, Command, FilePenLine, FileStack, FolderOpenDot, House, ListChecks, Signature, UserRoundCog, UsersRound } from 'lucide-react';
+import { CalendarClock, FilePenLine, FileStack, FolderOpenDot, House, ListChecks, Signature, UserRoundCog, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CommandShortcut } from '@/components/ui/command';
 import { Tables } from '@/type/database.types';
 
 export const NavMenu = ({ contract }: { contract: Tables<'contracts'> }) => {
@@ -42,28 +40,23 @@ export const NavMenu = ({ contract }: { contract: Tables<'contracts'> }) => {
 	}, [navItems, router]);
 
 	return (
-		<ul className="no-scrollbar flex max-w-xs items-center gap-4 overflow-x-auto rounded-full border bg-background/30 px-2 py-2 shadow-md backdrop-blur transition-all duration-500 sm:max-w-[unset]">
+		<ul className="no-scrollbar flex max-w-full items-center gap-4 overflow-x-auto rounded-full border bg-background/30 px-2 py-2 shadow-md backdrop-blur transition-all duration-500 sm:max-w-fit">
 			{navItems.map((item, index) => (
-				<li key={index} className={cn('group rounded-3xl px-2 py-2 shadow-gray-400 transition-all duration-500', item.enabled && 'hover:bg-secondary hover:px-3 hover:shadow-md', isPageActive(item.page) && 'bg-foreground px-3 shadow-md hover:bg-foreground')}>
-					<TooltipProvider>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Link href={`./${(item.enabled && item.page) || '#'}`} className={cn('flex items-center', !item.enabled && 'pointer-events-none opacity-50')}>
-									<item.icon size={16} className={cn('', isPageActive(item.page) && 'text-background')} />
+				<li
+					key={index}
+					className={cn('group rounded-3xl px-3 py-2 shadow-gray-400 transition-all duration-500 sm:px-2', item.enabled && 'sm:hover:bg-secondary sm:hover:px-3 sm:hover:shadow-md', isPageActive(item.page) && '!bg-foreground shadow-md hover:bg-foreground sm:px-3')}>
+					<Link href={`./${(item.enabled && item.page) || '#'}`} className={cn('flex items-center', !item.enabled && 'pointer-events-none opacity-50')}>
+						<item.icon size={16} className={cn('', isPageActive(item.page) && 'text-background')} />
 
-									<div className={cn('w-0 overflow-hidden whitespace-nowrap text-sm font-light transition-all duration-500', item.enabled && 'group-hover:ml-4 group-hover:w-[4.2rem]', isPageActive(item.page) && 'ml-4 w-[4.2rem] text-background')}>
-										{item.label}
-									</div>
-								</Link>
-							</TooltipTrigger>
-
-							<TooltipContent align="center">
-								<CommandShortcut className={cn('capitlize flex items-center gap-1')}>
-									<Command className="scale-50" /> Shift <span className="uppercase">{item.shortcut}</span>
-								</CommandShortcut>
-							</TooltipContent>
-						</Tooltip>
-					</TooltipProvider>
+						<div
+							className={cn(
+								'ml-4 w-fit overflow-hidden whitespace-nowrap text-sm font-light transition-all duration-500 sm:ml-0 sm:w-0',
+								item.enabled && 'group-hover:sm:ml-4 group-hover:sm:w-[4.2rem]',
+								isPageActive(item.page) && '!ml-4 text-background sm:w-[4.2rem]'
+							)}>
+							{item.label}
+						</div>
+					</Link>
 				</li>
 			))}
 		</ul>

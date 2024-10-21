@@ -78,7 +78,7 @@ export default async function RootLayout({ children, params }: { children: React
 					{children}
 				</section>
 
-				<nav className="fixed bottom-0 left-0 right-0 z-10 flex w-full items-center justify-center gap-4 bg-gradient-to-t from-background to-transparent pb-12 pt-4 shadow-md backdrop-blur-sm">
+				<nav className="fixed bottom-0 left-1 right-1 z-10 flex w-full items-center justify-center gap-3 bg-gradient-to-t from-background to-transparent pb-6 pt-4 shadow-md backdrop-blur-sm sm:pb-12">
 					{data.length > 1 && <ContractsPopover contracts={data} contractId={params.contract} />}
 
 					<NavMenu contract={contract as any} />
