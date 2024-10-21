@@ -38,7 +38,7 @@ export default async function OrgsPage() {
 		);
 	}
 
-	if (error)
+	if (error) {
 		return (
 			<div className="flex h-[50vh] flex-col items-center justify-center text-center">
 				<p className="text-xs">Unable to fetch organisations available to you</p>
@@ -49,6 +49,7 @@ export default async function OrgsPage() {
 				</div>
 			</div>
 		);
+	}
 
 	return (
 		<div className="flex h-[50vh] flex-col items-center justify-center gap-4 text-center">
@@ -65,10 +66,10 @@ export default async function OrgsPage() {
 				)}
 
 				{data && data.length && (
-					<NavLink org={data[0].organisation} className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`/`}>
+					<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? `http://${data[0].organisation}.${process.env.NEXT_PUBLIC_DOMAIN}/` : `/${data[0].organisation}`}>
 						<Building2 size={12} />
 						Admin Platform
-					</NavLink>
+					</Link>
 				)}
 
 				{data && !data.length && (
