@@ -515,33 +515,35 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 						</InputsContainer>
 					</FormSection>
 
-					<FormSection>
-						<FormSectionDescription>
-							<h2 className="font-medium">Additional questions</h2>
-							<p className="text-balance text-xs font-light text-muted-foreground">These are specific qiestions required for this role</p>
-						</FormSectionDescription>
+					{customQuestions.length > 0 && (
+						<FormSection>
+							<FormSectionDescription>
+								<h2 className="font-medium">Additional questions</h2>
+								<p className="text-balance text-xs font-light text-muted-foreground">These are specific qiestions required for this role</p>
+							</FormSectionDescription>
 
-						<InputsContainer>
-							<div className="grid gap-x-6 gap-y-8">
-								{customQuestions.map((question, index) => (
-									<FormField
-										key={index + 'question'}
-										control={form.control}
-										name={`custom_answers.${index}`}
-										render={() => (
-											<FormItem>
-												<FormLabel>{question}</FormLabel>
-												<FormControl>
-													<Input onChange={event => form.setValue(`custom_answers.${index}`, { ...form.getValues(`custom_answers.${index}`), answer: event.target.value })} placeholder="Enter answers here" />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								))}
-							</div>
-						</InputsContainer>
-					</FormSection>
+							<InputsContainer>
+								<div className="grid gap-x-6 gap-y-8">
+									{customQuestions.map((question, index) => (
+										<FormField
+											key={index + 'question'}
+											control={form.control}
+											name={`custom_answers.${index}`}
+											render={() => (
+												<FormItem>
+													<FormLabel>{question}</FormLabel>
+													<FormControl>
+														<Input onChange={event => form.setValue(`custom_answers.${index}`, { ...form.getValues(`custom_answers.${index}`), answer: event.target.value })} placeholder="Enter answers here" />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									))}
+								</div>
+							</InputsContainer>
+						</FormSection>
+					)}
 
 					<FormSection>
 						<FormSectionDescription className="gap-3">

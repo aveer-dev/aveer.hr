@@ -156,7 +156,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			team: String(contractData?.team || openRoleData?.team || ''),
 			manager: formType == 'contract' ? (manager?.data ? !!manager?.data[0] : false) : openRoleData?.is_manager,
 			policy: String(openRoleData?.policy || policies[0]?.id),
-			direct_report: formType == 'contract' ? (openRoleData?.direct_report ? String(openRoleData?.direct_report) : '') : contractData?.direct_report ? String(contractData?.direct_report) : '',
+			direct_report: formType == 'contract' ? (contractData?.direct_report ? String(contractData?.direct_report) : '') : openRoleData?.direct_report ? String(openRoleData?.direct_report) : '',
 			role: contractData?.role ? String(contractData?.role) : undefined
 		}
 	});
@@ -364,10 +364,6 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 		setActiveLevel(undefined);
 	}, [form, orgBenefits?.additional_offerings]);
 
-	useEffect(() => {
-		if (showManualSystem == true) clearCompensationSection();
-	}, [clearCompensationSection, showManualSystem]);
-
 	const resetForm = () => {
 		toggleFormDetails(false);
 		form.reset();
@@ -546,7 +542,17 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 												)}
 											/>
 
-											<SelectLevel isManual={showManualSystem} setManualSystem={setManualSystem} orgJobLevels={orgJobLevels} form={form} selectedLevelId={form.getValues('level') || ''} setLevelDetails={onSetLevel} />
+											<SelectLevel
+												isManual={showManualSystem}
+												setManualSystem={value => {
+													setManualSystem(value);
+													if (value) clearCompensationSection();
+												}}
+												orgJobLevels={orgJobLevels}
+												form={form}
+												selectedLevelId={form.getValues('level') || ''}
+												setLevelDetails={onSetLevel}
+											/>
 										</div>
 									}
 

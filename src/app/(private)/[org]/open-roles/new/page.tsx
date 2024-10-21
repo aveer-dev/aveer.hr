@@ -1,20 +1,20 @@
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
-import { BackButton } from '@/components/ui/back-button';
 import { ContractForm } from '@/components/forms/contract/form';
 import { PageLoader } from '@/components/ui/page-loader';
-import { getFormEntities, getOrgLevels, getPolicies, getTeams } from '@/utils/form-data-init';
+import { getEmployees, getFormEntities, getOrgLevels, getPolicies, getTeams } from '@/utils/form-data-init';
 
 export default async function Home({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
 
-	const [roleDetails, entities, levels, teams, policies] = await Promise.all([
+	const [roleDetails, entities, levels, teams, policies, employees] = await Promise.all([
 		searchParams.duplicate ? await supabase.from('open_roles').select().match({ id: searchParams.duplicate, org: params.org }).single() : undefined,
 		await getFormEntities({ org: params.org }),
 		await getOrgLevels({ org: params.org }),
 		await getTeams({ org: params.org }),
-		await getPolicies({ org: params.org })
+		await getPolicies({ org: params.org }),
+		await getEmployees({ org: params.org })
 	]);
 
 	const { data } = await supabase.from('org_settings').select().eq('org', params.org).single();
@@ -35,7 +35,7 @@ export default async function Home({ params, searchParams }: { params: { [key: s
 							<Skeleton className="h-60 w-full max-w-4xl"></Skeleton>
 						</div>
 					}>
-					<ContractForm orgBenefits={data} formType="role" policiesData={policies} openRoleData={roleDetails?.data ? roleDetails?.data : undefined} entitiesData={entities as any} levels={levels} teamsData={teams} />
+					<ContractForm employeesData={employees} orgBenefits={data} formType="role" policiesData={policies} openRoleData={roleDetails?.data ? roleDetails?.data : undefined} entitiesData={entities as any} levels={levels} teamsData={teams} />
 				</Suspense>
 			</div>
 		</Suspense>

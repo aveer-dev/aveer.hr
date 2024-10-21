@@ -23,10 +23,10 @@ export const JobRequirements = ({ form }: props) => {
 
 						<div className="rounded-lg bg-background p-2">
 							{form.getValues().requirements?.length ? (
-								<ul className="ml-4 grid gap-2">
+								<ul className="ml-4 space-y-3">
 									{form.getValues().requirements?.map((requirement: string, index: number) => (
 										<li key={index} className="list-disc text-xs text-muted-foreground">
-											<div className="flex w-full justify-between gap-2">
+											<div className="flex w-full items-start justify-between gap-3">
 												{requirement}
 												<button
 													type="button"
