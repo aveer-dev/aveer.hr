@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { UserRound, Building2 } from 'lucide-react';
+import { NavLink } from '@/components/ui/link';
 
 export default async function OrgsPage() {
 	const supabase = createClient();
@@ -64,10 +65,10 @@ export default async function OrgsPage() {
 				)}
 
 				{data && data.length && (
-					<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`/${data[0].organisation}`}>
+					<NavLink org={data[0].organisation} className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={`/`}>
 						<Building2 size={12} />
 						Admin Platform
-					</Link>
+					</NavLink>
 				)}
 
 				{data && !data.length && (
