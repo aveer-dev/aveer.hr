@@ -3,6 +3,11 @@ import { TeamMember } from './team-member-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { AppraisalsDialog } from '@/components/appraisal/appraisals-dialog';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { EllipsisVertical } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Tables } from '@/type/database.types';
+
 interface props {
 	org: string;
 	name: string;
@@ -23,6 +28,44 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 
 	if (error) return error.message;
 	const filteredTeam = data;
+
+	const TeamOptions = ({ person, directReport }: { person: Tables<'contracts'>; directReport?: boolean }) => {
+		return (
+			<>
+				<div className="hidden items-center gap-2 sm:flex">
+					{(!directReport ? isManager && !!managers?.find(manager => manager.person !== person.id) && currentUser !== 'org' : currentUser !== 'org') && <AppraisalsDialog role="manager" managerContract={contractId} org={org} contract={person} />}
+					{contractId !== person.id && <TeamMember person={person as any} />}
+				</div>
+
+				{contractId !== person.id && (
+					<Drawer>
+						<DrawerTrigger asChild>
+							<Button variant="outline" className="sm:hidden">
+								<EllipsisVertical size={12} />
+							</Button>
+						</DrawerTrigger>
+
+						<DrawerContent>
+							<div className="mx-auto w-full max-w-sm py-6">
+								<DrawerHeader className="hidden">
+									<DrawerTitle>Actions</DrawerTitle>
+									<DrawerDescription>Team member actions</DrawerDescription>
+								</DrawerHeader>
+
+								<div className="space-y-3">
+									{(!directReport ? isManager && !!managers?.find(manager => manager.person !== person.id) && currentUser !== 'org' : currentUser !== 'org') && (
+										<AppraisalsDialog className="w-full justify-start" variant={{ variant: 'outline' }} role="manager" managerContract={contractId} org={org} contract={person} />
+									)}
+
+									{contractId !== person.id && <TeamMember person={person as any} />}
+								</div>
+							</div>
+						</DrawerContent>
+					</Drawer>
+				)}
+			</>
+		);
+	};
 
 	return (
 		<>
@@ -60,10 +103,7 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 									<p className="text-xs text-muted-foreground">{person.job_title}</p>
 								</div>
 
-								<div className="flex items-center gap-2">
-									{isManager && !!managers?.find(manager => manager.person !== person.id) && currentUser !== 'org' && <AppraisalsDialog role="manager" managerContract={contractId} org={org} contract={person} />}
-									{contractId !== person.id && <TeamMember person={person as any} />}
-								</div>
+								<TeamOptions person={person} />
 							</li>
 						))}
 
@@ -118,10 +158,11 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 											<p className="text-xs text-muted-foreground">{person.job_title}</p>
 										</div>
 
-										<div className="flex items-center gap-2">
+										{/* <div className="flex items-center gap-2">
 											{currentUser !== 'org' && <AppraisalsDialog role="manager" managerContract={contractId} org={org} contract={person} />}
 											<TeamMember person={person as any} />
-										</div>
+										</div> */}
+										<TeamOptions directReport person={person} />
 									</li>
 								))}
 

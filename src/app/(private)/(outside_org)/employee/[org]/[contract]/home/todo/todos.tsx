@@ -6,6 +6,7 @@ import { getApplicants, getBoardingRequests, getLeaveRequests } from '@/componen
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Tables } from '@/type/database.types';
+import { TodoMenu } from './todo-menu';
 
 export const Todos = async ({ profile, contract, org, team }: { profileId?: string; org: string; contract: Tables<'contracts'>; team: number; profile: Tables<'profiles'> }) => {
 	const supabase = createClient();
@@ -38,11 +39,11 @@ export const Todos = async ({ profile, contract, org, team }: { profileId?: stri
 		<section className={cn(contract.status !== 'signed' && 'pointer-events-none opacity-50 blur-sm')}>
 			<h2 className="mb-4 ml-2 text-sm font-normal text-support">Todos</h2>
 
-			<div className="flex overflow-hidden rounded-3xl bg-muted/60 p-4">
-				<ul className="max-h-72 min-h-72 w-full max-w-[16rem] space-y-1 overflow-y-auto rounded-2xl bg-background px-8 py-4 text-sm drop-shadow-sm">
+			<div className="relative flex overflow-hidden rounded-3xl bg-muted/60 p-4">
+				<TodoMenu>
 					<li className="w-full">
 						<Link href={`#profile`} className={cn(buttonVariants({ variant: 'ghost' }), 'group h-[unset] w-full justify-between rounded-md p-2 px-3 py-3 font-medium transition-all duration-500')}>
-							Profile <span className="w-6 rounded-md bg-muted p-1 text-center text-[10px] transition-all duration-500 group-hover:bg-foreground/10">{profileTodos && profileTodos.length}</span>
+							Account setup <span className="w-6 rounded-md bg-muted p-1 text-center text-[10px] transition-all duration-500 group-hover:bg-foreground/10">{profileTodos && profileTodos.length}</span>
 						</Link>
 					</li>
 					<li className="w-full">
@@ -60,12 +61,12 @@ export const Todos = async ({ profile, contract, org, team }: { profileId?: stri
 							Boarding review <span className="w-6 rounded-md bg-muted p-1 text-center text-[10px] transition-all duration-500 group-hover:bg-foreground/10">{(boardingRequests && typeof boardingRequests !== 'string' && boardingRequests?.length) || 0}</span>
 						</Link>
 					</li>
-				</ul>
+				</TodoMenu>
 
-				<div className="max-h-72 w-full overflow-auto py-4">
+				<div className="max-h-72 w-full overflow-auto py-4 pb-16">
 					<div className="mx-auto max-w-96 space-y-8">
 						<ul id="profile" className="space-y-4">
-							<h3 className="mb-2 text-base font-semibold">Profile</h3>
+							<h3 className="mb-2 text-base font-semibold">Account setup</h3>
 
 							{profileTodos.map(todo => (
 								<li key={todo.id}>

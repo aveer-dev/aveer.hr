@@ -92,7 +92,7 @@ export const Boarding = ({ data, type, state, contract, boarding, org, reviewTyp
 
 	return (
 		<div className="grid gap-4 rounded-3xl bg-muted/60 py-4">
-			<div className="mb-4 flex items-center justify-between border-b-4 border-b-background px-6 pb-3">
+			<div className="mb-4 items-center justify-between space-y-2 border-b-4 border-b-background px-6 pb-3 sm:flex sm:space-y-0">
 				<div className="flex items-center gap-2">
 					<h2 className="text-lg font-medium">{type == 'on' ? 'On' : 'Off'}boarding checklist</h2>
 					{(userState?.state == 'pending' || userState?.state == 'approved') && <Badge variant={userState?.state == 'pending' ? 'secondary-warn' : userState?.state == 'approved' ? 'secondary-success' : 'secondary'}>{userState?.state}</Badge>}
@@ -130,13 +130,13 @@ export const Boarding = ({ data, type, state, contract, boarding, org, reviewTyp
 								id={`onboarding-${index}`}
 							/>
 
-							<label htmlFor={`onboarding-${index}`} className="peer-disabled:opacity-7 flex w-full text-sm font-medium leading-none peer-disabled:cursor-not-allowed">
-								<div className="space-y-2">
+							<label htmlFor={`onboarding-${index}`} className="peer-disabled:opacity-7 flex w-full flex-col gap-2 space-y-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed sm:flex-row">
+								<div className="order-2 space-y-2 sm:order-1">
 									<h4>{item.item}</h4>
 									<p className="text-xs font-light leading-5 text-muted-foreground">{item.description}</p>
 								</div>
 
-								{item.created_at && <p className="ml-auto min-w-20 text-xs font-light text-muted-foreground">{format(item.created_at, 'PP')}</p>}
+								{item.created_at && <p className="order-1 min-w-20 text-xs font-light text-muted-foreground sm:order-2 sm:ml-auto">{format(item.created_at, 'PP')}</p>}
 							</label>
 						</li>
 					))}

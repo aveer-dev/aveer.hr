@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
-import { Todos } from './todos';
+import { Todos } from './todo/todos';
 import { Payments } from './payments';
 import { Tables } from '@/type/database.types';
 import { Info } from 'lucide-react';

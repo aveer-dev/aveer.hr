@@ -42,7 +42,7 @@ export const NavMenu = ({ contract }: { contract: Tables<'contracts'> }) => {
 	}, [navItems, router]);
 
 	return (
-		<ul className="flex items-center gap-4 rounded-full border bg-background/30 px-2 py-2 shadow-md backdrop-blur transition-all duration-500">
+		<ul className="no-scrollbar flex max-w-xs items-center gap-4 overflow-x-auto rounded-full border bg-background/30 px-2 py-2 shadow-md backdrop-blur transition-all duration-500 sm:max-w-[unset]">
 			{navItems.map((item, index) => (
 				<li key={index} className={cn('group rounded-3xl px-2 py-2 shadow-gray-400 transition-all duration-500', item.enabled && 'hover:bg-secondary hover:px-3 hover:shadow-md', isPageActive(item.page) && 'bg-foreground px-3 shadow-md hover:bg-foreground')}>
 					<TooltipProvider>

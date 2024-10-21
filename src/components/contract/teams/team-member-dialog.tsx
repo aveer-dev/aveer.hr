@@ -11,7 +11,7 @@ export const TeamMember = ({ person }: props) => {
 	return (
 		<Sheet>
 			<SheetTrigger className="flex items-center" asChild>
-				<Button variant={'outline'}>
+				<Button variant={'outline'} className="w-full justify-start">
 					<BookUser size={12} className="mr-2" /> View details
 				</Button>
 			</SheetTrigger>

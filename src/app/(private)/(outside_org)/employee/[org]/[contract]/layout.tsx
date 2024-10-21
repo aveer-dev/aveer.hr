@@ -48,15 +48,9 @@ export default async function RootLayout({ children, params }: { children: React
 			<Header orgId={'employee'} />
 
 			<main className="relative mx-auto mt-[5%] min-h-screen w-full max-w-7xl px-4 py-0 pb-28 sm:px-10">
-				<nav className="fixed bottom-0 left-0 right-0 z-10 flex w-full items-center justify-center gap-4 bg-gradient-to-t from-background to-transparent pb-12 pt-4 shadow-md backdrop-blur-sm">
-					{data.length > 1 && <ContractsPopover contracts={data} contractId={params.contract} />}
-
-					<NavMenu contract={contract as any} />
-				</nav>
-
 				<section className="mx-auto max-w-3xl">
-					<div className="mb-8 flex items-start justify-between border-b pb-8">
-						<div className="space-y-1">
+					<div className="mb-8 flex flex-col items-start justify-between gap-8 border-b pb-8 sm:flex-row">
+						<div className="order-2 space-y-1 sm:order-1">
 							<h1 className="text-2xl font-bold">Hi, {contract?.profile?.first_name}</h1>
 							{contract && (
 								<div className="flex items-center gap-3 text-xs font-light">
@@ -74,14 +68,21 @@ export default async function RootLayout({ children, params }: { children: React
 							)}
 						</div>
 
-						<div className="flex items-center gap-2">
+						<div className="order-1 flex w-full items-center justify-end gap-3 sm:order-2 sm:w-fit sm:justify-start">
 							<EmployeePageSearch />
 
 							<EmployeeProfileSettings profile={contract?.profile as any} />
 						</div>
 					</div>
+
 					{children}
 				</section>
+
+				<nav className="fixed bottom-0 left-0 right-0 z-10 flex w-full items-center justify-center gap-4 bg-gradient-to-t from-background to-transparent pb-12 pt-4 shadow-md backdrop-blur-sm">
+					{data.length > 1 && <ContractsPopover contracts={data} contractId={params.contract} />}
+
+					<NavMenu contract={contract as any} />
+				</nav>
 			</main>
 		</>
 	);
