@@ -43,7 +43,8 @@ const nextConfig = {
 				}
 			]
 		})
-	]
+	],
+	swcMinify: true
 };
 
 export default withSentryConfig(nextConfig, {
