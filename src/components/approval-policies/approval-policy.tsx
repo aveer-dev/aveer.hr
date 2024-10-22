@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
-import { Check, ChevronsUpDown, CircleMinus, Plus, Trash2, TriangleAlert } from 'lucide-react';
+import { Plus, Trash2, TriangleAlert } from 'lucide-react';
 import { Database, Tables } from '@/type/database.types';
 import { format } from 'date-fns';
 import { createPolicy, deletePolicy, updatePolicy } from './policy-actions';
@@ -22,21 +22,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Badge } from '@/components/ui/badge';
+import { formSchema, LEVEL } from './types';
 
-const formSchema = z.object({
-	name: z.string().min(1),
-	description: z.string().optional(),
-	type: z.enum(['time_off', 'role_application', 'boarding']),
-	levels: z
-		.object({ type: z.string(), id: z.string(), level: z.number() })
-		.refine(input => (input.type == 'employee' && input.id) || input.type == 'admin' || input.type == 'manager', { message: 'Selete an employee' })
-		.array()
-		.min(1, { message: 'Add at least one approval level' }),
-	is_default: z.boolean().optional()
-});
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { PolicyLevels } from './policy-levels';
 
 const supabase = createClient();
 
@@ -50,13 +41,20 @@ interface props {
 }
 
 export const ApprovalPolicy = ({ data, org, children, className, onCreate, type }: props) => {
-	const [levels, updateLevels] = useState<{ type: string; id: string; level: number; isopen?: boolean }[]>([]);
+	const [levels, updateLevels] = useState<LEVEL[]>([]);
 	const [isUpdating, setUpdateState] = useState(false);
 	const [isDeleting, setDeleteState] = useState(false);
 	const [isDialogOpen, toggleDialogState] = useState(false);
 	const [employees, setEmployees] = useState<{ id: number; job_title: string; profile: { first_name: string; last_name: string } }[]>([]);
 	const [defaultPolicy, setDefaultPolicy] = useState<Tables<'approval_policies'>[]>();
 	const router = useRouter();
+
+	const sensors = useSensors(
+		useSensor(PointerSensor),
+		useSensor(KeyboardSensor, {
+			coordinateGetter: sortableKeyboardCoordinates
+		})
+	);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -75,7 +73,9 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setUpdateState(true);
 
-		const response = data ? await updatePolicy(org, data.id, { ...values, updated_at: new Date() as any }) : await createPolicy(org, { ...values, org });
+		const payload = { ...values, levels: values.levels.map((level, index) => ({ ...level, level: index })) };
+
+		const response = data ? await updatePolicy(org, data.id, { ...payload, updated_at: new Date() as any }) : await createPolicy(org, { ...payload, org });
 		setUpdateState(false);
 		if (typeof response == 'string') return toast.error('Error', { description: response });
 
@@ -108,11 +108,19 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 		if (data?.type) getDefaultPolicy(data?.type);
 	}, [data, getDefaultPolicy, org]);
 
-	const employeeTypes = [
-		{ label: 'Admins', type: 'admin' },
-		{ label: 'Manager', type: 'manager' },
-		{ label: 'Employee', type: 'employee' }
-	];
+	const handleDragEnd = (event: { active: any; over: any }) => {
+		const { active, over } = event;
+
+		if (active.id !== over.id) {
+			updateLevels(items => {
+				const oldIndex = items.findIndex(item => item.level == active.id);
+				const newIndex = items.findIndex(item => item.level == over.id);
+
+				form.setValue('levels', arrayMove(form.getValues('levels'), oldIndex, newIndex));
+				return arrayMove(items, oldIndex, newIndex);
+			});
+		}
+	};
 
 	return (
 		<Sheet
@@ -259,122 +267,13 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 							<div>
 								<h2 className="mb-4 text-sm font-medium text-foreground">Approval levels</h2>
 
-								<div className="space-y-8">
-									{levels.map((level, index) => (
-										<FormField
-											control={form.control}
-											key={index}
-											name={`levels.${index}`}
-											render={() => (
-												<FormItem key={index} className="mt-4 space-y-4 rounded-md bg-accent p-2">
-													<FormLabel className="flex items-center justify-between">
-														<h3 className="text-sm font-semibold text-muted-foreground">Level {index + 1}</h3>
-														<Button
-															type="button"
-															variant={'ghost_destructive'}
-															onClick={() => {
-																levels.splice(index, 1);
-																updateLevels([...levels]);
-
-																const formLevels = form.getValues('levels');
-																formLevels.splice(index, 1);
-																form.setValue('levels', formLevels);
-															}}
-															className="h-6 w-6 p-0">
-															<CircleMinus size={12} />
-														</Button>
-													</FormLabel>
-
-													<div className="space-y-6">
-														<FormField
-															control={form.control}
-															name={`levels.${index}.type`}
-															render={() => (
-																<FormItem className="flex w-full flex-col">
-																	<FormLabel>Employee type</FormLabel>
-
-																	<Popover
-																		open={level.isopen}
-																		onOpenChange={state => {
-																			level.isopen = state;
-																			levels[index] = level;
-																			updateLevels([...levels]);
-																		}}>
-																		<PopoverTrigger asChild>
-																			<FormControl>
-																				<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !form.getValues(`levels.${index}.type`) && 'text-muted-foreground')}>
-																					{form.getValues(`levels.${index}.type`) ? employeeTypes.find(type => type.type === form.getValues(`levels.${index}.type`))?.label : 'Select employee type'}
-																					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-																				</Button>
-																			</FormControl>
-																		</PopoverTrigger>
-
-																		<PopoverContent className="w-[300px] p-0">
-																			<Command>
-																				<CommandList>
-																					<CommandGroup>
-																						{employeeTypes.map((type, idx) => (
-																							<CommandItem
-																								key={idx}
-																								value={type.type}
-																								onSelect={value => {
-																									form.setValue(`levels.${index}.type`, value);
-																									if (value !== 'employee') form.setValue(`levels.${index}.id`, '');
-
-																									levels[index] = { ...levels[index], type: value, isopen: false };
-																									updateLevels([...levels]);
-																								}}>
-																								<Check className={cn('mr-2 h-4 w-4', type.type === form.getValues(`levels.${index}.type`) ? 'opacity-100' : 'opacity-0')} />
-																								{type.label}
-																							</CommandItem>
-																						))}
-																					</CommandGroup>
-																				</CommandList>
-																			</Command>
-																		</PopoverContent>
-																	</Popover>
-
-																	<FormMessage />
-																</FormItem>
-															)}
-														/>
-
-														{levels[index].type == 'employee' && (
-															<FormField
-																control={form.control}
-																name={`levels.${index}.id`}
-																render={({ field }) => (
-																	<FormItem>
-																		<FormLabel>Employee</FormLabel>
-																		<Select onValueChange={field.onChange} defaultValue={field.value}>
-																			<FormControl>
-																				<SelectTrigger>
-																					<SelectValue placeholder="Select an employee" />
-																				</SelectTrigger>
-																			</FormControl>
-
-																			<SelectContent>
-																				{employees.map(employee => (
-																					<SelectItem key={employee.id} value={String(employee.id)}>
-																						{employee.profile.first_name} {employee.profile.last_name} • {employee.job_title}
-																					</SelectItem>
-																				))}
-																			</SelectContent>
-																		</Select>
-
-																		<FormMessage />
-																	</FormItem>
-																)}
-															/>
-														)}
-													</div>
-
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									))}
-								</div>
+								<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+									<SortableContext items={levels.map(item => item.level)} strategy={verticalListSortingStrategy}>
+										{levels.map((level, index) => (
+											<PolicyLevels id={level.level} index={index} key={level.level} levels={levels} level={level} updateLevels={updateLevels} employees={employees} form={form} />
+										))}
+									</SortableContext>
+								</DndContext>
 
 								<Button
 									type="button"
@@ -389,9 +288,9 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 								</Button>
 							</div>
 
-							<div className="flex items-center gap-4">
+							<div className="!mt-12 flex items-center gap-3">
 								{data?.id && (
-									<Button type="button" disabled={isDeleting} onClick={() => onDeletePolicy(data?.id)} variant={'secondary_destructive'} size={'icon'} className="w-16 gap-3">
+									<Button type="button" disabled={isDeleting} onClick={() => onDeletePolicy(data?.id)} variant={'secondary_destructive'} className="gap-3">
 										{!isDeleting && <Trash2 size={12} />}
 										{isDeleting && <LoadingSpinner className="text-inherit" />}
 									</Button>

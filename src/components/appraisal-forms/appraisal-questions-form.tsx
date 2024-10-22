@@ -153,7 +153,7 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group, 
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-12">
 					<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 						<SortableContext items={questions.q.map(item => item.id)} strategy={verticalListSortingStrategy}>
-							{questions.q?.map((id, index) => <Questions teams={teams} question={id} index={index} key={Math.random()} id={id.id} updateQuestions={updateQuestions} org={org} questions={questions} form={form} />)}
+							{questions.q?.map((question, index) => <Questions teams={teams} question={question} index={index} key={Math.random()} id={question.id} updateQuestions={updateQuestions} org={org} questions={questions} form={form} />)}
 						</SortableContext>
 					</DndContext>
 
