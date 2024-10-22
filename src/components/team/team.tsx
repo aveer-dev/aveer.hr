@@ -1,6 +1,5 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,19 +20,20 @@ import { Separator } from '@/components/ui/separator';
 import { createTeam, deleteManager, updateTeam } from './team-actions';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
+import { DeleteTeamDialog } from './delete-team-dialog';
 
 const formSchema = z.object({
 	name: z.string().min(1, { message: 'Provide team name' }),
 	description: z.string().optional(),
 	managers: z
 		.object({ id: z.number().optional(), person: z.string(), role: z.number(), org: z.string(), team: z.number().nullable(), profile: z.string() })
-		.refine(input => input.person && input.role && input.team && input.profile, { message: 'Selete an employee' })
+		.refine(input => input.person && input.role && input.profile, { message: 'Selete an employee' })
 		.array()
 		.refine(
 			inputs => {
 				if (inputs.length <= 1) return true;
 
-				const items = inputs.map(input => !!inputs.find(finder => finder.person == input.person));
+				const items = inputs.map(input => inputs.filter(finder => finder.person == input.person).length > 1);
 
 				return !items?.find(item => item == true);
 			},
@@ -72,6 +72,9 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 
 		if (!onCreate) router.refresh();
 		if (onCreate) response !== true ? onCreate(response) : onCreate();
+		form.reset();
+		form.setValue('managers', []);
+		setManagers([]);
 	};
 
 	const getManagers = useCallback(
@@ -95,7 +98,7 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 	}, []);
 
 	const getEmployees = useCallback(async (org: string) => {
-		const { data, error } = await supabase.from('contracts').select('id, profile:profiles!contracts_profile_fkey(id, first_name, last_name)').match({ org, status: 'signed' });
+		const { data, error } = await supabase.from('contracts').select('id, profile:profiles!contracts_profile_fkey(id, first_name, last_name)').match({ org });
 		if (!data || error) return toast('🥺 Error', { description: 'Unable to fetch list of colleagues for leave request form' });
 		if (data.length) setEmployees(() => data as any);
 	}, []);
@@ -141,21 +144,23 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 	return (
 		<Sheet open={isDialogOpen} onOpenChange={toggleDialogState}>
 			<SheetTrigger asChild>
-				<button type="button" className={cn('w-full', !data && !children && buttonVariants(), className)}>
-					{data && !children && (
-						<Card className="flex w-full items-center justify-between p-3 text-left transition-all duration-500 hover:bg-accent/60">
-							<div className="space-y-1">
-								<h4 className="text-xs font-semibold">{data?.name}</h4>
-								<p className="text-xs text-muted-foreground">
-									{managers.length} manager{managers.length > 1 && 's'} • {teamMembers} members
-								</p>
-							</div>
+				<button type="button" className={cn('w-full text-left', !children && buttonVariants({ variant: data ? 'outline' : 'default' }), data && 'h-fit', !children && 'flex items-center justify-between p-4', className)}>
+					{!children && (
+						<>
+							{data ? (
+								<div className="space-y-1">
+									<h4 className="text-xs font-semibold">{data?.name}</h4>
+									<p className="text-xs text-muted-foreground">
+										{managers.length} manager{managers.length > 1 && 's'} • {teamMembers} members
+									</p>
+								</div>
+							) : (
+								'Add new team'
+							)}
 
 							<ChevronRightIcon size={12} />
-						</Card>
+						</>
 					)}
-
-					{!data && !children && 'Add team'}
 
 					{!!children && children}
 				</button>
@@ -306,10 +311,22 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 								</Button>
 							)}
 
-							<Button type="submit" disabled={isUpdating} size={'sm'} className="w-full gap-3 px-4 text-xs font-light">
-								{isUpdating && <LoadingSpinner />}
-								{isUpdating ? (data ? 'Updating team' : 'Creating team') : data ? 'Update team' : 'Create team'}
-							</Button>
+							<div className="mt-4 flex items-center gap-2">
+								{data && <DeleteTeamDialog org={org} id={data?.id} onTeamDeleted={() => router.refresh()} />}
+
+								<Button
+									type="submit"
+									onClick={() => {
+										console.log(form.formState);
+										console.log(form.getValues());
+									}}
+									disabled={isUpdating}
+									size={'sm'}
+									className="w-full gap-3 px-4 text-xs font-light">
+									{isUpdating && <LoadingSpinner />}
+									{isUpdating ? (data ? 'Updating team' : 'Creating team') : data ? 'Update team' : 'Create team'}
+								</Button>
+							</div>
 						</form>
 					</Form>
 				</section>

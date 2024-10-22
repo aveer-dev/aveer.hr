@@ -18,5 +18,5 @@ export const FormSectionDescription = ({ children, ...props }: { children: React
 };
 
 export const InputsContainer = ({ children }: { children: ReactNode }) => {
-	return <div className="grid gap-8">{children}</div>;
+	return <div className="space-y-8">{children}</div>;
 };

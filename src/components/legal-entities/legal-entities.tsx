@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
-import { ChevronRightIcon } from 'lucide-react';
+import { ChevronRight, ChevronRightIcon } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
@@ -28,17 +28,18 @@ export const LegalEntities = async ({ org }: { org: string }) => {
 
 			<InputsContainer>
 				{data.map(entity => (
-					<Card key={entity.id} className="w-full text-left">
-						<Link className="flex items-center justify-between p-4 text-xs" href={`./legal-entity/${entity.id}`}>
-							<div>
-								{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
-							</div>
-							<ChevronRightIcon className="text-muted-foreground" size={14} />
-						</Link>
-					</Card>
+					<Link key={entity.id} className={cn(buttonVariants({ variant: 'outline' }), 'flex h-fit items-center justify-between p-4')} href={`./legal-entity/${entity.id}`}>
+						<div>
+							{entity?.name} • <span className="text-muted-foreground">{entity.incorporation_country}</span>
+						</div>
+						<ChevronRightIcon className="text-muted-foreground" size={14} />
+					</Link>
 				))}
-				<Link href="./legal-entity/new" className={cn(buttonVariants(), 'w-full text-xs')}>
-					Add Legal Entity
+
+				{data.length == 0 && <Card className="flex h-32 items-center justify-center text-xs text-muted-foreground">You do not have any legal entities yet</Card>}
+
+				<Link href="./legal-entity/new" className={cn(buttonVariants(), 'flex w-full items-center justify-between')}>
+					Add Legal Entity <ChevronRight size={12} />
 				</Link>
 			</InputsContainer>
 		</FormSection>

@@ -2,6 +2,7 @@ import { FormSection, FormSectionDescription, InputsContainer } from '@/componen
 import { createClient } from '@/utils/supabase/server';
 import { Suspense } from 'react';
 import { Boarding } from './boarding';
+import { Card } from '../ui/card';
 
 interface props {
 	org: string;
@@ -25,6 +26,9 @@ export const Boardings = async ({ org }: props) => {
 					{data.map(policy => (
 						<Boarding key={policy.id} org={org} data={policy} />
 					))}
+
+					{data.length == 0 && <Card className="flex h-32 items-center justify-center text-xs text-muted-foreground">You do not have any onboarding/offboarding checklist yet</Card>}
+
 					<Boarding org={org} />
 				</InputsContainer>
 			</FormSection>

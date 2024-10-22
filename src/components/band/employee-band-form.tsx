@@ -128,20 +128,17 @@ export const EmployeeBandDialog = ({ band, org }: props) => {
 	return (
 		<Sheet open={isDialogOpen} onOpenChange={openDialog}>
 			<SheetTrigger asChild>
-				<Card className="w-full text-left">
-					{band && (
-						<button className="flex w-full items-center justify-between p-4 text-xs">
-							<div>
-								{band.level} • <span className="text-muted-foreground">{band.role}</span>
-							</div>
-							<div className="flex items-center gap-2 text-muted-foreground">
-								<ChevronRight size={14} />
-							</div>
-						</button>
+				<Button variant={band ? 'outline' : 'default'} className={cn('flex w-full items-center justify-between p-4 text-xs', band && 'h-fit')}>
+					{band ? (
+						<div>
+							{band.level} • <span className="text-muted-foreground">{band.role}</span>
+						</div>
+					) : (
+						'Add new band'
 					)}
 
-					{!band && <Button className={cn('w-full text-xs')}>Add new band</Button>}
-				</Card>
+					<ChevronRight size={14} />
+				</Button>
 			</SheetTrigger>
 
 			<SheetContent className="overflow-auto pb-24">
@@ -276,6 +273,7 @@ export const EmployeeBandDialog = ({ band, org }: props) => {
 
 							<div className="mt-8 flex items-center gap-2">
 								{band && <DeleteBandDialog onBandDeleted={() => router.refresh()} org={org} id={band?.id} />}
+
 								<SubmitButton />
 							</div>
 						</form>

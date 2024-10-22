@@ -4,7 +4,6 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { cn } from '@/lib/utils';
 import { Tables, TablesInsert } from '@/type/database.types';
 import { ReactNode, useCallback, useState } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { ChevronRightIcon, CircleMinus, List, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -127,26 +126,29 @@ export const Boarding = ({ data, children, className, org }: props) => {
 				}
 			}}>
 			<SheetTrigger asChild>
-				<button type="button" className={cn('w-full', !data && !children && buttonVariants(), className)}>
-					{data && !children && (
-						<Card className="flex w-full items-center justify-between p-5 text-left transition-all duration-500 hover:bg-accent/60">
-							<div className="space-y-1">
-								<h4 className="text-xs font-semibold">{data?.name}</h4>
-								<p className="text-xs font-light capitalize text-muted-foreground">{data.type}boarding</p>
-							</div>
+				<button type="button" className={cn('w-full', !children && buttonVariants({ variant: data ? 'outline' : 'default' }), data && 'h-fit', !children && 'flex w-full items-center justify-between p-4 text-left', className)}>
+					{!children && (
+						<>
+							{data ? (
+								<div className="space-y-1">
+									<div className="flex items-center gap-2">
+										<h4 className="text-xs font-semibold">{data?.name}</h4>
+										{data.is_default && (
+											<Badge className="py-px text-xs font-light text-muted-foreground" variant={'secondary'}>
+												{data.is_default && 'default'}
+											</Badge>
+										)}
+									</div>
 
-							<div className="flex items-center gap-2">
-								{data.is_default && (
-									<Badge className="py-px text-xs font-light text-muted-foreground" variant={'secondary'}>
-										{data.is_default && 'default'}
-									</Badge>
-								)}
-								<ChevronRightIcon size={12} />
-							</div>
-						</Card>
+									<p className="text-xs font-light capitalize text-muted-foreground">{data.type}boarding</p>
+								</div>
+							) : (
+								'Add checklist'
+							)}
+
+							<ChevronRightIcon size={12} />
+						</>
 					)}
-
-					{!data && !children && 'Add checklist'}
 
 					{!!children && children}
 				</button>

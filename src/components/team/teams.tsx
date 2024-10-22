@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { Team } from './team';
 import { Tables } from '@/type/database.types';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
+import { Card } from '../ui/card';
 
 interface props {
 	org: string;
@@ -26,9 +27,10 @@ export const Teams = async ({ org, teams }: props) => {
 				</FormSectionDescription>
 
 				<InputsContainer>
-					{teams.data.map(policy => (
-						<Team key={policy.id} org={org} data={policy} />
-					))}
+					{teams.data?.map((team: any) => <Team key={team.id} org={org} data={team} />)}
+
+					{teams.data?.length == 0 && <Card className="flex h-32 items-center justify-center text-xs text-muted-foreground">You do not have any teams yet</Card>}
+
 					<Team org={org} />
 				</InputsContainer>
 			</FormSection>

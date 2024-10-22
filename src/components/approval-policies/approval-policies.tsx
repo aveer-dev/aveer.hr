@@ -4,6 +4,8 @@ import { FormSection, FormSectionDescription, InputsContainer } from '../forms/f
 import { createClient } from '@/utils/supabase/server';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/card';
+import { ChevronRight } from 'lucide-react';
 
 export const ApprovalPolicies = async ({ org }: { org: string }) => {
 	const supabase = createClient();
@@ -24,8 +26,11 @@ export const ApprovalPolicies = async ({ org }: { org: string }) => {
 						<ApprovalPolicy org={org} key={policy.id} data={policy} />
 					))}
 
-					<ApprovalPolicy className={cn(buttonVariants())} org={org}>
+					{data.length == 0 && <Card className="flex h-32 items-center justify-center text-xs text-muted-foreground">You do not have any approval policy created yet.</Card>}
+
+					<ApprovalPolicy className={cn(buttonVariants(), 'flex w-full items-center justify-between p-4')} org={org}>
 						Create approval policy
+						<ChevronRight size={12} />
 					</ApprovalPolicy>
 				</InputsContainer>
 			</FormSection>

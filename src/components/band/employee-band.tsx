@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { EmployeeBandDialog } from './employee-band-form';
-import { FormSection, FormSectionDescription, InputsContainer } from '../forms/form-section';
+import { FormSection, FormSectionDescription, InputsContainer } from '@/components/forms/form-section';
+import { Card } from '@/components/ui/card';
 
 interface props {
 	org: string;
@@ -28,13 +29,13 @@ export const EmployeeBand = async ({ org }: props) => {
 			</FormSectionDescription>
 
 			<InputsContainer>
-				<div className="grid gap-8">
-					{data.map(band => (
-						<EmployeeBandDialog band={band} key={band.id} org={org} />
-					))}
+				{data.map(band => (
+					<EmployeeBandDialog band={band} key={band.id} org={org} />
+				))}
 
-					<EmployeeBandDialog org={org} />
-				</div>
+				{data.length == 0 && <Card className="flex h-32 items-center justify-center text-xs text-muted-foreground">You do not have any employee levels yet</Card>}
+
+				<EmployeeBandDialog org={org} />
 			</InputsContainer>
 		</FormSection>
 	);

@@ -5,35 +5,37 @@ import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
-import { deleteBand } from './band.action';
+import { deleteTeam } from './team-actions';
 
 interface props {
 	org: string;
 	id: number;
-	onBandDeleted: () => void;
+	onTeamDeleted: () => void;
 }
 
-export const DeleteBandDialog = ({ org, id, onBandDeleted }: props) => {
+export const DeleteTeamDialog = ({ org, id, onTeamDeleted }: props) => {
 	const [isDeleting, setDeleteState] = useState(false);
 	const [isToggled, toggleDialog] = useState(false);
 
-	const onDeleteBand = async () => {
+	const onDeleteTeam = async () => {
 		setDeleteState(true);
-		const response = await deleteBand(org, id);
+		const response = await deleteTeam(org, id);
 		setDeleteState(false);
+
 		toggleDialog(false);
 		if (response !== true) return toast('❌ Error', { description: response });
+
 		toast('🍻 Success', { description: 'Band deleted successfully' });
-		onBandDeleted();
+		onTeamDeleted();
 	};
 
 	const SubmitButton = () => {
 		const { pending } = useFormStatus();
 
 		return (
-			<Button onClick={() => onDeleteBand()} variant={'destructive'} disabled={pending || isDeleting} size={'sm'} className="gap-2">
+			<Button onClick={() => onDeleteTeam()} variant={'destructive'} disabled={pending || isDeleting} size={'sm'} className="gap-2">
 				{(pending || isDeleting) && <LoadingSpinner />}
-				{pending || isDeleting ? 'Deleting band' : 'Delete band'}
+				{pending || isDeleting ? 'Deleting team' : 'Delete team'}
 			</Button>
 		);
 	};
@@ -49,7 +51,7 @@ export const DeleteBandDialog = ({ org, id, onBandDeleted }: props) => {
 			<AlertDialogContent className="gap-12">
 				<AlertDialogHeader>
 					<AlertDialogTitle>🙋🏾 Caution, are you absolutely sure?</AlertDialogTitle>
-					<AlertDialogDescription className="text-xs leading-7">This action cannot be undone. This action will permanently delete this employee band from your organisation</AlertDialogDescription>
+					<AlertDialogDescription className="text-xs leading-7">Deleting a team will render people in this team without a team, including managers. This action cannot be undone.</AlertDialogDescription>
 				</AlertDialogHeader>
 
 				<AlertDialogFooter>

@@ -60,6 +60,7 @@ export const AppraisalQuestionsForm = ({ questionsData, org, isOptional, group, 
 	const [showAddOptions, toggleShowAddOptions] = useState(false);
 	const [isFormEnabled, toggleFormState] = useState(!!qts?.length);
 	const [isCreatingQuestions, creationsState] = useState(false);
+
 	const sensors = useSensors(
 		useSensor(PointerSensor),
 		useSensor(KeyboardSensor, {

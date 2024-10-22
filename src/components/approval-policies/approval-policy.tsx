@@ -1,18 +1,16 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
-import { ChartNoAxesGantt, Check, ChevronsUpDown, CircleMinus, Plus, Trash2, TriangleAlert } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { Check, ChevronsUpDown, CircleMinus, Plus, Trash2, TriangleAlert } from 'lucide-react';
 import { Database, Tables } from '@/type/database.types';
 import { format } from 'date-fns';
 import { createPolicy, deletePolicy, updatePolicy } from './policy-actions';
@@ -125,9 +123,9 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 				if (state == true && data?.levels) return updateLevels(structuredClone(data?.levels as any));
 			}}>
 			<SheetTrigger asChild>
-				<button className={cn('h-fit', className)}>
+				<button className={cn(!children && buttonVariants({ variant: data ? 'outline' : 'default' }), !children && 'flex h-fit w-full items-center justify-between p-4', className)}>
 					{!children && data && (
-						<Card className="flex w-full items-center justify-between p-4">
+						<>
 							<div className="space-y-1 text-left">
 								<div className="flex items-center gap-2">
 									<h4 className="text-xs font-semibold">{data.name}</h4>
@@ -156,7 +154,7 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 									</Tooltip>
 								</TooltipProvider>
 							</div>
-						</Card>
+						</>
 					)}
 
 					{!!children && children}
@@ -384,12 +382,10 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 										updateLevels([...levels, { type: '', id: '', level: levels.length + 1 }]);
 										form.setValue('levels', [...form.getValues('levels'), { type: '', id: '', level: levels.length + 1 }]);
 									}}
-									variant={'secondary'}
-									className="mt-8 gap-3">
+									variant={'outline'}
+									className="mt-8 w-full gap-3">
 									<Plus size={12} />
-									<Separator orientation="vertical" />
 									Add level
-									<ChartNoAxesGantt size={12} />
 								</Button>
 							</div>
 

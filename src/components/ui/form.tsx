@@ -89,7 +89,7 @@ const FormMessage = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<
 	const { error, formMessageId } = useFormField();
 	const body = error ? (error?.message ? String(error?.message) : String(error.root?.message)) : children;
 
-	if (!body) {
+	if (!body || body == undefined) {
 		return;
 	}
 
