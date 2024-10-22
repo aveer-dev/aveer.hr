@@ -47,10 +47,10 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 	return (
 		<div className="mx-auto max-w-4xl">
 			<Tabs defaultValue={searchParams.type || 'personal'} className="">
-				<div className="mb-6 flex items-center gap-4">
+				<div className="mb-6 items-center gap-4 space-y-4 sm:flex sm:space-y-0">
 					<h1 className="text-xl font-semibold">Settings</h1>
 
-					<TabsList className="mb-px h-8 py-px">
+					<TabsList className="no-scrollbar mb-px h-8 w-full overflow-x-auto py-px sm:w-fit">
 						<TabsTrigger value="personal" className="h-6">
 							Personal
 						</TabsTrigger>
