@@ -1,18 +1,15 @@
-import { Button, buttonVariants } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { APPLICANT, DOCUMENT } from '@/type/roles.types';
 import { createClient } from '@/utils/supabase/client';
 import { TabsContent } from '@radix-ui/react-tabs';
-import { ChevronLeft, ChevronRight, CloudDownload } from 'lucide-react';
+import { CloudDownload } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { Page, Document } from 'react-pdf';
 import { useResizeObserver } from '@wojtekmaj/react-hooks';
 import Image from 'next/image';
-import { pdfjs } from 'react-pdf';
-
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+import { DocumentViewer } from 'react-documents';
+import { LoadingSpinner } from '@/components/ui/loader';
 
 interface props {
 	applicantData: APPLICANT;
@@ -20,25 +17,13 @@ interface props {
 	setDocuments: (doc: DOCUMENT[]) => void;
 }
 
-const options = {
-	cMapUrl: '/cmaps/',
-	standardFontDataUrl: '/standard_fonts/'
-};
-
 const supabase = createClient();
 const resizeObserverOptions = {};
 const maxWidth = 420;
 
 export const ApplicantDocuments = ({ applicantData, documents, setDocuments }: props) => {
-	const [numberOfPages, setNumberOfPages] = useState<number>(0);
-	const [activePageNumber, setActivePageNumber] = useState<number>(1);
-
 	const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
 	const [containerWidth, setContainerWidth] = useState<number>();
-
-	const onDocumentLoadSuccess = ({ numPages }: { numPages: number }): void => {
-		setNumberOfPages(numPages);
-	};
 
 	const gatherDocuments = useCallback(() => {
 		const allDocuments: DOCUMENT[] = [];
@@ -85,33 +70,20 @@ export const ApplicantDocuments = ({ applicantData, documents, setDocuments }: p
 		documents.map((document, index) => (
 			<TabsContent key={index} value={document.name} className="w-[420px]">
 				{document.format == 'pdf' && (
-					<div className="group relative h-fit">
-						<div ref={setContainerRef}>
-							<Document options={options} loading={<Skeleton className="h-[554px] w-[448px]" />} className={'drop-shadow-2xl'} file={document.url} onLoadSuccess={onDocumentLoadSuccess}>
-								<Page pageNumber={activePageNumber} loading={<Skeleton className="h-[554px] w-[448px]" />} width={containerWidth ? Math.min(containerWidth, maxWidth) : maxWidth} />
-							</Document>
+					<div className="relative h-[60vh]">
+						<div className="relative z-10 h-full">
+							<DocumentViewer queryParams="hl=Nl" url={'https://byprsbkeackkgjsjlcgp.supabase.co/storage/v1/object/public/job-applications/applications/best-orgs/37/AcctNotice_2022-10-13.pdf'}></DocumentViewer>
+						</div>
 
-							{numberOfPages > 1 && (
-								<div className="pointer-events-none absolute bottom-16 left-1/2 flex -translate-x-1/2 items-center gap-4 opacity-0 transition-all duration-500 group-hover:pointer-events-auto group-hover:opacity-100">
-									<Button variant={'secondary'} disabled={activePageNumber <= 1} onClick={() => setActivePageNumber(activePageNumber - 1)} className="rounded-full">
-										<ChevronLeft size={12} />
-									</Button>
-									<Button variant={'secondary'} disabled={activePageNumber >= numberOfPages} onClick={() => setActivePageNumber(activePageNumber + 1)} className="rounded-full">
-										<ChevronRight size={12} />
-									</Button>
-								</div>
-							)}
-
-							<p className="mt-8 text-xs">
-								Page {activePageNumber} of {numberOfPages}
-							</p>
+						<div className="absolute left-0 top-0 z-0 flex h-full w-full items-center justify-center">
+							<LoadingSpinner />
 						</div>
 					</div>
 				)}
 
 				{(document.format == 'png' || document.format == 'jpg' || document.format == 'jpeg') && document.url && (
 					<div className="group relative h-fit">
-						<Image src={document.url} alt={`applicant's ${document.name}`} width={350} height={500} className="object-contain" />
+						<Image src={document.url} alt={`applicant's ${document}`} width={350} height={500} className="object-contain" />
 					</div>
 				)}
 

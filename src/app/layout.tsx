@@ -3,13 +3,8 @@ import { Karla } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 
-// to fix Promise.withResolvers issue
-import { polyfillPromiseWithResolvers } from '@/utils/polyfilsResolver';
-import 'core-js/full/promise/with-resolvers.js';
 import { cn } from '@/lib/utils';
 import { Analytics } from '@vercel/analytics/react';
-
-polyfillPromiseWithResolvers();
 
 const karla = Karla({ subsets: ['latin'] });
 
@@ -22,8 +17,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 	return (
 		<html lang="en">
 			<body className={cn(karla.className)}>
-				<Toaster toastOptions={{ className: '!font-thin bg-background text-foreground border-none text-xs font-karla' }} />
+				<Toaster toastOptions={{ className: `${karla.className} !font-thin bg-background text-foreground border-none text-xs font-karla` }} />
+
 				{children}
+
 				<Analytics />
 			</body>
 		</html>
