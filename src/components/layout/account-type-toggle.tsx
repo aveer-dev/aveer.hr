@@ -31,7 +31,7 @@ export const AccountTypeToggle = ({ orgId }: { orgId?: string }) => {
 
 	const getOrgs = useCallback(
 		async (profile: string) => {
-			const { data, error } = await supabase.from('profiles_roles').select('organisation:organisations!profiles_roles_organisation_fkey(id, name, subdomain)').eq('profile', profile);
+			const { data, error } = await supabase.from('profiles_roles').select('organisation:organisations!profiles_roles_organisation_fkey(id, name, subdomain)').match({ profile, disable: false });
 			if (error) return toast.error('Unable to fetch organisations', { description: error.message });
 
 			const links: LINK = {
@@ -106,7 +106,7 @@ export const AccountTypeToggle = ({ orgId }: { orgId?: string }) => {
 
 				<Separator className="block sm:hidden" />
 
-				<div className={cn('w-0 space-y-4 p-4 transition-all sm:max-h-72 sm:overflow-x-hidden sm:p-1', subLinks?.links.length && 'w-full sm:w-64')}>
+				<div className={cn('w-0 space-y-4 p-4 transition-all sm:overflow-x-hidden sm:p-1', subLinks?.links.length && 'w-full sm:w-64')}>
 					<ul className="space-y-2">
 						{subLinks?.links.map((link, index) => (
 							<li key={index}>

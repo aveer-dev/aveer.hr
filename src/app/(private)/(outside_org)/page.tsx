@@ -15,7 +15,7 @@ export default async function OrgsPage() {
 	} = await supabase.auth.getUser();
 	if (!user || userError) redirect('/login');
 
-	const [{ data, error }, { data: contracts }] = await Promise.all([await supabase.from('profiles_roles').select('role, organisation').eq('profile', user.id), await supabase.from('contracts').select('id, org').eq('profile', user.id)]);
+	const [{ data, error }, { data: contracts }] = await Promise.all([await supabase.from('profiles_roles').select('role, organisation').match({ profile: user.id, disable: false }), await supabase.from('contracts').select('id, org').eq('profile', user.id)]);
 
 	if (data && !data.length) {
 		return (

@@ -19,7 +19,7 @@ export const AdminUsers = async ({ org }: props) => {
 			data: { user }
 		}
 	] = await Promise.all([
-		await supabase.from('profiles_roles').select(`*, profile:profiles!profiles_roles_profile_fkey(*)`).eq('organisation', org),
+		await supabase.from('profiles_roles').select(`*, profile:profiles!profiles_roles_profile_fkey(*)`).match({ organisation: org, disable: false }),
 		await supabase.from('contracts').select(`*, profile:profiles!contracts_profile_fkey(*)`).match({ org, status: 'signed' }),
 		await supabase.auth.getUser()
 	]);
