@@ -64,7 +64,7 @@ export const ProfileFormComponent = ({ data }: { data?: TablesUpdate<'profiles'>
 			first_name: data?.first_name || '',
 			last_name: data?.last_name || '',
 			email: data?.email || '',
-			nationality: (data?.nationality as any).country_code || data?.nationality || ''
+			nationality: (data?.nationality as any)?.country_code || data?.nationality || ''
 		}
 	});
 

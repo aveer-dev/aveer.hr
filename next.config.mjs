@@ -26,7 +26,7 @@ export default withSentryConfig(nextConfig, {
 	// https://github.com/getsentry/sentry-webpack-plugin#options
 
 	org: 'aveer',
-	project: 'javascript-nextjs',
+	project: 'aveer-hr',
 
 	// Only print logs for uploading source maps in CI
 	silent: !process.env.CI,
@@ -47,6 +47,7 @@ export default withSentryConfig(nextConfig, {
 	// Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
 	// side errors will fail.
 	tunnelRoute: '/monitoring',
+	sendClientReports: false,
 
 	// Hides source maps from generated client bundles
 	hideSourceMaps: true,

@@ -78,6 +78,9 @@ export const ProfileForm = ({ data }: props) => {
 		router.refresh();
 	};
 
+	const genotypes = ['AA', 'AC', 'BB', 'AB', 'OO', 'SS', 'Ss', 'ss', 'CC', 'Cc', 'cc', 'RR', 'Rr', 'rr'];
+	const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
 	return (
 		<Sheet open={isDialogOpen} onOpenChange={toggleDialog}>
 			<SheetTrigger asChild>
@@ -249,13 +252,11 @@ export const ProfileForm = ({ data }: props) => {
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
-													<SelectItem value="A+">A+</SelectItem>
-													<SelectItem value="A-">A-</SelectItem>
-													<SelectItem value="B-">B-</SelectItem>
-													<SelectItem value="B+">B+</SelectItem>
-													<SelectItem value="AB+">AB+</SelectItem>
-													<SelectItem value="O-">O-</SelectItem>
-													<SelectItem value="O+">O+</SelectItem>
+													{bloodTypes.map(bloodType => (
+														<SelectItem value={bloodType} key={bloodType}>
+															{bloodType}
+														</SelectItem>
+													))}
 												</SelectContent>
 											</Select>
 											<FormMessage />
@@ -276,19 +277,11 @@ export const ProfileForm = ({ data }: props) => {
 													</SelectTrigger>
 												</FormControl>
 												<SelectContent>
-													<SelectItem value="AA">AA</SelectItem>
-													<SelectItem value="BB">BB</SelectItem>
-													<SelectItem value="AB">AB</SelectItem>
-													<SelectItem value="OO">OO</SelectItem>
-													<SelectItem value="SS">SS</SelectItem>
-													<SelectItem value="Ss">Ss</SelectItem>
-													<SelectItem value="ss">ss</SelectItem>
-													<SelectItem value="CC">CC</SelectItem>
-													<SelectItem value="Cc">Cc</SelectItem>
-													<SelectItem value="cc">cc</SelectItem>
-													<SelectItem value="RR">RR</SelectItem>
-													<SelectItem value="Rr">Rr</SelectItem>
-													<SelectItem value="rr">rr</SelectItem>
+													{genotypes.map(genotype => (
+														<SelectItem value={genotype} key={genotype}>
+															{genotype}
+														</SelectItem>
+													))}
 												</SelectContent>
 											</Select>
 											<FormMessage />
