@@ -15,7 +15,7 @@ export const doesUserHaveAdequatePermissions = async ({ orgId }: { orgId: string
 	const {
 		data: { user }
 	} = await supabase.auth.getUser();
-	const role = await supabase.from('profiles_roles').select().match({ organisation: orgId, profile: user?.id });
+	const role = await supabase.from('profiles_roles').select().match({ organisation: orgId, profile: user?.id, disable: false });
 	if (role.error) return role.error.message;
 	if (role.data && !role.data.length) return `You do not have adequate org permission for this action`;
 	return true;
