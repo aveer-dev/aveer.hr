@@ -9,49 +9,27 @@ import { usePathname } from 'next/navigation';
 export function NavMenu({ orgId }: { orgId: string }) {
 	const path = usePathname();
 
+	const navItems = [
+		{ label: 'People', href: '/', icon: Users },
+		{ label: 'Open Roles', href: '/open-roles', icon: UserPlus },
+		{ label: 'Time Off', href: '/time-off', icon: CalendarPlus },
+		{ label: 'Performance', href: '/performance', icon: ChartPie },
+		{ label: 'Settings', href: '/settings', icon: Bolt }
+	];
+
 	return (
 		<NavigationMenu>
 			<NavigationMenuList className="group-hover:text-accent">
-				<NavigationMenuItem>
-					<NavLink org={orgId} href={`/`} legacyBehavior passHref>
-						<NavigationMenuLink active={path.includes('people') || path == '/' || path == `/${orgId}`} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
-							<Users size={16} />
-							People
-						</NavigationMenuLink>
-					</NavLink>
-				</NavigationMenuItem>
-				<NavigationMenuItem>
-					<NavLink org={orgId} href={`/open-roles`} legacyBehavior passHref>
-						<NavigationMenuLink active={path.includes('/open-roles')} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
-							<UserPlus size={16} />
-							Open Roles
-						</NavigationMenuLink>
-					</NavLink>
-				</NavigationMenuItem>
-				<NavigationMenuItem>
-					<NavLink org={orgId} href={`/time-off`} legacyBehavior passHref>
-						<NavigationMenuLink active={path.includes('/time-off')} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
-							<CalendarPlus size={16} />
-							Time Off
-						</NavigationMenuLink>
-					</NavLink>
-				</NavigationMenuItem>
-				<NavigationMenuItem>
-					<NavLink org={orgId} href={`/performance`} legacyBehavior passHref>
-						<NavigationMenuLink active={path.includes('/performance')} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
-							<ChartPie size={16} />
-							Performance
-						</NavigationMenuLink>
-					</NavLink>
-				</NavigationMenuItem>
-				<NavigationMenuItem>
-					<NavLink org={orgId} href={`/settings`} legacyBehavior passHref>
-						<NavigationMenuLink active={path.includes('/settings')} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
-							<Bolt size={16} />
-							Settings
-						</NavigationMenuLink>
-					</NavLink>
-				</NavigationMenuItem>
+				{navItems.map((item, index) => (
+					<NavigationMenuItem key={index}>
+						<NavLink org={orgId} href={item.href} legacyBehavior passHref>
+							<NavigationMenuLink active={item.href == '/' ? path.includes('people') || path == '/' || path == `/${orgId}` : path.includes(item.href)} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
+								<item.icon size={16} />
+								{item.label}
+							</NavigationMenuLink>
+						</NavLink>
+					</NavigationMenuItem>
+				))}
 			</NavigationMenuList>
 		</NavigationMenu>
 	);

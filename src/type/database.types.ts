@@ -450,7 +450,6 @@ export type Database = {
           end_date: string | null
           entity: number
           fixed_allowance: Json | null
-          gender: string | null
           id: number
           job_title: string
           level: number | null
@@ -494,7 +493,6 @@ export type Database = {
           end_date?: string | null
           entity: number
           fixed_allowance?: Json | null
-          gender?: string | null
           id?: number
           job_title: string
           level?: number | null
@@ -538,7 +536,6 @@ export type Database = {
           end_date?: string | null
           entity?: number
           fixed_allowance?: Json | null
-          gender?: string | null
           id?: number
           job_title?: string
           level?: number | null
@@ -773,6 +770,61 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
+          },
+        ]
+      }
+      inbox: {
+        Row: {
+          created_at: string
+          draft: boolean | null
+          entity: number | null
+          id: number
+          message: string | null
+          org: string | null
+          read: Json[]
+          sender: number | null
+        }
+        Insert: {
+          created_at?: string
+          draft?: boolean | null
+          entity?: number | null
+          id?: number
+          message?: string | null
+          org?: string | null
+          read?: Json[]
+          sender?: number | null
+        }
+        Update: {
+          created_at?: string
+          draft?: boolean | null
+          entity?: number | null
+          id?: number
+          message?: string | null
+          org?: string | null
+          read?: Json[]
+          sender?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "inbox_sender_fkey"
+            columns: ["sender"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1450,6 +1502,7 @@ export type Database = {
           paid_time_off: number | null
           paternity_leave: number | null
           probation: number | null
+          salary_date: string | null
           sick_leave: number | null
           work_schedule: string | null
           work_shedule_interval: string | null
@@ -1464,6 +1517,7 @@ export type Database = {
           paid_time_off?: number | null
           paternity_leave?: number | null
           probation?: number | null
+          salary_date?: string | null
           sick_leave?: number | null
           work_schedule?: string | null
           work_shedule_interval?: string | null
@@ -1478,6 +1532,7 @@ export type Database = {
           paid_time_off?: number | null
           paternity_leave?: number | null
           probation?: number | null
+          salary_date?: string | null
           sick_leave?: number | null
           work_schedule?: string | null
           work_shedule_interval?: string | null
@@ -1560,13 +1615,6 @@ export type Database = {
           org?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "profiles_nationality_fkey"
             columns: ["nationality"]
@@ -1951,5 +1999,20 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 

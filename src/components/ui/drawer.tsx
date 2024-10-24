@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 
 const Drawer = ({ shouldScaleBackground = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />;
 Drawer.displayName = 'Drawer';
+const DrawerNested = ({ shouldScaleBackground = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />;
+DrawerNested.displayName = 'DrawerNested';
 
 const DrawerTrigger = DrawerPrimitive.Trigger;
 
@@ -19,9 +21,9 @@ const DrawerOverlay = React.forwardRef<React.ElementRef<typeof DrawerPrimitive.O
 ));
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
-const DrawerContent = React.forwardRef<React.ElementRef<typeof DrawerPrimitive.Content>, React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>>(({ className, children, ...props }, ref) => (
+const DrawerContent = React.forwardRef<React.ElementRef<typeof DrawerPrimitive.Content>, React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & { overlayClassName?: string }>(({ overlayClassName, className, children, ...props }, ref) => (
 	<DrawerPortal>
-		<DrawerOverlay />
+		<DrawerOverlay className={overlayClassName} />
 		<DrawerPrimitive.Content ref={ref} className={cn('fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background', className)} {...props}>
 			<div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
 			{children}
@@ -46,4 +48,4 @@ const DrawerDescription = React.forwardRef<React.ElementRef<typeof DrawerPrimiti
 ));
 DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
-export { Drawer, DrawerPortal, DrawerOverlay, DrawerTrigger, DrawerClose, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription };
+export { Drawer, DrawerNested, DrawerPortal, DrawerOverlay, DrawerTrigger, DrawerClose, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription };

@@ -4,6 +4,7 @@ import { LogoutButton } from './logout-button';
 import { AccountTypeToggle } from './account-type-toggle';
 import { createClient } from '@/utils/supabase/server';
 import { NavLink } from '@/components/ui/link';
+import { Inbox } from './inbox/messages';
 
 export const Header = async ({ orgId }: { orgId?: string }) => {
 	const supabase = createClient();
@@ -35,8 +36,10 @@ export const Header = async ({ orgId }: { orgId?: string }) => {
 			</div>
 
 			{orgId && orgId !== 'employee' && data?.user && (
-				<div className="no-scrollbar flex items-center overflow-x-auto px-6 pt-4">
+				<div className="no-scrollbar flex items-center justify-between overflow-x-auto px-6 pt-4">
 					<NavMenu orgId={orgId} />
+
+					<Inbox />
 				</div>
 			)}
 		</header>
