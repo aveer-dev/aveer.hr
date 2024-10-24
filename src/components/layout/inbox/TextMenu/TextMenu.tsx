@@ -1,4 +1,3 @@
-import { Icon } from '@/components/ui/Icon';
 import { Toolbar } from '@/components/ui/Toolbar';
 import { useTextmenuCommands } from './hooks/useTextmenuCommands';
 import { useTextmenuStates } from './hooks/useTextmenuStates';
@@ -7,19 +6,15 @@ import { memo } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { Surface } from '@/components/ui/Surface';
 import { ColorPicker } from '@/components/panels';
-import { FontFamilyPicker } from './components/FontFamilyPicker';
 import { FontSizePicker } from './components/FontSizePicker';
-import { useTextmenuContentTypes } from './hooks/useTextmenuContentTypes';
-import { ContentTypePicker } from './components/ContentTypePicker';
 import { EditLinkPopover } from './components/EditLinkPopover';
+import { AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, Code, EllipsisVertical, Highlighter, Italic, Palette, Strikethrough, Subscript, Superscript, Underline } from 'lucide-react';
 
 // We memorize the button so each button is not rerendered
 // on every editor state change
 const MemoButton = memo(Toolbar.Button);
 const MemoColorPicker = memo(ColorPicker);
-const MemoFontFamilyPicker = memo(FontFamilyPicker);
 const MemoFontSizePicker = memo(FontSizePicker);
-const MemoContentTypePicker = memo(ContentTypePicker);
 
 export type TextMenuProps = {
 	editor: Editor;
@@ -28,7 +23,6 @@ export type TextMenuProps = {
 export const TextMenu = ({ editor }: TextMenuProps) => {
 	const commands = useTextmenuCommands(editor);
 	const states = useTextmenuStates(editor);
-	const blockOptions = useTextmenuContentTypes(editor);
 
 	return (
 		<BubbleMenu
@@ -61,28 +55,25 @@ export const TextMenu = ({ editor }: TextMenuProps) => {
 				<MemoFontSizePicker onChange={commands.onSetFontSize} value={states.currentSize || ''} />
 				<Toolbar.Divider />
 				<MemoButton tooltip="Bold" tooltipShortcut={['Mod', 'B']} onClick={commands.onBold} active={states.isBold}>
-					<Icon name="Bold" />
+					<Bold size={14} />
 				</MemoButton>
 				<MemoButton tooltip="Italic" tooltipShortcut={['Mod', 'I']} onClick={commands.onItalic} active={states.isItalic}>
-					<Icon name="Italic" />
+					<Italic size={14} />
 				</MemoButton>
 				<MemoButton tooltip="Underline" tooltipShortcut={['Mod', 'U']} onClick={commands.onUnderline} active={states.isUnderline}>
-					<Icon name="Underline" />
+					<Underline size={14} />
 				</MemoButton>
 				<MemoButton tooltip="Strikehrough" tooltipShortcut={['Mod', 'Shift', 'S']} onClick={commands.onStrike} active={states.isStrike}>
-					<Icon name="Strikethrough" />
+					<Strikethrough size={14} />
 				</MemoButton>
 				<MemoButton tooltip="Code" tooltipShortcut={['Mod', 'E']} onClick={commands.onCode} active={states.isCode}>
-					<Icon name="Code" />
-				</MemoButton>
-				<MemoButton tooltip="Code block" onClick={commands.onCodeBlock}>
-					<Icon name="FileCode" />
+					<Code size={14} />
 				</MemoButton>
 				<EditLinkPopover onSetLink={commands.onLink} />
 				<Popover.Root>
 					<Popover.Trigger asChild>
 						<MemoButton active={!!states.currentHighlight} tooltip="Highlight text">
-							<Icon name="Highlighter" />
+							<Highlighter size={14} />
 						</MemoButton>
 					</Popover.Trigger>
 					<Popover.Content side="top" sideOffset={8} asChild>
@@ -94,7 +85,7 @@ export const TextMenu = ({ editor }: TextMenuProps) => {
 				<Popover.Root>
 					<Popover.Trigger asChild>
 						<MemoButton active={!!states.currentColor} tooltip="Text color">
-							<Icon name="Palette" />
+							<Palette size={14} />
 						</MemoButton>
 					</Popover.Trigger>
 					<Popover.Content side="top" sideOffset={8} asChild>
@@ -106,29 +97,29 @@ export const TextMenu = ({ editor }: TextMenuProps) => {
 				<Popover.Root>
 					<Popover.Trigger asChild>
 						<MemoButton tooltip="More options">
-							<Icon name="EllipsisVertical" />
+							<EllipsisVertical size={14} />
 						</MemoButton>
 					</Popover.Trigger>
 					<Popover.Content side="top" asChild>
 						<Toolbar.Wrapper>
 							<MemoButton tooltip="Subscript" tooltipShortcut={['Mod', '.']} onClick={commands.onSubscript} active={states.isSubscript}>
-								<Icon name="Subscript" />
+								<Subscript size={14} />
 							</MemoButton>
 							<MemoButton tooltip="Superscript" tooltipShortcut={['Mod', ',']} onClick={commands.onSuperscript} active={states.isSuperscript}>
-								<Icon name="Superscript" />
+								<Superscript size={14} />
 							</MemoButton>
 							<Toolbar.Divider />
 							<MemoButton tooltip="Align left" tooltipShortcut={['Shift', 'Mod', 'L']} onClick={commands.onAlignLeft} active={states.isAlignLeft}>
-								<Icon name="AlignLeft" />
+								<AlignLeft size={14} />
 							</MemoButton>
 							<MemoButton tooltip="Align center" tooltipShortcut={['Shift', 'Mod', 'E']} onClick={commands.onAlignCenter} active={states.isAlignCenter}>
-								<Icon name="AlignCenter" />
+								<AlignCenter size={14} />
 							</MemoButton>
 							<MemoButton tooltip="Align right" tooltipShortcut={['Shift', 'Mod', 'R']} onClick={commands.onAlignRight} active={states.isAlignRight}>
-								<Icon name="AlignRight" />
+								<AlignRight size={14} />
 							</MemoButton>
 							<MemoButton tooltip="Justify" tooltipShortcut={['Shift', 'Mod', 'J']} onClick={commands.onAlignJustify} active={states.isAlignJustify}>
-								<Icon name="AlignJustify" />
+								<AlignJustify size={14} />
 							</MemoButton>
 						</Toolbar.Wrapper>
 					</Popover.Content>
