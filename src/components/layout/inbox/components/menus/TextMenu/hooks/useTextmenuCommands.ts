@@ -32,16 +32,6 @@ export const useTextmenuCommands = (editor: Editor) => {
 		[editor]
 	);
 
-	const onSetFont = useCallback(
-		(font: string) => {
-			if (!font || font.length === 0) {
-				return editor.chain().focus().unsetFontFamily().run();
-			}
-			return editor.chain().focus().setFontFamily(font).run();
-		},
-		[editor]
-	);
-
 	const onSetFontSize = useCallback(
 		(fontSize: string) => {
 			if (!fontSize || fontSize.length === 0) {
@@ -69,7 +59,6 @@ export const useTextmenuCommands = (editor: Editor) => {
 		onClearColor,
 		onChangeHighlight,
 		onClearHighlight,
-		onSetFont,
 		onSetFontSize,
 		onLink
 	};

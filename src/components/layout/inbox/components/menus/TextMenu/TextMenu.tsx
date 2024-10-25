@@ -1,11 +1,11 @@
-import { Toolbar } from '@/components/ui/Toolbar';
+import { Toolbar } from '../../Toolbar';
 import { useTextmenuCommands } from './hooks/useTextmenuCommands';
 import { useTextmenuStates } from './hooks/useTextmenuStates';
 import { BubbleMenu, Editor } from '@tiptap/react';
 import { memo } from 'react';
 import * as Popover from '@radix-ui/react-popover';
-import { Surface } from '@/components/ui/Surface';
-import { ColorPicker } from '@/components/panels';
+import { Surface } from '../../Surface';
+import { ColorPicker } from '../../../components/panels';
 import { FontSizePicker } from './components/FontSizePicker';
 import { EditLinkPopover } from './components/EditLinkPopover';
 import { AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, Code, EllipsisVertical, Highlighter, Italic, Palette, Strikethrough, Subscript, Superscript, Underline } from 'lucide-react';

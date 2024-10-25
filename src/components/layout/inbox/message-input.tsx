@@ -5,10 +5,13 @@ import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { ImagePlus, Send, Timer } from 'lucide-react';
+import { Send, Timer } from 'lucide-react';
 import { useRef } from 'react';
-import { SlashCommand } from './SlashCommand';
 import './styles.scss';
+import { SlashCommand } from './extensions';
+import { TextMenu } from './components/menus/TextMenu';
+import { ContentItemMenu, LinkMenu } from './components/menus';
+import ImageBlockMenu from './extensions/ImageBlock/components/ImageBlockMenu';
 
 export const MessageInput = () => {
 	const menuContainerRef = useRef(null);
@@ -32,9 +35,15 @@ export const MessageInput = () => {
 
 	return (
 		<>
-			<div ref={menuContainerRef}>
-				<EditorContent className="overflow-auto" editor={editor} />
-			</div>
+			{!!editor && (
+				<div ref={menuContainerRef}>
+					<EditorContent className="overflow-auto" editor={editor} />
+					<ContentItemMenu editor={editor} />
+					<LinkMenu editor={editor} appendTo={menuContainerRef} />
+					<TextMenu editor={editor} />
+					<ImageBlockMenu editor={editor} appendTo={menuContainerRef} />
+				</div>
+			)}
 
 			<Separator />
 
