@@ -3,7 +3,6 @@ import React, { ButtonHTMLAttributes, HTMLProps, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Surface } from './Surface';
 import { Button, ButtonProps } from '@/components/ui/button';
-import Tooltip from './Tooltip';
 
 export type ToolbarWrapperProps = {
 	shouldShowContent?: boolean;
@@ -48,21 +47,11 @@ export type ToolbarButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(({ children, buttonSize = 'icon', variant = 'ghost', className, tooltip, tooltipShortcut, activeClassname, ...rest }, ref) => {
 	const buttonClass = cn('gap-1 min-w-[2rem] px-2 w-auto', className);
 
-	const content = (
-		<Button className={cn(buttonClass, rest.active && activeClassname, rest.active && 'text-blue-500 hover:text-blue-600', 'h-8 p-1')} variant={variant} ref={ref} onClick={rest.onClick}>
+	return (
+		<Button tooltip={tooltip} tooltipShortcut={tooltipShortcut} className={cn(buttonClass, rest.active && activeClassname, rest.active && 'text-blue-500 hover:text-blue-600', 'h-8 p-1')} variant={variant} ref={ref} onClick={rest.onClick}>
 			{children}
 		</Button>
 	);
-
-	if (tooltip) {
-		return (
-			<Tooltip title={tooltip} shortcut={tooltipShortcut}>
-				{content}
-			</Tooltip>
-		);
-	}
-
-	return content;
 });
 
 ToolbarButton.displayName = 'ToolbarButton';

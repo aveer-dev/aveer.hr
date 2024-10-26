@@ -37,7 +37,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 	asChild?: boolean;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps & { tooltip?: string; tooltipClassName?: string }>(({ tooltip, tooltipClassName, className, variant, size, asChild = false, ...props }, ref) => {
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps & { tooltipShortcut?: string[]; tooltip?: string; tooltipClassName?: string }>(({ tooltipShortcut, tooltip, tooltipClassName, className, variant, size, asChild = false, ...props }, ref) => {
 	const Comp = asChild ? Slot : 'button';
 
 	if (tooltip) {
@@ -47,7 +47,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps & { tooltip?: str
 					<TooltipTrigger asChild>
 						<Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
 					</TooltipTrigger>
-					<TooltipContent>
+
+					<TooltipContent shortcut={tooltipShortcut}>
 						<p className={cn(tooltipClassName)}>{tooltip}</p>
 					</TooltipContent>
 				</Tooltip>

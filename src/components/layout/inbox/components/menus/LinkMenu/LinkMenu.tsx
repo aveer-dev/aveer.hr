@@ -4,6 +4,7 @@ import { BubbleMenu as BaseBubbleMenu, useEditorState } from '@tiptap/react';
 import { MenuProps } from '../types';
 import { LinkPreviewPanel } from '../../panels/LinkPreviewPanel';
 import { LinkEditorPanel } from '../../panels';
+import { cn } from '@/lib/utils';
 
 export const LinkMenu = ({ editor, appendTo }: MenuProps): JSX.Element => {
 	const [showEdit, setShowEdit] = useState(false);
@@ -60,7 +61,16 @@ export const LinkMenu = ({ editor, appendTo }: MenuProps): JSX.Element => {
 					setShowEdit(false);
 				}
 			}}>
-			{showEdit ? <LinkEditorPanel initialUrl={link} initialOpenInNewTab={target === '_blank'} onSetLink={onSetLink} /> : <LinkPreviewPanel url={link} onClear={onUnsetLink} onEdit={handleEdit} />}
+			{showEdit ? (
+				<div
+					className={cn(
+						'z-50 w-fit rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2'
+					)}>
+					<LinkEditorPanel initialUrl={link} initialOpenInNewTab={target === '_blank'} onSetLink={onSetLink} />
+				</div>
+			) : (
+				<LinkPreviewPanel url={link} onClear={onUnsetLink} onEdit={handleEdit} />
+			)}
 		</BaseBubbleMenu>
 	);
 };

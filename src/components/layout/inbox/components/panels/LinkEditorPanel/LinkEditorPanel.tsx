@@ -1,8 +1,7 @@
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { useState, useCallback, useMemo } from 'react';
 import { Link } from 'lucide-react';
-import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import { Icon } from '../../Icon';
 
 export type LinkEditorPanelProps = {
 	initialUrl?: string;
@@ -46,21 +45,25 @@ export const LinkEditorPanel = ({ onSetLink, initialOpenInNewTab, initialUrl }: 
 
 	return (
 		<>
-			<form onSubmit={state.handleSubmit} className="flex items-center gap-2">
-				<label className="flex cursor-text items-center gap-2 rounded-lg bg-neutral-100 p-2 dark:bg-neutral-900">
+			<form
+				onSubmit={event => {
+					state.setOpenInNewTab(true);
+					state.handleSubmit(event);
+				}}>
+				<label className="flex w-[280px] cursor-text items-center gap-2 rounded-lg bg-neutral-100 p-2 dark:bg-neutral-900">
 					<Link size={12} />
-					<input type="url" className="min-w-[12rem] flex-1 bg-transparent text-sm text-black outline-none dark:text-white" placeholder="Enter URL" value={state.url} onChange={state.onChange} />
+					<input type="url" className="w-full min-w-[12rem] flex-1 bg-transparent text-xs font-light text-black outline-none dark:text-white" placeholder="Enter URL" value={state.url} onChange={state.onChange} />
 				</label>
-				<Button type="submit" disabled={!state.isValidUrl}>
-					Set Link
-				</Button>
+
+				<button disabled={!state.isValidUrl} className={cn('flex h-0 w-full gap-2 overflow-hidden rounded-md bg-muted px-2 py-1 text-left text-xs transition-all duration-500 disabled:cursor-not-allowed disabled:opacity-25', !!state.url && 'mt-3 h-11')}>
+					<Icon name="Globe" className="mt-1" />
+
+					<div className="space-y-1">
+						<div className="max-w-[250px] truncate font-normal">{state.url}</div>
+						<div className="font-light text-muted-foreground">Link to webpage</div>
+					</div>
+				</button>
 			</form>
-			<div className="mt-3">
-				<Label className="flex items-center justify-between">
-					Open in new tab
-					<Switch className="scale-75" checked={state.openInNewTab} onCheckedChange={state.setOpenInNewTab} />
-				</Label>
-			</div>
 		</>
 	);
 };

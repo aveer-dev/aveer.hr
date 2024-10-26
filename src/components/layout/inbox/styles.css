@@ -41,6 +41,10 @@
 	}
 
 	strong {
-		font-weight: 500;
+		@apply font-medium;
+	}
+
+	a {
+		@apply underline;
 	}
 }

@@ -10,6 +10,7 @@ import { useRef } from 'react';
 import './styles.css';
 import { TextMenu } from './components/menus/TextMenu';
 import { ExtensionKit } from './extensions/extension-kit';
+import { LinkMenu } from './components/menus';
 
 export const MessageInput = () => {
 	const menuContainerRef = useRef(null);
@@ -36,8 +37,8 @@ export const MessageInput = () => {
 			{!!editor && (
 				<div ref={menuContainerRef}>
 					<EditorContent className="overflow-auto" editor={editor} />
-					{/* <ContentItemMenu editor={editor} />
-					<LinkMenu editor={editor} appendTo={menuContainerRef} /> */}
+					{/* <ContentItemMenu editor={editor} /> */}
+					<LinkMenu editor={editor} appendTo={menuContainerRef} />
 					<TextMenu editor={editor} />
 					{/* <ImageBlockMenu editor={editor} appendTo={menuContainerRef} /> */}
 				</div>
