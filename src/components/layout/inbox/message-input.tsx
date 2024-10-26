@@ -1,28 +1,20 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Send, Timer } from 'lucide-react';
 import { useRef } from 'react';
 import './styles.css';
-import { TextMenu } from './components/menus/TextMenu';
+import { TextMenu } from './components/menus';
 import { ExtensionKit } from './extensions/extension-kit';
-import { LinkMenu } from './components/menus';
+import { ContentItemMenu, LinkMenu } from './components/menus';
 
 export const MessageInput = () => {
 	const menuContainerRef = useRef(null);
 
 	const editor = useEditor({
-		extensions: [
-			StarterKit,
-			Placeholder.configure({
-				placeholder: 'Message starts here...'
-			}),
-			...ExtensionKit
-		],
+		extensions: ExtensionKit,
 		content: '<p>Hello World! 🌎️</p>',
 		immediatelyRender: false,
 		editorProps: {
@@ -37,7 +29,7 @@ export const MessageInput = () => {
 			{!!editor && (
 				<div ref={menuContainerRef}>
 					<EditorContent className="overflow-auto" editor={editor} />
-					{/* <ContentItemMenu editor={editor} /> */}
+					<ContentItemMenu editor={editor} />
 					<LinkMenu editor={editor} appendTo={menuContainerRef} />
 					<TextMenu editor={editor} />
 					{/* <ImageBlockMenu editor={editor} appendTo={menuContainerRef} /> */}

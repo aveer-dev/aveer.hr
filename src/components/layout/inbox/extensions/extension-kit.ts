@@ -42,15 +42,7 @@ export const ExtensionKit: any = [
 		types: ['paragraph', 'heading', 'blockquote', 'codeBlock', 'table'],
 		filterTransaction: transaction => !isChangeOrigin(transaction)
 	}),
-	StarterKit.configure({
-		document: false,
-		dropcursor: false,
-		heading: false,
-		horizontalRule: false,
-		blockquote: false,
-		history: false,
-		codeBlock: false
-	}),
+	StarterKit.configure({ dropcursor: false, horizontalRule: false }),
 	TextStyle,
 	FontSize,
 	Color,
@@ -95,9 +87,7 @@ export const ExtensionKit: any = [
 	Superscript,
 	Typography,
 	Placeholder.configure({
-		includeChildren: true,
-		showOnlyCurrent: false,
-		placeholder: () => ''
+		placeholder: `Start typing... or press '/' for commands`
 	}),
 	SlashCommand,
 	Focus,

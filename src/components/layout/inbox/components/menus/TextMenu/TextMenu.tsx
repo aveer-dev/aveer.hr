@@ -6,7 +6,6 @@ import { memo } from 'react';
 import { FontSizePicker } from './components/FontSizePicker';
 import { EditLinkPopover } from './components/EditLinkPopover';
 import { Bold, Code, Italic, Underline } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { HighlightPopover } from './components/HighlightPopover';
 import { TextColorPopover } from './components/TextColor';
 import { AlignmentPopover } from './components/AlignmentPopover';
