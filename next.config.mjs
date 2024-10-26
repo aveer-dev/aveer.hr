@@ -16,7 +16,13 @@ const nextConfig = {
 	},
 	experimental: {
 		turbo: {
-			resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json']
+			resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+			rules: {
+				'*.scss': {
+					loaders: ['sass'],
+					as: '*.css'
+				}
+			}
 		}
 	}
 };

@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { Surface } from '../../Surface';
 import { Switch } from '@/components/ui/switch';
 import { useState, useCallback, useMemo } from 'react';
 import { Link } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 export type LinkEditorPanelProps = {
 	initialUrl?: string;
@@ -45,10 +45,10 @@ export const LinkEditorPanel = ({ onSetLink, initialOpenInNewTab, initialUrl }: 
 	const state = useLinkEditorState({ onSetLink, initialOpenInNewTab, initialUrl });
 
 	return (
-		<Surface className="p-2">
+		<>
 			<form onSubmit={state.handleSubmit} className="flex items-center gap-2">
 				<label className="flex cursor-text items-center gap-2 rounded-lg bg-neutral-100 p-2 dark:bg-neutral-900">
-					<Link className="flex-none text-black dark:text-white" />
+					<Link size={12} />
 					<input type="url" className="min-w-[12rem] flex-1 bg-transparent text-sm text-black outline-none dark:text-white" placeholder="Enter URL" value={state.url} onChange={state.onChange} />
 				</label>
 				<Button type="submit" disabled={!state.isValidUrl}>
@@ -56,11 +56,11 @@ export const LinkEditorPanel = ({ onSetLink, initialOpenInNewTab, initialUrl }: 
 				</Button>
 			</form>
 			<div className="mt-3">
-				<label className="flex cursor-pointer select-none items-center justify-start gap-2 text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+				<Label className="flex items-center justify-between">
 					Open in new tab
-					<Switch checked={state.openInNewTab} onCheckedChange={state.setOpenInNewTab} />
-				</label>
+					<Switch className="scale-75" checked={state.openInNewTab} onCheckedChange={state.setOpenInNewTab} />
+				</Label>
 			</div>
-		</Surface>
+		</>
 	);
 };

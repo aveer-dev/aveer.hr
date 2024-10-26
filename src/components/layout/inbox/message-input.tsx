@@ -7,11 +7,9 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Send, Timer } from 'lucide-react';
 import { useRef } from 'react';
-import './styles.scss';
-import { SlashCommand } from './extensions';
+import './styles.css';
 import { TextMenu } from './components/menus/TextMenu';
-import { ContentItemMenu, LinkMenu } from './components/menus';
-import ImageBlockMenu from './extensions/ImageBlock/components/ImageBlockMenu';
+import { ExtensionKit } from './extensions/extension-kit';
 
 export const MessageInput = () => {
 	const menuContainerRef = useRef(null);
@@ -22,13 +20,13 @@ export const MessageInput = () => {
 			Placeholder.configure({
 				placeholder: 'Message starts here...'
 			}),
-			SlashCommand
+			...ExtensionKit
 		],
 		content: '<p>Hello World! 🌎️</p>',
 		immediatelyRender: false,
 		editorProps: {
 			attributes: {
-				class: 'h-[73vh] w-full resize-none bg-transparent text-sm font-light leading-6 outline-none'
+				class: 'h-[69vh] w-full resize-none bg-transparent text-sm font-light leading-6 outline-none'
 			}
 		}
 	});
@@ -38,10 +36,10 @@ export const MessageInput = () => {
 			{!!editor && (
 				<div ref={menuContainerRef}>
 					<EditorContent className="overflow-auto" editor={editor} />
-					<ContentItemMenu editor={editor} />
-					<LinkMenu editor={editor} appendTo={menuContainerRef} />
+					{/* <ContentItemMenu editor={editor} />
+					<LinkMenu editor={editor} appendTo={menuContainerRef} /> */}
 					<TextMenu editor={editor} />
-					<ImageBlockMenu editor={editor} appendTo={menuContainerRef} />
+					{/* <ImageBlockMenu editor={editor} appendTo={menuContainerRef} /> */}
 				</div>
 			)}
 

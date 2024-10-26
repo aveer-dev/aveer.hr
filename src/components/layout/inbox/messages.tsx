@@ -1,4 +1,4 @@
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerNested, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerNested, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { MessageSquareDot, Send, X } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
@@ -45,11 +45,11 @@ const NewMessage = () => {
 
 					<Separator />
 
-					<form className="space-y-4 p-6 pt-0">
+					<div className="space-y-4 p-6 pt-0">
 						<input className="bg-transparent text-base font-semibold outline-none" placeholder="Message title" />
 
 						<MessageInput />
-					</form>
+					</div>
 				</section>
 			</DrawerContent>
 		</DrawerNested>

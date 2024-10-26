@@ -8,14 +8,14 @@ export type IconProps = {
 	strokeWidth?: number;
 };
 
-export const Icon = memo(({ name, className, strokeWidth }: IconProps) => {
+export const Icon = memo(({ name, className, strokeWidth, size }: IconProps & { size?: number }) => {
 	const IconComponent = icons[name];
 
 	if (!IconComponent) {
 		return null;
 	}
 
-	return <IconComponent className={cn('h-4 w-4', className)} strokeWidth={strokeWidth || 2.5} />;
+	return <IconComponent size={size} className={cn(className)} strokeWidth={strokeWidth || 1.5} />;
 });
 
 Icon.displayName = 'Icon';

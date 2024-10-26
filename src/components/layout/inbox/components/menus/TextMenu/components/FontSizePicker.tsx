@@ -1,10 +1,9 @@
-import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Surface } from '../../../Surface';
-import { Toolbar } from '../../../Toolbar';
-import * as Dropdown from '@radix-ui/react-dropdown-menu';
 import { useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { DropdownButton } from '../../../dropdown';
+import { Button } from '@/components/ui/button';
 
 const FONT_SIZES = [
 	{ label: 'Smaller', value: '12px' },
@@ -28,12 +27,13 @@ export const FontSizePicker = ({ onChange, value }: FontSizePickerProps) => {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Toolbar.Button active={!!currentValue?.value}>
-					{currentSizeLabel}
-					<ChevronDown className="h-2 w-2" />
-				</Toolbar.Button>
+				<Button variant={!!currentValue?.value ? 'secondary' : 'ghost'} className="h-8 justify-between gap-px px-2" tooltip="Font size">
+					<span className="w-14 text-left">{currentSizeLabel}</span>
+					<ChevronDown size={10} />
+				</Button>
 			</DropdownMenuTrigger>
-			<Dropdown.Content asChild>
+
+			<DropdownMenuContent asChild>
 				<Surface className="flex flex-col gap-1 px-2 py-4">
 					{FONT_SIZES.map(size => (
 						<DropdownButton isActive={value === size.value} onClick={selectSize(size.value)} key={`${size.label}_${size.value}`}>
@@ -41,7 +41,7 @@ export const FontSizePicker = ({ onChange, value }: FontSizePickerProps) => {
 						</DropdownButton>
 					))}
 				</Surface>
-			</Dropdown.Content>
+			</DropdownMenuContent>
 		</DropdownMenu>
 	);
 };

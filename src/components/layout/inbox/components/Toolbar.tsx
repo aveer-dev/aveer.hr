@@ -49,8 +49,7 @@ const ToolbarButton = forwardRef<HTMLButtonElement, ToolbarButtonProps>(({ child
 	const buttonClass = cn('gap-1 min-w-[2rem] px-2 w-auto', className);
 
 	const content = (
-		// activeClassname={activeClassname}
-		<Button className={buttonClass} variant={variant} ref={ref} {...rest}>
+		<Button className={cn(buttonClass, rest.active && activeClassname, rest.active && 'text-blue-500 hover:text-blue-600', 'h-8 p-1')} variant={variant} ref={ref} onClick={rest.onClick}>
 			{children}
 		</Button>
 	);

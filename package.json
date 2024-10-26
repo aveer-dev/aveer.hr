@@ -38,6 +38,7 @@
 		"@tippyjs/react": "^4.2.6",
 		"@tiptap-pro/extension-drag-handle-react": "^2.11.9",
 		"@tiptap-pro/extension-emoji": "^2.11.9",
+		"@tiptap-pro/extension-file-handler": "^2.11.9",
 		"@tiptap-pro/extension-unique-id": "^2.11.9",
 		"@tiptap/extension-color": "^2.9.1",
 		"@tiptap/extension-focus": "^2.9.1",

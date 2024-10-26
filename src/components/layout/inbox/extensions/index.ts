@@ -18,12 +18,13 @@ export { Paragraph } from '@tiptap/extension-paragraph';
 export { BulletList } from '@tiptap/extension-bullet-list';
 export { OrderedList } from '@tiptap/extension-ordered-list';
 export { UniqueID } from '@tiptap-pro/extension-unique-id';
+export { FileHandler } from '@tiptap-pro/extension-file-handler';
 
-// export { Selection } from './Selection';
+export { Selection } from './Selection';
 export { HorizontalRule } from './HorizontalRule';
 // export { Heading } from './Heading';
 // export { Document } from './Document';
-// export { TrailingNode } from './TrailingNode';
+export { TrailingNode } from './TrailingNode';
 export { SlashCommand } from './SlashCommand';
 export { FontSize } from './FontSize';
 export { Figure } from './Figure';
