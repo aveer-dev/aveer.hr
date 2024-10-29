@@ -18,6 +18,9 @@ const nextConfig = {
 		turbo: {
 			resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json']
 		}
+	},
+	sassOptions: {
+		silenceDeprecations: ['legacy-js-api']
 	}
 };
 
