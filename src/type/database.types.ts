@@ -779,30 +779,39 @@ export type Database = {
           draft: boolean | null
           entity: number | null
           id: number
-          message: string | null
-          org: string | null
+          message: string
+          org: string
           read: Json[]
-          sender: number | null
+          send_time: string | null
+          sender_profile: string
+          title: string
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
           draft?: boolean | null
           entity?: number | null
           id?: number
-          message?: string | null
-          org?: string | null
+          message: string
+          org: string
           read?: Json[]
-          sender?: number | null
+          send_time?: string | null
+          sender_profile: string
+          title: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
           draft?: boolean | null
           entity?: number | null
           id?: number
-          message?: string | null
-          org?: string | null
+          message?: string
+          org?: string
           read?: Json[]
-          sender?: number | null
+          send_time?: string | null
+          sender_profile?: string
+          title?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -820,10 +829,10 @@ export type Database = {
             referencedColumns: ["subdomain"]
           },
           {
-            foreignKeyName: "inbox_sender_fkey"
-            columns: ["sender"]
+            foreignKeyName: "inbox_sender_profile_fkey"
+            columns: ["sender_profile"]
             isOneToOne: false
-            referencedRelation: "contracts"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

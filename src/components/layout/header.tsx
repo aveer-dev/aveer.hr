@@ -5,11 +5,20 @@ import { AccountTypeToggle } from './account-type-toggle';
 import { createClient } from '@/utils/supabase/server';
 import { NavLink } from '@/components/ui/link';
 import { Inbox } from './inbox/messages';
+import { redirect } from 'next/navigation';
 
 export const Header = async ({ orgId }: { orgId?: string }) => {
 	const supabase = createClient();
 
 	const { data } = await supabase.auth.getUser();
+
+	if (!data.user) return redirect('/login');
+
+	const { data: messages } = await supabase
+		.from('inbox')
+		.select('*, sender_profile:profiles!inbox_sender_profile_fkey(id, first_name, last_name)')
+		.or(`and(org.eq.${orgId},draft.eq.false),and(org.eq.${orgId},draft.eq.true,sender_profile.eq.${data.user.id})`)
+		.order('created_at', { ascending: false });
 
 	return (
 		<header className="sticky top-0 z-20 w-full bg-background shadow-sm">
@@ -39,7 +48,7 @@ export const Header = async ({ orgId }: { orgId?: string }) => {
 				<div className="no-scrollbar flex items-center justify-between overflow-x-auto px-6 pt-4">
 					<NavMenu orgId={orgId} />
 
-					<Inbox />
+					<Inbox dbMessages={messages || []} org={orgId} sender={data.user.id} />
 				</div>
 			)}
 		</header>

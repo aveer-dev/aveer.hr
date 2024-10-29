@@ -35,7 +35,6 @@ import { ImageUpload } from './ImageUpload';
 import { isChangeOrigin } from '@tiptap/extension-collaboration';
 
 export const ExtensionKit: any = [
-	Document,
 	Selection,
 	HorizontalRule,
 	UniqueID.configure({

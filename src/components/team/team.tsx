@@ -267,7 +267,7 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 																										setManagers([...managers]);
 																									}}>
 																									<Check className={cn('mr-2 h-4 w-4', employee.id === Number(form.getValues(`managers.${index}.person`)) ? 'opacity-100' : 'opacity-0')} />
-																									{employee.profile.first_name} {employee.profile.first_name}
+																									{employee.profile.first_name} {employee.profile.last_name}
 																								</CommandItem>
 																							))}
 																						</CommandGroup>

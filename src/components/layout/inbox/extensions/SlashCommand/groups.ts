@@ -55,45 +55,6 @@ export const GROUPS: Group[] = [
 				action: (editor: any) => {
 					editor.chain().focus().toggleOrderedList().run();
 				}
-			},
-			{
-				name: 'taskList',
-				label: 'Task List',
-				iconName: ListTodo,
-				description: 'Task list with todo items',
-				aliases: ['todo'],
-				action: (editor: any) => {
-					editor.chain().focus().toggleTaskList().run();
-				}
-			},
-			{
-				name: 'toggleList',
-				label: 'Toggle List',
-				iconName: ListCollapse,
-				description: 'Toggles can show and hide content',
-				aliases: ['toggle'],
-				action: (editor: any) => {
-					editor.chain().focus().setDetails().run();
-				}
-			},
-			{
-				name: 'blockquote',
-				label: 'Blockquote',
-				iconName: Quote,
-				description: 'Element for quoting',
-				action: (editor: any) => {
-					editor.chain().focus().setBlockquote().run();
-				}
-			},
-			{
-				name: 'codeBlock',
-				label: 'Code Block',
-				iconName: SquareCode,
-				description: 'Code block with syntax highlighting',
-				shouldBeHidden: (editor: any) => editor.isActive('columns'),
-				action: (editor: any) => {
-					editor.chain().focus().setCodeBlock().run();
-				}
 			}
 		]
 	},
@@ -101,42 +62,16 @@ export const GROUPS: Group[] = [
 		name: 'insert',
 		title: 'Insert',
 		commands: [
-			{
-				name: 'table',
-				label: 'Table',
-				iconName: Table,
-				description: 'Insert a table',
-				shouldBeHidden: (editor: any) => editor.isActive('columns'),
-				action: (editor: any) => {
-					editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: false }).run();
-				}
-			},
-			{
-				name: 'image',
-				label: 'Image',
-				iconName: Image,
-				description: 'Insert an image',
-				aliases: ['img'],
-				action: (editor: any) => {
-					editor.chain().focus().setImageUpload().run();
-				}
-			},
-			{
-				name: 'columns',
-				label: 'Columns',
-				iconName: Columns2,
-				description: 'Add two column content',
-				aliases: ['cols'],
-				shouldBeHidden: (editor: any) => editor.isActive('columns'),
-				action: (editor: any) => {
-					editor
-						.chain()
-						.focus()
-						.setColumns()
-						.focus(editor.state.selection.head - 1)
-						.run();
-				}
-			},
+			// {
+			// 	name: 'image',
+			// 	label: 'Image',
+			// 	iconName: Image,
+			// 	description: 'Insert an image',
+			// 	aliases: ['img'],
+			// 	action: (editor: any) => {
+			// 		editor.chain().focus().setImageUpload().run();
+			// 	}
+			// },
 			{
 				name: 'horizontalRule',
 				label: 'Horizontal Rule',
@@ -145,17 +80,6 @@ export const GROUPS: Group[] = [
 				aliases: ['hr'],
 				action: (editor: any) => {
 					editor.chain().focus().setHorizontalRule().run();
-				}
-			},
-			{
-				name: 'toc',
-				label: 'Table of Contents',
-				iconName: Book,
-				aliases: ['outline'],
-				description: 'Insert a table of contents',
-				shouldBeHidden: (editor: any) => editor.isActive('columns'),
-				action: (editor: any) => {
-					editor.chain().focus().insertTableOfContents().run();
 				}
 			}
 		]

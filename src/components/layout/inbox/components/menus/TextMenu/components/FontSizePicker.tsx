@@ -33,7 +33,7 @@ export const FontSizePicker = ({ onChange, value }: FontSizePickerProps) => {
 				</Button>
 			</DropdownMenuTrigger>
 
-			<DropdownMenuContent asChild>
+			<DropdownMenuContent asChild onCloseAutoFocus={event => event.preventDefault()}>
 				<Surface className="flex flex-col gap-1 px-2 py-4">
 					{FONT_SIZES.map(size => (
 						<DropdownButton isActive={value === size.value} onClick={selectSize(size.value)} key={`${size.label}_${size.value}`}>
