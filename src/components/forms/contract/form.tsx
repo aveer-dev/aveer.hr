@@ -798,6 +798,50 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 											</FormItem>
 										)}
 									/>
+
+									<div className="grid grid-cols-2 gap-8">
+										<FormField
+											control={form.control}
+											name="paid_leave"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Annual leave</FormLabel>
+													<FormControl>
+														<Input type="number" placeholder="20" {...field} onChange={event => field.onChange(Number(event.target.value))} required />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="sick_leave"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Sick leave</FormLabel>
+													<FormControl>
+														<Input type="number" placeholder="20" {...field} onChange={event => field.onChange(Number(event.target.value))} required />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+
+										<FormField
+											control={form.control}
+											name="probation_period"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Probation period</FormLabel>
+													<FormControl>
+														<Input type="number" placeholder="90" {...field} onChange={event => field.onChange(Number(event.target.value))} required />
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</div>
 								</InputsContainer>
 							</FormSection>
 						)}

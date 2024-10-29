@@ -302,9 +302,9 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 
 					<li className="grid gap-3">
 						<h4 className="flex items-center gap-2 text-sm font-medium">
-							Leave
-							{openScheduleDialog && (
-								<Button onClick={() => openScheduleDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+							Annual leave
+							{back && (
+								<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
 									<Pencil size={10} />
 								</Button>
 							)}
@@ -315,8 +315,8 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 					<li className="grid gap-3">
 						<h4 className="flex items-center gap-2 text-sm font-medium">
 							Sick Leave
-							{openScheduleDialog && (
-								<Button onClick={() => openScheduleDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+							{back && (
+								<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
 									<Pencil size={10} />
 								</Button>
 							)}
@@ -327,8 +327,8 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 					<li className="grid gap-3">
 						<h4 className="flex items-center gap-2 text-sm font-medium">
 							Probation Period
-							{openScheduleDialog && (
-								<Button onClick={() => openScheduleDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+							{back && (
+								<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
 									<Pencil size={10} />
 								</Button>
 							)}
