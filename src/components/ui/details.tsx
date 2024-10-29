@@ -12,7 +12,7 @@ interface props {
 	openBenefitsDialog?: (action: boolean) => void;
 	openScheduleDialog?: (action: boolean) => void;
 	data: any;
-	formType: 'role' | 'contract';
+	formType: 'role' | 'contract' | 'job';
 	isManager?: boolean;
 	team?: string;
 	currency?: string;
@@ -259,84 +259,86 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 			</div>
 
 			{/* job schedule */}
-			<div>
-				<div className="mb-4 flex items-center justify-between">
-					<h3 className="text-lg font-semibold text-support">Job Schedule</h3>
-					{back && (
-						<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
-							<Pencil size={12} />
-						</Button>
-					)}
-				</div>
+			{formType !== 'job' && (
+				<div>
+					<div className="mb-4 flex items-center justify-between">
+						<h3 className="text-lg font-semibold text-support">Job Schedule</h3>
+						{back && (
+							<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
+								<Pencil size={12} />
+							</Button>
+						)}
+					</div>
 
-				<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-					{formType == 'contract' && (
-						<>
-							<li className="grid gap-3">
-								<h4 className="flex items-center gap-2 text-sm font-medium">
-									Employment Start Date
-									{back && (
-										<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-											<Pencil size={10} />
-										</Button>
-									)}
-								</h4>
-								<p className="text-sm font-light">{format(data?.start_date as string, 'PP')}</p>
-							</li>
-
-							{data?.end_date && (
+					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
+						{formType == 'contract' && (
+							<>
 								<li className="grid gap-3">
 									<h4 className="flex items-center gap-2 text-sm font-medium">
-										Employment End Date
+										Employment Start Date
 										{back && (
 											<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
 												<Pencil size={10} />
 											</Button>
 										)}
 									</h4>
-									<p className="text-sm font-light">{format(data?.end_date as string, 'PP')}</p>
+									<p className="text-sm font-light">{format(data?.start_date as string, 'PP')}</p>
 								</li>
-							)}
-						</>
-					)}
 
-					<li className="grid gap-3">
-						<h4 className="flex items-center gap-2 text-sm font-medium">
-							Annual leave
-							{back && (
-								<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-									<Pencil size={10} />
-								</Button>
-							)}
-						</h4>
-						<p className="text-sm font-light">{data?.paid_leave} Days</p>
-					</li>
+								{data?.end_date && (
+									<li className="grid gap-3">
+										<h4 className="flex items-center gap-2 text-sm font-medium">
+											Employment End Date
+											{back && (
+												<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+													<Pencil size={10} />
+												</Button>
+											)}
+										</h4>
+										<p className="text-sm font-light">{format(data?.end_date as string, 'PP')}</p>
+									</li>
+								)}
+							</>
+						)}
 
-					<li className="grid gap-3">
-						<h4 className="flex items-center gap-2 text-sm font-medium">
-							Sick Leave
-							{back && (
-								<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-									<Pencil size={10} />
-								</Button>
-							)}
-						</h4>
-						<p className="text-sm font-light">{data?.sick_leave} Days</p>
-					</li>
+						<li className="grid gap-3">
+							<h4 className="flex items-center gap-2 text-sm font-medium">
+								Annual leave
+								{back && (
+									<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+										<Pencil size={10} />
+									</Button>
+								)}
+							</h4>
+							<p className="text-sm font-light">{data?.paid_leave} Days</p>
+						</li>
 
-					<li className="grid gap-3">
-						<h4 className="flex items-center gap-2 text-sm font-medium">
-							Probation Period
-							{back && (
-								<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-									<Pencil size={10} />
-								</Button>
-							)}
-						</h4>
-						<p className="text-sm font-light">{data?.probation_period} Days</p>
-					</li>
-				</ul>
-			</div>
+						<li className="grid gap-3">
+							<h4 className="flex items-center gap-2 text-sm font-medium">
+								Sick Leave
+								{back && (
+									<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+										<Pencil size={10} />
+									</Button>
+								)}
+							</h4>
+							<p className="text-sm font-light">{data?.sick_leave} Days</p>
+						</li>
+
+						<li className="grid gap-3">
+							<h4 className="flex items-center gap-2 text-sm font-medium">
+								Probation Period
+								{back && (
+									<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+										<Pencil size={10} />
+									</Button>
+								)}
+							</h4>
+							<p className="text-sm font-light">{data?.probation_period} Days</p>
+						</li>
+					</ul>
+				</div>
+			)}
 
 			{/* job location */}
 			{data?.work_location && (

@@ -123,7 +123,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 					</div>
 				</div>
 
-				<Details data={data} formType={'role'} />
+				<Details data={data} formType={type} />
 			</section>
 
 			{data.state == 'open' && <JobApplicationForm roleId={Number(role)} org={orgId} submit={submitApplication} />}
