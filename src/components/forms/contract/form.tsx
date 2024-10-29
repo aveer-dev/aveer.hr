@@ -697,7 +697,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 												<SelectContent>
 													{employees.map(employee => (
 														<SelectItem key={employee.id} value={String(employee.id)}>
-															{(employee.profile as unknown as Tables<'profiles'>)?.first_name} {(employee.profile as unknown as Tables<'profiles'>)?.first_name} - {employee.job_title}
+															{(employee.profile as unknown as Tables<'profiles'>)?.first_name} {(employee.profile as unknown as Tables<'profiles'>)?.last_name} - {employee.job_title}
 														</SelectItem>
 													))}
 												</SelectContent>
