@@ -666,49 +666,47 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 									</div>
 								)}
 
-								{isManager && (
-									<FormField
-										control={form.control}
-										name="direct_report"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel className="flex items-center gap-2">
-													Direct report
-													<TooltipProvider>
-														<Tooltip>
-															<TooltipTrigger asChild>
-																<button>
-																	<Info size={12} />
-																</button>
-															</TooltipTrigger>
-															<TooltipContent>
-																<p>Who will this manager report to?</p>
-															</TooltipContent>
-														</Tooltip>
-													</TooltipProvider>
-												</FormLabel>
+								<FormField
+									control={form.control}
+									name="direct_report"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel className="flex items-center gap-2">
+												Direct report
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<button>
+																<Info size={12} />
+															</button>
+														</TooltipTrigger>
+														<TooltipContent>
+															<p>Who will this person report to?</p>
+														</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+											</FormLabel>
 
-												<Select onValueChange={field.onChange} defaultValue={field.value}>
-													<FormControl>
-														<SelectTrigger>
-															<SelectValue placeholder="Select a direct report" />
-														</SelectTrigger>
-													</FormControl>
+											<Select onValueChange={field.onChange} defaultValue={field.value}>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Select a direct report" />
+													</SelectTrigger>
+												</FormControl>
 
-													<SelectContent>
-														{employees.map(employee => (
-															<SelectItem key={employee.id} value={String(employee.id)}>
-																{(employee.profile as unknown as Tables<'profiles'>)?.first_name} {(employee.profile as unknown as Tables<'profiles'>)?.first_name} - {employee.job_title}
-															</SelectItem>
-														))}
-													</SelectContent>
-												</Select>
+												<SelectContent>
+													{employees.map(employee => (
+														<SelectItem key={employee.id} value={String(employee.id)}>
+															{(employee.profile as unknown as Tables<'profiles'>)?.first_name} {(employee.profile as unknown as Tables<'profiles'>)?.first_name} - {employee.job_title}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
 
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								)}
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 							</InputsContainer>
 						</FormSection>
 
