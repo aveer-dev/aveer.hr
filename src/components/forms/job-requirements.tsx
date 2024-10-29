@@ -42,15 +42,15 @@ export const JobRequirements = ({ form }: props) => {
 									))}
 								</ul>
 							) : (
-								<p className="text-xs font-light italic text-muted-foreground">No job requirement added yet</p>
+								<p className="text-xs font-light italic text-muted-foreground">No requirements added yet</p>
 							)}
 						</div>
 
 						<div className="grid w-full gap-2">
 							<FormControl>
-								<Textarea value={requirement} onChange={event => setRequirement(event.target.value)} placeholder="Type additional offer" className="min-h-5 py-[10px] text-xs font-light" />
+								<Textarea value={requirement} onChange={event => setRequirement(event.target.value)} placeholder="Type requirement" className="min-h-5 bg-background py-[10px] text-xs font-light" />
 							</FormControl>
-							<FormDescription className="text-xs font-thin text-muted-foreground">Type and add job responsibility one after the other</FormDescription>
+							<FormDescription className="text-xs font-thin text-muted-foreground">Type and add requirements one after the other</FormDescription>
 							<Button
 								type="button"
 								className="w-full"
