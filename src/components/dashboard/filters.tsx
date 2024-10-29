@@ -12,7 +12,7 @@ import { createClient } from '@/utils/supabase/client';
 import { PERSON } from '@/type/person';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { Database } from '@/type/database.types';
+import { Database, Tables } from '@/type/database.types';
 
 interface props {
 	toggleTableLoadingState: Dispatch<SetStateAction<boolean>>;
@@ -24,23 +24,31 @@ type CONTRACT_TYPE = Database['public']['Enums']['contract_state'] | string;
 const supabase = createClient();
 
 export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: props) => {
+	const [showTeamFilter, toggleTeamFilter] = useState(false);
 	const [showStatusFilter, toggleStatusFilter] = useState(false);
 	const [showEmploymentTypeFilter, toggleEmploymentTypeFilter] = useState(false);
 	const [showCountryFilter, toggleCountryFilter] = useState(false);
 	const [isCountriesOpen, toggleCountryOpenState] = useState(true);
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
+	const [teams, setTeams] = useState<Tables<'teams'>[]>([]);
 	const [countryFilterValue, setCountryFilterValue] = useState('');
 	const [employmentTypeFilterValue, setEmploymentTypeFilterValue] = useState('');
 
 	const [statusFilterValue, setStausFilterValue] = useState<CONTRACT_TYPE>();
+	const [teamFilterValue, setTeamFilterValue] = useState<CONTRACT_TYPE>();
 
 	const getCountries = async () => {
 		const { data, error } = await supabase.from('countries').select();
-		if (!error) setCountries(data);
+		if (!error) setCountries(data || []);
 	};
 
+	const getTeams = useCallback(async () => {
+		const { data, error } = await supabase.from('teams').select().eq('org', org);
+		if (!error) setTeams(data || []);
+	}, [org]);
+
 	const getContractsWithFilter = useCallback(
-		async ({ status, employment_type, nationality }: { status?: CONTRACT_TYPE; employment_type?: string; nationality?: string }) => {
+		async ({ status, employment_type, nationality, team }: { status?: CONTRACT_TYPE; employment_type?: string; nationality?: string; team?: string }) => {
 			toggleTableLoadingState(true);
 
 			let query = supabase.from('contracts').select(`
@@ -50,6 +58,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
             employment_type,
             start_date,
             org,
+            team,
             profile:profiles!contracts_profile_fkey(
                 first_name,
                 last_name,
@@ -62,6 +71,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
 			if (nationality) query = query.not('profile', 'is', null).not('profile.nationality', 'is', null).eq('profile.nationality.country_code', nationality);
 			if (status) query = query.eq('status', status);
 			if (employment_type) query = query.eq('employment_type', employment_type);
+			if (team) query = query.eq('team', team);
 
 			const { data, error } = await query.eq('org', org);
 			toggleTableLoadingState(false);
@@ -72,8 +82,9 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
 	);
 
 	useEffect(() => {
+		getTeams();
 		getCountries();
-	}, []);
+	}, [getTeams]);
 
 	const statusOptions = [
 		{ label: 'Awaiting signatures', value: 'awaiting signatures' },
@@ -121,6 +132,47 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
 							{statusOptions.map(option => (
 								<SelectItem key={option.value} value={option.value}>
 									{option.label}
+								</SelectItem>
+							))}
+						</SelectGroup>
+					</SelectContent>
+				</Select>
+			)}
+
+			{showTeamFilter && (
+				<Select
+					defaultOpen
+					onValueChange={value => {
+						setTeamFilterValue(value as any);
+						getContractsWithFilter({ status: statusFilterValue, employment_type: employmentTypeFilterValue, nationality: countryFilterValue, team: value });
+					}}>
+					<div className="relative">
+						<SelectTrigger className="h-[unset] w-fit rounded-full border-none bg-transparent p-0 [&_>_svg]:hidden">
+							<div className={cn(badgeVariants({ variant: 'secondary' }), 'flex h-fit gap-1 bg-transparent p-0 font-light hover:bg-transparent')}>
+								<div className="rounded-full rounded-e-none bg-secondary px-3 py-2">Team</div>
+								<div className={cn('flex items-center gap-3 rounded-full rounded-s-none bg-secondary px-3 py-2', !teamFilterValue && 'text-muted-foreground')}>
+									<SelectValue placeholder="Select a status" />
+									<div className="h-3 w-3"></div>
+								</div>
+							</div>
+						</SelectTrigger>
+						{teamFilterValue && (
+							<button
+								className="absolute right-3 top-1/2 -translate-y-1/2"
+								onClick={() => {
+									setTeamFilterValue('');
+									getContractsWithFilter({ status: statusFilterValue, employment_type: employmentTypeFilterValue, nationality: countryFilterValue, team: '' });
+									toggleTeamFilter(false);
+								}}>
+								<CircleX size={14} className="stroke-1" />
+							</button>
+						)}
+					</div>
+					<SelectContent>
+						<SelectGroup>
+							{teams.map(team => (
+								<SelectItem key={team.id} value={String(team.id)}>
+									{team.name}
 								</SelectItem>
 							))}
 						</SelectGroup>
@@ -217,7 +269,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
 				</Popover>
 			)}
 
-			{(!showStatusFilter || !showEmploymentTypeFilter || !showCountryFilter) && (
+			{(!showStatusFilter || !showEmploymentTypeFilter || !showCountryFilter || !showTeamFilter) && (
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button variant={'secondary'} className={cn(badgeVariants({ variant: 'secondary' }), 'flex h-fit gap-1 rounded-full bg-secondary p-0 px-3 py-2 font-light')}>
@@ -244,6 +296,13 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
 							<DropdownMenuItem>
 								<Button className="h-5 w-full justify-start" onClick={() => toggleCountryFilter(true)} variant={'ghost'} size={'sm'}>
 									Country
+								</Button>
+							</DropdownMenuItem>
+						)}
+						{!showTeamFilter && (
+							<DropdownMenuItem>
+								<Button className="h-5 w-full justify-start" onClick={() => toggleTeamFilter(true)} variant={'ghost'} size={'sm'}>
+									Team
 								</Button>
 							</DropdownMenuItem>
 						)}
