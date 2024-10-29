@@ -1586,6 +1586,7 @@ export type Database = {
       profiles: {
         Row: {
           address: Json | null
+          date_of_birth: string | null
           email: string
           emergency_contact: Json | null
           first_name: string
@@ -1599,6 +1600,7 @@ export type Database = {
         }
         Insert: {
           address?: Json | null
+          date_of_birth?: string | null
           email: string
           emergency_contact?: Json | null
           first_name: string
@@ -1612,6 +1614,7 @@ export type Database = {
         }
         Update: {
           address?: Json | null
+          date_of_birth?: string | null
           email?: string
           emergency_contact?: Json | null
           first_name?: string

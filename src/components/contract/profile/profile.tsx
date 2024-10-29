@@ -1,5 +1,6 @@
 import { Tables } from '@/type/database.types';
 import { ProfileForm } from './profile-form';
+import { format } from 'date-fns';
 
 interface props {
 	data:
@@ -40,6 +41,9 @@ export const Profile = ({ data, type }: props) => {
 				</li>
 				<li className="grid gap-1">
 					<h4 className="text-xs text-muted-foreground">Mobile number</h4> <p className="font-normal">{data?.mobile ? `${data?.mobile}` : '-'}</p>
+				</li>
+				<li className="grid gap-1">
+					<h4 className="text-xs text-muted-foreground">Date of birth</h4> <p className="font-normal">{data?.date_of_birth ? `${format(data?.date_of_birth, 'PPP')}` : '-'}</p>
 				</li>
 			</ul>
 

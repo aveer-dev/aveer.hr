@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 import { updateProfile } from './profile.actions';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const formSchema = z.object({
 	first_name: z.string().min(2, { message: 'Enter first name' }),
@@ -38,7 +39,8 @@ const formSchema = z.object({
 		state: z.string().min(2, { message: 'Enter your state' }),
 		code: z.string().min(2, { message: 'Enter your postcode/zipcode' }),
 		country: z.string().min(2, { message: 'Select your country' })
-	})
+	}),
+	date_of_birth: z.date().optional()
 });
 
 interface props {
@@ -61,14 +63,15 @@ export const ProfileForm = ({ data }: props) => {
 			nationality: data.nationality?.country_code || '',
 			email: data.email || '',
 			first_name: data.first_name || '',
-			last_name: data.last_name || ''
+			last_name: data.last_name || '',
+			date_of_birth: data?.date_of_birth ? new Date(data?.date_of_birth) : undefined
 		}
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setUpdateState(true);
 
-		const payload: TablesUpdate<'profiles'> = { ...values };
+		const payload: TablesUpdate<'profiles'> = { ...values, date_of_birth: values?.date_of_birth ? new Date(values?.date_of_birth).toISOString() : null };
 		const response = await updateProfile({ payload, id: data.id });
 		setUpdateState(false);
 
@@ -165,6 +168,21 @@ export const ProfileForm = ({ data }: props) => {
 											<FormControl>
 												<Input type="email" inputMode="email" placeholder="Enter email address" {...field} />
 											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="date_of_birth"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Date of birth</FormLabel>
+											<FormControl>
+												<DatePicker selected={field.value || undefined} onSetDate={field.onChange} />
+											</FormControl>
+
 											<FormMessage />
 										</FormItem>
 									)}

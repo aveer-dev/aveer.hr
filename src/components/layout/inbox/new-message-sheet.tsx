@@ -16,7 +16,7 @@ export const NewMessageSheet = ({ org, message, onMessageSent, sender, children 
 		<DrawerNested open={isOpen} onOpenChange={toggleOpenState} dismissible={false} direction="right" modal={false}>
 			{!children && (
 				<DrawerTrigger asChild>
-					<Button name="new message" title="new message" className="fixed bottom-2 right-2 rounded-full">
+					<Button name="new message" disabled title="new message" className="fixed bottom-2 right-2 rounded-full">
 						<Send size={12} />
 					</Button>
 				</DrawerTrigger>

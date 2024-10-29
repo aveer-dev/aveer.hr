@@ -43,7 +43,6 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
 				years_dropdown: 'ml-3',
 				...classNames
 			}}
-			disabled={{ dayOfWeek: [0, 6] }}
 			components={{
 				Chevron: ({ orientation }) => (orientation == 'left' ? <ChevronLeft size={12} /> : <ChevronRight size={12} />)
 			}}
