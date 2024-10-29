@@ -12,12 +12,10 @@ export const Header = async ({ orgId }: { orgId?: string }) => {
 
 	const { data } = await supabase.auth.getUser();
 
-	if (!data.user) return redirect('/login');
-
 	const { data: messages } = await supabase
 		.from('inbox')
 		.select('*, sender_profile:profiles!inbox_sender_profile_fkey(id, first_name, last_name)')
-		.or(`and(org.eq.${orgId},draft.eq.false),and(org.eq.${orgId},draft.eq.true,sender_profile.eq.${data.user.id})`)
+		.or(`and(org.eq.${orgId},draft.eq.false),and(org.eq.${orgId},draft.eq.true,sender_profile.eq.${data.user?.id})`)
 		.order('created_at', { ascending: false });
 
 	return (
