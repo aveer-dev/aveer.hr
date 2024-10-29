@@ -136,7 +136,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			additional_offerings: (contractData?.additional_offerings as string[]) || (openRoleData?.additional_offerings as string[]) || (orgBenefits?.additional_offerings as string[]) || [],
 			responsibilities: (contractData?.responsibilities as string[]) || (openRoleData?.responsibilities as string[]) || [],
 			fixed_allowance: (contractData?.fixed_allowance as any) || (openRoleData?.fixed_allowance as any) || [],
-			start_date: contractData?.start_date ? new Date(contractData?.start_date) : new Date(),
+			start_date: contractData?.start_date ? new Date(`${contractData?.start_date}T00:00`) : new Date(),
 			end_date: contractData?.end_date ? new Date(contractData?.end_date) : undefined,
 			probation_period: contractData?.probation_period || openRoleData?.probation_period || orgBenefits?.probation || 90,
 			paid_leave: contractData?.paid_leave || openRoleData?.paid_leave || orgBenefits?.paid_time_off || 20,
