@@ -42,6 +42,7 @@ import { NavLink } from '@/components/ui/link';
 import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
+import { LeaveDays } from './leave-fields';
 
 const supabase = createClient();
 
@@ -92,6 +93,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 	const [selectedLevel, setActiveLevel] = useState<TablesInsert<'employee_levels'>>();
 	const [showAdditionalOffering, toggleAdditionalOffering] = useState(!!contractData?.additional_offerings?.length || !!openRoleData?.additional_offerings?.length || !!orgBenefits?.additional_offerings?.length);
 	const [showManualSystem, setManualSystem] = useState(!(contractData?.level || openRoleData?.level));
+	const [hasCustomLeave, setCustomLeaveState] = useState(contractData ? (contractData?.paid_leave != 0 && orgBenefits?.paid_leave != contractData?.paid_leave) || (contractData?.sick_leave != 0 && orgBenefits?.sick_leave != contractData?.sick_leave) : false);
 
 	const formSchema = z.object({
 		first_name: formType == 'contract' ? z.string() : z.string().optional(),
@@ -140,9 +142,9 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			fixed_allowance: (contractData?.fixed_allowance as any) || (openRoleData?.fixed_allowance as any) || [],
 			start_date: contractData?.start_date ? new Date(`${contractData?.start_date}`) : new Date(),
 			end_date: contractData?.end_date ? new Date(contractData?.end_date) : undefined,
-			probation_period: contractData?.probation_period || openRoleData?.probation_period || orgBenefits?.probation || 90,
-			paid_leave: contractData?.paid_leave || openRoleData?.paid_leave || orgBenefits?.paid_time_off || 20,
-			sick_leave: contractData?.sick_leave || openRoleData?.sick_leave || orgBenefits?.sick_leave || 20,
+			probation_period: contractData?.probation_period || openRoleData?.probation_period || 0,
+			paid_leave: contractData?.paid_leave || openRoleData?.paid_leave || 0,
+			sick_leave: contractData?.sick_leave || openRoleData?.sick_leave || 0,
 			work_schedule: contractData?.work_schedule || openRoleData?.work_schedule || orgBenefits?.work_schedule || '8',
 			work_shedule_interval: contractData?.work_shedule_interval || openRoleData?.work_shedule_interval || orgBenefits?.work_shedule_interval || 'daily',
 			salary: formType == 'contract' ? (contractData?.salary ? String(contractData?.salary) : '') : openRoleData?.salary ? String(openRoleData?.salary) : '',
@@ -342,7 +344,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 		form.setValue('work_schedule', (role?.work_schedule as string) || '');
 		form.setValue('work_shedule_interval', (role?.work_shedule_interval as string) || '');
 		form.setValue('probation_period', (role?.probation_period as number) || orgBenefits?.probation || 90);
-		form.setValue('paid_leave', (role?.paid_leave as number) || orgBenefits?.paid_time_off || 20);
+		form.setValue('paid_leave', (role?.paid_leave as number) || orgBenefits?.paid_leave || 20);
 		form.setValue('sick_leave', (role?.sick_leave as number) || orgBenefits?.sick_leave || 20);
 		form.setValue('years_of_experience', (role?.years_of_experience as number) || 0);
 		form.setValue('team', role?.team ? String(role.team) : '');
@@ -351,6 +353,9 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 		form.setValue('level_name', role?.level_name ? String(role.level_name) : '');
 		const activeLevel = orgJobLevels.find(level => level.id === role.level);
 		setActiveLevel(activeLevel);
+
+		const hasCustomLeave = role ? (role?.paid_leave != 0 && orgBenefits?.paid_leave != role?.paid_leave) || (role?.sick_leave != 0 && orgBenefits?.sick_leave != role?.sick_leave) : false;
+		setCustomLeaveState(hasCustomLeave);
 
 		toggleShowSigningBonus(!!role?.signing_bonus);
 		toggleShowFixedIncome(!!role?.fixed_allowance);
@@ -414,7 +419,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 						<FormSection>
 							<FormSectionDescription>
 								<h2 className="font-semibold">Legal entity </h2>
-								<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">Aveer allows you to manage employees across your entities around the world. Select which entity this new hire will be under</p>
+								<p className="mt-3 w-full text-xs font-thin text-support md:max-w-72">Aveer allows you to manage employees across your entities around the world. Select which entity this new hire will be under</p>
 							</FormSectionDescription>
 
 							<InputsContainer>
@@ -427,7 +432,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 							<FormSection>
 								<FormSectionDescription>
 									<h2 className="font-semibold">{contractData ? 'Employee details' : 'Personal details'}</h2>
-									<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+									<p className="mt-3 w-full text-xs font-thin text-support md:max-w-72">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
 								</FormSectionDescription>
 
 								<InputsContainer>
@@ -482,7 +487,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 						<FormSection>
 							<FormSectionDescription>
 								<h2 className="font-semibold">Role details</h2>
-								<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+								<p className="mt-3 w-full text-xs font-thin text-support md:max-w-72">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
 							</FormSectionDescription>
 
 							<InputsContainer>
@@ -595,7 +600,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 							<FormSection>
 								<FormSectionDescription>
 									<h2 className="font-semibold">Job requirements</h2>
-									<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">What are the things, skills or characteristics you expect from your new hire.</p>
+									<p className="mt-3 w-full text-xs font-thin text-support md:max-w-72">What are the things, skills or characteristics you expect from your new hire.</p>
 								</FormSectionDescription>
 
 								<InputsContainer>
@@ -625,7 +630,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 						<FormSection>
 							<FormSectionDescription>
 								<h2 className="font-semibold">Team</h2>
-								<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">Will this person work with a team and will the person lead or manage the team in any capacity</p>
+								<p className="mt-3 w-full text-xs font-thin text-support md:max-w-72">Will this person work with a team and will the person lead or manage the team in any capacity</p>
 							</FormSectionDescription>
 
 							<InputsContainer>
@@ -720,7 +725,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 						<FormSection>
 							<FormSectionDescription>
 								<h2 className="font-semibold">Compensation</h2>
-								<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+								<p className="mt-3 max-w-72 text-xs font-thin text-support">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
 							</FormSectionDescription>
 
 							<InputsContainer>
@@ -760,7 +765,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 							<FormSection>
 								<FormSectionDescription>
 									<h2 className="font-semibold">Job Schedule</h2>
-									<p className="mt-3 w-full text-xs font-thin text-muted-foreground md:max-w-72">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
+									<p className="mt-3 w-full text-xs font-thin text-support md:max-w-72">This should be the public name of your entire organisation. This is mostly an organisation identifier.</p>
 								</FormSectionDescription>
 
 								<InputsContainer>
@@ -805,49 +810,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 										)}
 									/>
 
-									<div className="grid grid-cols-2 gap-8">
-										<FormField
-											control={form.control}
-											name="paid_leave"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Annual leave</FormLabel>
-													<FormControl>
-														<Input type="number" placeholder="20" {...field} onChange={event => field.onChange(Number(event.target.value))} required />
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-
-										<FormField
-											control={form.control}
-											name="sick_leave"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Sick leave</FormLabel>
-													<FormControl>
-														<Input type="number" placeholder="20" {...field} onChange={event => field.onChange(Number(event.target.value))} required />
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-
-										<FormField
-											control={form.control}
-											name="probation_period"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Probation period</FormLabel>
-													<FormControl>
-														<Input type="number" placeholder="90" {...field} onChange={event => field.onChange(Number(event.target.value))} required />
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
+									<LeaveDays isEnabled={hasCustomLeave} form={form} />
 								</InputsContainer>
 							</FormSection>
 						)}
@@ -857,7 +820,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 							<FormSection>
 								<FormSectionDescription>
 									<h2 className="font-semibold">Location</h2>
-									<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">Where will your new hire be working from: remote, office, or hybrid?</p>
+									<p className="mt-3 max-w-72 text-xs font-thin text-support">Where will your new hire be working from: remote, office, or hybrid?</p>
 								</FormSectionDescription>
 
 								<InputsContainer>
@@ -892,7 +855,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 							<FormSection>
 								<FormSectionDescription>
 									<h2 className="font-semibold">Review/approval policy</h2>
-									<p className="mt-3 max-w-72 text-xs font-thin text-muted-foreground">This will enable automated flow of candidate review, from one person to the other</p>
+									<p className="mt-3 max-w-72 text-xs font-thin text-support">This will enable automated flow of candidate review, from one person to the other</p>
 								</FormSectionDescription>
 
 								<InputsContainer>
@@ -946,7 +909,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 							<FormSection>
 								<FormSectionDescription>
 									<h2 className="font-semibold">Custom questions</h2>
-									<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Are there any specific information you&apos;ll like to collect from your applicants?</p>
+									<p className="mt-3 text-xs font-thin text-support sm:max-w-72">Are there any specific information you&apos;ll like to collect from your applicants?</p>
 								</FormSectionDescription>
 
 								<InputsContainer>

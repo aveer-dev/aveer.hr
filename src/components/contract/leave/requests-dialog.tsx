@@ -14,9 +14,10 @@ interface props {
 	org: string;
 	contract: Tables<'contracts'>;
 	reviewType: ROLE;
+	orgSettings: Tables<'org_settings'> | null;
 }
 
-export const LeaveRequests = async ({ org, contract, reviewType }: props) => {
+export const LeaveRequests = async ({ org, contract, reviewType, orgSettings }: props) => {
 	const supabase = createClient();
 
 	const { data, error } = await supabase
@@ -67,7 +68,7 @@ export const LeaveRequests = async ({ org, contract, reviewType }: props) => {
 									</button>
 								</LeaveReview>
 
-								<LeaveActions contract={contract} data={leave} org={org} id={leave.id} />
+								<LeaveActions orgSettings={orgSettings} contract={contract} data={leave} org={org} id={leave.id} />
 							</li>
 						))}
 					</ul>

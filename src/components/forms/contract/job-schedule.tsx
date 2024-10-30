@@ -89,7 +89,7 @@ export const JobScheduleDialog = ({ isDialogOpen, openDialog, form }: props) => 
 									name="paid_leave"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel htmlFor="paid_leave">Leave</FormLabel>
+											<FormLabel htmlFor="paid_leave">Annual leave</FormLabel>
 											<div className="relative h-fit w-full">
 												<FormControl>
 													<Input id="paid_leave" type="number" placeholder="20" {...field} onChange={event => form.setValue('paid_leave', Number(event.target.value))} required />

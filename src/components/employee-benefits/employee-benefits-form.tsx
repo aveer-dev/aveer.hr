@@ -35,7 +35,7 @@ export const EmployeeBenefitsForm = ({ data, updateBenefits }: { data?: Tables<'
 		defaultValues: {
 			additional_offerings: (data?.additional_offerings as string[]) || [],
 			probation: data?.probation || 90,
-			paid_time_off: data?.paid_time_off || 20,
+			paid_time_off: data?.paid_leave || 20,
 			sick_leave: data?.sick_leave || 20,
 			work_schedule: data?.work_schedule || '8',
 			maternity_leave: data?.maternity_leave || 60,

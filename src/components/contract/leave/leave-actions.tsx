@@ -16,11 +16,12 @@ interface props {
 	onDelete?: () => void;
 	contract: Tables<'contracts'>;
 	data: Tables<'time_off'>;
+	orgSettings: Tables<'org_settings'> | null;
 }
 
 const supabase = createClient();
 
-export const LeaveActions = ({ org, id, onDelete, contract, data }: props) => {
+export const LeaveActions = ({ org, id, onDelete, contract, data, orgSettings }: props) => {
 	const [isDeleting, setDeleteState] = useState(false);
 	const router = useRouter();
 
@@ -39,7 +40,7 @@ export const LeaveActions = ({ org, id, onDelete, contract, data }: props) => {
 				{isDeleting && <LoadingSpinner />} {!isDeleting && <Trash2 size={12} />}
 			</Button>
 
-			<LeaveRequestDialog contract={contract} data={data}>
+			<LeaveRequestDialog orgSettings={orgSettings} contract={contract} data={data}>
 				<Button variant={'ghost'} className="h-6">
 					<Edit size={12} />
 				</Button>

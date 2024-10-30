@@ -18,12 +18,13 @@ import { cn } from '@/lib/utils';
 interface props {
 	data: Tables<'contracts'> & { profile: Tables<'profiles'>; org: Tables<'organisations'>; entity: Tables<'legal_entities'> & { incorporation_country: { currency_code: string } } };
 	reviewType: ROLE;
+	orgSettings: Tables<'org_settings'> | null;
 }
 
-export const ContractOverview = async ({ data, reviewType }: props) => {
+export const ContractOverview = async ({ data, reviewType, orgSettings }: props) => {
 	const supabase = createClient();
 
-	const chartData = getChartData(data);
+	const chartData = getChartData(data, orgSettings);
 
 	const files = await supabase.from('links').select().match({ org: data.org.subdomain });
 	const getLinks = (path: string) => files.data?.filter(file => file.path == path);
@@ -64,8 +65,8 @@ export const ContractOverview = async ({ data, reviewType }: props) => {
 						<div className="flex items-center gap-2">
 							{data.status == 'signed' && (
 								<>
-									<LeaveRequestDialog contract={data} />
-									<LeaveRequests reviewType={reviewType} org={data.org.subdomain} contract={data} />
+									<LeaveRequestDialog orgSettings={orgSettings} contract={data} />
+									<LeaveRequests orgSettings={orgSettings} reviewType={reviewType} org={data.org.subdomain} contract={data} />
 								</>
 							)}
 						</div>

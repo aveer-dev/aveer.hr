@@ -47,3 +47,11 @@ export const getPolicies = async ({ org }: { org: string }) => {
 
 	return res;
 };
+
+export const getOrgSettings = async ({ org }: { org: string }) => {
+	const supabase = createClient();
+
+	const res = await supabase.from('org_settings').select().eq('org', org).single();
+
+	return res;
+};

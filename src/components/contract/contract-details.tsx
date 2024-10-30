@@ -32,10 +32,11 @@ import { ResendInviteButton } from './resend-invite-button';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = createClient();
-	const { data, error } = await supabase
-		.from('contracts')
-		.select(
-			`*, org:organisations!contracts_org_fkey(id, name, subdomain),
+	const [{ data, error }, { data: orgSettings }] = await Promise.all([
+		await supabase
+			.from('contracts')
+			.select(
+				`*, org:organisations!contracts_org_fkey(id, name, subdomain),
             level:employee_levels!contracts_level_fkey(level, role),
             entity:legal_entities!contracts_entity_fkey(incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name), address_state, street_address, address_code),
             profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)),
@@ -43,9 +44,12 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
             terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email),
             team:teams!contracts_team_fkey(id, name),
             direct_report(job_title, id, profile(first_name, last_name))`
-		)
-		.match({ org, id })
-		.single();
+			)
+			.match({ org, id })
+			.single(),
+
+		await supabase.from('org_settings').select().match({ org })
+	]);
 
 	if (error) {
 		return (
@@ -274,7 +278,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				)}
 
 				<TabsContent value="overview">
-					<ContractOverview reviewType={manager?.length ? 'manager' : 'employee'} data={data as any} />
+					<ContractOverview orgSettings={orgSettings && orgSettings[0]} reviewType={manager?.length ? 'manager' : 'employee'} data={data as any} />
 				</TabsContent>
 
 				<TabsContent value="onboarding">

@@ -30,15 +30,18 @@ export default async function TimeoffPage({ params }: { params: { [key: string]:
 
 	if (data.status !== 'signed') redirect('./home');
 
-	const timeOffRequest = await supabase
-		.from('time_off')
-		.select(
-			'*, hand_over:contracts!time_off_hand_over_fkey(id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)), contract:contracts!time_off_contract_fkey(job_title,id, team, unpaid_leave_used, sick_leave_used, paternity_leave_used, paid_leave_used, maternity_leave_used), profile:profiles!time_off_profile_fkey(*)'
-		)
-		.match({ org: params.org, profile: (data.profile as any).id, status: 'pending' });
+	const [timeOffRequest, orgSettings] = await Promise.all([
+		await supabase
+			.from('time_off')
+			.select(
+				'*, hand_over:contracts!time_off_hand_over_fkey(id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)), contract:contracts!time_off_contract_fkey(job_title,id, team, unpaid_leave_used, sick_leave_used, paternity_leave_used, paid_leave_used, maternity_leave_used), profile:profiles!time_off_profile_fkey(*)'
+			)
+			.match({ org: params.org, profile: (data.profile as any).id, status: 'pending' }),
+		await supabase.from('org_settings').select().match({ org: params.org })
+	]);
 	const reviewType: ROLE = 'employee';
 
-	const chartData = getChartData(data);
+	const chartData = getChartData(data, orgSettings?.data && orgSettings?.data[0]);
 
 	return (
 		<Suspense
@@ -53,7 +56,7 @@ export default async function TimeoffPage({ params }: { params: { [key: string]:
 					<h2 className="flex items-center justify-between text-base font-medium text-support">Leave summary</h2>
 
 					<div className="flex items-center gap-2">
-						<LeaveRequestDialog contract={data} />
+						<LeaveRequestDialog orgSettings={orgSettings?.data && orgSettings?.data[0]} contract={data} />
 					</div>
 				</div>
 

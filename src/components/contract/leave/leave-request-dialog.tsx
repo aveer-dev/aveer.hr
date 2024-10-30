@@ -37,9 +37,10 @@ interface props {
 	contract: Tables<'contracts'>;
 	children?: ReactNode;
 	data?: Tables<'time_off'>;
+	orgSettings: Tables<'org_settings'> | null;
 }
 
-export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data }: props) => {
+export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data, orgSettings }: props) => {
 	const [creatingRequest, setCreatingState] = useState(false);
 	const [isDialoagOpen, toggleDialog] = useState(false);
 	const [showNote, setNoteState] = useState(!!data?.note);
@@ -47,6 +48,9 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data }: 
 	const [employees, setEmployees] = useState<{ id: number; job_title: string; profile: { first_name: string; last_name: string } }[]>([]);
 	const [approvalPolicy, setPolicyDetails] = useState<any[]>([]);
 	const router = useRouter();
+	const [selectedLeaveType, setLeaveType] = useState(data?.leave_type || 'paid');
+	const [leaveDaysUsed, setLeaveDaysUsed] = useState(((contract as any)[`${selectedLeaveType}_leave_used`] as number) || 0);
+	const [leaveDays, setLeaveDays] = useState(((contract as any)[`${selectedLeaveType}_leave`] as number) || ((orgSettings as any)[`${selectedLeaveType}_leave`] as number) || 0);
 
 	const getNextBusinessDay = (date: Date) => {
 		while (isWeekend(date)) {
@@ -113,6 +117,11 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data }: 
 	}, [date, form]);
 
 	useEffect(() => {
+		setLeaveDaysUsed(contract[`${selectedLeaveType}_leave_used`] || 0);
+		setLeaveDays(((contract as any)[`${selectedLeaveType}_leave`] as number) || ((orgSettings as any)[`${selectedLeaveType}_leave`] as number) || 0);
+	}, [contract, orgSettings, selectedLeaveType]);
+
+	useEffect(() => {
 		const getEmployees = async () => {
 			const { data, error } = await supabase
 				.from('contracts')
@@ -162,7 +171,12 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data }: 
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Leave type</FormLabel>
-										<Select onValueChange={field.onChange} defaultValue={field.value}>
+										<Select
+											onValueChange={value => {
+												setLeaveType(value as any);
+												field.onChange(value);
+											}}
+											defaultValue={field.value}>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue placeholder="Select a verified email to display" />
@@ -202,7 +216,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data }: 
 												)}
 											</div>
 										</FormControl>
-										<Calendar className="!mt-10" mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1} />
+										<Calendar max={leaveDays - leaveDaysUsed} className="!mt-10" mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1} />
 										<FormMessage />
 									</FormItem>
 								)}

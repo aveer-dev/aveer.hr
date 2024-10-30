@@ -301,41 +301,33 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 							</>
 						)}
 
-						<li className="grid gap-3">
-							<h4 className="flex items-center gap-2 text-sm font-medium">
-								Annual leave
-								{back && (
-									<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-										<Pencil size={10} />
-									</Button>
-								)}
-							</h4>
-							<p className="text-sm font-light">{data?.paid_leave} Days</p>
-						</li>
+						{!!data?.paid_leave && data?.paid_leave != 0 && (
+							<li className="grid gap-3">
+								<h4 className="flex items-center gap-2 text-sm font-medium">
+									Annual leave
+									{back && (
+										<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+											<Pencil size={10} />
+										</Button>
+									)}
+								</h4>
+								<p className="text-sm font-light">{data?.paid_leave} Days</p>
+							</li>
+						)}
 
-						<li className="grid gap-3">
-							<h4 className="flex items-center gap-2 text-sm font-medium">
-								Sick Leave
-								{back && (
-									<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-										<Pencil size={10} />
-									</Button>
-								)}
-							</h4>
-							<p className="text-sm font-light">{data?.sick_leave} Days</p>
-						</li>
-
-						<li className="grid gap-3">
-							<h4 className="flex items-center gap-2 text-sm font-medium">
-								Probation Period
-								{back && (
-									<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-										<Pencil size={10} />
-									</Button>
-								)}
-							</h4>
-							<p className="text-sm font-light">{data?.probation_period} Days</p>
-						</li>
+						{!!data?.sick_leave && data?.sick_leave != 0 && (
+							<li className="grid gap-3">
+								<h4 className="flex items-center gap-2 text-sm font-medium">
+									Sick Leave
+									{back && (
+										<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+											<Pencil size={10} />
+										</Button>
+									)}
+								</h4>
+								<p className="text-sm font-light">{data?.sick_leave} Days</p>
+							</li>
+						)}
 					</ul>
 				</div>
 			)}

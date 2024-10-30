@@ -1514,7 +1514,7 @@ export type Database = {
           id: number
           maternity_leave: number | null
           org: string
-          paid_time_off: number | null
+          paid_leave: number | null
           paternity_leave: number | null
           probation: number | null
           salary_date: string | null
@@ -1529,7 +1529,7 @@ export type Database = {
           id?: number
           maternity_leave?: number | null
           org: string
-          paid_time_off?: number | null
+          paid_leave?: number | null
           paternity_leave?: number | null
           probation?: number | null
           salary_date?: string | null
@@ -1544,7 +1544,7 @@ export type Database = {
           id?: number
           maternity_leave?: number | null
           org?: string
-          paid_time_off?: number | null
+          paid_leave?: number | null
           paternity_leave?: number | null
           probation?: number | null
           salary_date?: string | null
