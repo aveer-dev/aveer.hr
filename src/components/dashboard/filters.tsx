@@ -61,7 +61,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
             profile:profiles!contracts_profile_fkey(
                 first_name,
                 last_name,
-                nationality(
+                nationality:countries!profiles_nationality_fkey(
                     name,
                     country_code
                 )
@@ -72,7 +72,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
 			if (employment_type) query = query.eq('employment_type', employment_type);
 			if (team) query = query.eq('team', team);
 
-			const { data, error } = await query.eq('org', org);
+			const { data, error } = await query.eq('org', org).order('id');
 			toggleTableLoadingState(false);
 			if (error) toast.error(error.message);
 			updateData(data as any);
