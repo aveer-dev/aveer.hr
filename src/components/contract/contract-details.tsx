@@ -190,7 +190,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				<BackButton className="mb-6" />
 
 				<div className="flex items-center justify-between">
-					<div className="space-y-1">
+					<div className="space-y-2">
 						<h1 className="text-2xl font-bold">
 							{data?.profile?.first_name} {data?.profile?.last_name}
 						</h1>
@@ -239,7 +239,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					</div>
 				</div>
 
-				<div className="mt-3 flex items-center gap-3 text-xs font-light">
+				<div className="mt-4 flex items-center gap-3 text-xs font-light">
 					<ContractStatus state={data.status} start_date={data.start_date || ''} end_date={data?.end_date} />•
 					{data?.status == 'scheduled termination' && data?.end_date && (
 						<>

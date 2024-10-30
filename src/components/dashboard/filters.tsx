@@ -57,8 +57,7 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
             job_title,
             employment_type,
             start_date,
-            org,
-            team,
+            org, team:teams!contracts_team_fkey(name, id),
             profile:profiles!contracts_profile_fkey(
                 first_name,
                 last_name,
