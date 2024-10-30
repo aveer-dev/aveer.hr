@@ -12,15 +12,16 @@ export const jobColumns: ColumnDef<Tables<'open_roles'>>[] = [
 		id: 'select',
 		header: ({ table }) => (
 			<Checkbox
-				className="h-5 w-5 border-none bg-muted data-[state=checked]:bg-accent data-[state=checked]:text-primary"
+				className="h-5 w-5 border-none bg-background data-[state=checked]:bg-accent data-[state=checked]:text-primary"
 				checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
 				onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
 				aria-label="Select all"
 			/>
 		),
-		cell: ({ row }) => <Checkbox checked={row.getIsSelected()} className="h-5 w-5 border-none bg-muted data-[state=checked]:bg-accent data-[state=checked]:text-primary" onCheckedChange={value => row.toggleSelected(!!value)} aria-label="Select row" />,
+		cell: ({ row }) => <Checkbox checked={row.getIsSelected()} className="h-5 w-5 border-none bg-background data-[state=checked]:bg-accent data-[state=checked]:text-primary" onCheckedChange={value => row.toggleSelected(!!value)} aria-label="Select row" />,
 		enableSorting: false,
-		enableHiding: false
+		enableHiding: false,
+		size: 80
 	},
 	{
 		accessorKey: 'job_title',
@@ -33,12 +34,14 @@ export const jobColumns: ColumnDef<Tables<'open_roles'>>[] = [
 	{
 		id: 'employment_type',
 		header: 'Employment type',
-		cell: ({ row }) => <span className="capitalize">{row.original.employment_type}</span>
+		cell: ({ row }) => <span className="capitalize">{row.original.employment_type}</span>,
+		size: 80
 	},
 	{
 		id: 'work_location',
 		header: 'Work Location',
-		cell: ({ row }) => <span className="capitalize">{row.original.work_location}</span>
+		cell: ({ row }) => <span className="capitalize">{row.original.work_location}</span>,
+		size: 80
 	},
 	{
 		id: 'actions',

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(({ className, ...props }, ref) => (
 	<div className="relative w-full overflow-auto">
-		<table ref={ref} className={cn('w-full caption-bottom border-separate border-spacing-x-0 border-spacing-y-2 px-px text-sm', className)} {...props} />
+		<table ref={ref} className={cn('w-full caption-bottom border-separate border-spacing-x-0 border-spacing-y-3 px-px text-sm', className)} {...props} />
 	</div>
 ));
 Table.displayName = 'Table';
@@ -19,7 +19,7 @@ const TableFooter = React.forwardRef<HTMLTableSectionElement, React.HTMLAttribut
 TableFooter.displayName = 'TableFooter';
 
 const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(({ className, ...props }, ref) => (
-	<tr ref={ref} className={cn('rounded-md border-b bg-muted/70 outline-border transition-colors duration-500 focus-within:outline hover:outline data-[state=selected]:bg-muted', className)} {...props} />
+	<tr ref={ref} className={cn('rounded-md border-b bg-muted/60 outline-border transition-colors duration-500 focus-within:outline hover:outline data-[state=selected]:bg-muted', className)} {...props} />
 ));
 TableRow.displayName = 'TableRow';
 

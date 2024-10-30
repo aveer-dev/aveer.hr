@@ -124,7 +124,7 @@ export const EmployeeAppraisals = async ({ org, adminId, group, managerContract,
 							)}
 
 							<AppraisalForm
-								team={(contract.team as any).id}
+								team={(contract.team as any)?.id}
 								managerContract={managerContract}
 								dbAnswer={answers.data ? answers.data[0] : undefined}
 								appraisal={appraisal}

@@ -44,13 +44,13 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 		id: 'select',
 		header: ({ table }) => (
 			<Checkbox
-				className="h-5 w-5 border-none bg-muted data-[state=checked]:bg-accent data-[state=checked]:text-primary"
+				className="h-5 w-5 border-muted bg-white data-[state=checked]:bg-accent data-[state=checked]:text-primary"
 				checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
 				onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
 				aria-label="Select all"
 			/>
 		),
-		cell: ({ row }) => <Checkbox checked={row.getIsSelected()} className="h-5 w-5 border-none bg-muted data-[state=checked]:bg-accent data-[state=checked]:text-primary" onCheckedChange={value => row.toggleSelected(!!value)} aria-label="Select row" />,
+		cell: ({ row }) => <Checkbox checked={row.getIsSelected()} className="h-5 w-5 border-muted bg-white data-[state=checked]:bg-accent data-[state=checked]:text-primary" onCheckedChange={value => row.toggleSelected(!!value)} aria-label="Select row" />,
 		enableSorting: false,
 		enableHiding: false,
 		size: 80
