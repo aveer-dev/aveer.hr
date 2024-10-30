@@ -1,4 +1,4 @@
-import { Info } from 'lucide-react';
+import { ArrowUpRight, Info } from 'lucide-react';
 import { Tables, TablesInsert } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,6 +11,9 @@ import { ROLE } from '@/type/contract.types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AddFile } from '../file-management/add-file-link';
 import { LeaveStat } from './leave/leave-stat';
+import { buttonVariants } from '../ui/button';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 interface props {
 	data: Tables<'contracts'> & { profile: Tables<'profiles'>; org: Tables<'organisations'>; entity: Tables<'legal_entities'> & { incorporation_country: { currency_code: string } } };
@@ -37,7 +40,21 @@ export const ContractOverview = async ({ data, reviewType }: props) => {
 	};
 
 	return (
-		<section className="mt-6 flex w-full flex-wrap gap-14 space-y-8">
+		<section className="mt-6 flex w-full flex-wrap gap-14 space-y-6">
+			{data?.direct_report && (
+				<div className="flex w-full items-center justify-between rounded-2xl border bg-muted/40 p-2">
+					<h2 className="p-2 text-sm font-light">Reports to</h2>
+
+					<Link href={(data.direct_report as any) ? `./${(data.direct_report as any).id}` : ''} className={cn(buttonVariants({ variant: 'outline' }), 'flex items-center gap-2')}>
+						<p className="text-sm font-light">
+							{(data.direct_report as any)?.profile?.first_name} {(data.direct_report as any)?.profile?.last_name}
+						</p>
+						<Separator className="h-3" orientation="vertical" />
+						<ArrowUpRight size={12} />
+					</Link>
+				</div>
+			)}
+
 			{/* leave */}
 			<div className="w-full">
 				<div className="flex items-center justify-between">
@@ -67,8 +84,6 @@ export const ContractOverview = async ({ data, reviewType }: props) => {
 					</div>
 				)}
 			</div>
-
-			<Separator />
 
 			{/* documents */}
 			<div className="w-full">

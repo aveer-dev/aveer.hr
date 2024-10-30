@@ -672,7 +672,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel className="flex items-center gap-2">
-												Direct report
+												Reports to
 												<TooltipProvider>
 													<Tooltip>
 														<TooltipTrigger asChild>

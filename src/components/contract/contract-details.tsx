@@ -41,7 +41,8 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
             profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)),
             signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email),
             terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email),
-            team:teams!contracts_team_fkey(id, name)`
+            team:teams!contracts_team_fkey(id, name),
+            direct_report(job_title, id, profile(first_name, last_name))`
 		)
 		.match({ org, id })
 		.single();
