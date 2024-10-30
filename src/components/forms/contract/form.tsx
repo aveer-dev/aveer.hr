@@ -123,7 +123,9 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 		customFields: z.array(z.string()),
 		team: z.string().optional(),
 		policy: z.string().optional(),
-		direct_report: z.string().optional()
+		direct_report: z.string().optional(),
+		enable_location: z.boolean().optional(),
+		enable_voluntary_data: z.boolean().optional()
 	});
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -157,7 +159,9 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			manager: formType == 'contract' ? (manager?.data ? !!manager?.data[0] : false) : openRoleData?.is_manager,
 			policy: String(openRoleData?.policy || policies[0]?.id),
 			direct_report: formType == 'contract' ? (contractData?.direct_report ? String(contractData?.direct_report) : '') : openRoleData?.direct_report ? String(openRoleData?.direct_report) : '',
-			role: contractData?.role ? String(contractData?.role) : undefined
+			role: contractData?.role ? String(contractData?.role) : undefined,
+			enable_location: openRoleData?.enable_location || true,
+			enable_voluntary_data: openRoleData?.enable_voluntary_data || true
 		}
 	});
 
@@ -184,13 +188,15 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			org: params.org,
 			work_location: values.work_location,
 			years_of_experience: values.years_of_experience,
-			state: 'closed',
+			state: openRoleData?.state ? openRoleData?.state : 'closed',
 			additional_offerings: values.additional_offerings,
 			custom_fields: values.customFields,
 			team: values.team ? Number(values.team) : null,
 			is_manager: isManager,
 			policy: Number(values.policy),
-			direct_report: values.direct_report ? Number(values.direct_report) : null
+			direct_report: values.direct_report ? Number(values.direct_report) : null,
+			enable_location: values?.enable_location,
+			enable_voluntary_data: values?.enable_voluntary_data
 		};
 
 		if (showSigningBonus) role.signing_bonus = Number(values.signing_bonus);
@@ -936,7 +942,70 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 							</FormSection>
 						)}
 
-						{formType == 'role' && <CustomFields updateCustomFields={event => form.setValue('customFields', event)} customFields={form.getValues('customFields') as any} />}
+						{formType == 'role' && (
+							<FormSection>
+								<FormSectionDescription>
+									<h2 className="font-semibold">Custom questions</h2>
+									<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Are there any specific information you&apos;ll like to collect from your applicants?</p>
+								</FormSectionDescription>
+
+								<InputsContainer>
+									<CustomFields updateCustomFields={event => form.setValue('customFields', event)} customFields={form.getValues('customFields') as any} />
+
+									<FormField
+										control={form.control}
+										name="enable_location"
+										render={({ field }) => (
+											<FormItem className="flex flex-row items-center justify-between space-y-0 rounded-lg bg-accent p-2">
+												<FormLabel className="flex items-center gap-2 text-xs">
+													Collect location details
+													<TooltipProvider>
+														<Tooltip>
+															<TooltipTrigger asChild>
+																<Info size={12} />
+															</TooltipTrigger>
+															<TooltipContent>
+																<p className="max-w-[180px]">Enable personal address fields like address, state, e.t.c in application form</p>
+															</TooltipContent>
+														</Tooltip>
+													</TooltipProvider>
+												</FormLabel>
+
+												<FormControl>
+													<Switch checked={field.value} className="scale-75" onCheckedChange={field.onChange} aria-readonly />
+												</FormControl>
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="enable_voluntary_data"
+										render={({ field }) => (
+											<FormItem className="flex flex-row items-center justify-between space-y-0 rounded-lg bg-accent p-2">
+												<FormLabel className="flex items-center gap-2 text-xs">
+													Collect voluntary data
+													<TooltipProvider>
+														<Tooltip>
+															<TooltipTrigger asChild>
+																<Info size={12} />
+															</TooltipTrigger>
+															<TooltipContent>
+																<p className="max-w-[180px]">Enable collecting voluntary detail like gender, disability, e.t.c on application form</p>
+															</TooltipContent>
+														</Tooltip>
+													</TooltipProvider>
+												</FormLabel>
+
+												<FormControl>
+													<Switch checked={field.value} className="scale-75" onCheckedChange={field.onChange} aria-readonly />
+												</FormControl>
+											</FormItem>
+										)}
+									/>
+								</InputsContainer>
+							</FormSection>
+						)}
 
 						<div className="flex items-center justify-end border-t border-t-border pt-10">
 							{!contractData && !openRoleData && (

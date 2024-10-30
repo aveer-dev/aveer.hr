@@ -1294,6 +1294,8 @@ export type Database = {
           custom_fields: Json[] | null
           direct_report: number | null
           employment_type: Database["public"]["Enums"]["employment_type"]
+          enable_location: boolean
+          enable_voluntary_data: boolean
           entity: number
           fixed_allowance: Json | null
           id: number
@@ -1324,6 +1326,8 @@ export type Database = {
           custom_fields?: Json[] | null
           direct_report?: number | null
           employment_type: Database["public"]["Enums"]["employment_type"]
+          enable_location?: boolean
+          enable_voluntary_data?: boolean
           entity: number
           fixed_allowance?: Json | null
           id?: number
@@ -1354,6 +1358,8 @@ export type Database = {
           custom_fields?: Json[] | null
           direct_report?: number | null
           employment_type?: Database["public"]["Enums"]["employment_type"]
+          enable_location?: boolean
+          enable_voluntary_data?: boolean
           entity?: number
           fixed_allowance?: Json | null
           id?: number

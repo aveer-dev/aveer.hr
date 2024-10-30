@@ -47,9 +47,11 @@ interface props {
 	org: string;
 	roleId: number;
 	submit: (application: TablesInsert<'job_applications'>) => Promise<string | number>;
+	enableLocation: boolean;
+	enableVoluntary: boolean;
 }
 
-export function JobApplicationForm({ org, roleId, submit }: props) {
+export function JobApplicationForm({ org, roleId, submit, enableLocation, enableVoluntary }: props) {
 	const [showManualResume, toggleManualResumeState] = useState(false);
 	const [showSuccessDialog, toggleSuccessDialog] = useState(false);
 	const [isSubmiting, toggleSubmitState] = useState(false);
@@ -342,76 +344,78 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 						</InputsContainer>
 					</FormSection>
 
-					<FormSection>
-						<FormSectionDescription>
-							<h2 className="font-medium">Location details</h2>
-							<p className="text-balance text-xs font-light text-muted-foreground">Help us understand where you&apos;re currently resided, so we can know how to prepare for you.</p>
-						</FormSectionDescription>
+					{enableLocation && (
+						<FormSection>
+							<FormSectionDescription>
+								<h2 className="font-medium">Location details</h2>
+								<p className="text-balance text-xs font-light text-muted-foreground">Help us understand where you&apos;re currently resided, so we can know how to prepare for you.</p>
+							</FormSectionDescription>
 
-						<InputsContainer>
-							<div className="grid gap-x-6 gap-y-8">
-								<SelectCountry name="country_location" label="Where do you reside?" form={form} />
+							<InputsContainer>
+								<div className="grid gap-x-6 gap-y-8">
+									<SelectCountry name="country_location" label="Where do you reside?" form={form} />
 
-								<FormField
-									control={form.control}
-									name="state_location"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>State / province / city</FormLabel>
-											<FormControl>
-												<Input {...field} placeholder="Enter state / province / city" />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="work_authorization"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Do you have work authorization in the country where this job is located?</FormLabel>
-											<Select onValueChange={value => form.setValue('work_authorization', value == 'yes' ? true : false)} defaultValue={field.value == undefined ? '' : field.value == true ? 'yes' : 'no'}>
+									<FormField
+										control={form.control}
+										name="state_location"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>State / province / city</FormLabel>
 												<FormControl>
-													<SelectTrigger>
-														<SelectValue placeholder="Select an option" />
-													</SelectTrigger>
+													<Input {...field} placeholder="Enter state / province / city" />
 												</FormControl>
-												<SelectContent>
-													<SelectItem value="yes">Yes</SelectItem>
-													<SelectItem value="no">No</SelectItem>
-												</SelectContent>
-											</Select>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 
-								<FormField
-									control={form.control}
-									name="require_sponsorship"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Do you require sponsorship to work in the country where this job is located?</FormLabel>
-											<Select onValueChange={value => form.setValue('require_sponsorship', value == 'yes' ? true : false)} defaultValue={field.value == undefined ? '' : field.value == true ? 'yes' : 'no'}>
-												<FormControl>
-													<SelectTrigger>
-														<SelectValue placeholder="Select an option" />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													<SelectItem value="yes">Yes</SelectItem>
-													<SelectItem value="no">No</SelectItem>
-												</SelectContent>
-											</Select>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-						</InputsContainer>
-					</FormSection>
+									<FormField
+										control={form.control}
+										name="work_authorization"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Do you have work authorization in the country where this job is located?</FormLabel>
+												<Select onValueChange={value => form.setValue('work_authorization', value == 'yes' ? true : false)} defaultValue={field.value == undefined ? '' : field.value == true ? 'yes' : 'no'}>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select an option" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value="yes">Yes</SelectItem>
+														<SelectItem value="no">No</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="require_sponsorship"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Do you require sponsorship to work in the country where this job is located?</FormLabel>
+												<Select onValueChange={value => form.setValue('require_sponsorship', value == 'yes' ? true : false)} defaultValue={field.value == undefined ? '' : field.value == true ? 'yes' : 'no'}>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select an option" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value="yes">Yes</SelectItem>
+														<SelectItem value="no">No</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							</InputsContainer>
+						</FormSection>
+					)}
 
 					<FormSection>
 						<FormSectionDescription>
@@ -545,113 +549,115 @@ export function JobApplicationForm({ org, roleId, submit }: props) {
 						</FormSection>
 					)}
 
-					<FormSection>
-						<FormSectionDescription className="gap-3">
-							<h2 className="font-medium">Voluntary Self-Identification</h2>
-							<p className="text-balance text-xs font-light text-muted-foreground">For government reporting purposes, we ask candidates to respond to the below self-identification survey.</p>
-							<p className="text-balance text-xs font-light text-muted-foreground">As set forth in our Equal Employment Opportunity policy, we do not discriminate on the basis of any protected group status under any applicable law.</p>
-						</FormSectionDescription>
+					{enableVoluntary && (
+						<FormSection>
+							<FormSectionDescription className="gap-3">
+								<h2 className="font-medium">Voluntary Self-Identification</h2>
+								<p className="text-balance text-xs font-light text-muted-foreground">For government reporting purposes, we ask candidates to respond to the below self-identification survey.</p>
+								<p className="text-balance text-xs font-light text-muted-foreground">As set forth in our Equal Employment Opportunity policy, we do not discriminate on the basis of any protected group status under any applicable law.</p>
+							</FormSectionDescription>
 
-						<InputsContainer>
-							<div className="grid gap-x-6 gap-y-8">
-								<FormField
-									control={form.control}
-									name="gender"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Gender</FormLabel>
-											<Select onValueChange={field.onChange} defaultValue={field.value}>
-												<FormControl>
-													<SelectTrigger>
-														<SelectValue placeholder="Select a gender" />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													<SelectItem value="male">Male</SelectItem>
-													<SelectItem value="female">Female</SelectItem>
-													<SelectItem value="decline">Decline to self identify</SelectItem>
-												</SelectContent>
-											</Select>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+							<InputsContainer>
+								<div className="grid gap-x-6 gap-y-8">
+									<FormField
+										control={form.control}
+										name="gender"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Gender</FormLabel>
+												<Select onValueChange={field.onChange} defaultValue={field.value}>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select a gender" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value="male">Male</SelectItem>
+														<SelectItem value="female">Female</SelectItem>
+														<SelectItem value="decline">Decline to self identify</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 
-								<FormField
-									control={form.control}
-									name="race_ethnicity"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Race / Ethnicity</FormLabel>
-											<Select onValueChange={field.onChange} defaultValue={field.value}>
-												<FormControl>
-													<SelectTrigger>
-														<SelectValue placeholder="Select a race/ethnic group" />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													<SelectItem value="hispanic-latino">Hispanic/Latino</SelectItem>
-													<SelectItem value="american-indian">American Indian / Alaskan Native</SelectItem>
-													<SelectItem value="asian">Asian</SelectItem>
-													<SelectItem value="black-african-american">Black or African American</SelectItem>
-													<SelectItem value="white">White</SelectItem>
-													<SelectItem value="native-hawaiian-pacific-islands">Native Hawaiian or Other Pacific Islands</SelectItem>
-													<SelectItem value="decline">Decline to self identify</SelectItem>
-												</SelectContent>
-											</Select>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+									<FormField
+										control={form.control}
+										name="race_ethnicity"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Race / Ethnicity</FormLabel>
+												<Select onValueChange={field.onChange} defaultValue={field.value}>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select a race/ethnic group" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value="hispanic-latino">Hispanic/Latino</SelectItem>
+														<SelectItem value="american-indian">American Indian / Alaskan Native</SelectItem>
+														<SelectItem value="asian">Asian</SelectItem>
+														<SelectItem value="black-african-american">Black or African American</SelectItem>
+														<SelectItem value="white">White</SelectItem>
+														<SelectItem value="native-hawaiian-pacific-islands">Native Hawaiian or Other Pacific Islands</SelectItem>
+														<SelectItem value="decline">Decline to self identify</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 
-								<FormField
-									control={form.control}
-									name="veterian_status"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Veterian Status</FormLabel>
-											<Select onValueChange={field.onChange} defaultValue={field.value}>
-												<FormControl>
-													<SelectTrigger>
-														<SelectValue placeholder="Select an option" />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													<SelectItem value="not-veterian">I am not a protected veterian</SelectItem>
-													<SelectItem value="veterian">I am a protected veterian</SelectItem>
-													<SelectItem value="decline">I do not wish to answer</SelectItem>
-												</SelectContent>
-											</Select>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+									<FormField
+										control={form.control}
+										name="veterian_status"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Veterian Status</FormLabel>
+												<Select onValueChange={field.onChange} defaultValue={field.value}>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select an option" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value="not-veterian">I am not a protected veterian</SelectItem>
+														<SelectItem value="veterian">I am a protected veterian</SelectItem>
+														<SelectItem value="decline">I do not wish to answer</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 
-								<FormField
-									control={form.control}
-									name="disability"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Disability status</FormLabel>
-											<Select onValueChange={field.onChange} defaultValue={field.value}>
-												<FormControl>
-													<SelectTrigger>
-														<SelectValue placeholder="Select an option" />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													<SelectItem value="not-disabled">I do not have a disability, or had one in the past</SelectItem>
-													<SelectItem value="disabled">I have a disability, or had one in the past</SelectItem>
-													<SelectItem value="decline">I do not wish to answer</SelectItem>
-												</SelectContent>
-											</Select>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							</div>
-						</InputsContainer>
-					</FormSection>
+									<FormField
+										control={form.control}
+										name="disability"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Disability status</FormLabel>
+												<Select onValueChange={field.onChange} defaultValue={field.value}>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select an option" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value="not-disabled">I do not have a disability, or had one in the past</SelectItem>
+														<SelectItem value="disabled">I have a disability, or had one in the past</SelectItem>
+														<SelectItem value="decline">I do not wish to answer</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							</InputsContainer>
+						</FormSection>
+					)}
 
 					<FormSection className="flex w-full justify-end">
 						<SubmitButton />
