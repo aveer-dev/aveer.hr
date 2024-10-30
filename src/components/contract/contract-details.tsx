@@ -249,7 +249,12 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 							•
 						</>
 					)}
-					<span className="capitalize">{data?.team?.name}</span> • <span className="capitalize">{data?.employment_type}</span>
+					{data?.team && (
+						<>
+							<span className="capitalize">{data?.team?.name}</span> •
+						</>
+					)}{' '}
+					<span className="capitalize">{data?.employment_type}</span>
 				</div>
 			</div>
 

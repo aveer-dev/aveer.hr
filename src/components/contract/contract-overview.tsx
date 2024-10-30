@@ -40,9 +40,9 @@ export const ContractOverview = async ({ data, reviewType }: props) => {
 	};
 
 	return (
-		<section className="mt-6 flex w-full flex-wrap gap-14 space-y-6">
+		<section className="mt-4 w-full">
 			{data?.direct_report && (
-				<div className="flex w-full items-center justify-between rounded-2xl border bg-muted/40 p-2">
+				<div className="mb-10 flex w-full items-center justify-between rounded-2xl border bg-muted/40 p-2">
 					<h2 className="p-2 text-sm font-light">Reports to</h2>
 
 					<Link href={(data.direct_report as any) ? `./${(data.direct_report as any).id}` : ''} className={cn(buttonVariants({ variant: 'outline' }), 'flex items-center gap-2')}>
@@ -55,115 +55,117 @@ export const ContractOverview = async ({ data, reviewType }: props) => {
 				</div>
 			)}
 
-			{/* leave */}
-			<div className="w-full">
-				<div className="flex items-center justify-between">
-					<h2 className="flex items-center justify-between text-xl font-bold">Leave Days</h2>
+			<div className="space-y-16">
+				{/* leave */}
+				<div className="w-full">
+					<div className="flex items-center justify-between">
+						<h2 className="flex items-center justify-between text-xl font-bold">Leave Days</h2>
 
-					<div className="flex items-center gap-2">
-						{data.status == 'signed' && (
-							<>
-								<LeaveRequestDialog contract={data} />
-								<LeaveRequests reviewType={reviewType} org={data.org.subdomain} contract={data} />
-							</>
-						)}
+						<div className="flex items-center gap-2">
+							{data.status == 'signed' && (
+								<>
+									<LeaveRequestDialog contract={data} />
+									<LeaveRequests reviewType={reviewType} org={data.org.subdomain} contract={data} />
+								</>
+							)}
+						</div>
 					</div>
+
+					<div className="mt-14 grid gap-x-10 gap-y-16 sm:grid-cols-2">
+						{chartData.map(stat => (
+							<LeaveStat key={stat.label} {...stat} org={data.org.subdomain} profile={(data.profile as any).id} />
+						))}
+					</div>
+
+					{chartData.length == 0 && (
+						<div className="flex gap-4">
+							<Skeleton className="h-36 w-20" />
+							<Skeleton className="h-36 w-20" />
+							<Skeleton className="h-36 w-20" />
+						</div>
+					)}
 				</div>
 
-				<div className="mt-14 grid gap-x-10 gap-y-16 sm:grid-cols-2">
-					{chartData.map(stat => (
-						<LeaveStat key={stat.label} {...stat} org={data.org.subdomain} profile={(data.profile as any).id} />
-					))}
+				{/* documents */}
+				<div className="w-full">
+					<div className="mb-4">
+						<h2 className="flex items-center justify-between text-xl font-bold">Files</h2>
+					</div>
+
+					<section className="relative mt-8">
+						<div className="mb-6 flex items-center gap-2">
+							<h2 className="text-sm font-light text-muted-foreground">Organisation files</h2>
+
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild className="text-muted-foreground">
+										<button>
+											<Info size={12} />
+										</button>
+									</TooltipTrigger>
+
+									<TooltipContent>
+										<p className="max-w-36 text-left text-muted-foreground">Files added here will be visible to every employee</p>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
+						</div>
+
+						<Tabs defaultValue="files" className="w-full">
+							<TabsList className="flex w-fit">
+								<TabsTrigger value="files">Files</TabsTrigger>
+								<TabsTrigger value="links">Links</TabsTrigger>
+							</TabsList>
+
+							<TabsContent value="files">
+								<FileItems readonly path={`${data.org.id}/org-${data.org.id}`} />
+							</TabsContent>
+
+							<TabsContent value="links">
+								<FileLinks links={getLinks(`${data.org.id}/org-${data.org.id}`)} />
+							</TabsContent>
+						</Tabs>
+					</section>
+
+					<section className="relative mt-16">
+						<div className="mb-6 flex items-center gap-2">
+							<h2 className="text-sm font-light text-muted-foreground">Your files</h2>
+
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild className="text-muted-foreground">
+										<button>
+											<Info size={12} />
+										</button>
+									</TooltipTrigger>
+
+									<TooltipContent>
+										<p className="max-w-36 text-left text-muted-foreground">Files added here is visible to company admin</p>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
+						</div>
+
+						<Tabs defaultValue="files" className="w-full">
+							<TabsList className="flex w-fit">
+								<TabsTrigger value="files">Files</TabsTrigger>
+								<TabsTrigger value="links">Links</TabsTrigger>
+							</TabsList>
+
+							<TabsContent value="files">
+								<FileDropZone path={`${data.org.id}/${data.profile?.id}`}>
+									<FileItems path={`${data.org.id}/${data.profile?.id}`} />
+								</FileDropZone>
+							</TabsContent>
+
+							<TabsContent value="links">
+								<FileLinks org={data.org.subdomain} links={getLinks(`${data.org.id}/${data.profile?.id}`)} />
+							</TabsContent>
+						</Tabs>
+
+						<AddFile path={`${data.org.id}/${data.profile?.id}`} addLink={addLink} />
+					</section>
 				</div>
-
-				{chartData.length == 0 && (
-					<div className="flex gap-4">
-						<Skeleton className="h-36 w-20" />
-						<Skeleton className="h-36 w-20" />
-						<Skeleton className="h-36 w-20" />
-					</div>
-				)}
-			</div>
-
-			{/* documents */}
-			<div className="w-full">
-				<div className="mb-4">
-					<h2 className="flex items-center justify-between text-xl font-bold">Files</h2>
-				</div>
-
-				<section className="relative mt-8">
-					<div className="mb-6 flex items-center gap-2">
-						<h2 className="text-sm font-light text-muted-foreground">Organisation files</h2>
-
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild className="text-muted-foreground">
-									<button>
-										<Info size={12} />
-									</button>
-								</TooltipTrigger>
-
-								<TooltipContent>
-									<p className="max-w-36 text-left text-muted-foreground">Files added here will be visible to every employee</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</div>
-
-					<Tabs defaultValue="files" className="w-full">
-						<TabsList className="flex w-fit">
-							<TabsTrigger value="files">Files</TabsTrigger>
-							<TabsTrigger value="links">Links</TabsTrigger>
-						</TabsList>
-
-						<TabsContent value="files">
-							<FileItems readonly path={`${data.org.id}/org-${data.org.id}`} />
-						</TabsContent>
-
-						<TabsContent value="links">
-							<FileLinks links={getLinks(`${data.org.id}/org-${data.org.id}`)} />
-						</TabsContent>
-					</Tabs>
-				</section>
-
-				<section className="relative mt-16">
-					<div className="mb-6 flex items-center gap-2">
-						<h2 className="text-sm font-light text-muted-foreground">Your files</h2>
-
-						<TooltipProvider>
-							<Tooltip>
-								<TooltipTrigger asChild className="text-muted-foreground">
-									<button>
-										<Info size={12} />
-									</button>
-								</TooltipTrigger>
-
-								<TooltipContent>
-									<p className="max-w-36 text-left text-muted-foreground">Files added here is visible to company admin</p>
-								</TooltipContent>
-							</Tooltip>
-						</TooltipProvider>
-					</div>
-
-					<Tabs defaultValue="files" className="w-full">
-						<TabsList className="flex w-fit">
-							<TabsTrigger value="files">Files</TabsTrigger>
-							<TabsTrigger value="links">Links</TabsTrigger>
-						</TabsList>
-
-						<TabsContent value="files">
-							<FileDropZone path={`${data.org.id}/${data.profile?.id}`}>
-								<FileItems path={`${data.org.id}/${data.profile?.id}`} />
-							</FileDropZone>
-						</TabsContent>
-
-						<TabsContent value="links">
-							<FileLinks org={data.org.subdomain} links={getLinks(`${data.org.id}/${data.profile?.id}`)} />
-						</TabsContent>
-					</Tabs>
-
-					<AddFile path={`${data.org.id}/${data.profile?.id}`} addLink={addLink} />
-				</section>
 			</div>
 		</section>
 	);
