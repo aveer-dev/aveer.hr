@@ -9,4 +9,5 @@ export interface PERSON {
 	id: string;
 	org?: string;
 	end_date?: string;
+	team?: { id: number; name: string };
 }

@@ -48,7 +48,7 @@ export const Profile = ({ data, type }: props) => {
 			</ul>
 
 			<h2 className="mb-4 mt-16 text-lg font-semibold text-support">Address</h2>
-			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 border-t border-t-border pt-6 text-sm font-light">
+			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 border-t pt-6 text-sm font-light">
 				<li className="grid gap-1">
 					<h4 className="text-xs text-muted-foreground">Country of residence</h4> <p className="font-normal">{data?.address?.country || '-'}</p>
 				</li>

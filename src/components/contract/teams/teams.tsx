@@ -1,12 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
-import { TeamMember } from './team-member-dialog';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { AppraisalsDialog } from '@/components/appraisal/appraisals-dialog';
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { EllipsisVertical } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Tables } from '@/type/database.types';
+import { ArrowUpRight } from 'lucide-react';
+import Link from 'next/link';
 
 interface props {
 	org: string;
@@ -29,97 +24,60 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 	if (error) return error.message;
 	const filteredTeam = data;
 
-	const TeamOptions = ({ person, directReport }: { person: Tables<'contracts'>; directReport?: boolean }) => {
-		return (
-			<>
-				<div className="hidden items-center gap-2 sm:flex">
-					{(!directReport ? isManager && !!managers?.find(manager => manager.person !== person.id) && currentUser !== 'org' : currentUser !== 'org') && <AppraisalsDialog role="manager" managerContract={contractId} org={org} contract={person} />}
-					{contractId !== person.id && <TeamMember person={person as any} />}
-				</div>
-
-				{contractId !== person.id && (
-					<Drawer>
-						<DrawerTrigger asChild>
-							<Button variant="outline" className="sm:hidden">
-								<EllipsisVertical size={12} />
-							</Button>
-						</DrawerTrigger>
-
-						<DrawerContent>
-							<div className="mx-auto w-full max-w-sm py-6">
-								<DrawerHeader className="hidden">
-									<DrawerTitle>Actions</DrawerTitle>
-									<DrawerDescription>Team member actions</DrawerDescription>
-								</DrawerHeader>
-
-								<div className="space-y-3">
-									{(!directReport ? isManager && !!managers?.find(manager => manager.person !== person.id) && currentUser !== 'org' : currentUser !== 'org') && (
-										<AppraisalsDialog className="w-full justify-start" variant={{ variant: 'outline' }} role="manager" managerContract={contractId} org={org} contract={person} />
-									)}
-
-									{contractId !== person.id && <TeamMember person={person as any} />}
-								</div>
-							</div>
-						</DrawerContent>
-					</Drawer>
-				)}
-			</>
-		);
-	};
-
 	return (
 		<>
 			<section className="mt-6 w-full">
-				<div className="mb-4 space-y-1">
+				<div className="space-y-1">
 					<h2 className="text-lg font-semibold text-support">Team</h2>
 					<p className="text-xs font-light text-muted-foreground">Team name: {name}</p>
 				</div>
 
 				{filteredTeam.length > 0 && (
-					<ul className="mt-6">
+					<ul className="mt-6 space-y-4">
 						{filteredTeam.map(person => (
-							<li key={person.id} className="flex items-center justify-between border-t py-6">
-								<div className="space-y-2">
-									<div className="flex items-center gap-2">
-										<h2 className="text-xs">
-											{person.profile?.first_name} {person.profile?.last_name}
-										</h2>
-										{(person.level || person.level_name) && (
-											<Badge className="py-px text-[10px]" variant={'outline'}>
-												{person.level?.level || person.level_name}
-											</Badge>
-										)}
-										{!!managers?.find(manager => manager.person == person.id) && (
-											<Badge className="py-px text-[10px]" variant={'outline'}>
-												manager
-											</Badge>
-										)}
-										{contractId == person.id && (
-											<Badge className="py-px text-[10px]" variant={'secondary'}>
-												You
-											</Badge>
-										)}
-									</div>
-									<p className="text-xs text-muted-foreground">{person.job_title}</p>
-								</div>
+							<li key={person.id}>
+								<Link href={contractId == person.id ? '' : `./${person.id}`} className="flex items-center justify-between rounded-md bg-muted/60 p-4 transition-colors hover:bg-muted">
+									<div className="space-y-2">
+										<div className="flex items-center gap-2">
+											<h2 className="text-xs">
+												{person.profile?.first_name} {person.profile?.last_name}
+											</h2>
+											{(person.level || person.level_name) && (
+												<Badge className="py-px text-[10px]" variant={'outline'}>
+													{person.level?.level || person.level_name}
+												</Badge>
+											)}
+											{!!managers?.find(manager => manager.person == person.id) && (
+												<Badge className="py-px text-[10px]" variant={'outline'}>
+													manager
+												</Badge>
+											)}
+											{contractId == person.id && currentUser !== 'org' && (
+												<Badge className="py-px text-[10px]" variant={'outline'}>
+													You
+												</Badge>
+											)}
+										</div>
 
-								<TeamOptions person={person} />
+										<p className="text-xs text-muted-foreground">{person.job_title}</p>
+									</div>
+
+									{contractId !== person.id && <ArrowUpRight size={12} />}
+								</Link>
 							</li>
 						))}
-
-						<Separator />
 					</ul>
 				)}
 
 				{filteredTeam.length == 0 && (
-					<div className="flex h-32 w-full items-center justify-center rounded-md bg-accent/80 text-xs text-muted-foreground">
+					<div className="mt-6 flex h-32 w-full items-center justify-center rounded-md bg-accent/80 text-xs text-muted-foreground">
 						<p>You do not have any team member</p>
 					</div>
 				)}
 			</section>
 
 			<section className="mt-16 w-full">
-				<div className="mb-4 space-y-1">
+				<div className="space-y-1">
 					<h2 className="text-lg font-semibold text-support">Direct reports</h2>
 					<p className="text-xs font-light text-muted-foreground">People reporting directly to you</p>
 				</div>
@@ -133,45 +91,41 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 				{!!directReports && (
 					<>
 						{directReports.length > 0 && (
-							<ul className="mt-6">
+							<ul className="mt-6 space-y-4">
 								{directReports.map(person => (
-									<li key={person.id} className="flex items-center justify-between border-t py-6">
-										<div className="space-y-2">
-											<div className="flex items-center gap-2">
-												<h2 className="text-xs">
-													{person.profile?.first_name} {person.profile?.last_name}
-												</h2>
+									<li key={person.id}>
+										<Link href={contractId == person.id ? '' : `./${person.id}`} className="flex items-center justify-between rounded-md bg-muted/60 p-4 transition-colors hover:bg-muted">
+											<div className="space-y-2">
+												<div className="flex items-center gap-2">
+													<h2 className="text-xs">
+														{person.profile?.first_name} {person.profile?.last_name}
+													</h2>
 
-												{(person.level || person.level_name) && (
-													<Badge className="py-px text-[10px]" variant={'outline'}>
-														{person.level?.level || person.level_name}
-													</Badge>
-												)}
+													{(person.level || person.level_name) && (
+														<Badge className="py-px text-[10px]" variant={'outline'}>
+															{person.level?.level || person.level_name}
+														</Badge>
+													)}
 
-												{!!managers?.find(manager => manager.person == person.id) && (
-													<Badge className="py-px text-[10px]" variant={'outline'}>
-														manager
-													</Badge>
-												)}
+													{!!managers?.find(manager => manager.person == person.id) && (
+														<Badge className="py-px text-[10px]" variant={'outline'}>
+															manager
+														</Badge>
+													)}
+												</div>
+
+												<p className="text-xs text-muted-foreground">{person.job_title}</p>
 											</div>
 
-											<p className="text-xs text-muted-foreground">{person.job_title}</p>
-										</div>
-
-										{/* <div className="flex items-center gap-2">
-											{currentUser !== 'org' && <AppraisalsDialog role="manager" managerContract={contractId} org={org} contract={person} />}
-											<TeamMember person={person as any} />
-										</div> */}
-										<TeamOptions directReport person={person} />
+											<ArrowUpRight size={12} />
+										</Link>
 									</li>
 								))}
-
-								<Separator />
 							</ul>
 						)}
 
 						{directReports.length == 0 && (
-							<div className="flex h-32 w-full items-center justify-center rounded-md bg-accent/80 text-xs text-muted-foreground">
+							<div className="mt-6 flex h-32 w-full items-center justify-center rounded-md bg-accent/80 text-xs text-muted-foreground">
 								<p>You do not have any direct reports</p>
 							</div>
 						)}

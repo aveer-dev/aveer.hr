@@ -58,7 +58,11 @@ export const columns: ColumnDef<PERSON>[] = [
 		id: 'employment_type',
 		header: 'Employment type',
 		cell: ({ row }) => <span className="capitalize">{row.original.employment_type}</span>,
-		enableHiding: true,
+		size: 80
+	},
+	{
+		accessorKey: 'team.name',
+		header: 'Team',
 		size: 80
 	},
 	{

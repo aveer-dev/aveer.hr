@@ -10,7 +10,7 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 	const supabase = createClient();
 	const { data, error, count } = await supabase
 		.from('contracts')
-		.select('profile:profiles!contracts_profile_fkey(first_name, last_name, nationality:countries!profiles_nationality_fkey(name)), org, id, status, job_title, employment_type, start_date', { count: 'estimated' })
+		.select('profile:profiles!contracts_profile_fkey(first_name, last_name, nationality:countries!profiles_nationality_fkey(name)), org, id, status, job_title, employment_type, start_date, team:teams!contracts_team_fkey(name, id)', { count: 'estimated' })
 		.match({ org: props.params.org })
 		.order('id');
 

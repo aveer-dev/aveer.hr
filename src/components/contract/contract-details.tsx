@@ -189,7 +189,13 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				<BackButton className="mb-6" />
 
 				<div className="flex items-center justify-between">
-					<h1 className="flex items-center gap-4 text-2xl font-bold">{data?.job_title}</h1>
+					<div className="space-y-1">
+						<h1 className="text-2xl font-bold">
+							{data?.profile?.first_name} {data?.profile?.last_name}
+						</h1>
+
+						<p className="text-sm text-support">{data?.job_title}</p>
+					</div>
 
 					<div className="fixed bottom-0 left-0 flex w-full justify-between gap-3 border-t bg-background p-4 sm:relative sm:w-fit sm:border-t-0 sm:p-0">
 						{data.profile && (
@@ -232,7 +238,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					</div>
 				</div>
 
-				<div className="mt-4 flex items-center gap-3 text-xs font-light">
+				<div className="mt-3 flex items-center gap-3 text-xs font-light">
 					<ContractStatus state={data.status} start_date={data.start_date || ''} end_date={data?.end_date} />•
 					{data?.status == 'scheduled termination' && data?.end_date && (
 						<>
@@ -242,14 +248,14 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 							•
 						</>
 					)}
-					<span className="capitalize">{data?.org?.name}</span> • <span className="capitalize">{data?.employment_type}</span>
+					<span className="capitalize">{data?.team?.name}</span> • <span className="capitalize">{data?.employment_type}</span>
 				</div>
 			</div>
 
 			<Tabs defaultValue={data.profile_signed && data.org_signed ? 'overview' : 'contract'} className="space-y-6">
 				{data.profile_signed && data.org_signed && (
 					<div className="no-scrollbar flex items-center overflow-x-auto">
-						<TabsList className={cn('flex')}>
+						<TabsList className={cn('mb-4 flex')}>
 							<TabsTrigger value="overview">Overview</TabsTrigger>
 							<TabsTrigger value="profile">Profile</TabsTrigger>
 							{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="team">Team</TabsTrigger>}
