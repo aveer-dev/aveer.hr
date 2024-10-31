@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/server';
 import { PERSON } from '@/type/person';
 import { ClientTable } from './table';
 import { OnboardingForm } from './onboarding';
+import { DashboardCalendar } from './dashboard-calendar';
 
 export default async function OrgPage(props: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -60,30 +61,9 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 					}>
 					<DashboardCharts contracts={count} org={props.params.org} />
 				</Suspense>
-
-				{/* <div className="grid w-full max-w-80 gap-2 rounded-md border p-2">
-					<div className="flex items-center justify-between">
-						<h3 className="text-xs font-normal">Your tasks</h3>
-						<div className="flex items-center gap-1">
-							<Button size={'icon'} variant={'ghost'} className="h-8 w-8">
-								<ChevronsUpDown size={16} />
-							</Button>
-
-							<div className="h-3 w-px bg-muted-foreground"></div>
-
-							<Button size={'icon'} variant={'ghost'} className="h-8 w-8">
-								<Plus size={16} />
-							</Button>
-						</div>
-					</div>
-
-					<ul className="grid gap-2">
-						<li className="rounded-full border border-input bg-input-bg p-2 text-xs font-light">Approve data update</li>
-						<li className="rounded-full border border-input bg-input-bg p-2 text-xs font-light">Company information</li>
-					</ul>
-					<div className="flex h-20 items-center justify-center rounded-sm bg-accent text-xs text-muted-foreground">You don&apos;t have any pending task</div>
-				</div> */}
 			</div>
+
+			<DashboardCalendar org={props.params.org} />
 
 			<Suspense fallback={<Skeleton className="h-96 w-full max-w-[1200px]"></Skeleton>}>
 				<ClientTable org={props.params.org} data={data as unknown as PERSON[]} />

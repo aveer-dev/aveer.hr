@@ -20,6 +20,7 @@ interface props {
 	data: Tables<'time_off'> & { profile: Tables<'profiles'>; contract: Tables<'contracts'> };
 	reviewType: ROLE;
 	contractId?: number;
+	hideTooltip?: boolean;
 }
 interface LEVEL {
 	action?: string;
@@ -34,7 +35,7 @@ interface LEVEL {
 
 const supabase = createClient();
 
-export const LeaveReview = ({ data, reviewType, children, contractId, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
+export const LeaveReview = ({ data, reviewType, children, contractId, hideTooltip, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
 	const [levels, updateLevels] = useState<LEVEL[]>([]);
 	const [isReviewOpen, setReviewState] = useState(false);
 	const [isAnyLevelDenied, setDeniedLevelState] = useState(false);
@@ -143,7 +144,7 @@ export const LeaveReview = ({ data, reviewType, children, contractId, ...props }
 
 	return (
 		<Sheet open={isReviewOpen} onOpenChange={setReviewState}>
-			{typeof children == 'string' && (
+			{typeof children == 'string' && !hideTooltip && (
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
@@ -165,6 +166,16 @@ export const LeaveReview = ({ data, reviewType, children, contractId, ...props }
 					</Tooltip>
 				</TooltipProvider>
 			)}
+
+			{hideTooltip && typeof children == 'string' && (
+				<SheetTrigger asChild>
+					<button {...props} className={cn('flex w-full items-center gap-2 overflow-hidden rounded-lg p-1 text-left text-xs capitalize text-muted-foreground transition-all duration-500 hover:bg-accent', props.className)}>
+						<div className={cn(`${data.status == 'approved' ? 'bg-green-400' : data.status == 'denied' ? 'bg-red-400' : data.status == 'pending' ? 'bg-orange-400' : 'bg-gray-400'}`, 'h-3 w-[2px] rounded-sm')}></div>
+						<div className="w-10/12 truncate">{children}</div>
+					</button>
+				</SheetTrigger>
+			)}
+
 			{typeof children !== 'string' && <SheetTrigger asChild>{children}</SheetTrigger>}
 
 			<SheetContent className="overflow-y-auto sm:max-w-md">

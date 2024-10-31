@@ -78,7 +78,7 @@ export const LeaveCalendar = ({ leaveDays }: props) => {
 										{modifiers.leaveDay &&
 											!modifiers.weekend &&
 											dayLeaves.slice(0, dayLeaves.length > 3 ? 2 : dayLeaves.length).map((leave, index) => (
-												<LeaveReview reviewType="admin" data={leave.data} key={index + 'leave'} className={cn(modifiers.outside && 'opacity-10')}>
+												<LeaveReview hideTooltip reviewType="admin" data={leave.data} key={index + 'leave'} className={cn(modifiers.outside && 'opacity-10')}>
 													{leave?.name}
 												</LeaveReview>
 											))}
