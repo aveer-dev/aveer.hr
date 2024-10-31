@@ -127,7 +127,7 @@ export const Calendar = ({ leaveDays, birthdays, org }: props) => {
 														{isBirthday.map(birthday => (
 															<li className="2 max-w-56 text-xs" key={birthday.id}>
 																<NavLink className="flex items-center gap-2 rounded-sm p-1 py-2 transition-all duration-300 hover:bg-muted" org={org} href={`/people/${birthday?.id}`}>
-																	{birthday.profile?.first_name}&apos;s birthday
+																	🎉 {birthday.profile?.first_name}&apos;s birthday
 																	<ArrowUpRight size={12} />
 																</NavLink>
 															</li>
