@@ -40,7 +40,7 @@ const formSchema = z.object({
 		code: z.string().min(2, { message: 'Enter your postcode/zipcode' }),
 		country: z.string().min(2, { message: 'Select your country' })
 	}),
-	date_of_birth: z.date().optional()
+	date_of_birth: z.date()
 });
 
 interface props {
@@ -71,7 +71,7 @@ export const ProfileForm = ({ data }: props) => {
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setUpdateState(true);
 
-		const payload: TablesUpdate<'profiles'> = { ...values, date_of_birth: values?.date_of_birth ? new Date(values?.date_of_birth).toISOString() : null };
+		const payload: TablesUpdate<'profiles'> = { ...values, date_of_birth: values?.date_of_birth as unknown as string };
 		const response = await updateProfile({ payload, id: data.id });
 		setUpdateState(false);
 

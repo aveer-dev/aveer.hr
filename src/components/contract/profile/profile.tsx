@@ -25,10 +25,10 @@ export const Profile = ({ data, type }: props) => {
 
 			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 pt-6 text-sm font-light">
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">First name</h4> <p className="font-normal">{data?.first_name}</p>
-				</li>
-				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Last name</h4> <p className="font-normal">{data?.last_name}</p>
+					<h4 className="text-xs text-muted-foreground">Full name</h4>{' '}
+					<p className="font-normal">
+						{data?.first_name} {data?.last_name}
+					</p>
 				</li>
 				<li className="grid gap-1">
 					<h4 className="text-xs text-muted-foreground">Gender</h4> <p className="font-normal capitalize">{data?.gender || '-'}</p>
@@ -43,7 +43,7 @@ export const Profile = ({ data, type }: props) => {
 					<h4 className="text-xs text-muted-foreground">Mobile number</h4> <p className="font-normal">{data?.mobile ? `${data?.mobile}` : '-'}</p>
 				</li>
 				<li className="grid gap-1">
-					<h4 className="text-xs text-muted-foreground">Date of birth</h4> <p className="font-normal">{data?.date_of_birth ? `${format(data?.date_of_birth, 'PPP')}` : '-'}</p>
+					<h4 className="text-xs text-muted-foreground">Date of birth</h4> <p className="font-normal">{data?.date_of_birth ? `${format(data?.date_of_birth, 'PP')}` : '-'}</p>
 				</li>
 			</ul>
 
