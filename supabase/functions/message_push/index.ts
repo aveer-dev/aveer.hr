@@ -1,6 +1,5 @@
 import { createClient } from "supabase";
 import { JWT } from "google-auth";
-// import serviceAccount from "../service-account.ts" with { type: "json" };
 
 const serviceAccount = {
     "type": "service_account",
@@ -76,16 +75,10 @@ Deno.serve(async (req) => {
         (d.profile as unknown as { fcm_token: string[] })!.fcm_token.toString()
     );
 
-    // console.log("🚀 ~ serviceAccount:", {
-    //     clientEmail: serviceAccount.client_email,
-    //     privateKey: serviceAccount.private_key,
-    // });
     const accessToken = await getAccessToken({
         clientEmail: serviceAccount.client_email,
         privateKey: serviceAccount.private_key,
     });
-
-    console.log("🚀 ~ Deno.serve ~ accessToken:", accessToken);
 
     const notification = {
         title: "New message from HR",
