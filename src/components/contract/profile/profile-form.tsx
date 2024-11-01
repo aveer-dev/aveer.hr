@@ -18,6 +18,7 @@ import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 import { updateProfile } from './profile.actions';
 import { DatePicker } from '@/components/ui/date-picker';
+import { format } from 'date-fns';
 
 const formSchema = z.object({
 	first_name: z.string().min(2, { message: 'Enter first name' }),
@@ -71,7 +72,7 @@ export const ProfileForm = ({ data }: props) => {
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setUpdateState(true);
 
-		const payload: TablesUpdate<'profiles'> = { ...values, date_of_birth: values?.date_of_birth as unknown as string };
+		const payload: TablesUpdate<'profiles'> = { ...values, date_of_birth: new Date(`${format(values?.date_of_birth, 'yyyy-MM-dd')}, 00:00:00`) as unknown as string };
 		const response = await updateProfile({ payload, id: data.id });
 		setUpdateState(false);
 

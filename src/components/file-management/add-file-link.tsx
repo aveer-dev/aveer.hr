@@ -2,14 +2,14 @@
 
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '../ui/label';
+import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Link, Plus } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { FormEvent, useState } from 'react';
 import { TablesInsert } from '@/type/database.types';
 import { toast } from 'sonner';
-import { LoadingSpinner } from '../ui/loader';
+import { LoadingSpinner } from '@/components/ui/loader';
 import { FileUpload } from './file-upload-zone';
 import { useRouter } from 'next/navigation';
 

@@ -2,7 +2,7 @@ import { FormSection, FormSectionDescription, InputsContainer } from '@/componen
 import { createClient } from '@/utils/supabase/server';
 import { Suspense } from 'react';
 import { Boarding } from './boarding';
-import { Card } from '../ui/card';
+import { Card } from '@/components/ui/card';
 
 interface props {
 	org: string;

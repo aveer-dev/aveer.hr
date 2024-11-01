@@ -22,6 +22,6 @@
 		},
 		"target": "ES2017"
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-	"exclude": ["node_modules"]
+	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/lib/firebase-hook"],
+	"exclude": ["node_modules", "supabase"]
 }

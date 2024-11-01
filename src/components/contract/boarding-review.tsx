@@ -2,8 +2,8 @@ import { ChevronRight } from 'lucide-react';
 import { Tables } from '@/type/database.types';
 import { Separator } from '@/components/ui/separator';
 import { BoardingReview } from './boarding/boarding-review';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { getBoardingRequests } from './contract-assignments/utils';
 
 interface props {

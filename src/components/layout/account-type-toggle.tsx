@@ -11,7 +11,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useMediaQuery } from 'usehooks-ts';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { Separator } from '../ui/separator';
+import { Separator } from '@/components/ui/separator';
 
 interface LINK {
 	type: 'admin' | 'employee';

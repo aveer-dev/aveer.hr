@@ -11,7 +11,7 @@ import { ROLE } from '@/type/contract.types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AddFile } from '../file-management/add-file-link';
 import { LeaveStat } from './leave/leave-stat';
-import { buttonVariants } from '../ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 

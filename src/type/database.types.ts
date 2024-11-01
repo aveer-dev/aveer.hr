@@ -1133,6 +1133,44 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string
+          contracts: number[]
+          created_at: string
+          id: number
+          org: string
+          read_contracts: number[]
+          type: string | null
+        }
+        Insert: {
+          body: string
+          contracts: number[]
+          created_at?: string
+          id?: number
+          org: string
+          read_contracts?: number[]
+          type?: string | null
+        }
+        Update: {
+          body?: string
+          contracts?: number[]
+          created_at?: string
+          id?: number
+          org?: string
+          read_contracts?: number[]
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       okr_objectives: {
         Row: {
           created_at: string
@@ -1595,6 +1633,7 @@ export type Database = {
           date_of_birth: string | null
           email: string
           emergency_contact: Json | null
+          fcm_token: string[]
           first_name: string
           gender: string | null
           id: string
@@ -1609,6 +1648,7 @@ export type Database = {
           date_of_birth?: string | null
           email: string
           emergency_contact?: Json | null
+          fcm_token?: string[]
           first_name: string
           gender?: string | null
           id: string
@@ -1623,6 +1663,7 @@ export type Database = {
           date_of_birth?: string | null
           email?: string
           emergency_contact?: Json | null
+          fcm_token?: string[]
           first_name?: string
           gender?: string | null
           id?: string

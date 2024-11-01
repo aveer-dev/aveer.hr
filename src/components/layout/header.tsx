@@ -5,7 +5,7 @@ import { AccountTypeToggle } from './account-type-toggle';
 import { createClient } from '@/utils/supabase/server';
 import { NavLink } from '@/components/ui/link';
 import { Inbox } from './inbox/messages';
-import { redirect } from 'next/navigation';
+import { PushNotificationBanner } from './push-notification-banner';
 
 export const Header = async ({ orgId }: { orgId?: string }) => {
 	const supabase = createClient();
@@ -18,13 +18,31 @@ export const Header = async ({ orgId }: { orgId?: string }) => {
 		.or(`and(org.eq.${orgId},draft.eq.false),and(org.eq.${orgId},draft.eq.true,sender_profile.eq.${data.user?.id})`)
 		.order('created_at', { ascending: false });
 
+	const updateFCMToken = async (token: string) => {
+		'use server';
+
+		if (!data?.user?.id) return;
+
+		const supabase = createClient();
+
+		const { data: profile } = await supabase.from('profiles').select('fcm_token').eq('id', data.user?.id).single();
+		const existingTokens = profile!.fcm_token || [];
+		existingTokens.push(token);
+
+		const { error } = await supabase.from('profiles').update({ fcm_token: existingTokens }).eq('id', data.user?.id);
+		if (error) return error;
+	};
+
 	return (
 		<header className="sticky top-0 z-20 w-full bg-background shadow-sm">
+			<PushNotificationBanner updateToken={updateFCMToken} />
+
 			<div className="flex items-center justify-between px-6 py-4">
 				<div className="flex items-center gap-3">
 					<NavLink org={orgId} href={'/'} className="font-logo text-xl font-light">
 						aveer.hr
 					</NavLink>
+
 					{data?.user && orgId && <AccountTypeToggle orgId={orgId} />}
 				</div>
 

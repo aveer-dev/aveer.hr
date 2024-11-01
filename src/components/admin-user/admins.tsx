@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { Suspense } from 'react';
 import { DataTable } from '../dashboard/table';
 import { adminUserColumn } from './column';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { AddAdmin } from './admin';
 
 interface props {

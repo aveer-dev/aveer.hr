@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import { useRouter } from 'next/navigation';
-import { LoadingSpinner } from '../ui/loader';
+import { LoadingSpinner } from '@/components/ui/loader';
 import { removeAdminPerson } from './admin-actions';
 
 const supabase = createClient();

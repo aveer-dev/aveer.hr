@@ -17,7 +17,7 @@ import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
-import { Input } from '../ui/input';
+import { Input } from '@/components/ui/input';
 
 const formSchema = z.object({
 	frequency: z.string().min(2, { message: 'Select how often employees will answer appraisal questions' }),

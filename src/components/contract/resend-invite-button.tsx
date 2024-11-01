@@ -1,11 +1,11 @@
 'use client';
 
 import { Redo2 } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { generateInvite } from '../forms/contract/invite-user.action';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { LoadingSpinner } from '../ui/loader';
+import { LoadingSpinner } from '@/components/ui/loader';
 
 export const ResendInviteButton = ({ email, first_name, last_name, org }: { email: string; first_name: string; last_name: string; org: string }) => {
 	const [isSendingInvite, setInviteState] = useState(false);

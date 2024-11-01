@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { Team } from './team';
 import { Tables } from '@/type/database.types';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
-import { Card } from '../ui/card';
+import { Card } from '@/components/ui/card';
 
 interface props {
 	org: string;
