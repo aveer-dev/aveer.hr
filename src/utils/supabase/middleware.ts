@@ -60,16 +60,10 @@ export async function updateSession(request: NextRequest) {
 
 	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/login`, request.url));
 
+	if (subdomain && path.includes('firebase-messaging-sw')) NextResponse.rewrite(new URL(`/firebase-messaging-sw.js`, request.url));
+
 	// for employee subdomains, rewrite to employee pages
-	if (subdomain && subdomain === 'employee') {
-		if (url.pathname.includes('firebase-messaging-sw')) {
-			console.log('hit me');
-
-			return NextResponse.rewrite(new URL(`/firebase-messaging-sw.js`, request.url));
-		}
-
-		return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
-	}
+	if (subdomain && subdomain === 'employee') return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
 
 	// for other pages, rewrite to org pages
 	if (subdomain && subdomain !== 'employee' && subdomain !== 'app') {
