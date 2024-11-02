@@ -39,9 +39,9 @@ export async function updateSession(request: NextRequest) {
 	const domain = decodeURIComponent(hostname as string);
 
 	// if its a firebase sw request, send it from the root domain
-	if (url.pathname.includes('firebase-messaging-sw')) {
-		return NextResponse.redirect(`${url.protocol}//${process.env.NEXT_PUBLIC_DOMAIN}/firebase-messaging-sw.js`);
-	}
+	// if (url.pathname.includes('firebase-messaging-sw')) {
+	// 	return NextResponse.redirect(`${url.protocol}//${process.env.NEXT_PUBLIC_DOMAIN}/firebase-messaging-sw.js`);
+	// }
 
 	// if on localhost or user disable/unset subdomain, cancel mapping
 	if (domain?.includes('localhost') || process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'false' || !process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN) return;
@@ -61,7 +61,15 @@ export async function updateSession(request: NextRequest) {
 	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/login`, request.url));
 
 	// for employee subdomains, rewrite to employee pages
-	if (subdomain && subdomain === 'employee') return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
+	if (subdomain && subdomain === 'employee') {
+		if (url.pathname.includes('firebase-messaging-sw')) {
+			console.log('hit me');
+
+			return NextResponse.rewrite(new URL(`/firebase-messaging-sw.js`, request.url));
+		}
+
+		return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
+	}
 
 	// for other pages, rewrite to org pages
 	if (subdomain && subdomain !== 'employee' && subdomain !== 'app') {
