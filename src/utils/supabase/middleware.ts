@@ -38,6 +38,11 @@ export async function updateSession(request: NextRequest) {
 	let hostname = request.headers.get('host');
 	const domain = decodeURIComponent(hostname as string);
 
+	// if its a firebase sw request, send it from the root domain
+	if (url.pathname.includes('firebase-messaging-sw')) {
+		return NextResponse.redirect(`${url.protocol}//${process.env.NEXT_PUBLIC_DOMAIN}/firebase-messaging-sw.js`);
+	}
+
 	// if on localhost or user disable/unset subdomain, cancel mapping
 	if (domain?.includes('localhost') || process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'false' || !process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN) return;
 
@@ -57,6 +62,7 @@ export async function updateSession(request: NextRequest) {
 
 	// for employee subdomains, rewrite to employee pages
 	if (subdomain && subdomain === 'employee') return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
+
 	// for other pages, rewrite to org pages
 	if (subdomain && subdomain !== 'employee' && subdomain !== 'app') {
 		if (path.split('/')[1] == subdomain) return NextResponse.rewrite(new URL(`${path}`, request.url));

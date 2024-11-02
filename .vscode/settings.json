@@ -1,14 +1,6 @@
 {
-	"[typescript]": {
-		"editor.defaultFormatter": "denoland.vscode-deno"
-	},
-	"deno.enable": true,
-	"deno.lint": true,
-	"deno.unstable": true,
 	"scss.lint.unknownAtRules": "ignore",
 	"search.exclude": {
 		"**/node_modules": false
-	},
-	"deno.enablePaths": ["./supabase/functions"],
-	"deno.importMap": "./supabase/functions/import_map.json"
+	}
 }

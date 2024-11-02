@@ -1,0 +1,12 @@
+{
+	"[typescript]": {
+		"editor.defaultFormatter": "denoland.vscode-deno"
+	},
+	"deno.lint": true,
+	"deno.unstable": true,
+	"scss.lint.unknownAtRules": "ignore",
+	"search.exclude": {
+		"**/node_modules": false
+	},
+	"deno.importMap": "./import_map.json"
+}
