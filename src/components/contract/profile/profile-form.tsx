@@ -82,7 +82,7 @@ export const ProfileForm = ({ data }: props) => {
 		router.refresh();
 	};
 
-	const genotypes = ['AA', 'AC', 'BB', 'AB', 'OO', 'SS', 'Ss', 'ss', 'CC', 'Cc', 'cc', 'RR', 'Rr', 'rr'];
+	const genotypes = ['AA', 'AC', 'AS', 'BB', 'AB', 'OO', 'SS', 'Ss', 'ss', 'CC', 'Cc', 'cc', 'RR', 'Rr', 'rr'];
 	const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 	return (

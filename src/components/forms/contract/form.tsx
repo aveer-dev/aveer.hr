@@ -162,8 +162,8 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			policy: String(openRoleData?.policy || policies[0]?.id),
 			direct_report: formType == 'contract' ? (contractData?.direct_report ? String(contractData?.direct_report) : '') : openRoleData?.direct_report ? String(openRoleData?.direct_report) : '',
 			role: contractData?.role ? String(contractData?.role) : undefined,
-			enable_location: openRoleData?.enable_location || true,
-			enable_voluntary_data: openRoleData?.enable_voluntary_data || true
+			enable_location: openRoleData?.enable_location,
+			enable_voluntary_data: openRoleData?.enable_voluntary_data
 		}
 	});
 
