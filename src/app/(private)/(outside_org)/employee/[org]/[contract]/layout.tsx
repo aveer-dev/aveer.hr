@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/header';
 import { EmployeeProfileSettings } from './employee-profile-settings';
 import { EmployeePageSearch } from './employee-search';
 import { ContractsPopover } from './contracts-popover';
+import { Notifications } from './notifications';
 
 export default async function RootLayout({ children, params }: { children: React.ReactNode; params: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -43,9 +44,15 @@ export default async function RootLayout({ children, params }: { children: React
 
 	const contract = data.find(contract => String(contract.id) == params.contract);
 
+	const { data: messages } = await supabase
+		.from('inbox')
+		.select('*, sender_profile:profiles!inbox_sender_profile_fkey(id, first_name, last_name)')
+		.or(`and(org.eq.${params.org},draft.eq.false),and(org.eq.${params.org},draft.eq.true,sender_profile.eq.${user?.id})`)
+		.order('created_at', { ascending: false });
+
 	return (
 		<>
-			<Header orgId={'employee'} />
+			<Header orgId={'employee'} messages={messages} />
 
 			<main className="relative mx-auto mt-[5%] min-h-screen w-full max-w-7xl px-4 py-0 pb-28 sm:px-10">
 				<section className="mx-auto max-w-3xl">
@@ -69,6 +76,8 @@ export default async function RootLayout({ children, params }: { children: React
 						</div>
 
 						<div className="order-1 flex w-full items-center justify-end gap-3 sm:order-2 sm:w-fit sm:justify-start">
+							<Notifications contractId={contract?.id} messages={messages} />
+
 							<EmployeePageSearch />
 
 							<EmployeeProfileSettings profile={contract?.profile as any} />

@@ -106,7 +106,7 @@ export const Inbox = ({ org, sender, dbMessages }: { org: string; sender: string
 	};
 
 	return (
-		<Drawer direction="right" modal={false}>
+		<Drawer direction="right">
 			<DrawerTrigger asChild>
 				<Button variant={'ghost'} className="gap-3">
 					<MessageSquareDot className="" size={16} />
@@ -114,8 +114,11 @@ export const Inbox = ({ org, sender, dbMessages }: { org: string; sender: string
 				</Button>
 			</DrawerTrigger>
 
-			<DrawerContent className="p4 bottom-2 left-[unset] right-2 top-2 mt-0 w-[310px] rounded-none border-none bg-transparent outline-none [&>div]:hidden" style={{ '--initial-transform': 'calc(100% + 8px)' } as React.CSSProperties}>
-				<section className="relative grow space-y-4 overflow-y-auto rounded-3xl border bg-background/90 pb-16 backdrop-blur-lg">
+			<DrawerContent
+				overlayClassName="bg-white/70 backdrop-blur-md"
+				className="p4 bottom-2 left-[unset] right-2 top-2 mt-0 w-[310px] rounded-none border-none bg-transparent outline-none [&>div]:hidden"
+				style={{ '--initial-transform': 'calc(100% + 8px)' } as React.CSSProperties}>
+				<section className="relative grow space-y-4 overflow-y-auto rounded-3xl border bg-background pb-16">
 					<DrawerHeader className="p-6 pb-0">
 						<DrawerTitle className="text-base">Inbox</DrawerTitle>
 						<DrawerDescription className="text-xs">Inbox messages send to employees</DrawerDescription>
@@ -137,6 +140,15 @@ export const Inbox = ({ org, sender, dbMessages }: { org: string; sender: string
 								</Fragment>
 							))}
 						</ul>
+					)}
+
+					{messages?.length === 0 && (
+						<div className="px-4">
+							<div className="flex h-48 w-full items-center justify-center rounded-md bg-muted text-center text-xs font-light text-muted-foreground">
+								No messages yet. <br />
+								<br /> Take your time, cook!.
+							</div>
+						</div>
 					)}
 				</section>
 

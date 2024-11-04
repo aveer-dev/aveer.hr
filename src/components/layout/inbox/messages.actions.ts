@@ -16,11 +16,11 @@ export const sendMessage = async ({ payload }: { payload: TablesInsert<'inbox'> 
 export const updateMessage = async ({ payload, id }: { payload: TablesUpdate<'inbox'>; id: number }) => {
 	const supabase = createClient();
 
-	const { error } = await supabase.from('inbox').update(payload).eq('id', id);
+	const { error, data } = await supabase.from('inbox').update(payload).eq('id', id).select('*, sender_profile:profiles!inbox_sender_profile_fkey(id, first_name, last_name)');
 
 	if (error) return error.message;
 
-	return true;
+	return data[0];
 };
 
 export const deleteMessage = async ({ id }: { id: number }) => {

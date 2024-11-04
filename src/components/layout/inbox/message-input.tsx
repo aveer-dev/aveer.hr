@@ -5,7 +5,6 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Send, Timer } from 'lucide-react';
 import { useRef, useState } from 'react';
-import './styles.css';
 import { TextMenu } from './components/menus';
 import { ExtensionKit } from './extensions/extension-kit';
 import { ContentItemMenu, LinkMenu } from './components/menus';

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Karla } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
+import './styles.css';
 
 import { cn } from '@/lib/utils';
 import { Analytics } from '@vercel/analytics/react';

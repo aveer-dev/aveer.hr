@@ -6,17 +6,22 @@ import { createClient } from '@/utils/supabase/server';
 import { NavLink } from '@/components/ui/link';
 import { Inbox } from './inbox/messages';
 import { PushNotificationBanner } from './push-notification-banner';
+import { Tables } from '@/type/database.types';
 
-export const Header = async ({ orgId }: { orgId?: string }) => {
+export const Header = async ({ orgId, messages }: { orgId?: string; messages?: Tables<'inbox'>[] | null }) => {
 	const supabase = createClient();
 
 	const { data } = await supabase.auth.getUser();
 
-	const { data: messages } = await supabase
-		.from('inbox')
-		.select('*, sender_profile:profiles!inbox_sender_profile_fkey(id, first_name, last_name)')
-		.or(`and(org.eq.${orgId},draft.eq.false),and(org.eq.${orgId},draft.eq.true,sender_profile.eq.${data.user?.id})`)
-		.order('created_at', { ascending: false });
+	messages = !messages
+		? (
+				await supabase
+					.from('inbox')
+					.select('*, sender_profile:profiles!inbox_sender_profile_fkey(id, first_name, last_name)')
+					.or(`and(org.eq.${orgId},draft.eq.false),and(org.eq.${orgId},draft.eq.true,sender_profile.eq.${data.user?.id})`)
+					.order('created_at', { ascending: false })
+			).data
+		: messages;
 
 	const updateFCMToken = async (token: string) => {
 		'use server';
