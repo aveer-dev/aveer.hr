@@ -46,7 +46,7 @@ export async function updateSession(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams.toString();
 	const path = `${url.pathname}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
 
-	if (subdomain && path.includes('firebase-messaging-sw')) NextResponse.rewrite(new URL(`/firebase-messaging-sw.js`, request.url));
+	if (subdomain && path.includes('firebase-messaging-sw')) return NextResponse.rewrite(new URL(`/firebase-messaging-sw.js`, request.url));
 
 	// if user nevigates to employee page, redirect to employee subdomain
 	if (url.pathname.includes('/employee')) {
