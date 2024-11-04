@@ -6,7 +6,6 @@ import { PERSON } from '@/type/person';
 import { ClientTable } from './table';
 import { OnboardingForm } from './onboarding';
 import { DashboardCalendar } from './dashboard-calendar';
-import { jwtDecode } from 'jwt-decode';
 
 export default async function OrgPage(props: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
@@ -15,12 +14,6 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 		.select('profile:profiles!contracts_profile_fkey(first_name, last_name, nationality:countries!profiles_nationality_fkey(name)), org, id, status, job_title, employment_type, start_date, team:teams!contracts_team_fkey(name, id)', { count: 'estimated' })
 		.match({ org: props.params.org })
 		.order('id');
-
-	const {
-		data: { session }
-	} = await supabase.auth.getSession();
-	const jwt = jwtDecode(session!.access_token);
-	console.log('🚀 ~ OrgPage ~ jwt:', jwt);
 
 	if (data && !data.length) {
 		const { data, error } = await supabase.from('legal_entities').select().match({ org: props.params.org });

@@ -21,6 +21,14 @@ const nextConfig = {
 	},
 	sassOptions: {
 		silenceDeprecations: ['legacy-js-api']
+	},
+	headers() {
+		return [
+			{
+				source: '/',
+				headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }]
+			}
+		];
 	}
 };
 
