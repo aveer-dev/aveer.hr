@@ -35,7 +35,7 @@ export const Header = async ({ orgId }: { orgId?: string }) => {
 
 	return (
 		<header className="sticky top-0 z-20 w-full bg-background shadow-sm">
-			<PushNotificationBanner updateToken={updateFCMToken} />
+			{orgId === 'employee' && <PushNotificationBanner updateToken={updateFCMToken} />}
 
 			<div className="flex items-center justify-between px-6 py-4">
 				<div className="flex items-center gap-3">
