@@ -72,7 +72,7 @@ export const ProfileForm = ({ data }: props) => {
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setUpdateState(true);
 
-		const payload: TablesUpdate<'profiles'> = { ...values, date_of_birth: new Date(`${format(values?.date_of_birth, 'yyyy-MM-dd')}, 00:00:00`) as unknown as string };
+		const payload: TablesUpdate<'profiles'> = { ...values, date_of_birth: new Date(`${format(values?.date_of_birth, 'yyyy-MM-dd')}`) as unknown as string };
 		const response = await updateProfile({ payload, id: data.id });
 		setUpdateState(false);
 
@@ -446,7 +446,7 @@ export const ProfileForm = ({ data }: props) => {
 								</Button>
 							</SheetClose>
 
-							<Button type="submit" disabled={isUpdating} className="w-36">
+							<Button type="submit" disabled={isUpdating} className="w-36 gap-2">
 								{isUpdating && <LoadingSpinner />} Submit
 							</Button>
 						</SheetFooter>

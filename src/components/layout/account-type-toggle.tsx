@@ -116,7 +116,7 @@ export const AccountTypeToggle = ({ orgId }: { orgId?: string }) => {
 										<span className="max-w-44 truncate">{link.label}</span>
 									</div>
 
-									{path.includes(`/${link.id}`) && <CheckCheck size={12} />}
+									{(subLinks.type == 'admin' ? path.includes(`/${link.id}`) && orgId !== 'employee' : path.includes(`/${link.id}`) && orgId == 'employee') && <CheckCheck size={12} />}
 								</Link>
 							</li>
 						))}
