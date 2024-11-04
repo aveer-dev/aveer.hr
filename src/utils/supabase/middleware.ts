@@ -38,13 +38,15 @@ export async function updateSession(request: NextRequest) {
 	let hostname = request.headers.get('host');
 	const domain = decodeURIComponent(hostname as string);
 
-	// if its a firebase sw request, send it from the root domain
-	// if (url.pathname.includes('firebase-messaging-sw')) {
-	// 	return NextResponse.redirect(`${url.protocol}//${process.env.NEXT_PUBLIC_DOMAIN}/firebase-messaging-sw.js`);
-	// }
-
 	// if on localhost or user disable/unset subdomain, cancel mapping
 	if (domain?.includes('localhost') || process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'false' || !process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN) return;
+
+	// get subdomain and path url for remaping other routes
+	const subdomain = domain.endsWith(`.${process.env.NEXT_PUBLIC_DOMAIN}`) ? domain.replace(`.${process.env.NEXT_PUBLIC_DOMAIN}`, '') : null;
+	const searchParams = request.nextUrl.searchParams.toString();
+	const path = `${url.pathname}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
+
+	if (subdomain && path.includes('firebase-messaging-sw')) NextResponse.rewrite(new URL(`/firebase-messaging-sw.js`, request.url));
 
 	// if user nevigates to employee page, redirect to employee subdomain
 	if (url.pathname.includes('/employee')) {
@@ -53,14 +55,7 @@ export async function updateSession(request: NextRequest) {
 		return NextResponse.redirect(`${url.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}${path}`);
 	}
 
-	// get subdomain and path url for remaping other routes
-	const subdomain = domain.endsWith(`.${process.env.NEXT_PUBLIC_DOMAIN}`) ? domain.replace(`.${process.env.NEXT_PUBLIC_DOMAIN}`, '') : null;
-	const searchParams = request.nextUrl.searchParams.toString();
-	const path = `${url.pathname}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
-
 	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/login`, request.url));
-
-	if (subdomain && path.includes('firebase-messaging-sw')) NextResponse.rewrite(new URL(`/firebase-messaging-sw.js`, request.url));
 
 	// for employee subdomains, rewrite to employee pages
 	if (subdomain && subdomain === 'employee') return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
