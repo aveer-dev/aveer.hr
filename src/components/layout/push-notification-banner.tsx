@@ -20,13 +20,15 @@ export const PushNotificationBanner = ({ updateToken }: { updateToken: (token: s
 	const [open, setOpen] = useState(false);
 	const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>();
 	const [isUpdatingToken, setUpdateState] = useState(false);
+	const [subscription, setSubscription] = useState<ServiceWorkerRegistration | null>(null);
 
 	const requestPermission = async () => {
 		const permission = await Notification.requestPermission();
-		if (permission === 'granted') {
-			const token = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_VAPID });
-
+		if (permission === 'granted' && subscription) {
 			setUpdateState(true);
+
+			const token = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_VAPID, serviceWorkerRegistration: subscription });
+
 			const error = await updateToken(token);
 			setUpdateState(false);
 			if (error) toast.error(error.message);
@@ -38,40 +40,47 @@ export const PushNotificationBanner = ({ updateToken }: { updateToken: (token: s
 	useEffect(() => {
 		setPermission(checkNotificationPermission());
 
-		navigator.serviceWorker.register('/firebase-messaging-sw.js');
+		const getServiceWorkerReg = async () => {
+			const swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+			setSubscription(swRegistration);
+		};
+
+		getServiceWorkerReg();
 	}, []);
 
-	return permission === 'granted' || permission === undefined ? null : (
-		<div className="flex w-full items-center justify-center gap-4 bg-muted p-2">
-			<p className="text-sm font-light">Hi, will you like to be notified about company wide reminders, messages and notifications?</p>
+	return permission === 'granted' || permission === undefined
+		? null
+		: !!subscription && (
+				<div className="flex w-full items-center justify-center gap-4 bg-muted p-2">
+					<p className="text-sm font-light">Hi, will you like to be notified about company wide reminders, messages and notifications?</p>
 
-			<AlertDialog open={open} onOpenChange={setOpen}>
-				<AlertDialogTrigger asChild>
-					<Button className="gap-3" variant={'outline'} onClick={() => setOpen(true)}>
-						{isUpdatingToken ? <LoadingSpinner /> : <Bell size={12} />} Enable notifications
-					</Button>
-				</AlertDialogTrigger>
+					<AlertDialog open={open} onOpenChange={setOpen}>
+						<AlertDialogTrigger asChild>
+							<Button className="gap-3" variant={'outline'} onClick={() => setOpen(true)}>
+								{isUpdatingToken ? <LoadingSpinner /> : <Bell size={12} />} Enable notifications
+							</Button>
+						</AlertDialogTrigger>
 
-				<AlertDialogContent>
-					<AlertDialogHeader>
-						<AlertDialogTitle>Hey, just some info</AlertDialogTitle>
-						<AlertDialogDescription>
-							We know lot of platforms miss use the push notification feature, but that&apos;s not us. We promise to only send notifications when necessary.
-							<br /> <br />
-							Soon we&apos;ll let you set the kind of notifications you&apos;ll like to receive.
-							<br />
-							<br />
-						</AlertDialogDescription>
-					</AlertDialogHeader>
+						<AlertDialogContent>
+							<AlertDialogHeader>
+								<AlertDialogTitle>Hey, just some info</AlertDialogTitle>
+								<AlertDialogDescription>
+									We know lot of platforms miss use the push notification feature, but that&apos;s not us. We promise to only send notifications when necessary.
+									<br /> <br />
+									Soon we&apos;ll let you set the kind of notifications you&apos;ll like to receive.
+									<br />
+									<br />
+								</AlertDialogDescription>
+							</AlertDialogHeader>
 
-					<AlertDialogFooter className="sm:justify-start">
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
-						<AlertDialogAction className="gap-2" onClick={requestPermission}>
-							<Bell size={12} /> Enable notifications
-						</AlertDialogAction>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
-		</div>
-	);
+							<AlertDialogFooter className="sm:justify-start">
+								<AlertDialogCancel>Cancel</AlertDialogCancel>
+								<AlertDialogAction className="gap-2" onClick={requestPermission}>
+									<Bell size={12} /> Enable notifications
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
+				</div>
+			);
 };
