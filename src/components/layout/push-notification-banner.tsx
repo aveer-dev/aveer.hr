@@ -24,8 +24,7 @@ export const PushNotificationBanner = ({ updateToken }: { updateToken: (token: s
 	const requestPermission = async () => {
 		const permission = await Notification.requestPermission();
 		if (permission === 'granted') {
-			const swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-			const token = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_VAPID, serviceWorkerRegistration: swRegistration });
+			const token = await getToken(messaging, { vapidKey: process.env.NEXT_PUBLIC_VAPID });
 
 			setUpdateState(true);
 			const error = await updateToken(token);
@@ -38,6 +37,8 @@ export const PushNotificationBanner = ({ updateToken }: { updateToken: (token: s
 
 	useEffect(() => {
 		setPermission(checkNotificationPermission());
+
+		navigator.serviceWorker.register('/firebase-messaging-sw.js');
 	}, []);
 
 	return permission === 'granted' || permission === undefined ? null : (
