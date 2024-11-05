@@ -1,6 +1,9 @@
 {
 	"imports": {
 		"supabase": "npm:@supabase/supabase-js",
-		"google-auth": "npm:google-auth-library"
+		"google-auth": "npm:google-auth-library",
+		"resend": "npm:resend",
+		"react-email": "npm:@react-email/components",
+		"react": "npm:react"
 	}
 }

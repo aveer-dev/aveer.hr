@@ -54,6 +54,23 @@ const sendNotification = async ({ accessToken, token, notification }: { accessTo
 	}
 };
 
+const getAccessToken = ({ clientEmail, privateKey }: { clientEmail: string; privateKey: string }): Promise<string> => {
+	return new Promise((resolve, reject) => {
+		const jwtClient = new JWT({
+			email: clientEmail,
+			key: privateKey,
+			scopes: ['https://www.googleapis.com/auth/firebase.messaging']
+		});
+		jwtClient.authorize((err, tokens) => {
+			if (err) {
+				reject(err);
+				return;
+			}
+			resolve(tokens!.access_token!);
+		});
+	});
+};
+
 Deno.serve(async req => {
 	const payload: WebhookPayload = await req.json();
 
@@ -80,20 +97,3 @@ Deno.serve(async req => {
 
 	return new Response('ok', { status: 200 });
 });
-
-const getAccessToken = ({ clientEmail, privateKey }: { clientEmail: string; privateKey: string }): Promise<string> => {
-	return new Promise((resolve, reject) => {
-		const jwtClient = new JWT({
-			email: clientEmail,
-			key: privateKey,
-			scopes: ['https://www.googleapis.com/auth/firebase.messaging']
-		});
-		jwtClient.authorize((err, tokens) => {
-			if (err) {
-				reject(err);
-				return;
-			}
-			resolve(tokens!.access_token!);
-		});
-	});
-};
