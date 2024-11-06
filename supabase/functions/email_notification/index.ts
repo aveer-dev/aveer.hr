@@ -40,6 +40,7 @@ interface Notification {
 	for: 'admin' | 'employee';
 	link: string;
 	body: string;
+	contracts: number[];
 }
 
 interface WebhookPayload {
@@ -52,10 +53,19 @@ interface WebhookPayload {
 const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
 const getEmails = async ({ payload }: { payload: WebhookPayload }) => {
-	const { data, error } =
-		payload.record.for === 'admin'
-			? await supabase.from('profiles_roles').select('profile(email, first_name)').match({ organisation: payload.record.org })
-			: await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(email, first_name)').match({ org: payload.record.org, status: 'signed' });
+	if (payload.record.for === 'admin') {
+		const { data } = await supabase.from('profiles_roles').select('profile(email, first_name)').match({ organisation: payload.record.org });
+		const details: { email: string; first_name: string }[] = data!.map(d => ({ email: (d.profile as unknown as { email: string })!.email, first_name: (d.profile as unknown as { first_name: string })!.first_name }));
+		return details;
+	}
+
+	if (payload.record.contracts.length > 0) {
+		const { data } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(email, first_name)').eq('org', payload.record.org).in('id', payload.record.contracts);
+		const details: { email: string; first_name: string }[] = data!.map(d => ({ email: (d.profile as unknown as { email: string })!.email, first_name: (d.profile as unknown as { first_name: string })!.first_name }));
+		return details;
+	}
+
+	const { data } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(email, first_name)').match({ org: payload.record.org, status: 'signed' });
 
 	const details: { email: string; first_name: string }[] = data!.map(d => ({ email: (d.profile as unknown as { email: string })!.email, first_name: (d.profile as unknown as { first_name: string })!.first_name }));
 
