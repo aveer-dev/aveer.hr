@@ -1135,31 +1135,40 @@ export type Database = {
       }
       notifications: {
         Row: {
-          body: string
-          contracts: number[]
+          contracts: number[] | null
           created_at: string
+          for: Database["public"]["Enums"]["user_type"]
           id: number
+          link: string | null
           org: string
-          read_contracts: number[]
-          type: string | null
+          read: string[]
+          sender_contract: number
+          sender_profile: string
+          title: string
         }
         Insert: {
-          body: string
-          contracts: number[]
+          contracts?: number[] | null
           created_at?: string
+          for: Database["public"]["Enums"]["user_type"]
           id?: number
+          link?: string | null
           org: string
-          read_contracts?: number[]
-          type?: string | null
+          read: string[]
+          sender_contract: number
+          sender_profile: string
+          title: string
         }
         Update: {
-          body?: string
-          contracts?: number[]
+          contracts?: number[] | null
           created_at?: string
+          for?: Database["public"]["Enums"]["user_type"]
           id?: number
+          link?: string | null
           org?: string
-          read_contracts?: number[]
-          type?: string | null
+          read?: string[]
+          sender_contract?: number
+          sender_profile?: string
+          title?: string
         }
         Relationships: [
           {
@@ -1168,6 +1177,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "notifications_sender_contract_fkey"
+            columns: ["sender_contract"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_sender_profile_fkey"
+            columns: ["sender_profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1970,6 +1993,7 @@ export type Database = {
       leave_type_enum: "paid" | "sick" | "maternity" | "paternity" | "unpaid"
       policy_types: "time_off" | "role_application" | "boarding"
       role_status: "open" | "close"
+      user_type: "admin" | "employee"
       work_locations: "on-site" | "remote" | "hybrid"
     }
     CompositeTypes: {

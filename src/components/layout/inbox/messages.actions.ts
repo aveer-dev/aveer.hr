@@ -23,6 +23,16 @@ export const updateMessage = async ({ payload, id }: { payload: TablesUpdate<'in
 	return data[0];
 };
 
+export const updateNotification = async ({ payload, id }: { payload: TablesUpdate<'notifications'>; id: number }) => {
+	const supabase = createClient();
+
+	const { error, data } = await supabase.from('notifications').update(payload).eq('id', id).select('*, sender_profile:profiles!notifications_sender_profile_fkey(id, first_name, last_name)');
+
+	if (error) return error.message;
+
+	return data[0];
+};
+
 export const deleteMessage = async ({ id }: { id: number }) => {
 	const supabase = createClient();
 
