@@ -93,7 +93,14 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 	const [selectedLevel, setActiveLevel] = useState<TablesInsert<'employee_levels'>>();
 	const [showAdditionalOffering, toggleAdditionalOffering] = useState(!!contractData?.additional_offerings?.length || !!openRoleData?.additional_offerings?.length || !!orgBenefits?.additional_offerings?.length);
 	const [showManualSystem, setManualSystem] = useState(!(contractData?.level || openRoleData?.level));
-	const [hasCustomLeave, setCustomLeaveState] = useState(contractData ? (contractData?.paid_leave != 0 && orgBenefits?.paid_leave != contractData?.paid_leave) || (contractData?.sick_leave != 0 && orgBenefits?.sick_leave != contractData?.sick_leave) : false);
+	const [hasCustomLeave, setCustomLeaveState] = useState(
+		contractData
+			? (contractData?.paid_leave != 0 && orgBenefits?.paid_leave != contractData?.paid_leave) ||
+					(contractData?.sick_leave != 0 && orgBenefits?.sick_leave != contractData?.sick_leave) ||
+					(contractData?.maternity_leave != 0 && orgBenefits?.maternity_leave != contractData?.maternity_leave) ||
+					(contractData?.paternity_leave != 0 && orgBenefits?.paternity_leave != contractData?.paternity_leave)
+			: false
+	);
 
 	const formSchema = z.object({
 		first_name: formType == 'contract' ? z.string() : z.string().optional(),
@@ -113,6 +120,8 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 		end_date: z.date().optional(),
 		probation_period: z.number(),
 		paid_leave: z.number(),
+		paternity_leave: z.number(),
+		maternity_leave: z.number(),
 		sick_leave: z.number(),
 		years_of_experience: z.number().optional(),
 		additional_offerings: z.array(z.string()),
@@ -145,6 +154,8 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			probation_period: contractData?.probation_period || openRoleData?.probation_period || 0,
 			paid_leave: contractData?.paid_leave || openRoleData?.paid_leave || 0,
 			sick_leave: contractData?.sick_leave || openRoleData?.sick_leave || 0,
+			paternity_leave: contractData?.paternity_leave || 0,
+			maternity_leave: contractData?.maternity_leave || 0,
 			work_schedule: contractData?.work_schedule || openRoleData?.work_schedule || orgBenefits?.work_schedule || '8',
 			work_shedule_interval: contractData?.work_shedule_interval || openRoleData?.work_shedule_interval || orgBenefits?.work_shedule_interval || 'daily',
 			salary: formType == 'contract' ? (contractData?.salary ? String(contractData?.salary) : '') : openRoleData?.salary ? String(openRoleData?.salary) : '',
@@ -228,6 +239,8 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			salary: Number(values.salary),
 			sick_leave: values.sick_leave,
 			paid_leave: values.paid_leave,
+			paternity_leave: values.paternity_leave,
+			maternity_leave: values.maternity_leave,
 			probation_period: values.probation_period,
 			work_schedule: values.work_schedule,
 			work_shedule_interval: values.work_shedule_interval,
@@ -344,8 +357,8 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 		form.setValue('work_schedule', (role?.work_schedule as string) || '');
 		form.setValue('work_shedule_interval', (role?.work_shedule_interval as string) || '');
 		form.setValue('probation_period', (role?.probation_period as number) || orgBenefits?.probation || 90);
-		form.setValue('paid_leave', (role?.paid_leave as number) || orgBenefits?.paid_leave || 20);
-		form.setValue('sick_leave', (role?.sick_leave as number) || orgBenefits?.sick_leave || 20);
+		form.setValue('paid_leave', (role?.paid_leave as number) || orgBenefits?.paid_leave || 0);
+		form.setValue('sick_leave', (role?.sick_leave as number) || orgBenefits?.sick_leave || 0);
 		form.setValue('years_of_experience', (role?.years_of_experience as number) || 0);
 		form.setValue('team', role?.team ? String(role.team) : '');
 
@@ -354,8 +367,8 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 		const activeLevel = orgJobLevels.find(level => level.id === role.level);
 		setActiveLevel(activeLevel);
 
-		const hasCustomLeave = role ? (role?.paid_leave != 0 && orgBenefits?.paid_leave != role?.paid_leave) || (role?.sick_leave != 0 && orgBenefits?.sick_leave != role?.sick_leave) : false;
-		setCustomLeaveState(hasCustomLeave);
+		const customLeaveEnabled = role ? (role?.paid_leave != 0 && orgBenefits?.paid_leave != role?.paid_leave) || (role?.sick_leave != 0 && orgBenefits?.sick_leave != role?.sick_leave) : hasCustomLeave;
+		setCustomLeaveState(customLeaveEnabled);
 
 		toggleShowSigningBonus(!!role?.signing_bonus);
 		toggleShowFixedIncome(!!role?.fixed_allowance);

@@ -60,7 +60,7 @@ export const LeaveDays = ({ form, isEnabled }: { form: UseFormReturn<any>; isEna
 								<FormItem>
 									<FormLabel>Annual leave</FormLabel>
 									<FormControl>
-										<Input type="number" placeholder="20" {...field} onChange={event => field.onChange(Number(event.target.value))} required />
+										<Input type="number" placeholder="20" {...field} onChange={event => field.onChange(Number(event.target.value))} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -74,7 +74,35 @@ export const LeaveDays = ({ form, isEnabled }: { form: UseFormReturn<any>; isEna
 								<FormItem>
 									<FormLabel>Sick leave</FormLabel>
 									<FormControl>
-										<Input type="number" placeholder="20" {...field} onChange={event => field.onChange(Number(event.target.value))} required />
+										<Input type="number" placeholder="20" {...field} onChange={event => field.onChange(Number(event.target.value))} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="maternity_leave"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Maternity leave</FormLabel>
+									<FormControl>
+										<Input type="number" placeholder="20" {...field} onChange={event => field.onChange(Number(event.target.value))} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="paternity_leave"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Paternity leave</FormLabel>
+									<FormControl>
+										<Input type="number" placeholder="20" {...field} onChange={event => field.onChange(Number(event.target.value))} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
