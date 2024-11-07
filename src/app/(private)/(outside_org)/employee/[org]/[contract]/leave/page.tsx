@@ -36,7 +36,7 @@ export default async function TimeoffPage({ params }: { params: { [key: string]:
 			.select(
 				'*, hand_over:contracts!time_off_hand_over_fkey(id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)), contract:contracts!time_off_contract_fkey(job_title,id, team, unpaid_leave_used, sick_leave_used, paternity_leave_used, paid_leave_used, maternity_leave_used), profile:profiles!time_off_profile_fkey(*)'
 			)
-			.match({ org: params.org, profile: (data.profile as any).id, status: 'pending' }),
+			.match({ org: params.org, profile: (data.profile as any).id }),
 		await supabase.from('org_settings').select().match({ org: params.org })
 	]);
 	const reviewType: ROLE = 'employee';

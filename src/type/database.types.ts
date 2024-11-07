@@ -1135,6 +1135,7 @@ export type Database = {
       }
       notifications: {
         Row: {
+          body: string
           contracts: number[] | null
           created_at: string
           for: Database["public"]["Enums"]["user_type"]
@@ -1142,23 +1143,25 @@ export type Database = {
           link: string | null
           org: string
           read: string[]
-          sender_contract: number
-          sender_profile: string
+          sender_contract: number | null
+          sender_profile: string | null
           title: string
         }
         Insert: {
+          body?: string
           contracts?: number[] | null
           created_at?: string
           for: Database["public"]["Enums"]["user_type"]
           id?: number
           link?: string | null
           org: string
-          read: string[]
-          sender_contract: number
-          sender_profile: string
+          read?: string[]
+          sender_contract?: number | null
+          sender_profile?: string | null
           title: string
         }
         Update: {
+          body?: string
           contracts?: number[] | null
           created_at?: string
           for?: Database["public"]["Enums"]["user_type"]
@@ -1166,8 +1169,8 @@ export type Database = {
           link?: string | null
           org?: string
           read?: string[]
-          sender_contract?: number
-          sender_profile?: string
+          sender_contract?: number | null
+          sender_profile?: string | null
           title?: string
         }
         Relationships: [

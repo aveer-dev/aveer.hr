@@ -8,15 +8,15 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
 const resend = new Resend(RESEND_API_KEY);
 
-const getEmailBody = async ({ link, name, title, body }: { link: string; name: string; title: string; body: string }) => {
-	const html = await renderAsync(React.createElement(NotificationEmail, { link, name, title, body }));
+const getEmailBody = async ({ link, name, title, body, type, org }: { link: string; name: string; title: string; body: string; org: string; type: string }) => {
+	const html = await renderAsync(React.createElement(NotificationEmail, { link, name, title, body, type, org }));
 
 	return html;
 };
 
 const SendEmail = async ({ payload, nameAndEmails }: { payload: WebhookPayload; nameAndEmails: { email: string; first_name: string }[] }) => {
 	for (const contact of nameAndEmails) {
-		const html = await getEmailBody({ link: payload.record.link, name: contact.first_name, title: payload.record.title, body: payload.record.body });
+		const html = await getEmailBody({ link: payload.record.link, name: contact.first_name, title: payload.record.title, body: payload.record.body, org: payload.record.org, type: payload.record.for });
 
 		const { error } = await resend.emails.send({
 			from: 'Aveer.hr <support@notification.aveer.hr>',

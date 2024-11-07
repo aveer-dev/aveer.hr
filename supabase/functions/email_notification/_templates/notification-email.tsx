@@ -6,9 +6,11 @@ interface NotificationEmailProps {
 	link: string;
 	title: string;
 	body: string;
+	type: string;
+	org: string;
 }
 
-export const NotificationEmail = ({ name, link, title, body }: NotificationEmailProps) => (
+export const NotificationEmail = ({ name, link, title, body, type, org }: NotificationEmailProps) => (
 	<Tailwind
 		config={{
 			theme: {
@@ -43,7 +45,7 @@ export const NotificationEmail = ({ name, link, title, body }: NotificationEmail
 						<h2 className="mt-8 text-base">Hi {name}</h2>
 						<p className="my-5 text-sm leading-6">{body}</p>
 						<p>
-							<a className="my-6 block w-full min-w-52 rounded-md bg-black py-3 text-center text-sm text-white no-underline" href={link}>
+							<a className="my-6 block w-full min-w-52 rounded-md bg-black py-3 text-center text-sm text-white no-underline" href={`https://${type == 'admin' ? org : 'employee'}.aveer.hr${link}`}>
 								Open notification
 							</a>
 						</p>

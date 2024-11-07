@@ -129,7 +129,7 @@ export const Inbox = ({ org, sender, dbMessages }: { org: string; sender: string
 
 										<div className="w-full text-sm">
 											{notification.title}
-											<p className="text-xs font-light text-support">From {(notification.sender_profile as any).first_name + ' ' + (notification.sender_profile as any).last_name}</p>
+											{notification?.sender_profile && <p className="text-xs font-light text-support">From {(notification?.sender_profile as any)?.first_name + ' ' + (notification?.sender_profile as any)?.last_name}</p>}
 										</div>
 									</NavLink>
 								))}
