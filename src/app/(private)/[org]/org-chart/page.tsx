@@ -89,7 +89,7 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 				}
 
 				edges.push({
-					id: `DR-e-${reportsTo.id}-${manager.id}`,
+					id: `MG-DR-e-${reportsTo.id}-${manager.id}`,
 					source: reportTos[activeReportToIndex].nodeId,
 					target: `MG${manager.id}`,
 					animated: true,
@@ -141,7 +141,7 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 					}
 
 					edges.push({
-						id: `DR-e-${reportsTo.id}-${member.id}`,
+						id: `EE-DR-e-${reportsTo.id}-${reportTos[activeReportToIndex].id}`,
 						source: reportTos[activeReportToIndex].nodeId,
 						target: `EE${member.id}`,
 						animated: true,
@@ -165,6 +165,7 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 		});
 
 		const reportsTo: Tables<'contracts'> | null = person?.direct_report as any;
+
 		if (reportsTo) {
 			const isExistingManager = managers!.find(m => (m.person as any).id === reportsTo.id);
 			const activeReportToIndex = reportTos.findIndex(rt => rt.id === reportsTo.id);
@@ -175,7 +176,7 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 						id: `DR${reportsTo.id}`,
 						position: { x: 200 + teams!.length * 300, y: 0 },
 						data: {
-							label: `${(reportsTo.profile as any)?.first_name} ${(reportsTo.profile as any)?.last_name} DR`,
+							label: `${(reportsTo.profile as any)?.first_name} ${(reportsTo.profile as any)?.last_name}`,
 							title: `${reportsTo.job_title}`
 						},
 						width: 240,
@@ -187,7 +188,7 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 			}
 
 			edges.push({
-				id: `DR-e-${reportsTo.id}-${person.id}`,
+				id: `TL-DR-e-${reportsTo.id}-${person.id}`,
 				source: reportTos[activeReportToIndex].nodeId,
 				target: `TL${person.id}`,
 				animated: true,
