@@ -5,20 +5,28 @@ import { Separator } from '@/components/ui/separator';
 export type CustomNodeType = Node<{
 	label: string;
 	title?: string;
-	manager?: string;
+	manager?: string[];
 }>;
 
 export function CustomNode({ data, selected }: NodeProps<CustomNodeType>) {
 	return (
-		<BaseNode selected={selected} className="space-y-1">
-			<h2 className="font-medium">{data.label}</h2>
-			<p className="text-xs text-support">{data?.title}</p>
+		<BaseNode selected={selected} className="space-y-2">
+			<div className="space-y-1">
+				<h2 className="font-medium">{data.label}</h2>
+				<p className="text-xs text-support">{data?.title}</p>
+			</div>
 
-			{data?.manager && (
+			{!!data?.manager && data?.manager?.length > 0 && (
 				<>
 					<Separator orientation="horizontal" />
 
-					<p className="text-xs font-light text-support">Team manager: {data?.manager}</p>
+					<div className="space-y-1">
+						{data?.manager?.map(manager => (
+							<p key={manager} className="text-xs font-light text-support">
+								Team manager: {manager}
+							</p>
+						))}
+					</div>
 				</>
 			)}
 

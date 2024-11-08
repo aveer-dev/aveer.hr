@@ -9,7 +9,7 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 	const [{ data: teams, error: teamsError }, { data: people, error: peopleError }, { data: managers, error: managersError }] = await Promise.all([
 		await supabase.from('teams').select().match({ org }),
 		await supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(first_name, last_name), direct_report(job_title, id, profile(first_name, last_name))').match({ org }),
-		await supabase.from('managers').select('*, profile:profiles!managers_profile_fkey(first_name, last_name), person(id, team(name, id), job_title, direct_report(job_title, id, profile(first_name, last_name)))').match({ org })
+		await supabase.from('managers').select('*, team:teams!managers_team_fkey(id, name), profile:profiles!managers_profile_fkey(first_name, last_name), person(id, team(name, id), job_title, direct_report(job_title, id, profile(first_name, last_name)))').match({ org })
 	]);
 
 	if (teamsError || peopleError || managersError) {
@@ -43,22 +43,22 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 
 	for (const team of teams!) {
 		const teamMembers = employees!.filter(person => person.team === team.id);
-		const teamManagers = managers!.filter(manager => manager.team === team.id);
+		const teamManagers = managers!.filter(manager => manager.team.id === team.id);
 
 		teamManagers.forEach(manager => {
 			managersIndex = managersIndex + 1;
 			const x = 200 + managersIndex * 300;
 
-			const multipleTimesManager = managers?.filter(mn => (mn.person as any).id === (manager.person as any).id)?.map(mn => mn.id);
+			const multipleTimesManager = managers?.filter(mn => (mn.person as any).id === (manager.person as any).id)?.map(mn => ({ id: mn.id, name: (mn.team as any).name }));
 
-			if (manager.id !== multipleTimesManager![1]) {
+			if (manager.id !== multipleTimesManager![1]?.id) {
 				nodes.push({
 					id: `MG${manager.id}`,
 					position: { x, y: 100 },
 					data: {
 						label: `${manager.profile?.first_name} ${manager.profile?.last_name}`,
 						title: `${(manager.person as any).job_title}`,
-						manager: team.name
+						manager: multipleTimesManager.length > 1 ? multipleTimesManager.map(mn => mn.name) : [team.name]
 					},
 					width: 240,
 					type: 'custom'
@@ -157,7 +157,7 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 			id: `TL${person.id}`,
 			position: { x: 200 + teams!.length * 300, y: 100 },
 			data: {
-				label: `${person.profile?.first_name} ${person.profile?.last_name} (TL)`,
+				label: `${person.profile?.first_name} ${person.profile?.last_name}`,
 				title: `${person.job_title}`
 			},
 			width: 240,
