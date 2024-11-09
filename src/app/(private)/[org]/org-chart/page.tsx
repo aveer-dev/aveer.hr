@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import FlowDiagram from './flow-diagram';
-import { Edge, Node, Position } from '@xyflow/react';
+import { Edge, Node } from '@xyflow/react';
 import { Tables } from '@/type/database.types';
 
 export default async function OrgChartPage({ params: { org } }: { params: { org: string } }) {
@@ -77,7 +77,6 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 					if (!isExistingManager) {
 						nodes.push({
 							id: `DR${reportsTo.id}`,
-							targetPosition: Position.Right,
 							position: { x, y: 0 },
 							data: {
 								label: `${(reportsTo.profile as any)?.first_name} ${(reportsTo.profile as any)?.last_name}`,
@@ -148,7 +147,6 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 						if (!isExistingManager) {
 							nodes.push({
 								id: `DR${reportsTo.id}`,
-								targetPosition: Position.Right,
 								position: { x, y: 0 },
 								data: {
 									label: `${(reportsTo.profile as any)?.first_name} ${(reportsTo.profile as any)?.last_name}`,
