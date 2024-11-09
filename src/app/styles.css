@@ -1,5 +1,11 @@
 @import '@xyflow/react/dist/style.css';
 
+.react-flow__edge.selected .react-flow__edge-path,
+.react-flow__edge.selectable:focus .react-flow__edge-path,
+.react-flow__edge.selectable:focus-visible .react-flow__edge-path {
+	@apply !stroke-blue-400;
+}
+
 .tiptap {
 	:first-child {
 		margin-top: 0;
