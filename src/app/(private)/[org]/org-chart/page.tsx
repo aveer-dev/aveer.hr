@@ -51,7 +51,8 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 
 			const multipleTimesManager = managers?.filter(mn => (mn.person as any).id === (manager.person as any).id)?.map(mn => ({ id: mn.id, name: (mn.team as any).name }));
 
-			if (manager.id !== multipleTimesManager![1]?.id) {
+			// creates manager node, also representing teams
+			if (multipleTimesManager!.findIndex(mn => mn.id === manager.id) === 0) {
 				nodes.push({
 					id: `MG${manager.id}`,
 					position: { x, y: 100 },
@@ -72,20 +73,22 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 				const activeReportToIndex = reportTos.findIndex(rt => rt.id === reportsTo.id);
 
 				if (reportTos[activeReportToIndex].nodeId == '') {
+					// Only create a new node if the person the manager reports to is not a manager
 					if (!isExistingManager) {
 						nodes.push({
 							id: `DR${reportsTo.id}`,
 							targetPosition: Position.Right,
 							position: { x, y: 0 },
 							data: {
-								label: `${(reportsTo.profile as any)?.first_name} ${(reportsTo.profile as any)?.last_name} DR`,
+								label: `${(reportsTo.profile as any)?.first_name} ${(reportsTo.profile as any)?.last_name}`,
 								title: `${reportsTo.job_title}`
 							},
+							type: 'custom',
 							width: 240
 						});
 					}
 
-					reportTos[activeReportToIndex].nodeId = isExistingManager ? `MG${isExistingManager.id}` : `DR${reportsTo.id}`;
+					reportTos[activeReportToIndex].nodeId = !!isExistingManager ? `MG${isExistingManager.id}` : `DR${reportsTo.id}`;
 				}
 
 				edges.push({
@@ -98,38 +101,57 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 			}
 
 			teamMembers.forEach((member, idx) => {
-				nodes.push({
-					id: `EE${member.id}`,
-					position: { x, y: 400 + ((idx + 1) * 20 + idx * 50) },
-					data: {
-						label: `${member.profile?.first_name} ${member.profile?.last_name}`,
-						title: `${member.job_title}`
-					},
-					width: 200,
-					type: 'custom'
-				});
+				if (member.id !== (manager.person as any).id) {
+					if (teamManagers!.findIndex(mn => mn.id === manager.id) === 0) {
+						nodes.push({
+							id: `EE${member.id}`,
+							position: { x, y: 400 + ((idx + 1) * 20 + idx * 50) },
+							data: {
+								label: `${member.profile?.first_name} ${member.profile?.last_name}`,
+								title: `${member.job_title}`
+							},
+							width: 200,
+							type: 'custom'
+						});
+					}
 
-				edges.push({
-					id: `EE-e-${member.id}-${manager.id}`,
-					source: `MG${manager.id}`,
-					target: `EE${member.id}`,
-					animated: true
-				});
+					if (teamManagers!.findIndex(mn => mn.id === manager.id) === 0) {
+						edges.push({
+							id: `EE-e-${member.id}-${manager.id}`,
+							source: multipleTimesManager.length > 1 ? `MG${multipleTimesManager[0].id}` : `MG${manager.id}`,
+							target: `EE${member.id}`,
+							animated: true,
+							type: 'smoothstep'
+						});
+					} else {
+						edges.push({
+							id: `EE-e-${member.id}-${manager.id}`,
+							source: multipleTimesManager.length > 1 ? `MG${multipleTimesManager[0].id}` : `MG${teamManagers[0].id}`,
+							target: `EE${member.id}`,
+							animated: true,
+							type: 'smoothstep'
+						});
+					}
+				}
 
+				// a team member might have someone they report to, other than the team manager
 				const reportsTo: Tables<'contracts'> | null = member?.direct_report as any;
 
 				if (reportsTo) {
+					if (reportsTo.id === (manager.person as any).id) return;
+
 					const isExistingManager = managers!.find(m => (m.person as any).id === reportsTo.id);
 					const activeReportToIndex = reportTos.findIndex(rt => rt.id === reportsTo.id);
 
 					if (reportTos[activeReportToIndex].nodeId == '') {
+						// Only create a new node if the person the manager reports to is not a manager
 						if (!isExistingManager) {
 							nodes.push({
 								id: `DR${reportsTo.id}`,
 								targetPosition: Position.Right,
 								position: { x, y: 0 },
 								data: {
-									label: `${(reportsTo.profile as any)?.first_name} ${(reportsTo.profile as any)?.last_name} DR`,
+									label: `${(reportsTo.profile as any)?.first_name} ${(reportsTo.profile as any)?.last_name}`,
 									title: `${reportsTo.job_title}`
 								},
 								width: 240,
@@ -137,11 +159,11 @@ export default async function OrgChartPage({ params: { org } }: { params: { org:
 							});
 						}
 
-						reportTos[activeReportToIndex].nodeId = isExistingManager ? `MG${isExistingManager.id}` : `DR${reportsTo.id}`;
+						reportTos[activeReportToIndex].nodeId = !!isExistingManager ? `MG${isExistingManager.id}` : `DR${reportsTo.id}`;
 					}
 
 					edges.push({
-						id: `EE-DR-e-${reportsTo.id}-${reportTos[activeReportToIndex].id}`,
+						id: `EE-DR-e-${reportsTo.id}-${member.id}`,
 						source: reportTos[activeReportToIndex].nodeId,
 						target: `EE${member.id}`,
 						animated: true,
