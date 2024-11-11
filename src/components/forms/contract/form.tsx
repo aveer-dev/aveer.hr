@@ -13,7 +13,6 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useCallback, useEffect, useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { toast } from 'sonner';
 import { useParams } from 'next/navigation';
@@ -43,8 +42,6 @@ import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { LeaveDays } from './leave-fields';
-
-const supabase = createClient();
 
 type ENTITY = Tables<'legal_entities'> & {
 	incorporation_country: {

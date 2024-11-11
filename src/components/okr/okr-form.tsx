@@ -263,7 +263,7 @@ export const OKRForm = ({ org, okr, objResult, toggleSheet }: props) => {
 																/>
 
 																<div className="!mt-8">
-																	<h4 className="mb-4 text-xs text-muted-foreground">Objective {index + 1} key results</h4>
+																	<h4 className="mb-4 text-xs text-muted-foreground">Key results</h4>
 
 																	<div className="space-y-4">
 																		{okr.results.length > 0 && (

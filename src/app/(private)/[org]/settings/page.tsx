@@ -67,7 +67,7 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 							Appraisal
 						</TabsTrigger>
 						<TabsTrigger value="users" className="h-6">
-							Users
+							Admin users
 						</TabsTrigger>
 					</TabsList>
 				</div>

@@ -21,7 +21,7 @@ export const OKR = ({ org, okr, objResult }: props) => {
 	return (
 		<Sheet open={isOpen} onOpenChange={toggle}>
 			<SheetTrigger asChild>
-				<Button className="h-fit items-center justify-between px-4 py-3" variant={!!okr ? 'outline' : 'default'}>
+				<Button className="h-fit w-full items-center justify-between px-4 py-3" variant={!!okr ? 'outline' : 'default'}>
 					{!!okr && (
 						<div className="text-left">
 							<h3 className="text-sm font-normal">{okr?.title}</h3>
