@@ -25,7 +25,7 @@ import { useRouter } from 'next/navigation';
 const formSchema = z.object({
 	dates: z.object({ from: z.date(), to: z.date() }),
 	leave_type: z.enum(['sick', 'paid', 'paternity', 'maternity', 'unpaid']),
-	note: z.string().optional(),
+	note: z.string(),
 	hand_over: z.string().optional(),
 	hand_over_note: z.string().optional()
 });
