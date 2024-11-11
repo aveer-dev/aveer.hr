@@ -7,6 +7,7 @@ import { ArrowRightLeft, CalendarClock, Command, Dock, FilePenLine, FileStack, F
 import { useState, useEffect } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export const EmployeePageSearch = () => {
 	const [open, setOpen] = useState(false);
@@ -83,15 +84,17 @@ export const EmployeePageSearch = () => {
 
 					<CommandGroup heading="Pages">
 						{commandItems.map((item, index) => (
-							<CommandItem key={index} value={item.label} className="gap-2 px-3 transition-all duration-500">
-								<div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted p-1">
-									<item.icon className="scale-75 stroke-[1.5] text-accent-foreground" />
-								</div>
-								<span className="text-sm">{item.label}</span>
-								<CommandShortcut className={cn('capitlize flex items-center gap-2')}>
-									<Command className="scale-50" /> Shift <span>{item.shortcut}</span>
-								</CommandShortcut>
-							</CommandItem>
+							<Link key={index} href={`./${item.page}`}>
+								<CommandItem value={item.label} className="gap-2 px-3 transition-all duration-500">
+									<div className="flex h-9 w-9 items-center justify-center rounded-md bg-muted p-1">
+										<item.icon className="scale-75 stroke-[1.5] text-accent-foreground" />
+									</div>
+									<span className="text-sm">{item.label}</span>
+									<CommandShortcut className={cn('capitlize flex items-center gap-2')}>
+										<Command className="scale-50" /> Shift <span>{item.shortcut}</span>
+									</CommandShortcut>
+								</CommandItem>
+							</Link>
 						))}
 					</CommandGroup>
 				</CommandList>
