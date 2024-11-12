@@ -181,82 +181,84 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 			)}
 
 			{/* compensation */}
-			<div>
-				<div className="mb-4 flex items-center justify-between">
-					<h3 className="text-lg font-semibold text-support">Compensation</h3>
-					{back && (
-						<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
-							<Pencil size={12} />
-						</Button>
-					)}
-				</div>
+			{(formType == 'job' ? data.compensation_public : true) && (
+				<div>
+					<div className="mb-4 flex items-center justify-between">
+						<h3 className="text-lg font-semibold text-support">Compensation</h3>
+						{back && (
+							<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
+								<Pencil size={12} />
+							</Button>
+						)}
+					</div>
 
-				<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-					<li className="grid gap-3">
-						<h4 className="flex items-center gap-2 text-sm font-medium">
-							Salary
-							{openCompensationDialog && (
-								<Button onClick={() => openCompensationDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-									<Pencil size={10} />
-								</Button>
-							)}
-						</h4>
-						<p className="text-sm font-light">{currencyFormat({ value: data.salary, currency: currency || data.entity?.incorporation_country?.currency_code })}</p>
-					</li>
-
-					<li className="grid gap-3">
-						<h4 className="flex items-center gap-2 text-sm font-medium">
-							Signing Bonus
-							{openCompensationDialog && (
-								<Button onClick={() => openCompensationDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-									<Pencil size={10} />
-								</Button>
-							)}
-						</h4>
-						<p className="text-sm font-light">{data?.signing_bonus ? currencyFormat({ value: data?.signing_bonus, currency: currency || data.entity?.incorporation_country?.currency_code }) : '--'}</p>
-					</li>
-
-					{data?.additional_offerings?.length > 0 && (
-						<li className="col-span-2 grid h-fit gap-4 sm:col-span-1">
-							<h4 className="flex h-fit items-center gap-2 text-sm font-medium">
-								Additional offerings{' '}
-								{openBenefitsDialog && (
-									<Button onClick={() => openBenefitsDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
-										<Pencil size={10} />
-									</Button>
-								)}
-							</h4>
-
-							<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.additional_offerings as string[])?.map((offering, index) => <li key={index}>{offering}</li>)}</ul>
-						</li>
-					)}
-
-					{data?.fixed_allowance?.length > 0 && (
-						<li className="col-span-2 grid h-fit max-w-72 gap-4 sm:col-span-1">
-							<h4 className="flex h-fit items-center gap-2 text-sm font-medium">
-								Fixed Allowances
+					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
+						<li className="grid gap-3">
+							<h4 className="flex items-center gap-2 text-sm font-medium">
+								Salary
 								{openCompensationDialog && (
 									<Button onClick={() => openCompensationDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
 										<Pencil size={10} />
 									</Button>
 								)}
 							</h4>
-							<ul className="grid list-disc gap-4 pl-3 text-sm font-light">
-								{(data?.fixed_allowance as { name: string; frequency: string; amount: string }[])?.map((allowance, index) => (
-									<li key={index}>
-										<div className="flex items-baseline justify-between p-1 font-light">
-											<div>
-												{allowance.name} • <span className="text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(allowance.amount), currency: currency || data.entity.incorporation_country?.currency_code })}</span>
-											</div>
-											<div className="text-xs capitalize text-muted-foreground">{allowance.frequency.replace('-', ' ')}</div>
-										</div>
-									</li>
-								))}
-							</ul>
+							<p className="text-sm font-light">{currencyFormat({ value: data.salary, currency: currency || data.entity?.incorporation_country?.currency_code })}</p>
 						</li>
-					)}
-				</ul>
-			</div>
+
+						<li className="grid gap-3">
+							<h4 className="flex items-center gap-2 text-sm font-medium">
+								Signing Bonus
+								{openCompensationDialog && (
+									<Button onClick={() => openCompensationDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+										<Pencil size={10} />
+									</Button>
+								)}
+							</h4>
+							<p className="text-sm font-light">{data?.signing_bonus ? currencyFormat({ value: data?.signing_bonus, currency: currency || data.entity?.incorporation_country?.currency_code }) : '--'}</p>
+						</li>
+
+						{data?.additional_offerings?.length > 0 && (
+							<li className="col-span-2 grid h-fit gap-4 sm:col-span-1">
+								<h4 className="flex h-fit items-center gap-2 text-sm font-medium">
+									Additional offerings{' '}
+									{openBenefitsDialog && (
+										<Button onClick={() => openBenefitsDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+											<Pencil size={10} />
+										</Button>
+									)}
+								</h4>
+
+								<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.additional_offerings as string[])?.map((offering, index) => <li key={index}>{offering}</li>)}</ul>
+							</li>
+						)}
+
+						{data?.fixed_allowance?.length > 0 && (
+							<li className="col-span-2 grid h-fit max-w-72 gap-4 sm:col-span-1">
+								<h4 className="flex h-fit items-center gap-2 text-sm font-medium">
+									Fixed Allowances
+									{openCompensationDialog && (
+										<Button onClick={() => openCompensationDialog(true)} variant={'secondary'} size={'icon'} className="h-5 w-5 gap-3 text-muted-foreground">
+											<Pencil size={10} />
+										</Button>
+									)}
+								</h4>
+								<ul className="grid list-disc gap-4 pl-3 text-sm font-light">
+									{(data?.fixed_allowance as { name: string; frequency: string; amount: string }[])?.map((allowance, index) => (
+										<li key={index}>
+											<div className="flex items-baseline justify-between p-1 font-light">
+												<div>
+													{allowance.name} • <span className="text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(allowance.amount), currency: currency || data.entity.incorporation_country?.currency_code })}</span>
+												</div>
+												<div className="text-xs capitalize text-muted-foreground">{allowance.frequency.replace('-', ' ')}</div>
+											</div>
+										</li>
+									))}
+								</ul>
+							</li>
+						)}
+					</ul>
+				</div>
+			)}
 
 			{/* job schedule */}
 			{formType !== 'job' && (

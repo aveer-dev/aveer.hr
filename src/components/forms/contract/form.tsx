@@ -133,7 +133,8 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 		policy: z.string().optional(),
 		direct_report: z.string().optional(),
 		enable_location: z.boolean().optional(),
-		enable_voluntary_data: z.boolean().optional()
+		enable_voluntary_data: z.boolean().optional(),
+		compensation_public: z.boolean().optional()
 	});
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -171,7 +172,8 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			direct_report: formType == 'contract' ? (contractData?.direct_report ? String(contractData?.direct_report) : '') : openRoleData?.direct_report ? String(openRoleData?.direct_report) : '',
 			role: contractData?.role ? String(contractData?.role) : undefined,
 			enable_location: openRoleData?.enable_location,
-			enable_voluntary_data: openRoleData?.enable_voluntary_data
+			enable_voluntary_data: openRoleData?.enable_voluntary_data,
+			compensation_public: openRoleData?.compensation_public
 		}
 	});
 
@@ -206,7 +208,8 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			policy: Number(values.policy),
 			direct_report: values.direct_report ? Number(values.direct_report) : null,
 			enable_location: values?.enable_location,
-			enable_voluntary_data: values?.enable_voluntary_data
+			enable_voluntary_data: values?.enable_voluntary_data,
+			compensation_public: values?.compensation_public
 		};
 
 		if (showSigningBonus) role.signing_bonus = Number(values.signing_bonus);
@@ -965,6 +968,32 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 															</TooltipTrigger>
 															<TooltipContent>
 																<p className="max-w-[180px]">Enable collecting voluntary detail like gender, disability, e.t.c on application form</p>
+															</TooltipContent>
+														</Tooltip>
+													</TooltipProvider>
+												</FormLabel>
+
+												<FormControl>
+													<Switch checked={field.value} className="scale-75" onCheckedChange={field.onChange} aria-readonly />
+												</FormControl>
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="compensation_public"
+										render={({ field }) => (
+											<FormItem className="flex flex-row items-center justify-between space-y-0 rounded-lg bg-accent p-2">
+												<FormLabel className="flex items-center gap-2 text-xs">
+													Show compensation details
+													<TooltipProvider>
+														<Tooltip>
+															<TooltipTrigger asChild>
+																<Info size={12} />
+															</TooltipTrigger>
+															<TooltipContent>
+																<p className="max-w-[180px]">Will you like for job applicants to see compensation related details?</p>
 															</TooltipContent>
 														</Tooltip>
 													</TooltipProvider>

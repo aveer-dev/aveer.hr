@@ -1143,6 +1143,7 @@ export type Database = {
           link: string | null
           org: string
           read: string[]
+          schedule_at: string | null
           sender_contract: number | null
           sender_profile: string | null
           title: string
@@ -1156,6 +1157,7 @@ export type Database = {
           link?: string | null
           org: string
           read?: string[]
+          schedule_at?: string | null
           sender_contract?: number | null
           sender_profile?: string | null
           title: string
@@ -1169,6 +1171,7 @@ export type Database = {
           link?: string | null
           org?: string
           read?: string[]
+          schedule_at?: string | null
           sender_contract?: number | null
           sender_profile?: string | null
           title?: string
@@ -1354,6 +1357,7 @@ export type Database = {
         Row: {
           additional_offerings: Json[] | null
           applicants: number
+          compensation_public: boolean
           created_at: string
           custom_fields: Json[] | null
           direct_report: number | null
@@ -1386,6 +1390,7 @@ export type Database = {
         Insert: {
           additional_offerings?: Json[] | null
           applicants?: number
+          compensation_public?: boolean
           created_at?: string
           custom_fields?: Json[] | null
           direct_report?: number | null
@@ -1418,6 +1423,7 @@ export type Database = {
         Update: {
           additional_offerings?: Json[] | null
           applicants?: number
+          compensation_public?: boolean
           created_at?: string
           custom_fields?: Json[] | null
           direct_report?: number | null
