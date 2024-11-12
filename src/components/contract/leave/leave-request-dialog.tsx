@@ -235,7 +235,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data, or
 												</Button>
 											</FormLabel>
 											<FormControl>
-												<Textarea placeholder="A short note for who will be approving this leave" className="resize-none" {...field} />
+												<Textarea placeholder="A short note about the reason for your leave, for who will be approving this leave" className="resize-none" {...field} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>

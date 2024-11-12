@@ -1765,6 +1765,64 @@ export type Database = {
           },
         ]
       }
+      reminders: {
+        Row: {
+          contract: number
+          created_at: string
+          datetime: string
+          description: string | null
+          id: number
+          org: string
+          profile: string | null
+          title: string
+          type: string | null
+        }
+        Insert: {
+          contract: number
+          created_at?: string
+          datetime: string
+          description?: string | null
+          id?: number
+          org: string
+          profile?: string | null
+          title: string
+          type?: string | null
+        }
+        Update: {
+          contract?: number
+          created_at?: string
+          datetime?: string
+          description?: string | null
+          id?: number
+          org?: string
+          profile?: string | null
+          title?: string
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_contract_fkey"
+            columns: ["contract"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "reminders_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roles: {
         Row: {
           created_at: string

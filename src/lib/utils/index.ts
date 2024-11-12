@@ -49,3 +49,11 @@ export const getTimeDifference = (date: Date) => {
 	if (daysDifference >= 2) return `${daysDifference}d  ${diff < 0 ? 'to go' : 'ago'}`;
 	return `${daysDifference}d, ${Math.floor(hoursDifference % 24)}h  ${diff < 0 ? 'to go' : 'ago'}`;
 };
+
+export const getTime = (dateString?: string) => {
+	const date = dateString ? new Date(dateString) : new Date();
+	const hour = date.getHours();
+	const minute = date.getMinutes();
+
+	return `${hour < 10 ? '0' : ''}${hour}:${minute < 10 ? '0' : ''}${minute}`;
+};

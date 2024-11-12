@@ -13,27 +13,11 @@ import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { toast } from 'sonner';
 import { Icon } from './components/Icon';
 import { DatePicker } from '@/components/ui/date-picker';
-import { cn } from '@/lib/utils';
+import { cn, getTime } from '@/lib/utils';
 import { format, isPast } from 'date-fns';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { DrawerClose } from '@/components/ui/drawer';
 import { DeleteMessageDialog } from './delete-message-dialog';
-
-const getTime = (dateString?: string) => {
-	const date = dateString ? new Date(dateString) : new Date();
-	const hour = date.getHours();
-	const minute = date.getMinutes();
-
-	if (minute < 10) {
-		return `${hour}:0${minute}`;
-	}
-
-	if (hour < 10) {
-		return `0${hour}:${minute}`;
-	}
-
-	return `${hour}:${minute}`;
-};
 
 export const MessageInput = ({ org, sender, message, onMessageSent }: { org: string; sender?: string; onMessageSent: () => void; message?: Tables<'inbox'> }) => {
 	const menuContainerRef = useRef(null);

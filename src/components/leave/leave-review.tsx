@@ -178,7 +178,7 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 
 			{typeof children !== 'string' && <SheetTrigger asChild>{children}</SheetTrigger>}
 
-			<SheetContent className="overflow-y-auto sm:max-w-md">
+			<SheetContent onCloseAutoFocus={event => event.preventDefault()} className="overflow-y-auto sm:max-w-md">
 				<SheetHeader>
 					<SheetTitle>Leave Review</SheetTitle>
 					<SheetDescription>See details of selected leave below</SheetDescription>

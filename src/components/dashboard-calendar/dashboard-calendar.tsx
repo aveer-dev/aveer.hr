@@ -1,15 +1,16 @@
 'use client';
 
 import { DayOfWeek, DayPicker } from 'react-day-picker';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { format, getDay, getYear, isFirstDayOfMonth, isSameDay, isThisMonth, isToday, setYear } from 'date-fns';
-import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Maximize } from 'lucide-react';
 import { useEffect } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LeaveReview } from '@/components/leave/leave-review';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NavLink } from '@/components/ui/link';
+import { Separator } from '../ui/separator';
 
 interface props {
 	org: string;
@@ -30,7 +31,6 @@ export const Calendar = ({ leaveDays, birthdays, org }: props) => {
 			classNames={{
 				month_caption: 'flex pt-1 relative items-center border-b mb-8 pb-3',
 				caption_label: 'text-xl font-bold',
-				nav: 'relative bg-transparent p-0 space-x-1 flex items-center justify-end -mb-9 z-[1]',
 				button_previous: cn(buttonVariants({ variant: 'ghost' }), ''),
 				button_next: cn(buttonVariants({ variant: 'ghost' }), ''),
 				today: '!bg-primary text-primary-foreground',
@@ -42,7 +42,24 @@ export const Calendar = ({ leaveDays, birthdays, org }: props) => {
 				leaveDay: leaveDays.map(day => day.date)
 			}}
 			components={{
-				Chevron: ({ orientation }) => (orientation == 'left' ? <ChevronLeft size={16} /> : <ChevronRight size={16} />),
+				Nav: ({ onNextClick, onPreviousClick }) => {
+					return (
+						<nav className={cn('relative z-[1] -mb-9 flex items-center justify-end space-x-1 bg-transparent p-0')}>
+							<Button variant={'ghost'} onClick={onPreviousClick}>
+								<ChevronLeft size={16} />
+							</Button>
+							<Button variant={'ghost'} onClick={onNextClick}>
+								<ChevronRight size={16} />
+							</Button>
+
+							<Separator orientation="vertical" className="h-3" />
+
+							<NavLink org={org} href={`/calendar`} className={cn(buttonVariants({ variant: 'ghost' }), '!mr-1.5')}>
+								<Maximize className="" size={16} />
+							</NavLink>
+						</nav>
+					);
+				},
 				MonthGrid: ({ children, className, ...props }) => {
 					useEffect(() => {
 						if (isThisMonth(props['aria-label'] as string)) {

@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/server';
 import { PERSON } from '@/type/person';
 import { ClientTable } from './table';
 import { OnboardingForm } from './onboarding';
-import { DashboardCalendar } from './dashboard-calendar';
+import { DashboardCalendar } from '@/components/dashboard-calendar';
 
 export default async function OrgPage(props: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
 	const supabase = createClient();
