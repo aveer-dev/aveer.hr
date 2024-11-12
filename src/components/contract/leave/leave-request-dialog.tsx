@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Calendar } from '@/components/ui/calendar';
-import { HardHat, MinusCircle, NotebookPen, Plus } from 'lucide-react';
+import { HardHat, MinusCircle, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { addBusinessDays, addDays, differenceInBusinessDays, format, isWeekend } from 'date-fns';
 import { ReactNode, useEffect, useState } from 'react';
@@ -25,7 +25,7 @@ import { useRouter } from 'next/navigation';
 const formSchema = z.object({
 	dates: z.object({ from: z.date(), to: z.date() }),
 	leave_type: z.enum(['sick', 'paid', 'paternity', 'maternity', 'unpaid']),
-	note: z.string(),
+	note: z.string().min(2, { message: 'Enter leave note' }),
 	hand_over: z.string().optional(),
 	hand_over_note: z.string().optional()
 });
@@ -43,7 +43,6 @@ interface props {
 export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data, orgSettings }: props) => {
 	const [creatingRequest, setCreatingState] = useState(false);
 	const [isDialoagOpen, toggleDialog] = useState(false);
-	const [showNote, setNoteState] = useState(!!data?.note);
 	const [showHandover, setHandoverState] = useState(!!data?.hand_over);
 	const [employees, setEmployees] = useState<{ id: number; job_title: string; profile: { first_name: string; last_name: string } }[]>([]);
 	const [approvalPolicy, setPolicyDetails] = useState<any[]>([]);
@@ -216,32 +215,25 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data, or
 												)}
 											</div>
 										</FormControl>
-										<Calendar max={leaveDays - leaveDaysUsed} className="!mt-10" mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1} />
+										<Calendar disabled={{ before: new Date() }} max={leaveDays - leaveDaysUsed} className="!mt-10" mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1} />
 										<FormMessage />
 									</FormItem>
 								)}
 							/>
 
-							{showNote && (
-								<FormField
-									control={form.control}
-									name="note"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel className="flex items-center justify-between">
-												Leave note
-												<Button onClick={() => setNoteState(false)} type="button" variant={'secondary'} className="h-6 w-6 text-muted-foreground" size={'icon'}>
-													<MinusCircle size={12} />
-												</Button>
-											</FormLabel>
-											<FormControl>
-												<Textarea placeholder="A short note about the reason for your leave, for who will be approving this leave" className="resize-none" {...field} />
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-							)}
+							<FormField
+								control={form.control}
+								name="note"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="flex items-center justify-between">Leave note</FormLabel>
+										<FormControl>
+											<Textarea placeholder="A short note about the reason for your leave, for who will be approving this leave" className="resize-none" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
 							{showHandover && (
 								<div className="grid gap-3">
@@ -296,15 +288,6 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data, or
 							)}
 
 							<div className="flex gap-4">
-								{!showNote && (
-									<Button type="button" onClick={() => setNoteState(true)} variant={'secondary'} className="gap-2">
-										<Plus size={12} />
-										<Separator orientation="vertical" />
-										Leave note
-										<NotebookPen size={12} />
-									</Button>
-								)}
-
 								{!showHandover && (
 									<Button type="button" onClick={() => setHandoverState(true)} variant={'secondary'} className="gap-2">
 										<Plus size={12} />
@@ -315,7 +298,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data, or
 								)}
 							</div>
 
-							<Button disabled={creatingRequest} type="submit" className="w-full">
+							<Button disabled={creatingRequest} type="submit" className="w-full gap-2">
 								{creatingRequest && <LoadingSpinner />}
 								{creatingRequest ? 'Requesting leave' : 'Request leave'}
 							</Button>
