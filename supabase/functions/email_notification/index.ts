@@ -22,8 +22,7 @@ const SendEmail = async ({ payload, nameAndEmails }: { payload: WebhookPayload; 
 			from: 'Aveer.hr <support@notification.aveer.hr>',
 			to: contact.email,
 			subject: payload.record.title,
-			html,
-			scheduledAt: payload.record?.schedule_at
+			html
 		});
 
 		if (error) {
@@ -42,7 +41,6 @@ interface Notification {
 	link: string;
 	body: string;
 	contracts: number[];
-	schedule_at?: string;
 }
 
 interface WebhookPayload {
