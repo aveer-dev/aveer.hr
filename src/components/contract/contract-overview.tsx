@@ -40,6 +40,14 @@ export const ContractOverview = async ({ data, reviewType, orgSettings }: props)
 		return true;
 	};
 
+	const { data: leaveRequests } = await supabase
+		.from('time_off')
+		.select(
+			'*, hand_over:contracts!time_off_hand_over_fkey(id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)), contract:contracts!time_off_contract_fkey(job_title,id, team, unpaid_leave_used, sick_leave_used, paternity_leave_used, paid_leave_used, maternity_leave_used), profile:profiles!time_off_profile_fkey(*)'
+		)
+		.match({ org: orgSettings?.org, contract: data.id })
+		.or('status.eq.pending,status.eq.approved');
+
 	return (
 		<section className="mt-4 w-full">
 			{data?.direct_report && (
@@ -65,7 +73,7 @@ export const ContractOverview = async ({ data, reviewType, orgSettings }: props)
 						<div className="flex items-center gap-2">
 							{data.status == 'signed' && (
 								<>
-									<LeaveRequestDialog orgSettings={orgSettings} contract={data} />
+									<LeaveRequestDialog usedLeaveDays={leaveRequests!} orgSettings={orgSettings} contract={data} />
 									<LeaveRequests orgSettings={orgSettings} reviewType={reviewType} org={data.org.subdomain} contract={data} />
 								</>
 							)}

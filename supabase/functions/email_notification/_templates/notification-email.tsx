@@ -50,7 +50,7 @@ export const NotificationEmail = ({ name, link, title, body, type, org }: Notifi
 							</a>
 						</p>
 						<p className="text-xs leading-6 text-black">
-							If you&apos;re unable to open link, copy link here: <a href={link}>{link}</a>
+							If you&apos;re unable to open link, copy link here: <a href={`https://${type == 'admin' ? org : 'employee'}.aveer.hr${link}`}>{link}</a>
 						</p>
 					</div>
 				</div>

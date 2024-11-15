@@ -42,6 +42,7 @@ export default async function TimeoffPage({ params }: { params: { [key: string]:
 	const reviewType: ROLE = 'employee';
 
 	const chartData = getChartData(data, orgSettings?.data && orgSettings?.data[0]);
+	const leaveDays = timeOffRequest!.data?.filter(item => item.status == 'approved' || item.status == 'pending');
 
 	return (
 		<Suspense
@@ -56,7 +57,7 @@ export default async function TimeoffPage({ params }: { params: { [key: string]:
 					<h2 className="flex items-center justify-between text-base font-medium text-support">Leave summary</h2>
 
 					<div className="flex items-center gap-2">
-						<LeaveRequestDialog orgSettings={orgSettings?.data && orgSettings?.data[0]} contract={data} />
+						<LeaveRequestDialog usedLeaveDays={leaveDays} orgSettings={orgSettings?.data && orgSettings?.data[0]} contract={data} />
 					</div>
 				</div>
 

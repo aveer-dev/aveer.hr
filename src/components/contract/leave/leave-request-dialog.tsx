@@ -9,8 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Calendar } from '@/components/ui/calendar';
 import { HardHat, MinusCircle, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { addBusinessDays, addDays, differenceInBusinessDays, format, isWeekend } from 'date-fns';
-import { ReactNode, useEffect, useState } from 'react';
+import { addBusinessDays, addDays, differenceInBusinessDays, format, isSameDay, isWeekend } from 'date-fns';
+import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,9 +38,10 @@ interface props {
 	children?: ReactNode;
 	data?: Tables<'time_off'>;
 	orgSettings: Tables<'org_settings'> | null;
+	usedLeaveDays?: Tables<'time_off'>[];
 }
 
-export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data, orgSettings }: props) => {
+export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, children, data, orgSettings }: props) => {
 	const [creatingRequest, setCreatingState] = useState(false);
 	const [isDialoagOpen, toggleDialog] = useState(false);
 	const [showHandover, setHandoverState] = useState(!!data?.hand_over);
@@ -50,6 +51,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data, or
 	const [selectedLeaveType, setLeaveType] = useState(data?.leave_type || 'paid');
 	const [leaveDaysUsed, setLeaveDaysUsed] = useState(((contract as any)[`${selectedLeaveType}_leave_used`] as number) || 0);
 	const [leaveDays, setLeaveDays] = useState(((contract as any)[`${selectedLeaveType}_leave`] as number) || ((orgSettings as any)[`${selectedLeaveType}_leave`] as number) || 0);
+	const [pastLeaveDaysUsed, setPastLeaveDaysUsed] = useState<Date[]>([]);
 
 	const getNextBusinessDay = (date: Date) => {
 		while (isWeekend(date)) {
@@ -111,6 +113,20 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data, or
 		router.refresh();
 	};
 
+	const getUsedLeaveDays = useCallback(async () => {
+		if (!usedLeaveDays || usedLeaveDays.length == 0) return;
+		const result: Date[] = [];
+
+		for (const item of usedLeaveDays!) {
+			const startDate = new Date(item.from);
+			const endDate = new Date(item.to);
+
+			for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) result.push(new Date(date));
+		}
+
+		setPastLeaveDaysUsed(result);
+	}, [usedLeaveDays]);
+
 	useEffect(() => {
 		if (date) form.setValue('dates', date as any);
 	}, [date, form]);
@@ -118,7 +134,8 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data, or
 	useEffect(() => {
 		setLeaveDaysUsed(contract[`${selectedLeaveType}_leave_used`] || 0);
 		setLeaveDays(((contract as any)[`${selectedLeaveType}_leave`] as number) || ((orgSettings as any)[`${selectedLeaveType}_leave`] as number) || 0);
-	}, [contract, orgSettings, selectedLeaveType]);
+		getUsedLeaveDays();
+	}, [contract, getUsedLeaveDays, orgSettings, selectedLeaveType]);
 
 	useEffect(() => {
 		const getEmployees = async () => {
@@ -215,7 +232,20 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, children, data, or
 												)}
 											</div>
 										</FormControl>
-										<Calendar disabled={{ before: new Date() }} max={leaveDays - leaveDaysUsed} className="!mt-10" mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={1} />
+										<Calendar
+											disabled={date => {
+												const isPastLeaveDate = pastLeaveDaysUsed.find(leaveDate => isSameDay(date, leaveDate));
+												if (isPastLeaveDate) return true;
+												return false;
+											}}
+											max={leaveDays - leaveDaysUsed}
+											className="!mt-10"
+											mode="range"
+											defaultMonth={date?.from}
+											selected={date}
+											onSelect={setDate}
+											numberOfMonths={1}
+										/>
 										<FormMessage />
 									</FormItem>
 								)}
