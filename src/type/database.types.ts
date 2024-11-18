@@ -855,15 +855,15 @@ export type Database = {
           links: Json | null
           org: string
           phone_number: string | null
-          race_ethnicity: string
-          require_sponsorship: boolean
+          race_ethnicity: string | null
+          require_sponsorship: boolean | null
           resume: string | null
           resume_url: string | null
           role: number
           stage: string
-          state_location: string
+          state_location: string | null
           veterian_status: string | null
-          work_authorization: boolean
+          work_authorization: boolean | null
         }
         Insert: {
           country_location?: string | null
@@ -882,15 +882,15 @@ export type Database = {
           links?: Json | null
           org: string
           phone_number?: string | null
-          race_ethnicity: string
-          require_sponsorship: boolean
+          race_ethnicity?: string | null
+          require_sponsorship?: boolean | null
           resume?: string | null
           resume_url?: string | null
           role: number
           stage?: string
-          state_location: string
+          state_location?: string | null
           veterian_status?: string | null
-          work_authorization: boolean
+          work_authorization?: boolean | null
         }
         Update: {
           country_location?: string | null
@@ -909,15 +909,15 @@ export type Database = {
           links?: Json | null
           org?: string
           phone_number?: string | null
-          race_ethnicity?: string
-          require_sponsorship?: boolean
+          race_ethnicity?: string | null
+          require_sponsorship?: boolean | null
           resume?: string | null
           resume_url?: string | null
           role?: number
           stage?: string
-          state_location?: string
+          state_location?: string | null
           veterian_status?: string | null
-          work_authorization?: boolean
+          work_authorization?: boolean | null
         }
         Relationships: [
           {

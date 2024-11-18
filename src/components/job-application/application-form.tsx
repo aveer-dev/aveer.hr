@@ -28,17 +28,17 @@ const formSchema = z.object({
 	phone_number: z.string().min(8, 'Please enter mobile number'),
 	resume: z.string().optional(),
 	cover_letter: z.string().optional(),
-	country_location: z.string().min(1, 'Please select your country'),
-	state_location: z.string(),
-	work_authorization: z.boolean(),
-	require_sponsorship: z.boolean(),
-	race_ethnicity: z.string(),
-	veterian_status: z.string(),
-	gender: z.string().optional(),
+	country_location: z.string().min(1, 'Please select your country').optional(),
+	state_location: z.string().optional(),
+	work_authorization: z.boolean().optional(),
+	require_sponsorship: z.boolean().optional(),
+	race_ethnicity: z.string().optional(),
+	veterian_status: z.string().optional(),
+	gender: z.string().optional().optional(),
 	disability: z.string().optional(),
-	links: z.array(z.object({ name: z.string(), link: z.string() })),
+	links: z.array(z.object({ name: z.string(), link: z.string().optional() })),
 	documents: z.array(z.object({ name: z.string(), path: z.string(), file: z.any() })),
-	custom_answers: z.array(z.object({ name: z.string(), answer: z.string().min(1) }))
+	custom_answers: z.array(z.object({ name: z.string(), answer: z.string() }))
 });
 
 const supabase = createClient();
@@ -68,36 +68,30 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 			email: '',
 			phone_number: '',
 			resume: '',
-			cover_letter: '',
-			country_location: '',
+			cover_letter: undefined,
+			country_location: undefined,
 			work_authorization: undefined,
 			require_sponsorship: undefined,
-			race_ethnicity: '',
-			veterian_status: '',
-			disability: '',
+			race_ethnicity: undefined,
+			veterian_status: undefined,
+			disability: undefined,
 			links: [{ name: 'linkedin', link: '' }],
-			gender: '',
+			gender: undefined,
 			documents: [],
 			custom_answers: [],
-			state_location: ''
+			state_location: undefined
 		}
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		try {
-			toggleSubmitState(true);
 			const files = await uploadFiles();
 
-			const application: TablesInsert<'job_applications'> = {
-				...form.getValues(),
-				role: roleId,
-				require_sponsorship: values.require_sponsorship,
-				org,
-				documents: files as Json[]
-			};
+			const application: TablesInsert<'job_applications'> = { ...form.getValues(), role: roleId, org, documents: files as Json[] };
 
 			if (!application.resume && !application.documents?.length) return toast('😬 One more thing', { description: 'Please be sure you provided you attached your resume' });
 
+			toggleSubmitState(true);
 			const response = await submit(application);
 			toggleSubmitState(false);
 
@@ -115,7 +109,7 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 		const uploadedFiles: { name: string; path: string }[] = [];
 		return await new Promise<{ name: string; path: string }[] | void>(async (resolve, reject) => {
 			const filesToUpload = form.getValues('documents');
-			if (!filesToUpload.length) return resolve();
+			if (!filesToUpload?.length) return resolve();
 
 			for (let i = 0; i < filesToUpload.length; i++) {
 				const { data, error } = await supabase.storage.from('job-applications').upload(filesToUpload[i].path, filesToUpload[i].file, { upsert: true });
@@ -134,7 +128,15 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" disabled={pending || isSubmiting} size={'sm'} className="gap-3 px-4 text-xs font-light">
+			<Button
+				type="submit"
+				disabled={pending || isSubmiting}
+				onClick={() => {
+					console.log(form.formState);
+					console.log(form.getValues());
+				}}
+				size={'sm'}
+				className="gap-3 px-4 text-xs font-light">
 				{(pending || isSubmiting) && <LoadingSpinner />}
 				{pending || isSubmiting ? 'Submiting application' : 'Submit application'}
 			</Button>
@@ -441,8 +443,8 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 														type="button"
 														onClick={() => {
 															const formLinks = structuredClone(form.getValues('links'));
-															formLinks.splice(index, 1);
-															setLinks([...formLinks]);
+															formLinks?.splice(index, 1);
+															setLinks([...((formLinks as any) || [])]);
 															form.setValue(`links`, formLinks);
 														}}
 														size={'icon'}
@@ -462,7 +464,7 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 										<Button
 											type="button"
 											onClick={() => {
-												form.setValue('links', [...form.getValues('links'), { name: 'portfolio', link: '' }]);
+												form.setValue('links', [...form.getValues('links')!, { name: 'portfolio', link: '' }]);
 												setLinks([...links, { name: 'portfolio', link: '' }]);
 											}}
 											variant={'secondary'}
@@ -476,7 +478,7 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 										<Button
 											type="button"
 											onClick={() => {
-												form.setValue('links', [...form.getValues('links'), { name: 'github', link: '' }]);
+												form.setValue('links', [...form.getValues('links')!, { name: 'github', link: '' }]);
 												setLinks([...links, { name: 'github', link: '' }]);
 											}}
 											variant={'secondary'}
@@ -490,7 +492,7 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 										<Button
 											type="button"
 											onClick={() => {
-												form.setValue('links', [...form.getValues('links'), { name: 'documents', link: '' }]);
+												form.setValue('links', [...form.getValues('links')!, { name: 'documents', link: '' }]);
 												setLinks([...links, { name: 'documents', link: '' }]);
 											}}
 											variant={'secondary'}
@@ -504,7 +506,7 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 										<Button
 											type="button"
 											onClick={() => {
-												form.setValue('links', [...form.getValues('links'), { name: 'linkedin', link: '' }]);
+												form.setValue('links', [...form.getValues('links')!, { name: 'linkedin', link: '' }]);
 												setLinks([...links, { name: 'linkedin', link: '' }]);
 											}}
 											variant={'secondary'}
