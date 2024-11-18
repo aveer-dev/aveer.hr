@@ -85,13 +85,16 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		try {
+			toggleSubmitState(true);
 			const files = await uploadFiles();
 
 			const application: TablesInsert<'job_applications'> = { ...form.getValues(), role: roleId, org, documents: files as Json[] };
 
-			if (!application.resume && !application.documents?.length) return toast('😬 One more thing', { description: 'Please be sure you provided you attached your resume' });
+			if (!application.resume && !application.documents?.length) {
+				toggleSubmitState(false);
+				return toast('😬 One more thing', { description: 'Please be sure you provided you attached your resume' });
+			}
 
-			toggleSubmitState(true);
 			const response = await submit(application);
 			toggleSubmitState(false);
 
