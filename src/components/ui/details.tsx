@@ -156,29 +156,27 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 			</div>
 
 			{/* requirements */}
-			{formType == 'role' && (
-				<div>
-					<div className="mb-4 flex items-center justify-between">
-						<h1 className="text-lg font-semibold">Job Requirements</h1>
-						{back && (
-							<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
-								<Pencil size={12} />
-							</Button>
-						)}
-					</div>
-					<ul className="grid items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
-						<li className="grid gap-3">
-							<h4 className="text-sm font-medium">Experience</h4>
-							<p className="text-sm font-light">{data?.years_of_experience} years</p>
-						</li>
-
-						<li className="grid gap-3">
-							<h4 className="text-sm font-medium">Job Requirements</h4>
-							<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.requirements as string[])?.map((requirement, index) => <li key={index}>{requirement}</li>)}</ul>
-						</li>
-					</ul>
+			<div>
+				<div className="mb-4 flex items-center justify-between">
+					<h1 className="text-lg font-semibold">Job Requirements</h1>
+					{back && (
+						<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
+							<Pencil size={12} />
+						</Button>
+					)}
 				</div>
-			)}
+				<ul className="grid items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
+					<li className="grid gap-3">
+						<h4 className="text-sm font-medium">Experience</h4>
+						<p className="text-sm font-light">{data?.years_of_experience} years</p>
+					</li>
+
+					<li className="grid gap-3">
+						<h4 className="text-sm font-medium">Job Requirements</h4>
+						<ul className="ml-3 grid list-disc gap-4 text-sm font-light">{(data?.requirements as string[])?.map((requirement, index) => <li key={index}>{requirement}</li>)}</ul>
+					</li>
+				</ul>
+			</div>
 
 			{/* compensation */}
 			{(formType == 'job' ? data.compensation_public : true) && (
