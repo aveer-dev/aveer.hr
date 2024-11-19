@@ -59,20 +59,20 @@ export default async function OrgsPage() {
 			</div>
 
 			<div className="mx-auto mt-6 flex items-center gap-4">
-				{contracts && contracts.length && (
+				{contracts && contracts.length > 0 && (
 					<Link className={cn(buttonVariants({ size: 'sm', variant: data.length ? 'outline' : 'default' }), 'gap-4 text-xs')} href={`/employee/${contracts[0].org}/${contracts[0].id}/home`}>
 						<UserRound size={12} /> Employee Platform
 					</Link>
 				)}
 
-				{data && data.length && (
+				{data && data.length > 0 && (
 					<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? `http://${data[0].organisation}.${process.env.NEXT_PUBLIC_DOMAIN}/` : `/${data[0].organisation}`}>
 						<Building2 size={12} />
 						Admin Platform
 					</Link>
 				)}
 
-				{data && !data.length && (
+				{data && data.length == 0 && (
 					<Link className={cn(buttonVariants({ size: 'sm' }), 'gap-4 text-xs')} href={'/create-org'}>
 						<Building2 size={12} />
 						Create Organisation
