@@ -72,7 +72,7 @@ export const ApplicantDocuments = ({ applicantData, documents, setDocuments }: p
 				{document.format == 'pdf' && (
 					<div className="relative h-[60vh]">
 						<div className="relative z-10 h-full">
-							<DocumentViewer queryParams="hl=Nl" url={'https://byprsbkeackkgjsjlcgp.supabase.co/storage/v1/object/public/job-applications/applications/best-orgs/37/AcctNotice_2022-10-13.pdf'}></DocumentViewer>
+							<DocumentViewer queryParams="hl=Nl" url={document.url}></DocumentViewer>
 						</div>
 
 						<div className="absolute left-0 top-0 z-0 flex h-full w-full items-center justify-center">
