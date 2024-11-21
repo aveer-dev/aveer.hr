@@ -131,15 +131,7 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 		const { pending } = useFormStatus();
 
 		return (
-			<Button
-				type="submit"
-				disabled={pending || isSubmiting}
-				onClick={() => {
-					console.log(form.formState);
-					console.log(form.getValues());
-				}}
-				size={'sm'}
-				className="gap-3 px-4 text-xs font-light">
+			<Button type="submit" disabled={pending || isSubmiting} size={'sm'} className="gap-3 px-4 text-xs font-light">
 				{(pending || isSubmiting) && <LoadingSpinner />}
 				{pending || isSubmiting ? 'Submiting application' : 'Submit application'}
 			</Button>
@@ -152,7 +144,6 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 		const reader = new FileReader();
 		reader.onloadend = async () => {
 			const path = `applications/${org}/${roleId}/${file.name}`;
-			// updateFilesToUpload([...filesToUpload, { name, file, path }]);
 			form.setValue('documents', [...form.getValues('documents'), { name, file, path }]);
 		};
 
