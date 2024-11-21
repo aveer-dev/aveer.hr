@@ -10,6 +10,14 @@ const nextConfig = {
 				hostname: '**.supabase.co'
 			},
 			{
+				protocol: 'https',
+				hostname: '**.aveer.hr'
+			},
+			{
+				protocol: 'https',
+				hostname: 'aveer.hr'
+			},
+			{
 				hostname: '127.0.0.1'
 			}
 		]
