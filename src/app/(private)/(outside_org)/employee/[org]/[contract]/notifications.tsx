@@ -3,7 +3,7 @@
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Command, MessageSquareDot, X } from 'lucide-react';
+import { Command, MessageSquare, MessageSquareDot, X } from 'lucide-react';
 import { Tables } from '@/type/database.types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CommandShortcut } from '@/components/ui/command';
@@ -57,7 +57,7 @@ export const Notifications = ({ contractId, messages }: { contractId?: number; m
 					<TooltipTrigger asChild>
 						<AlertDialogTrigger asChild>
 							<Button onClick={() => setOpen(open => !open)} className="h-8 w-8 rounded-2xl border p-0" variant={'secondary'}>
-								<MessageSquareDot size={12} />
+								{_messages.filter(message => !isMessageRead(message)).length > 0 ? <MessageSquareDot size={12} /> : <MessageSquare size={12} />}
 							</Button>
 						</AlertDialogTrigger>
 					</TooltipTrigger>

@@ -3,5 +3,8 @@
 	"search.exclude": {
 		"**/node_modules": false
 	},
-	"deno.enable": false
+	"deno.enable": true,
+
+	"deno.enablePaths": ["./supabase/functions"],
+	"deno.importMap": "./supabase/functions/import_map.json"
 }
