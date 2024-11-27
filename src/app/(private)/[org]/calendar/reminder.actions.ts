@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/server';
 export const createReminder = async ({ payload }: { payload: TablesInsert<'reminders'> }) => {
 	const supabase = createClient();
 
-	const { data, error } = await supabase.from('reminders').insert(payload);
+	const { data, error } = await supabase.from('reminders').insert(payload).select().single();
 	if (error) return error.message;
 
 	return data;
@@ -15,7 +15,7 @@ export const createReminder = async ({ payload }: { payload: TablesInsert<'remin
 export const updateReminder = async ({ payload, id }: { payload: TablesUpdate<'reminders'>; id: number }) => {
 	const supabase = createClient();
 
-	const { data, error } = await supabase.from('reminders').update(payload).match({ id, org: payload.org });
+	const { data, error } = await supabase.from('reminders').update(payload).match({ id, org: payload.org }).select().single();
 	if (error) return error.message;
 
 	return data;

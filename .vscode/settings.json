@@ -2,5 +2,6 @@
 	"scss.lint.unknownAtRules": "ignore",
 	"search.exclude": {
 		"**/node_modules": false
-	}
+	},
+	"deno.enable": false
 }

@@ -8,13 +8,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { getTime } from '@/lib/utils';
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Clock, Text, Trash2 } from 'lucide-react';
+import { Clock, LetterText, Text, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { createReminder, updateReminder, deleteReminder } from './reminder.actions';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
+import { Separator } from '@/components/ui/separator';
+import { ReminderSync } from './reminder-sync';
 
 const formSchema = z.object({
 	title: z.string().min(2, { message: 'Enter reminder title' }),
@@ -27,6 +29,7 @@ export const ReminderForm = ({ date, org, contract, profile, onCreateReminder, o
 	const [isDeleting, setDeletingState] = useState(false);
 	const [time, setTime] = useState(getTime(reminder?.datetime));
 	const router = useRouter();
+	const [activeReminder, setActiveReminder] = useState<Tables<'reminders'> | undefined>(reminder);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -49,8 +52,7 @@ export const ReminderForm = ({ date, org, contract, profile, onCreateReminder, o
 			if (typeof response == 'string') return toast.error(response);
 
 			toast.success('Reminder updated successfully 🎉');
-			router.refresh();
-			onCreateReminder();
+			setActiveReminder(response);
 			return;
 		}
 
@@ -61,8 +63,7 @@ export const ReminderForm = ({ date, org, contract, profile, onCreateReminder, o
 		if (typeof response == 'string') return toast.error(response);
 
 		toast.success('Reminder created successfully 🎉');
-		router.refresh();
-		onCreateReminder();
+		setActiveReminder(response);
 	};
 
 	const onDeleteReminder = async () => {
@@ -84,9 +85,13 @@ export const ReminderForm = ({ date, org, contract, profile, onCreateReminder, o
 					control={form.control}
 					name="title"
 					render={({ field }) => (
-						<FormItem>
+						<FormItem className="flex flex-row items-center gap-2">
+							<FormLabel>
+								<LetterText size={14} className="mt-4" />
+							</FormLabel>
+
 							<FormControl>
-								<Input aria-label="Title" className="rounded-none border-0 border-b bg-transparent pl-0 font-medium outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0" placeholder="Reminder title" {...field} />
+								<Input aria-label="Title" className="" placeholder="Reminder title" {...field} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -97,12 +102,13 @@ export const ReminderForm = ({ date, org, contract, profile, onCreateReminder, o
 					control={form.control}
 					name="description"
 					render={({ field }) => (
-						<FormItem className="flex flex-row flex-wrap gap-2">
+						<FormItem className="flex flex-row gap-2">
 							<FormLabel>
 								<Text size={14} className="mt-4" />
 							</FormLabel>
+
 							<FormControl>
-								<Textarea className="w-[90%]" placeholder="Note, description or reason" {...field} />
+								<Textarea placeholder="Note, description or reason" {...field} />
 							</FormControl>
 							<FormMessage className="w-full" />
 						</FormItem>
@@ -120,16 +126,25 @@ export const ReminderForm = ({ date, org, contract, profile, onCreateReminder, o
 
 							<FormControl>
 								<div className="flex items-center gap-6">
-									<DatePicker disabled={{ before: new Date() }} selected={field.value} onSetDate={field.onChange}>
+									<DatePicker disabled={{ before: new Date() }} selected={field.value} onSetDate={date => field.onChange(new Date(`${format(date, 'yyyy-MM-dd')} ${time}`))}>
 										<button className="border-b border-dashed text-xs">{format(field.value, 'PPP')}</button>
 									</DatePicker>
-									<input min={getTime()} className="border-b border-dashed text-xs" value={time} onChange={event => setTime(event.target.value)} type="time" />
+
+									<input className="border-b border-dashed text-xs" value={time} onChange={event => setTime(event.target.value)} type="time" />
 								</div>
 							</FormControl>
 							<FormMessage />
 						</FormItem>
 					)}
 				/>
+
+				{activeReminder && activeReminder?.title == form.getValues('title') && activeReminder?.description == form.getValues('description') && new Date(activeReminder?.datetime).toString() == form.getValues('datetime').toString() && (
+					<>
+						<Separator className="!mt-6" />
+						<ReminderSync reminder={activeReminder} />
+						<Separator />
+					</>
+				)}
 
 				<div className="!mt-6 flex w-full justify-end space-x-4 text-right">
 					{!!reminder && (
@@ -140,7 +155,7 @@ export const ReminderForm = ({ date, org, contract, profile, onCreateReminder, o
 
 					{!date && (
 						<Button type="button" variant={'outline'} onClick={() => onClose && onClose()}>
-							Cancel
+							Close
 						</Button>
 					)}
 
