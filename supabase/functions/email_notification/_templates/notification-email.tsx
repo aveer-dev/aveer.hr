@@ -1,4 +1,4 @@
-import { Body, Container, Head, Heading, Html, Link, Preview, Text, Tailwind, Font, Img } from 'react-email';
+import { Body, Head, Html, Preview, Tailwind, Font, Img } from 'react-email';
 import * as React from 'react';
 
 interface NotificationEmailProps {
@@ -50,7 +50,7 @@ export const NotificationEmail = ({ name, link, title, body, type, org }: Notifi
 							</a>
 						</p>
 						<p className="text-xs leading-6 text-black">
-							If you&apos;re unable to open link, copy link here: <a href={`https://${type == 'admin' ? org : 'employee'}.aveer.hr${link}`}>{link}</a>
+							If you&apos;re unable to open link, copy link here: <a href={`https://${type == 'admin' ? org : 'employee'}.aveer.hr${link}`}>{`https://${type == 'admin' ? org : 'employee'}.aveer.hr${link}`}</a>
 						</p>
 					</div>
 				</div>

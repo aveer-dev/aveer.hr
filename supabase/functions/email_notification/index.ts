@@ -59,7 +59,7 @@ const getEmails = async ({ payload }: { payload: WebhookPayload }) => {
 		return details;
 	}
 
-	if (payload.record.contracts.length > 0) {
+	if (payload.record.contracts?.length > 0) {
 		const { data } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(email, first_name)').eq('org', payload.record.org).in('id', payload.record.contracts);
 		const details: { email: string; first_name: string }[] = data!.map(d => ({ email: (d.profile as unknown as { email: string })!.email, first_name: (d.profile as unknown as { first_name: string })!.first_name }));
 		return details;
