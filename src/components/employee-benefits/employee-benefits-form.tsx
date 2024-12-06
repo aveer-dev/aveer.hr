@@ -19,7 +19,7 @@ const formSchema = z.object({
 	work_schedule: z.string().optional(),
 	work_shedule_interval: z.string().optional(),
 	probation: z.number(),
-	paid_time_off: z.number(),
+	paid_leave: z.number(),
 	sick_leave: z.number(),
 	maternity_leave: z.number(),
 	paternity_leave: z.number(),
@@ -35,7 +35,7 @@ export const EmployeeBenefitsForm = ({ data, updateBenefits }: { data?: Tables<'
 		defaultValues: {
 			additional_offerings: (data?.additional_offerings as string[]) || [],
 			probation: data?.probation || 90,
-			paid_time_off: data?.paid_leave || 20,
+			paid_leave: data?.paid_leave || 20,
 			sick_leave: data?.sick_leave || 20,
 			work_schedule: data?.work_schedule || '8',
 			maternity_leave: data?.maternity_leave || 60,
@@ -70,13 +70,13 @@ export const EmployeeBenefitsForm = ({ data, updateBenefits }: { data?: Tables<'
 							<div className="grid grid-cols-2 gap-6">
 								<FormField
 									control={form.control}
-									name="paid_time_off"
+									name="paid_leave"
 									render={({ field }) => (
 										<FormItem>
 											<FormLabel>Annual leave</FormLabel>
 											<FormControl>
 												<div className="relative h-fit w-full">
-													<Input type="number" inputMode="numeric" placeholder="20" {...field} onChange={event => form.setValue('paid_time_off', Number(event.target.value))} required />
+													<Input type="number" inputMode="numeric" placeholder="20" {...field} onChange={event => form.setValue('paid_leave', Number(event.target.value))} required />
 													<div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-thin text-foreground">days/year</div>
 												</div>
 											</FormControl>
