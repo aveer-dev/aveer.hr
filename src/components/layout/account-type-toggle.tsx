@@ -106,21 +106,29 @@ export const AccountTypeToggle = ({ orgId }: { orgId?: string }) => {
 
 				<Separator className="block sm:hidden" />
 
-				<div className={cn('w-0 space-y-4 p-4 transition-all sm:overflow-x-hidden sm:p-1', subLinks?.links.length && 'w-full sm:w-64')}>
-					<ul className="space-y-2">
-						{subLinks?.links.map((link, index) => (
-							<li key={index}>
-								<Link href={link.link} passHref={true} onClick={() => toggleOpen(!isOpen)} className={cn(buttonVariants({ variant: path.includes(link.id) ? 'secondary' : 'ghost' }), 'w-full justify-between')}>
-									<div className="flex items-center gap-4">
-										<Building2 size={12} />
-										<span className="max-w-44 truncate">{link.label}</span>
-									</div>
+				<div className={cn('w-full space-y-4 p-4 transition-all sm:w-64 sm:overflow-x-hidden sm:p-1')}>
+					{subLinks?.links && (
+						<ul className="space-y-2">
+							{subLinks?.links.map((link, index) => (
+								<li key={index}>
+									<Link href={link.link} passHref={true} onClick={() => toggleOpen(!isOpen)} className={cn(buttonVariants({ variant: path.includes(link.id) ? 'secondary' : 'ghost' }), 'w-full justify-between')}>
+										<div className="flex items-center gap-4">
+											<Building2 size={12} />
+											<span className="max-w-44 truncate">{link.label}</span>
+										</div>
 
-									{(subLinks.type == 'admin' ? path.includes(`/${link.id}`) && orgId !== 'employee' : path.includes(`/${link.id}`) && orgId == 'employee') && <CheckCheck size={12} />}
-								</Link>
-							</li>
-						))}
-					</ul>
+										{(subLinks.type == 'admin' ? path.includes(`/${link.id}`) && orgId !== 'employee' : path.includes(`/${link.id}`) && orgId == 'employee') && <CheckCheck size={12} />}
+									</Link>
+								</li>
+							))}
+						</ul>
+					)}
+
+					{subLinks?.type == 'admin' && subLinks?.links.length == 0 && (
+						<div className="flex h-24 w-full items-center justify-center px-4 text-center text-xs font-light text-support">
+							<p>You are not an admin of any organisation on aveer</p>
+						</div>
+					)}
 				</div>
 			</>
 		);

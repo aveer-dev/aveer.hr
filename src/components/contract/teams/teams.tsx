@@ -1,18 +1,19 @@
 import { createClient } from '@/utils/supabase/server';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
+import { TeamMember } from './team-member-dialog';
+import { Tables } from '@/type/database.types';
 
 interface props {
 	org: string;
 	name: string;
 	team: number;
 	contractId: number;
-	currentUser: 'profile' | 'org';
-	isManager: boolean;
+	currentUser: 'profile' | 'org' | 'manager';
+	orgSettings: Tables<'org_settings'>[] | null;
 }
 
-export const Teams = async ({ org, team, contractId, name, currentUser, isManager }: props) => {
+export const Teams = async ({ org, team, contractId, name, currentUser, orgSettings }: props) => {
 	const supabase = createClient();
 
 	const [{ data, error }, { data: managers }, { data: directReports, error: directReportsError }] = await Promise.all([
@@ -33,37 +34,26 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 				</div>
 
 				{filteredTeam.length > 0 && (
-					<ul className="mt-6 space-y-4">
+					<ul className="mt-4 space-y-4">
 						{filteredTeam.map(person => (
 							<li key={person.id}>
-								<Link href={contractId == person.id ? '' : `./${person.id}`} className="flex items-center justify-between rounded-md bg-muted/60 p-4 transition-colors hover:bg-muted">
-									<div className="space-y-2">
-										<div className="flex items-center gap-2">
-											<h2 className="text-xs">
-												{person.profile?.first_name} {person.profile?.last_name}
-											</h2>
-											{(person.level || person.level_name) && (
-												<Badge className="py-px text-[10px]" variant={'outline'}>
-													{person.level?.level || person.level_name}
-												</Badge>
-											)}
-											{!!managers?.find(manager => manager.person == person.id) && (
-												<Badge className="py-px text-[10px]" variant={'outline'}>
-													manager
-												</Badge>
-											)}
-											{contractId == person.id && currentUser !== 'org' && (
-												<Badge className="py-px text-[10px]" variant={'outline'}>
-													You
-												</Badge>
-											)}
-										</div>
+								{currentUser === 'org' && (
+									<Link href={contractId == person.id ? '' : `./${person.id}`} className="flex items-center justify-between rounded-md border bg-muted/60 p-4 transition-colors hover:bg-muted">
+										<TeamMemberItem person={person} managers={managers} contractId={contractId} currentUser={currentUser} />
+									</Link>
+								)}
 
-										<p className="text-xs text-muted-foreground">{person.job_title}</p>
+								{contractId !== person.id && currentUser !== 'org' && (
+									<TeamMember person={person as any} manager={managers} signatureType={currentUser} orgSettings={currentUser == 'manager' ? orgSettings : null} org={org}>
+										<TeamMemberItem person={person} managers={managers} contractId={contractId} currentUser={currentUser} />
+									</TeamMember>
+								)}
+
+								{contractId == person.id && currentUser !== 'org' && (
+									<div className="flex items-center justify-between rounded-md border bg-muted/60 p-4 transition-colors hover:bg-muted">
+										<TeamMemberItem person={person} managers={managers} contractId={contractId} currentUser={currentUser} />
 									</div>
-
-									{contractId !== person.id && <ArrowUpRight size={12} />}
-								</Link>
+								)}
 							</li>
 						))}
 					</ul>
@@ -94,31 +84,17 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 							<ul className="mt-6 space-y-4">
 								{directReports.map(person => (
 									<li key={person.id}>
-										<Link href={contractId == person.id ? '' : `./${person.id}`} className="flex items-center justify-between rounded-md bg-muted/60 p-4 transition-colors hover:bg-muted">
-											<div className="space-y-2">
-												<div className="flex items-center gap-2">
-													<h2 className="text-xs">
-														{person.profile?.first_name} {person.profile?.last_name}
-													</h2>
+										{currentUser === 'org' && (
+											<Link href={contractId == person.id ? '' : `./${person.id}`} className="flex items-center justify-between rounded-md border bg-muted/60 p-4 transition-colors hover:bg-muted">
+												<TeamMemberItem person={person} managers={managers} contractId={contractId} currentUser={currentUser} />
+											</Link>
+										)}
 
-													{(person.level || person.level_name) && (
-														<Badge className="py-px text-[10px]" variant={'outline'}>
-															{person.level?.level || person.level_name}
-														</Badge>
-													)}
-
-													{!!managers?.find(manager => manager.person == person.id) && (
-														<Badge className="py-px text-[10px]" variant={'outline'}>
-															manager
-														</Badge>
-													)}
-												</div>
-
-												<p className="text-xs text-muted-foreground">{person.job_title}</p>
-											</div>
-
-											<ArrowUpRight size={12} />
-										</Link>
+										{currentUser !== 'org' && (
+											<TeamMember person={person as any} orgSettings={currentUser == 'manager' ? orgSettings : null} signatureType={currentUser} org={org}>
+												<TeamMemberItem person={person} managers={managers} contractId={contractId} currentUser={currentUser} />
+											</TeamMember>
+										)}
 									</li>
 								))}
 							</ul>
@@ -133,5 +109,34 @@ export const Teams = async ({ org, team, contractId, name, currentUser, isManage
 				)}
 			</section>
 		</>
+	);
+};
+
+const TeamMemberItem = ({ person, managers, contractId, currentUser }: { person: Tables<'contracts'> | any; managers: Tables<'managers'>[] | null; contractId: number; currentUser: 'profile' | 'org' | 'manager' }) => {
+	return (
+		<div className="space-y-2">
+			<div className="flex items-center gap-2">
+				<h2 className="text-xs">
+					{(person.profile as any)?.first_name} {(person.profile as any)?.last_name}
+				</h2>
+				{(person.level || person.level_name) && (
+					<Badge className="py-px text-[10px]" variant={'outline'}>
+						{(person.level as any)?.level || person.level_name}
+					</Badge>
+				)}
+				{!!managers?.find(manager => manager.person == person.id) && (
+					<Badge className="py-px text-[10px]" variant={'outline'}>
+						manager
+					</Badge>
+				)}
+				{contractId == person.id && currentUser !== 'org' && (
+					<Badge className="py-px text-[10px]" variant={'outline'}>
+						You
+					</Badge>
+				)}
+			</div>
+
+			<p className="text-xs text-muted-foreground">{person.job_title}</p>
+		</div>
 	);
 };
