@@ -44,13 +44,11 @@ const sendNotification = async ({ accessToken, token, notification }: { accessTo
 			})
 		});
 
-		const resData = await res.json();
-		console.log(resData);
+		await res.json();
 
 		return;
 	} catch (error) {
-		console.log('🚀 ~ error:', error);
-		return;
+		throw error;
 	}
 };
 

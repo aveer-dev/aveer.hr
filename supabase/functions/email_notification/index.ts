@@ -26,7 +26,7 @@ const SendEmail = async ({ payload, nameAndEmails }: { payload: WebhookPayload; 
 		});
 
 		if (error) {
-			console.log('error', error);
+			throw error;
 		}
 	}
 
