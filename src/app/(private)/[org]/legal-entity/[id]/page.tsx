@@ -55,7 +55,7 @@ export default async function ViewEntityPage(props: { params: { [key: string]: s
 					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">Organisation Name</p>
-							<p className="text-sm font-light">{data?.org?.name}</p>
+							<p className="text-sm font-light">{data?.org?.name || '--'}</p>
 						</li>
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">Organisation website</p>
@@ -69,28 +69,28 @@ export default async function ViewEntityPage(props: { params: { [key: string]: s
 					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">Legal Name</p>
-							<p className="text-sm font-light">{data?.name}</p>
+							<p className="text-sm font-light">{data?.name || '--'}</p>
 						</li>
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">Country of Incorporation</p>
-							<p className="text-sm font-light">{data?.incorporation_country}</p>
+							<p className="text-sm font-light">{data?.incorporation_country || '--'}</p>
 						</li>
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">Formation Data</p>
-							<p className="text-sm font-light">{format(data?.formation_date as string, 'PP')}</p>
+							<p className="text-sm font-light">{data?.formation_date ? format(data?.formation_date as string, 'PP') : '--'}</p>
 						</li>
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">Entity Type</p>
-							<p className="text-sm font-light uppercase">{data?.company_type}</p>
+							<p className="text-sm font-light uppercase">{data?.company_type || '--'}</p>
 						</li>
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">{companyRequiredIds[data?.incorporation_country].tax_no}</p>
-							<p className="text-sm font-light">{data?.tax_no}</p>
+							<p className="text-sm font-light">{data?.tax_no || '--'}</p>
 						</li>
 						{data?.rn && (
 							<li className="grid gap-2">
 								<p className="text-sm font-medium">{companyRequiredIds[data?.incorporation_country].rn}</p>
-								<p className="text-sm font-light">{data?.rn}</p>
+								<p className="text-sm font-light">{data?.rn || '--'}</p>
 							</li>
 						)}
 					</ul>
@@ -101,15 +101,15 @@ export default async function ViewEntityPage(props: { params: { [key: string]: s
 					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">State</p>
-							<p className="text-sm font-light">{data?.address_state?.name}</p>
+							<p className="text-sm font-light">{data?.address_state?.name || '--'}</p>
 						</li>
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">Post / Zip Code</p>
-							<p className="text-sm font-light">{data?.address_code}</p>
+							<p className="text-sm font-light">{data?.address_code || '--'}</p>
 						</li>
 						<li className="grid gap-2">
 							<p className="text-sm font-medium">Street Address</p>
-							<p className="text-sm font-light">{data?.street_address}</p>
+							<p className="text-sm font-light">{data?.street_address || '--'}</p>
 						</li>
 					</ul>
 				</div>
