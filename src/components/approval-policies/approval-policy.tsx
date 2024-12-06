@@ -249,7 +249,7 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 											</div>
 
 											<FormControl>
-												<Switch disabled={defaultPolicy && defaultPolicy?.length > 0 && defaultPolicy[0].id !== data?.id} className="!m-0 scale-75" checked={field.value} onCheckedChange={field.onChange} />
+												<Switch disabled={(defaultPolicy && defaultPolicy?.length > 0 && defaultPolicy[0].id !== data?.id) || !form.getValues('type')} className="!m-0 scale-75" checked={field.value} onCheckedChange={field.onChange} />
 											</FormControl>
 										</FormItem>
 									)}
