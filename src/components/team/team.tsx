@@ -19,8 +19,9 @@ import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { createTeam, deleteManager, updateTeam } from './team-actions';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { DeleteTeamDialog } from './delete-team-dialog';
+import { searchPeople } from '@/utils/employee-search';
 
 const formSchema = z.object({
 	name: z.string().min(1, { message: 'Provide team name' }),
@@ -49,6 +50,7 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 	const [isDialogOpen, toggleDialogState] = useState(false);
 	const [teamMembers, setTeamMembers] = useState(0);
 	const [employees, setEmployees] = useState<{ id: number; profile: { first_name: string; last_name: string; id: string } }[]>([]);
+	const [filteredEmployees, setFilteredEmployees] = useState<{ id: number; profile: { first_name: string; last_name: string; id: string } }[]>([]);
 	const [managers, setManagers] = useState<{ isOpen?: boolean; isDeleting?: boolean; id: number }[]>([]);
 	const router = useRouter();
 
@@ -100,7 +102,10 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 	const getEmployees = useCallback(async (org: string) => {
 		const { data, error } = await supabase.from('contracts').select('id, profile:profiles!contracts_profile_fkey(id, first_name, last_name)').match({ org });
 		if (!data || error) return toast('🥺 Error', { description: 'Unable to fetch list of colleagues for leave request form' });
-		if (data.length) setEmployees(() => data as any);
+		if (data.length) {
+			setEmployees(() => data as any);
+			setFilteredEmployees(() => data as any);
+		}
 	}, []);
 
 	useEffect(() => {
@@ -251,15 +256,25 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 																			</PopoverTrigger>
 
 																			<PopoverContent className="w-[300px] p-0">
-																				<Command>
+																				<Command shouldFilter={false}>
+																					<CommandInput
+																						placeholder="Search people"
+																						onValueChange={value => {
+																							const result = searchPeople(employees as any, value, ['first_name', 'last_name']);
+																							setFilteredEmployees(result);
+																						}}
+																					/>
+
 																					<CommandList>
+																						<CommandEmpty>No person found with that name.</CommandEmpty>
+
 																						<CommandGroup>
-																							{employees.map(employee => (
+																							{filteredEmployees.map(employee => (
 																								<CommandItem
 																									value={String(employee.id)}
 																									key={employee.id}
 																									onSelect={value => {
-																										const managerDetails = employees.find(employee => employee.id == Number(value));
+																										const managerDetails = filteredEmployees.find(employee => employee.id == Number(value));
 																										if (!managerDetails) return;
 
 																										form.setValue(`managers.${index}`, { team: (data?.id as number) || null, person: String(managerDetails?.id), profile: managerDetails?.profile.id, org, role: 1 });
@@ -314,15 +329,7 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 							<div className="mt-4 flex items-center gap-2">
 								{data && <DeleteTeamDialog org={org} id={data?.id} onTeamDeleted={() => router.refresh()} />}
 
-								<Button
-									type="submit"
-									onClick={() => {
-										console.log(form.formState);
-										console.log(form.getValues());
-									}}
-									disabled={isUpdating}
-									size={'sm'}
-									className="w-full gap-3 px-4 text-xs font-light">
+								<Button type="submit" disabled={isUpdating} size={'sm'} className="w-full gap-3 px-4 text-xs font-light">
 									{isUpdating && <LoadingSpinner />}
 									{isUpdating ? (data ? 'Updating team' : 'Creating team') : data ? 'Update team' : 'Create team'}
 								</Button>
