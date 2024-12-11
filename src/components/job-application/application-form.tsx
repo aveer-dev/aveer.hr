@@ -301,7 +301,7 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 											<FormItem>
 												<FormLabel>Cover letter</FormLabel>
 												<FormControl>
-													<Input onChange={event => pickFile(event, 'cover letter')} type="file" />
+													<Input accept="application/pdf" onChange={event => pickFile(event, 'cover letter')} type="file" />
 												</FormControl>
 												<FormDescription>
 													Or{' '}

@@ -3,12 +3,10 @@ import { cn } from '@/lib/utils';
 import { APPLICANT, DOCUMENT } from '@/type/roles.types';
 import { createClient } from '@/utils/supabase/client';
 import { TabsContent } from '@radix-ui/react-tabs';
-import { CloudDownload } from 'lucide-react';
+import { ArrowUpRight, CloudDownload } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { useResizeObserver } from '@wojtekmaj/react-hooks';
 import Image from 'next/image';
-import { DocumentViewer } from 'react-documents';
 import { LoadingSpinner } from '@/components/ui/loader';
 
 interface props {
@@ -18,12 +16,9 @@ interface props {
 }
 
 const supabase = createClient();
-const resizeObserverOptions = {};
-const maxWidth = 420;
 
 export const ApplicantDocuments = ({ applicantData, documents, setDocuments }: props) => {
-	const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
-	const [containerWidth, setContainerWidth] = useState<number>();
+	const [showDocButtons, setShowDocButton] = useState<boolean>(false);
 
 	const gatherDocuments = useCallback(() => {
 		const allDocuments: DOCUMENT[] = [];
@@ -51,16 +46,6 @@ export const ApplicantDocuments = ({ applicantData, documents, setDocuments }: p
 		}
 	}, [applicantData, setDocuments]);
 
-	const onResize = useCallback<ResizeObserverCallback>(entries => {
-		const [entry] = entries;
-
-		if (entry) {
-			setContainerWidth(entry.contentRect.width);
-		}
-	}, []);
-
-	useResizeObserver(containerRef, resizeObserverOptions, onResize);
-
 	useEffect(() => {
 		gatherDocuments();
 	}, [gatherDocuments]);
@@ -68,11 +53,18 @@ export const ApplicantDocuments = ({ applicantData, documents, setDocuments }: p
 	return (
 		documents.length > 0 &&
 		documents.map((document, index) => (
-			<TabsContent key={index} value={document.name} className="w-[420px]">
+			<TabsContent key={index} value={document.name}>
 				{document.format == 'pdf' && (
-					<div className="relative h-[60vh]">
-						<div className="relative z-10 h-full">
-							<DocumentViewer queryParams="hl=Nl" url={document.url}></DocumentViewer>
+					<div className="relative -mt-4">
+						<div className="relative z-10">
+							{showDocButtons && (
+								<div className="flex justify-end gap-1">
+									<a target="_blank" referrerPolicy="no-referrer" className={cn(buttonVariants({ variant: 'secondary' }))} href={document.url}>
+										<ArrowUpRight size={12} />
+									</a>
+								</div>
+							)}
+							<iframe onLoad={() => setShowDocButton(true)} src={document.url} width="100%" height="100%" style={{ border: 'none', minHeight: '70vh' }} />
 						</div>
 
 						<div className="absolute left-0 top-0 z-0 flex h-full w-full items-center justify-center">

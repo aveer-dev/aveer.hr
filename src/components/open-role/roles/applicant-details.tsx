@@ -98,36 +98,21 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 				</button>
 			</SheetTrigger>
 
-			<SheetContent hideClose className="overflow-y-auto p-0 sm:max-w-2xl">
+			<SheetContent hideClose className="overflow-y-auto p-0 sm:w-full sm:max-w-full">
 				<SheetHeader className="relative rounded-md bg-accent/70 p-6 text-left">
 					<div className="flex flex-col justify-between gap-y-6 sm:flex-row">
-						<div className="space-y-1">
+						<div className="flex items-center gap-1">
 							<SheetTitle className="max-w-64 truncate text-xl">
-								{applicantData?.first_name} {applicantData?.last_name}
+								<span className="font-light">Role:</span> {applicantData?.role?.job_title}{' '}
 							</SheetTitle>
-							<SheetDescription>
-								<NavLink target="_blank" org={applicantData.org.subdomain} href={`/jobs/${applicantData.role?.id}`} className="flex items-center gap-1 text-foreground underline decoration-dashed underline-offset-2">
-									Role: {applicantData?.role?.job_title} <ArrowUpRight className="-mb-1" size={12} />
-								</NavLink>
-							</SheetDescription>
+							<SheetDescription></SheetDescription>
 						</div>
 
 						<div className="flex gap-2">
-							<Link href={`mailto:${applicantData.email}`} className={cn(buttonVariants({ variant: 'outline', size: 'icon' }), 'order-2 flex h-9 items-center justify-center gap-2 sm:order-1 sm:max-w-80')}>
-								<CalendarRange size={12} />
-							</Link>
-
-							<ComposeMailDialog
-								title={`Send message to ${applicantData.first_name}`}
-								onClose={state => state == 'success' && toast.success(`Message sent to ${applicantData.first_name}`)}
-								recipients={[applicantData.email]}
-								name={`Message from ${applicantData.org}`}>
-								<Button size={'icon'} className="order-3 flex h-9 items-center justify-center gap-2 sm:order-2 sm:max-w-80" variant={'outline'}>
-									<Mail size={12} />
-								</Button>
-							</ComposeMailDialog>
-
-							{role == 'admin' && <UpdateApplication applicant={applicantData as any} className="order-1 w-full sm:order-3 sm:w-44" onUpdateItem={data => setApplicantData(data as any)} />}
+							<NavLink target="_blank" org={applicantData.org.subdomain} href={`/jobs/${applicantData.role?.id}`} className={cn(buttonVariants({ variant: 'outline' }), 'gap-2')}>
+								Open role
+								<ArrowUpRight className="" size={12} />
+							</NavLink>
 
 							<SheetClose asChild>
 								<Button className="absolute right-2 top-4 order-4 h-9 w-9 rounded-full sm:static" variant={'outline'} size={'icon'}>
@@ -138,7 +123,25 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 					</div>
 				</SheetHeader>
 
-				<section className="mt-3 w-full p-6">
+				<section className="mx-auto mt-3 w-full max-w-2xl p-6">
+					<div className="mb-10 space-y-2">
+						<h1 className="text-3xl font-bold">
+							{applicantData?.first_name} {applicantData?.last_name}
+						</h1>
+
+						<div>
+							<a href={`mailto:${applicantData?.email}`} className="flex w-fit items-center gap-1 text-sm font-light underline decoration-muted-foreground decoration-dashed underline-offset-4">
+								<span className="max-w-52 overflow-hidden text-ellipsis whitespace-nowrap">{applicantData?.email}</span>
+								<Mail size={12} className="text-muted-foreground" />
+							</a>
+
+							<a href={`tel:${applicantData?.phone_number}`} className="flex w-fit items-center gap-1 text-sm font-light underline decoration-muted-foreground decoration-dashed underline-offset-4">
+								<span className="max-w-52 overflow-hidden text-ellipsis whitespace-nowrap">{applicantData?.phone_number}</span>
+								<Phone size={12} className="text-muted-foreground" />
+							</a>
+						</div>
+					</div>
+
 					<Tabs defaultValue={applicantData.levels?.length > 0 ? 'overview' : 'details'}>
 						<TabsList className="mb-10 grid w-fit" style={{ gridTemplateColumns: `repeat(${documents.length + 1 + (applicantData.levels?.length ? 1 : 0)}, minmax(0, 1fr))` }}>
 							{applicantData.levels?.length > 0 && (
@@ -165,32 +168,6 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 
 						<TabsContent value="details">
 							<div className="grid w-full gap-16">
-								<div>
-									<h1 className="mb-4 text-base font-semibold">Applicant Details</h1>
-									<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
-										<li className="grid gap-3">
-											<p className="text-sm font-medium">Full name</p>
-											<p className="text-sm font-light">
-												{applicantData?.first_name} {applicantData?.last_name}
-											</p>
-										</li>
-										<li className="grid gap-3">
-											<p className="text-sm font-medium">Email</p>
-											<a href={`mailto:${applicantData?.email}`} className="flex items-center gap-1 text-sm font-light underline decoration-muted-foreground decoration-dashed underline-offset-4">
-												<span className="max-w-52 overflow-hidden text-ellipsis whitespace-nowrap">{applicantData?.email}</span>
-												<Mail size={12} className="text-muted-foreground" />
-											</a>
-										</li>
-										<li className="grid gap-3">
-											<p className="text-sm font-medium">Phone number</p>
-											<a href={`tel:${applicantData?.phone_number}`} className="flex items-center gap-1 text-sm font-light underline decoration-muted-foreground decoration-dashed underline-offset-4">
-												<span className="max-w-52 overflow-hidden text-ellipsis whitespace-nowrap">{applicantData?.phone_number}</span>
-												<Phone size={12} className="text-muted-foreground" />
-											</a>
-										</li>
-									</ul>
-								</div>
-
 								<div>
 									<h1 className="mb-4 text-base font-semibold">Location Details</h1>
 									<ul className="grid grid-cols-2 items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">

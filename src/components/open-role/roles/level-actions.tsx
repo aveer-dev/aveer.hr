@@ -88,7 +88,7 @@ export const LevelsAction = ({ index, level, contractId, applicantData, setAppli
 						<h3 className="text-sm capitalize">{level.type == 'employee' ? `${level.first_name} ${level.last_name}` : level.type}</h3>
 
 						{!showFeedback && (
-							<div className="space-y-4">
+							<div className="flex flex-col gap-4">
 								<Link href={`mailto:${applicantData.email}`} className={cn(buttonVariants({ variant: 'outline' }), 'w-full gap-2 py-5 sm:max-w-80 sm:justify-start')}>
 									<CalendarRange size={12} /> Interview
 								</Link>
