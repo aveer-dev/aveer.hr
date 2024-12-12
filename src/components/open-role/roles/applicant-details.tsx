@@ -3,15 +3,12 @@
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/client';
-import { ArrowUpRight, CalendarRange, Mail, PanelRightOpenIcon, Phone, X } from 'lucide-react';
+import { ArrowUpRight, Mail, PanelRightOpenIcon, Phone, X } from 'lucide-react';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
-import 'react-pdf/dist/Page/TextLayer.css';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { UpdateApplication } from './applicant-actions';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { NavLink } from '@/components/ui/link';
@@ -19,8 +16,6 @@ import { APPLICANT, DOCUMENT, LEVEL } from '@/type/roles.types';
 import { ApplicantDocuments } from './applicant-documents';
 import { LevelsAction } from './level-actions';
 import { ROLE } from '@/type/contract.types';
-import { ComposeMailDialog } from '@/components/ui/mail-dialog';
-import { toast } from 'sonner';
 
 interface props {
 	data: Tables<'job_applications'> & { org: { name: string; subdomain: string }; role: Tables<'open_roles'> & { policy: Tables<'approval_policies'> }; levels: LEVEL[] };
