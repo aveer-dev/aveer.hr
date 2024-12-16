@@ -13,7 +13,7 @@ interface props {
 }
 
 export const Boardings = async ({ org, onboardingId, offboardingId, contract, reviewType }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const [onboarding, offboarding] = await Promise.all([
 		await supabase

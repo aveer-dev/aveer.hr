@@ -5,8 +5,9 @@ import { createClient } from '@/utils/supabase/server';
 import { ContractForm } from '@/components/forms/contract/form';
 import { getEmployees, getFormEntities, getOrgLevels, getOrgSettings, getRoles, getTeams } from '@/utils/form-data-init';
 
-export default async function EditContractPage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function EditContractPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
+	const params = await props.params;
+	const supabase = await createClient();
 	const [{ data, error }, entities, levels, teams, roles, employees, orgSettings] = await Promise.all([
 		await supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(first_name, id, last_name, email, nationality)').match({ org: params.org, id: params.contract }).single(),
 		await getFormEntities({ org: params.org }),

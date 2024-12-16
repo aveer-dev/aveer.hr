@@ -9,8 +9,9 @@ import { buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-export default async function ContractPage({ params }: { params: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function ContractPage(props: { params: Promise<{ [key: string]: string }> }) {
+	const params = await props.params;
+	const supabase = await createClient();
 
 	const { data, error } = await supabase
 		.from('contracts')

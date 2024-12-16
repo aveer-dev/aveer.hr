@@ -1,7 +1,15 @@
 import { Header } from '@/components/layout/header';
 
-export default function RootLayout({ children, params }: { children: React.ReactNode; params: { [key: string]: string } }) {
-	return (
+export default async function RootLayout(
+    props: { children: React.ReactNode; params: Promise<{ [key: string]: string }> }
+) {
+    const params = await props.params;
+
+    const {
+        children
+    } = props;
+
+    return (
 		<>
 			<Header orgId={params.org} />
 

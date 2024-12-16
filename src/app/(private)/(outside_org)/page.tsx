@@ -4,10 +4,9 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { UserRound, Building2 } from 'lucide-react';
-import { NavLink } from '@/components/ui/link';
 
 export default async function OrgsPage() {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const {
 		data: { user },

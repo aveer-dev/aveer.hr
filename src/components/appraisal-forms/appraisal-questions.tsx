@@ -12,7 +12,7 @@ interface props {
 }
 
 export const AppraisalQuestions = async ({ org, children, group = 'employee', teams }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data } = await supabase.from('appraisal_questions').select().match({ org, group });
 

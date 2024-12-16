@@ -5,7 +5,7 @@ import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { createClient } from '@/utils/supabase/server';
 
 export const createTeam = async (org: string, team: TablesInsert<'teams'>, managers: TablesInsert<'managers'>[]) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (canUpdate !== true) return canUpdate;
@@ -21,7 +21,7 @@ export const createTeam = async (org: string, team: TablesInsert<'teams'>, manag
 };
 
 export const updateTeam = async (org: string, teamId: number, team: TablesInsert<'teams'>, managers: TablesInsert<'managers'>[]) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (canUpdate !== true) return canUpdate;
@@ -47,7 +47,7 @@ export const updateTeam = async (org: string, teamId: number, team: TablesInsert
 };
 
 export const deleteManager = async (org: string, managers: number[]) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (canUpdate !== true) return canUpdate;
@@ -59,7 +59,7 @@ export const deleteManager = async (org: string, managers: number[]) => {
 };
 
 export const deleteTeam = async (org: string, id: number) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (canUpdate !== true) return canUpdate;

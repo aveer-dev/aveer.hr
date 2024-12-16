@@ -7,16 +7,19 @@ import { ClientTable } from './table';
 import { OnboardingForm } from './onboarding';
 import { DashboardCalendar } from '@/components/dashboard-calendar';
 
-export default async function OrgPage(props: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function OrgPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
+	const supabase = await createClient();
 	const { data, error, count } = await supabase
 		.from('contracts')
 		.select('profile:profiles!contracts_profile_fkey(first_name, last_name, nationality:countries!profiles_nationality_fkey(name)), org, id, status, job_title, employment_type, start_date, team:teams!contracts_team_fkey(name, id)', { count: 'estimated' })
-		.match({ org: props.params.org })
+		.match({ org: (await props.params).org })
 		.order('id');
 
 	if (data && !data.length) {
-		const { data, error } = await supabase.from('legal_entities').select().match({ org: props.params.org });
+		const { data, error } = await supabase
+			.from('legal_entities')
+			.select()
+			.match({ org: (await props.params).org });
 
 		if (error) {
 			return (
@@ -34,8 +37,7 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 						<p className="text-base font-bold">Welcome to aveer.hr</p>
 						<p className="text-xs text-muted-foreground">Just a few more details to get your account running</p>
 					</div>
-
-					<OnboardingForm org={props.params.org} />
+					<OnboardingForm org={(await props.params).org} />
 				</div>
 			);
 		}
@@ -59,14 +61,12 @@ export default async function OrgPage(props: { params: { [key: string]: string }
 							<Skeleton className="h-32 w-full max-w-80" />
 						</>
 					}>
-					<DashboardCharts contracts={count} org={props.params.org} />
+					<DashboardCharts contracts={count} org={(await props.params).org} />
 				</Suspense>
 			</div>
-
-			<DashboardCalendar org={props.params.org} />
-
+			<DashboardCalendar org={(await props.params).org} />
 			<Suspense fallback={<Skeleton className="h-96 w-full max-w-[1200px]"></Skeleton>}>
-				<ClientTable org={props.params.org} data={data as unknown as PERSON[]} />
+				<ClientTable org={(await props.params).org} data={data as unknown as PERSON[]} />
 			</Suspense>
 		</section>
 	);

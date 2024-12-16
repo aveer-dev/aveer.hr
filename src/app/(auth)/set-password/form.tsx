@@ -5,25 +5,25 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
-import { useEffect, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { PageLoader } from '@/components/ui/page-loader';
 import { LoadingSpinner } from '@/components/ui/loader';
 
 interface props {
-	formAction: (payload: FormData) => Promise<String>;
+	passwordAction: (prev: any, payload: FormData) => Promise<String>;
 }
 
 const supabase = createClient();
 
-export const PasswordForm = ({ formAction }: props) => {
+export const PasswordForm = ({ passwordAction }: props) => {
 	const [viewPassword, toggleViewPassword] = useState(false);
 	const [userId, setUserId] = useState('');
 	const [isLoading, toggleLoadingState] = useState(false);
 	const [isFormEnabled, enableForm] = useState(false);
+	const [state, formAction, pending] = useActionState(passwordAction, '');
 
 	useEffect(() => {
 		const queryString = location.hash.split('#')[1];
@@ -47,24 +47,12 @@ export const PasswordForm = ({ formAction }: props) => {
 		verifyToken();
 	}, []);
 
-	const SubmitButton = () => {
-		const { pending } = useFormStatus();
-
-		return (
-			<Button type="submit" size={'sm'} className="gap-3 px-4 text-xs font-light" disabled={pending || isLoading || !isFormEnabled}>
-				{pending && <LoadingSpinner />}
-				{pending ? 'Setting password' : 'Set password'}
-			</Button>
-		);
-	};
-
-	const submitForm = async (formData: FormData) => {
-		const error = await formAction(formData);
-		if (error) return toast.error(error);
-	};
+	useEffect(() => {
+		if (state) toast.error(state);
+	}, [state]);
 
 	return (
-		<form className="grid gap-6" action={submitForm}>
+		<form className="grid gap-6" action={formAction}>
 			<input type="text" name="id" id="id" hidden defaultValue={userId} />
 
 			<div className="grid gap-3">
@@ -82,7 +70,10 @@ export const PasswordForm = ({ formAction }: props) => {
 					Login
 				</Link>
 
-				<SubmitButton />
+				<Button type="submit" size={'sm'} className="gap-3 px-4 text-xs font-light" disabled={pending || isLoading || !isFormEnabled}>
+					{pending && <LoadingSpinner />}
+					{pending ? 'Setting password' : 'Set password'}
+				</Button>
 			</div>
 
 			<PageLoader isLoading={isLoading} />

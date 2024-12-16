@@ -9,8 +9,12 @@ import { EmployeePageSearch } from './employee-search';
 import { ContractsPopover } from './contracts-popover';
 import { Notifications } from './notifications';
 
-export default async function RootLayout({ children, params }: { children: React.ReactNode; params: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function RootLayout(props: { children: React.ReactNode; params: Promise<{ [key: string]: string }> }) {
+	const params = await props.params;
+
+	const { children } = props;
+
+	const supabase = await createClient();
 
 	const {
 		data: { user },

@@ -10,7 +10,7 @@ interface props {
 }
 
 export const AdminUsers = async ({ org }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const [
 		{ data, error },

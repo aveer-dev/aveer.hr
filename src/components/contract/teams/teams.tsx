@@ -14,7 +14,7 @@ interface props {
 }
 
 export const Teams = async ({ org, team, contractId, name, currentUser, orgSettings }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const [{ data, error }, { data: managers }, { data: directReports, error: directReportsError }] = await Promise.all([
 		await supabase.from('contracts').select('*, level:employee_levels!contracts_level_fkey(*), profile:profiles!contracts_profile_fkey(*)').match({ org, team, status: 'signed' }),

@@ -3,9 +3,9 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
 export default function ResetPasswordPage() {
-	const requestPasswordReset = async (email: string) => {
+	const requestPasswordReset = async (_prevState: any, email: string) => {
 		'use server';
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${process.env.NEXT_PUBLIC_URL}/forgot-password` });
 
@@ -13,9 +13,9 @@ export default function ResetPasswordPage() {
 		return true;
 	};
 
-	const resetPassword = async (password: string) => {
+	const resetPassword = async (_prevState: any, password: string) => {
 		'use server';
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const { error } = await supabase.auth.updateUser({ password });
 

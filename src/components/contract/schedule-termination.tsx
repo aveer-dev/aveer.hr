@@ -1,34 +1,24 @@
 'use client';
 
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { DatePicker } from '@/components/ui/date-picker';
 import { CalendarClock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useFormStatus } from 'react-dom';
-import { useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { Calendar } from '../ui/calendar';
+import { LoadingSpinner } from '../ui/loader';
 
-export const ScheduleTermination = ({ job_title, first_name, formAction }: { job_title: string; first_name: string; formAction: (date: Date) => Promise<string> }) => {
+export const ScheduleTermination = ({ job_title, first_name, serverAction }: { job_title: string; first_name: string; serverAction: (prev: any, date: Date) => Promise<string> }) => {
 	const [drawerIsOpen, toggleDrawerState] = useState(false);
 	const [terminationDate, setTerminationDate] = useState<Date>();
+	const [state, formAction, pending] = useActionState(serverAction, '');
 
-	const signContract = async () => {
-		if (!terminationDate) return;
-
-		const error = await formAction(terminationDate);
-		if (error) return toast.error(error);
-		toggleDrawerState(false);
-	};
-
-	const SubmitButton = () => {
-		const { pending } = useFormStatus();
-
-		return (
-			<Button type="submit" disabled={pending || !terminationDate} size={'sm'} className="px-8 text-xs font-light">
-				{pending ? 'Scheduling termination...' : 'Schedule termination'}
-			</Button>
-		);
-	};
+	useEffect(() => {
+		if (state) {
+			toast.error(state);
+			toggleDrawerState(false);
+		}
+	}, [state]);
 
 	return (
 		<Drawer open={drawerIsOpen} onOpenChange={toggleDrawerState}>
@@ -38,15 +28,29 @@ export const ScheduleTermination = ({ job_title, first_name, formAction }: { job
 					Schedule Termination
 				</Button>
 			</DrawerTrigger>
+
 			<DrawerContent>
-				<form className="mx-auto my-8 w-full max-w-sm" action={signContract}>
+				<form
+					className="mx-auto my-8 w-full max-w-sm"
+					action={() => {
+						if (!terminationDate) return;
+						formAction(terminationDate as Date);
+					}}>
 					<DrawerHeader>
 						<DrawerTitle>Schedule Contract Termination</DrawerTitle>
 						<DrawerDescription className="mt-1 text-xs font-light">{`Select the date you'd want ${first_name}'s contract as a ${job_title} to be automatically terminated`}</DrawerDescription>
 					</DrawerHeader>
 
 					<div className="m-4">
-						<DatePicker selected={terminationDate} onSetDate={setTerminationDate} />
+						<Calendar
+							mode="single"
+							className="p-0"
+							selected={terminationDate}
+							onSelect={event => {
+								if (event) setTerminationDate(event);
+							}}
+							autoFocus
+						/>
 					</div>
 
 					<DrawerFooter className="grid grid-cols-2 gap-4">
@@ -56,7 +60,10 @@ export const ScheduleTermination = ({ job_title, first_name, formAction }: { job
 							</Button>
 						</DrawerClose>
 
-						<SubmitButton />
+						<Button type="submit" disabled={pending || !terminationDate} size={'sm'} className="gap-2 px-8 text-xs font-light">
+							{pending && <LoadingSpinner />}
+							{pending ? 'Scheduling termination...' : 'Schedule termination'}
+						</Button>
 					</DrawerFooter>
 				</form>
 			</DrawerContent>

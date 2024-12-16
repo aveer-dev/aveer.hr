@@ -2,8 +2,10 @@ import { PasswordForm } from './form';
 import { createClientAdminServer } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
-export default function SigninPage({ searchParams }: { searchParams: { [key: string]: string } }) {
-	const setPassword = async (payload: FormData): Promise<string> => {
+export default async function SigninPage(props: { searchParams: Promise<{ [key: string]: string }> }) {
+	const searchParams = await props.searchParams;
+
+	const setPassword = async (_prev: any, payload: FormData): Promise<string> => {
 		'use server';
 		const supabase = createClientAdminServer();
 
@@ -23,7 +25,7 @@ export default function SigninPage({ searchParams }: { searchParams: { [key: str
 				<p className="text-balance text-xs font-normal text-muted-foreground">Set your preferred password to get started.</p>
 			</div>
 
-			<PasswordForm formAction={setPassword} />
+			<PasswordForm passwordAction={setPassword} />
 		</div>
 	);
 }

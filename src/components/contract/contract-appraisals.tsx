@@ -24,7 +24,7 @@ interface props {
 }
 
 export const EmployeeAppraisals = async ({ org, adminId, group, managerContract, contract, formType, role, full = true }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const [appraisals, okrs] = await Promise.all([await supabase.from('appraisal_history').select().match({ org }), await supabase.from('okrs').select().match({ org })]);
 	if (appraisals.error) return appraisals.error.message;

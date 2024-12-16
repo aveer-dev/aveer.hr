@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { ChevronRight } from 'lucide-react';
 
 export const ApprovalPolicies = async ({ org }: { org: string }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data, error } = await supabase.from('approval_policies').select().eq('org', org);
 	if (!data || error) return;

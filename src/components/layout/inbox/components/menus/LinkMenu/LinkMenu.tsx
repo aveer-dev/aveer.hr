@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, type JSX } from 'react';
 import { BubbleMenu as BaseBubbleMenu, useEditorState } from '@tiptap/react';
 
 import { MenuProps } from '../types';

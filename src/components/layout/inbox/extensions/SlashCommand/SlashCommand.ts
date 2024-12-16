@@ -17,7 +17,7 @@ export const SlashCommand = Extension.create({
 	priority: 200,
 
 	onCreate() {
-		popup = tippy('body', {
+		popup = tippy('#message-input', {
 			interactive: true,
 			trigger: 'manual',
 			placement: 'bottom-start',
@@ -123,12 +123,14 @@ export const SlashCommand = Extension.create({
 
 							const editorNode = view.dom as HTMLElement;
 
+							const section = document.querySelector('#message-input');
+
 							const getReferenceClientRect = () => {
 								if (!props.clientRect) {
 									return props.editor.storage[extensionName].rect;
 								}
 
-								const rect = props.clientRect();
+								const rect = (section?.getClientRects() as DOMRectList)[0];
 
 								if (!rect) {
 									return props.editor.storage[extensionName].rect;
@@ -143,7 +145,7 @@ export const SlashCommand = Extension.create({
 
 								// Account for when the editor is bound inside a container that doesn't go all the way to the edge of the screen
 								const editorXOffset = editorNode.getBoundingClientRect().x;
-								return new DOMRect(rect.x, yPos, rect.width, rect.height);
+								return new DOMRect(30, yPos, rect.width, rect.height);
 							};
 
 							scrollHandler = () => {
@@ -156,7 +158,7 @@ export const SlashCommand = Extension.create({
 
 							popup?.[0].setProps({
 								getReferenceClientRect,
-								appendTo: () => document.body,
+								appendTo: () => section,
 								content: component.element
 							});
 

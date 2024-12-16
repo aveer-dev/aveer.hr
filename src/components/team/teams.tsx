@@ -12,7 +12,7 @@ interface props {
 }
 
 export const Teams = async ({ org, teams }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	if (!teams) teams = await supabase.from('teams').select().eq('org', org);
 

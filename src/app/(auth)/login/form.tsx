@@ -5,33 +5,23 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
+import { useActionState, useEffect } from 'react';
 
 interface props {
-	formAction: (payload: FormData) => Promise<string>;
+	loginAction: (prevState: any, payload: FormData) => Promise<string>;
 }
 
-export const LoginForm = ({ formAction }: props) => {
-	const SubmitButton = () => {
-		const { pending } = useFormStatus();
+export const LoginForm = ({ loginAction }: props) => {
+	const [state, formAction, pending] = useActionState(loginAction, '');
 
-		return (
-			<Button type="submit" disabled={pending} size={'sm'} className="gap-3 px-4 text-xs font-light">
-				{pending && <LoadingSpinner />}
-				{pending ? 'Logging in' : 'Login'}
-			</Button>
-		);
-	};
-
-	const submitForm = async (formData: FormData) => {
-		const error = await formAction(formData);
-		if (error) return toast.error(error);
-	};
+	useEffect(() => {
+		if (state) toast.error(state);
+	}, [state]);
 
 	return (
-		<form className="grid gap-6" action={submitForm}>
+		<form className="grid gap-6" action={formAction}>
 			<div className="grid gap-3">
 				<Label htmlFor="email">Email</Label>
 				<Input id="email" type="email" name="email" placeholder="m@example.com" required />
@@ -52,7 +42,10 @@ export const LoginForm = ({ formAction }: props) => {
 					Sign up
 				</Link>
 
-				<SubmitButton />
+				<Button type="submit" disabled={pending} size={'sm'} className="gap-3 px-4 text-xs font-light">
+					{pending && <LoadingSpinner />}
+					{pending ? 'Logging in' : 'Login'}
+				</Button>
 			</div>
 		</form>
 	);

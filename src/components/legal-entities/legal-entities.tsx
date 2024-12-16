@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { FormSection, FormSectionDescription, InputsContainer } from '../forms/form-section';
 
 export const LegalEntities = async ({ org }: { org: string }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data, error } = await supabase.from('legal_entities').select().eq('org', org);
 

@@ -1,3 +1,3 @@
-export default function RootLayout({ children }: { children: React.ReactNode; params: { [key: string]: string } }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return <>{children}</>;
 }

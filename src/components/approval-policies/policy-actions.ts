@@ -5,7 +5,7 @@ import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { createClient } from '@/utils/supabase/server';
 
 export const updatePolicy = async (org: string, policyId: number, payload: TablesUpdate<'approval_policies'>) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (canUpdate !== true) return canUpdate;
@@ -17,7 +17,7 @@ export const updatePolicy = async (org: string, policyId: number, payload: Table
 };
 
 export const createPolicy = async (org: string, payload: TablesInsert<'approval_policies'>) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (canUpdate !== true) return canUpdate;
@@ -29,7 +29,7 @@ export const createPolicy = async (org: string, payload: TablesInsert<'approval_
 };
 
 export const deletePolicy = async (org: string, id: number) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (canUpdate !== true) return canUpdate;

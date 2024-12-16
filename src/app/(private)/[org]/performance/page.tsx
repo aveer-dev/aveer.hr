@@ -7,8 +7,9 @@ import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 import { format } from 'date-fns';
 
-export default async function PerformancePage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function PerformancePage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
+	const params = await props.params;
+	const supabase = await createClient();
 
 	const { data: appraisals, error } = await supabase.from('appraisal_history').select().match({ org: params.org });
 	if (error) {
@@ -68,7 +69,7 @@ export default async function PerformancePage({ params }: { params: { [key: stri
 }
 
 const Contract = async ({ contract, appraisal, org, userId }: { userId?: string; org: string; appraisal: number; contract: Tables<'contracts'> & { profile: Tables<'profiles'>; level: Tables<'employee_levels'> } }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { data, error } = await supabase.from('appraisal_answers').select().match({ contract: contract.id, org: contract.org, appraisal });
 
 	return (

@@ -5,7 +5,7 @@ import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { createClient } from '@/utils/supabase/server';
 
 export const updateApplication = async (id: number, payload: TablesUpdate<'job_applications'>, org: string) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const canUser = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (canUser !== true) return canUser;

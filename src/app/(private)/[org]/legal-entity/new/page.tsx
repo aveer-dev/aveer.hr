@@ -1,8 +1,9 @@
 import { BackButton } from '@/components/ui/back-button';
 import { LegalEntityForm } from './form';
 
-export default function Home({ params }: { params: { [key: string]: string } }) {
-	return (
+export default async function Home(props: { params: Promise<{ [key: string]: string }> }) {
+    const params = await props.params;
+    return (
 		<div className="mx-auto max-w-4xl">
 			<div className="relative mb-6 flex">
 				<BackButton className="absolute -left-16" />

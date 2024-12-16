@@ -22,7 +22,7 @@ interface props {
 }
 
 export const ContractOverview = async ({ data, reviewType, orgSettings }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const chartData = getChartData(data, orgSettings);
 
@@ -32,7 +32,7 @@ export const ContractOverview = async ({ data, reviewType, orgSettings }: props)
 	const addLink = async (payload: TablesInsert<'links'>) => {
 		'use server';
 
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const { error } = await supabase.from('links').upsert({ ...payload, org: data.org.subdomain });
 		if (error) return error.code == '23505' ? `Link with name '${payload.name}' already exists` : error.message;

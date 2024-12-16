@@ -6,9 +6,13 @@ import { format } from 'date-fns';
 import { FilePenLine } from 'lucide-react';
 import Link from 'next/link';
 
-export default async function ViewEntityPage(props: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
-	const supabase = createClient();
-	const { error, data } = await supabase.from('legal_entities').select('*, address_state:states!legal_entities_address_state_fkey(id, name), org:organisations!legal_entities_org_fkey(id, name, website)').match({ id: props.params.id, org: props.params.org }).single();
+export default async function ViewEntityPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
+	const supabase = await createClient();
+	const { error, data } = await supabase
+		.from('legal_entities')
+		.select('*, address_state:states!legal_entities_address_state_fkey(id, name), org:organisations!legal_entities_org_fkey(id, name, website)')
+		.match({ id: (await props.params).id, org: (await props.params).org })
+		.single();
 
 	if (error) {
 		return (
@@ -43,12 +47,11 @@ export default async function ViewEntityPage(props: { params: { [key: string]: s
 					</div>
 				</div>
 
-				<Link href={`./${props.params.id}/edit`} className={cn(buttonVariants({ size: 'sm' }), 'gap-4')}>
+				<Link href={`./${(await props.params).id}/edit`} className={cn(buttonVariants({ size: 'sm' }), 'gap-4')}>
 					Update Entity
 					<FilePenLine size={12} />
 				</Link>
 			</div>
-
 			<div className="mt-5 grid gap-20">
 				<div>
 					<h1 className="mb-4 text-xl font-semibold">Entity Owner</h1>

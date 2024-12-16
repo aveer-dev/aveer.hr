@@ -24,22 +24,22 @@ interface props {
 }
 
 export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, recipients, onClose, name, title, description, children, replyTo }: props) => {
-	const sendMessage = async (form: FormData) => {
+	const sendMessage = (form: FormData) => {
 		const mailMessage = form.get('message') as string;
 		const mailSubject = subject || (form.get('subject') as string);
 		if (!mailMessage || !mailSubject) return;
 
-		const { error } = await sendEmail({
+		sendEmail({
 			from: `${name} <contracts@notification.aveer.hr>`,
 			to: recipients,
 			subject: mailSubject,
 			text: mailMessage,
 			replyTo
+		}).then(error => {
+			if (error) return toast.error((error as any).message);
+			onClose && onClose('success');
+			toggleDialog && toggleDialog(false);
 		});
-
-		if (error) return toast.error(error.message);
-		onClose && onClose('success');
-		toggleDialog && toggleDialog(false);
 	};
 
 	const SendButton = () => {

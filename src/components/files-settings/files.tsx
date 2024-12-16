@@ -15,7 +15,7 @@ interface props {
 }
 
 export const Files = async ({ org, orgId }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const [files] = await Promise.all([await supabase.from('links').select().match({ org })]);
 
@@ -24,7 +24,7 @@ export const Files = async ({ org, orgId }: props) => {
 	const addLink = async (payload: TablesInsert<'links'>) => {
 		'use server';
 
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const { error } = await supabase.from('links').upsert({ ...payload, org });
 		if (error) return error.code == '23505' ? `Link with name '${payload.name}' already exists` : error.message;

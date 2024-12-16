@@ -4,7 +4,7 @@ import { TablesInsert, TablesUpdate } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 
 export const sendMessage = async ({ payload }: { payload: TablesInsert<'inbox'> }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { error } = await supabase.from('inbox').insert(payload);
 
@@ -14,7 +14,7 @@ export const sendMessage = async ({ payload }: { payload: TablesInsert<'inbox'> 
 };
 
 export const updateMessage = async ({ payload, id }: { payload: TablesUpdate<'inbox'>; id: number }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { error, data } = await supabase.from('inbox').update(payload).eq('id', id).select('*, sender_profile:profiles!inbox_sender_profile_fkey(id, first_name, last_name)');
 
@@ -24,7 +24,7 @@ export const updateMessage = async ({ payload, id }: { payload: TablesUpdate<'in
 };
 
 export const updateNotification = async ({ payload, id }: { payload: TablesUpdate<'notifications'>; id: number }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { error, data } = await supabase.from('notifications').update(payload).eq('id', id).select('*, sender_profile:profiles!notifications_sender_profile_fkey(id, first_name, last_name)');
 
@@ -34,7 +34,7 @@ export const updateNotification = async ({ payload, id }: { payload: TablesUpdat
 };
 
 export const deleteMessage = async ({ id }: { id: number }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { error } = await supabase.from('inbox').delete().eq('id', id);
 

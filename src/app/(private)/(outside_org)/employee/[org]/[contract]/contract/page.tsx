@@ -5,8 +5,9 @@ import { Details } from '@/components/ui/details';
 import { createClient } from '@/utils/supabase/server';
 import { InfoIcon } from 'lucide-react';
 
-export default async function ProfilePage({ params }: { params: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function ProfilePage(props: { params: Promise<{ [key: string]: string }> }) {
+	const params = await props.params;
+	const supabase = await createClient();
 
 	const { data, error } = await supabase
 		.from('contracts')

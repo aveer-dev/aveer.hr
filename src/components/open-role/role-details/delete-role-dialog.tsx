@@ -4,28 +4,16 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { FileX2 } from 'lucide-react';
-import { useState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export const TerminateOpening = ({ deleteRole }: { deleteRole: () => Promise<string> }) => {
 	const [isOpen, toggleOpenState] = useState(false);
+	const [state, formAction, pending] = useActionState(deleteRole, '');
 
-	const submitForm = async () => {
-		const error = await deleteRole();
-		if (error) return toast.error(error);
-	};
-
-	const SubmitButton = () => {
-		const { pending } = useFormStatus();
-
-		return (
-			<Button type="submit" disabled={pending} variant={'destructive'} size={'sm'} className="gap-3 px-8 text-xs font-light">
-				{pending && <LoadingSpinner />}
-				{pending ? 'Deleting' : 'Delete'}
-			</Button>
-		);
-	};
+	useEffect(() => {
+		if (state) toast.error(state);
+	}, [state]);
 
 	return (
 		<AlertDialog open={isOpen} onOpenChange={toggleOpenState}>
@@ -35,16 +23,22 @@ export const TerminateOpening = ({ deleteRole }: { deleteRole: () => Promise<str
 					Delete Role
 				</Button>
 			</AlertDialogTrigger>
+
 			<AlertDialogContent asChild>
-				<form action={submitForm} className="gap-6">
+				<form action={formAction} className="gap-6">
 					<AlertDialogHeader>
 						<AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
 						<AlertDialogDescription className="text-xs leading-6">Continuing with this action will immidiately delete this open role. This action can not be reversed</AlertDialogDescription>
 					</AlertDialogHeader>
+
 					<AlertDialogFooter>
 						<AlertDialogCancel className="text-xs font-light">Cancel</AlertDialogCancel>
+
 						<AlertDialogAction asChild>
-							<SubmitButton />
+							<Button type="submit" disabled={pending} variant={'destructive'} size={'sm'} className="gap-3 px-8 text-xs font-light">
+								{pending && <LoadingSpinner />}
+								{pending ? 'Deleting' : 'Delete'}
+							</Button>
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</form>

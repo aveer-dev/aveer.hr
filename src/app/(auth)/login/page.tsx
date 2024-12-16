@@ -4,9 +4,9 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
 export default function SigninPage() {
-	const signin = async (payload: FormData): Promise<string> => {
+	const signin = async (prevState: any, payload: FormData) => {
 		'use server';
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const signinData: SignInWithPasswordCredentials = {
 			email: payload.get('email') as string,
@@ -25,7 +25,7 @@ export default function SigninPage() {
 				<p className="text-balance text-xs font-normal text-muted-foreground">Enter your email below to login to your account</p>
 			</div>
 
-			<LoginForm formAction={signin} />
+			<LoginForm loginAction={signin} />
 		</div>
 	);
 }

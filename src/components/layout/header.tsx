@@ -9,7 +9,7 @@ import { PushNotificationBanner } from './push-notification-banner';
 import { Tables } from '@/type/database.types';
 
 export const Header = async ({ orgId, messages }: { orgId?: string; messages?: Tables<'inbox'>[] | null }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data } = await supabase.auth.getUser();
 
@@ -28,7 +28,7 @@ export const Header = async ({ orgId, messages }: { orgId?: string; messages?: T
 
 		if (!data?.user?.id) return;
 
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const { data: profile } = await supabase.from('profiles').select('fcm_token').eq('id', data.user?.id).single();
 		const existingTokens = profile!.fcm_token || [];

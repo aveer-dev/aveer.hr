@@ -13,7 +13,7 @@ interface props {
 }
 
 export const Roles = async ({ orgId, type }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const query: { org: string; state?: string } = { org: orgId };
 	if (type == 'job') query.state = 'open';

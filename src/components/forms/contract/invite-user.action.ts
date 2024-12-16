@@ -18,7 +18,7 @@ const sendContractEmail = async (email: string) => {
 };
 
 const getExistingUserAccount = async (email: string) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data, error } = await supabase.from('profiles').select('id').eq('email', email).single();
 	if (error) return;
@@ -28,7 +28,7 @@ const getExistingUserAccount = async (email: string) => {
 };
 
 export const inviteUser = async (contract: string, profile: string, isManager: boolean) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 	const supabaseAdmin = createClientAdminServer();
 
 	const parsedContract: TablesInsert<'contracts'> = JSON.parse(contract);
@@ -62,7 +62,7 @@ export const inviteUser = async (contract: string, profile: string, isManager: b
 };
 
 export const updateContract = async (contract: string) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const parsedContract: TablesInsert<'contracts'> = JSON.parse(contract);
 
@@ -83,7 +83,7 @@ export const updateContract = async (contract: string) => {
 };
 
 export const createLevel = async (level: TablesInsert<'employee_levels'>) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const role = await doesUserHaveAdequatePermissions({ orgId: level.org });
 	if (role !== true) return role;

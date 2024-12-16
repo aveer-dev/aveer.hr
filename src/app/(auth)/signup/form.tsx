@@ -5,33 +5,23 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
+import { useActionState, useEffect } from 'react';
 
 interface PROPS {
-	formAction: (payload: FormData) => Promise<string>;
+	signupAction: (prevState: any, payload: FormData) => Promise<string>;
 }
 
-export const SignupForm = ({ formAction }: PROPS) => {
-	const SubmitButton = () => {
-		const { pending } = useFormStatus();
+export const SignupForm = ({ signupAction }: PROPS) => {
+	const [state, formAction, pending] = useActionState(signupAction, '');
 
-		return (
-			<Button disabled={pending} type="submit" size={'sm'} className="gap-3 px-4 text-sm font-light">
-				{pending && <LoadingSpinner />}
-				{pending ? 'Signing up...' : 'Sign up'}
-			</Button>
-		);
-	};
-
-	const submitForm = async (formData: FormData) => {
-		const error = await formAction(formData);
-		if (error) return toast.error(error);
-	};
+	useEffect(() => {
+		if (state) toast.error(state);
+	}, [state]);
 
 	return (
-		<form className="grid gap-6" action={submitForm}>
+		<form className="grid gap-6" action={formAction}>
 			<div className="grid grid-cols-2 items-center gap-6">
 				<div className="grid gap-3">
 					<Label htmlFor="first-name">First name</Label>
@@ -64,7 +54,10 @@ export const SignupForm = ({ formAction }: PROPS) => {
 					Login
 				</Link>
 
-				<SubmitButton />
+				<Button disabled={pending} type="submit" size={'sm'} className="gap-3 px-4 text-sm font-light">
+					{pending && <LoadingSpinner />}
+					{pending ? 'Signing up...' : 'Sign up'}
+				</Button>
 			</div>
 		</form>
 	);

@@ -9,7 +9,7 @@ interface props {
 }
 
 export const EmployeeBenefits = async ({ org }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data, error } = await supabase.from('org_settings').select().eq('org', org).single();
 
@@ -19,7 +19,7 @@ export const EmployeeBenefits = async ({ org }: props) => {
 		const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
 		if (typeof hasPermission == 'string') return hasPermission;
 
-		const supabase = createClient();
+		const supabase = await createClient();
 		const { error } = await supabase.from('org_settings').upsert({ ...benefits, org }, { onConflict: 'org' });
 		if (error) return error.message;
 		return true;

@@ -4,8 +4,9 @@ import { LegalEntityForm } from '../../new/form';
 import { createClient } from '@/utils/supabase/server';
 import { BackButton } from '@/components/ui/back-button';
 
-export default async function EditEntityPage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function EditEntityPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
+	const params = await props.params;
+	const supabase = await createClient();
 	const { data, error } = await supabase.from('legal_entities').select().match({ org: params.org, id: params.id }).single();
 
 	if (error) {

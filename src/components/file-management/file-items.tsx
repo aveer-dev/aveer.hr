@@ -29,7 +29,7 @@ const Item = ({ children, name, className, description }: { children?: ReactNode
 };
 
 export const FileItems = async ({ path, readonly }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const files = await supabase.storage.from('documents').list(path);
 

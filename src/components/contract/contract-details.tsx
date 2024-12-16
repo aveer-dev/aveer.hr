@@ -2,12 +2,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
-import { format, isPast } from 'date-fns';
-import { Copy, EllipsisVertical, FilePenLine, InfoIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { Copy, EllipsisVertical, FilePenLine } from 'lucide-react';
 import Link from 'next/link';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-import { TablesUpdate } from '@/type/database.types';
 import { SignatureDrawer } from './signature/signature-drawer';
 import { redirect } from 'next/navigation';
 import { ScheduleTermination } from './schedule-termination';
@@ -22,19 +21,19 @@ import { ResendInviteButton } from './resend-invite-button';
 import { EmployeeTabs } from './employee-tabs';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 	const [{ data, error }, { data: orgSettings }] = await Promise.all([
 		await supabase
 			.from('contracts')
 			.select(
 				`*, org:organisations!contracts_org_fkey(id, name, subdomain),
-            level:employee_levels!contracts_level_fkey(level, role),
-            entity:legal_entities!contracts_entity_fkey(incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name), address_state, street_address, address_code),
-            profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)),
-            signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email),
-            terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email),
-            team:teams!contracts_team_fkey(id, name),
-            direct_report(job_title, id, profile(first_name, last_name))`
+                level:employee_levels!contracts_level_fkey(level, role),
+                entity:legal_entities!contracts_entity_fkey(incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name), address_state, street_address, address_code),
+                profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)),
+                signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email),
+                terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email),
+                team:teams!contracts_team_fkey(id, name),
+                direct_report(job_title, id, profile(first_name, last_name))`
 			)
 			.match({ org, id })
 			.single(),
@@ -53,40 +52,6 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 
 	const manager = (await supabase.from('managers').select().match({ org, person: id, team: data.team?.id })).data;
 
-	const signContract = async (payload: FormData): Promise<string> => {
-		'use server';
-		const supabase = createClient();
-
-		const {
-			data: { user },
-			error: authError
-		} = await supabase.auth.getUser();
-		if (authError) return authError.message;
-		if (!user) return 'User auth not found';
-
-		const signatureString = payload.get('signature-string') as string;
-		let signatureDetails: TablesUpdate<'contracts'>;
-		if (signatureType === 'org') {
-			const { data, error } = await supabase.from('profiles_roles').select().match({ organisation: org, profile: user.id });
-			if (error || !data.length) return `You do not have adequate org permission to execute contracts`;
-
-			signatureDetails = { org_signed: new Date() as any, signed_by: user.id, org_signature_string: signatureString };
-			const { error: contractError } = await supabase.from('contracts').update(signatureDetails).match({ org, id });
-
-			if (contractError) return contractError.message;
-			return redirect(`/${org}/people/${id}`);
-		}
-
-		const { data, error } = await supabase.from('contracts').select().match({ org, profile: user.id, id });
-		if (error || !data.length) return `You do not have adequate permission to execute contracts`;
-
-		signatureDetails = { profile_signed: new Date() as any, profile_signature_string: signatureString };
-		const { error: contractError } = await supabase.from('contracts').update(signatureDetails).match({ org, id });
-
-		if (contractError) return contractError.message;
-		return redirect(`/employee/${org}/${id}`);
-	};
-
 	const sendTerminationScheduleEmail = async (endDate: string) => {
 		'use server';
 
@@ -102,10 +67,10 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 		return;
 	};
 
-	const scheduleTermination = async (date: Date): Promise<string> => {
+	const scheduleTermination = async (_prev: any, date: Date): Promise<string> => {
 		'use server';
 		if (!date) return 'Termination date not provided';
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
 		if (hasPermission !== true) return hasPermission;
@@ -141,7 +106,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 
 	const terminateContract = async (): Promise<string> => {
 		'use server';
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
 		if (hasPermission !== true) return hasPermission;
@@ -162,7 +127,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 
 	const deleteContract = async (): Promise<string> => {
 		'use server';
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const {
 			data: { user },
@@ -196,7 +161,9 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 					<div className="fixed bottom-0 left-0 flex w-full justify-between gap-3 border-t bg-background p-4 sm:relative sm:w-fit sm:border-t-0 sm:p-0">
 						{data.profile && (
 							<>
-								{((signatureType === 'org' && !data.org_signed) || (signatureType === 'profile' && !data.profile_signed)) && <SignatureDrawer first_name={data.profile.first_name} job_title={data.job_title} signatureAction={signContract} />}
+								{((signatureType === 'org' && !data.org_signed) || (signatureType === 'profile' && !data.profile_signed)) && (
+									<SignatureDrawer org={org} id={Number(id)} signatureType={signatureType} first_name={data.profile.first_name} job_title={data.job_title} />
+								)}
 
 								{signatureType === 'org' && (
 									<Popover>
@@ -225,7 +192,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 												<TerminateContract first_name={data.profile.first_name} job_title={data.job_title} deleteContract={deleteContract} terminateContract={terminateContract} action={data.status === 'signed' ? 'terminate' : 'delete'} />
 											)}
 
-											{data.status === 'signed' && <ScheduleTermination first_name={data.profile.first_name} job_title={data.job_title} formAction={scheduleTermination} />}
+											{data.status === 'signed' && <ScheduleTermination first_name={data.profile.first_name} job_title={data.job_title} serverAction={scheduleTermination} />}
 										</PopoverContent>
 									</Popover>
 								)}

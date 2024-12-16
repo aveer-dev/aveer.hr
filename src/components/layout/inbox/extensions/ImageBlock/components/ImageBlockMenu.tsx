@@ -1,5 +1,5 @@
 import { BubbleMenu as BaseBubbleMenu, useEditorState } from '@tiptap/react';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, type JSX } from 'react';
 import { Instance, sticky } from 'tippy.js';
 import { v4 as uuid } from 'uuid';
 

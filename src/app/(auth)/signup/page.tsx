@@ -4,9 +4,9 @@ import { redirect } from 'next/navigation';
 import { SignUpWithPasswordCredentials } from '@supabase/supabase-js';
 
 export default function SignupPage() {
-	const signup = async (payload: FormData): Promise<string> => {
+	const signup = async (_prevState: any, payload: FormData): Promise<string> => {
 		'use server';
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const signupData: SignUpWithPasswordCredentials = {
 			email: payload.get('email') as string,
@@ -32,7 +32,7 @@ export default function SignupPage() {
 				<p className="text-balance text-xs font-normal text-muted-foreground">Enter your details below to setup your organisation account</p>
 			</div>
 
-			<SignupForm formAction={signup} />
+			<SignupForm signupAction={signup} />
 		</div>
 	);
 }

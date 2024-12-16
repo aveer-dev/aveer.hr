@@ -1,6 +1,6 @@
 import { Icon } from '../../Icon';
 import { Toolbar } from '../../Toolbar';
-import DragHandle from '@tiptap-pro/extension-drag-handle-react';
+// import DragHandle from '@tiptap-pro/extension-drag-handle-react';
 import { Editor } from '@tiptap/react';
 
 import useContentItemActions from './hooks/useContentItemActions';
@@ -37,46 +37,45 @@ export const ContentItemMenu = ({ editor }: ContentItemMenuProps) => {
 		);
 	};
 
-	return (
-		<DragHandle
-			pluginKey="ContentItemMenu"
-			editor={editor}
-			onNodeChange={data.handleNodeChange}
-			tippyOptions={{
-				offset: [1, 0],
-				zIndex: 99
-			}}>
-			<Popover open={menuOpen} onOpenChange={setMenuOpen}>
-				<PopoverTrigger asChild>
-					<Button variant={'ghost'} className="h-fit w-fit p-1">
-						<Icon name="GripVertical" />
-					</Button>
-				</PopoverTrigger>
+	return null;
+	// <DragHandle
+	// 	pluginKey="ContentItemMenu"
+	// 	editor={editor}
+	// 	onNodeChange={data.handleNodeChange}
+	// 	tippyOptions={{
+	// 		offset: [1, 0],
+	// 		zIndex: 99
+	// 	}}>
+	// 	<Popover open={menuOpen} onOpenChange={setMenuOpen}>
+	// 		<PopoverTrigger asChild>
+	// 			<Button variant={'ghost'} className="h-fit w-fit p-1">
+	// 				<Icon name="GripVertical" />
+	// 			</Button>
+	// 		</PopoverTrigger>
 
-				<PopoverContent className="w-56 space-y-1 p-2 *:w-full" onOpenAutoFocus={event => event.preventDefault()} side="bottom" align="start" sideOffset={8}>
-					<PopoverButton onClick={actions.resetTextFormatting}>
-						<Icon name="RemoveFormatting" />
-						Clear formatting
-					</PopoverButton>
+	// 		<PopoverContent className="w-56 space-y-1 p-2 *:w-full" onOpenAutoFocus={event => event.preventDefault()} side="bottom" align="start" sideOffset={8}>
+	// 			<PopoverButton onClick={actions.resetTextFormatting}>
+	// 				<Icon name="RemoveFormatting" />
+	// 				Clear formatting
+	// 			</PopoverButton>
 
-					<PopoverButton onClick={actions.copyNodeToClipboard}>
-						<Icon name="Clipboard" />
-						Copy to clipboard
-					</PopoverButton>
+	// 			<PopoverButton onClick={actions.copyNodeToClipboard}>
+	// 				<Icon name="Clipboard" />
+	// 				Copy to clipboard
+	// 			</PopoverButton>
 
-					<PopoverButton onClick={actions.duplicateNode}>
-						<Icon name="Copy" />
-						Duplicate
-					</PopoverButton>
+	// 			<PopoverButton onClick={actions.duplicateNode}>
+	// 				<Icon name="Copy" />
+	// 				Duplicate
+	// 			</PopoverButton>
 
-					<Toolbar.Divider horizontal />
+	// 			<Toolbar.Divider horizontal />
 
-					<PopoverButton onClick={actions.deleteNode} variant={'secondary_destructive'}>
-						<Icon name="Trash2" />
-						Delete
-					</PopoverButton>
-				</PopoverContent>
-			</Popover>
-		</DragHandle>
-	);
+	// 			<PopoverButton onClick={actions.deleteNode} variant={'secondary_destructive'}>
+	// 				<Icon name="Trash2" />
+	// 				Delete
+	// 			</PopoverButton>
+	// 		</PopoverContent>
+	// 	</Popover>
+	// </DragHandle>
 };

@@ -6,8 +6,9 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 
-export default async function ProfilePage({ params }: { params: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function ProfilePage(props: { params: Promise<{ [key: string]: string }> }) {
+	const params = await props.params;
+	const supabase = await createClient();
 
 	const { data, error } = await supabase
 		.from('contracts')

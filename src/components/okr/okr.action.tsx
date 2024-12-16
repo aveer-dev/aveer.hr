@@ -8,7 +8,7 @@ export const deleteOKR = async (query: { id: number; org: string }) => {
 	const canUser = await doesUserHaveAdequatePermissions({ orgId: query.org });
 	if (canUser !== true) return canUser;
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { error } = await supabase.from('okrs').delete().match(query);
 
 	if (error) return error.message;
@@ -19,7 +19,7 @@ export const deleteResult = async (query: { id: number; okr: number; org: string
 	const canUser = await doesUserHaveAdequatePermissions({ orgId: query.org });
 	if (canUser !== true) return canUser;
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { error } = await supabase.from('okr_results').delete().match(query);
 
 	if (error) return error.message;
@@ -30,7 +30,7 @@ export const deleteObjective = async (query: { id: number; okr: number; org: str
 	const canUser = await doesUserHaveAdequatePermissions({ orgId: query.org });
 	if (canUser !== true) return canUser;
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { error } = await supabase.from('okr_objectives').delete().match(query);
 
 	if (error) return error.message;
@@ -41,7 +41,7 @@ export const createOKR = async (payload: TablesInsert<'okrs'>) => {
 	const canUser = await doesUserHaveAdequatePermissions({ orgId: payload.org });
 	if (canUser !== true) return canUser;
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { data, error } = await supabase.from('okrs').upsert(payload).select();
 	if (error) return error.message;
 	return data;
@@ -54,7 +54,7 @@ export const createObjective = async (payload: TablesInsert<'okr_objectives'>[])
 	const payloadWithId = payload.filter(item => !!item.id);
 	const payloadWithoutId = payload.filter(item => !item.id);
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const [updateRes, inserRes] = await Promise.all([await supabase.from('okr_objectives').upsert(payloadWithId).select(), await supabase.from('okr_objectives').insert(payloadWithoutId).select()]);
 
 	if (updateRes.error || inserRes.error) {
@@ -72,7 +72,7 @@ export const createResults = async (payload: TablesInsert<'okr_results'>[]) => {
 	const payloadWithId = payload.filter(item => !!item.id);
 	const payloadWithoutId = payload.filter(item => !item.id);
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const [updateRes, inserRes] = await Promise.all([await supabase.from('okr_results').upsert(payloadWithId).select(), await supabase.from('okr_results').insert(payloadWithoutId).select()]);
 
 	if (updateRes.error || inserRes.error) {

@@ -5,18 +5,17 @@ import Link from 'next/link';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useFormStatus } from 'react-dom';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
-import { useEffect, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff } from 'lucide-react';
 import { PageLoader } from '@/components/ui/page-loader';
 
 interface props {
-	requestPasswordReset: (email: string) => Promise<string | true>;
-	resetPassword: (email: string) => Promise<string | true>;
+	requestPasswordReset: (prevState: any, email: string) => Promise<string | true>;
+	resetPassword: (prevState: any, email: string) => Promise<string>;
 }
 
 const supabase = createClient();
@@ -28,39 +27,21 @@ export const LoginForm = ({ requestPasswordReset, resetPassword }: props) => {
 	const [viewPassword, toggleViewPassword] = useState(false);
 	const [isPageLoading, setPageLoadingState] = useState(false);
 
-	const RequestPasswordResetButton = () => {
-		const { pending } = useFormStatus();
+	const [requestResetState, requestResetAction, requestResetPending] = useActionState(requestPasswordReset, '');
+	const [resetPasswordState, resetPasswordAction, resetPasswordPending] = useActionState(resetPassword, '');
 
-		return (
-			<Button type="submit" disabled={pending} size={'sm'} className="gap-3 px-4 text-xs font-light">
-				{pending && <LoadingSpinner />}
-				{pending ? 'Requesting reset' : 'Request reset'}
-			</Button>
-		);
-	};
+	useEffect(() => {
+		if (requestResetState) {
+			if (typeof requestResetState == 'string') toast.error(requestResetState);
 
-	const ResetPasswordButton = () => {
-		const { pending } = useFormStatus();
+			setEmailFormState(false);
+			setEmailSuccessState(true);
 
-		return (
-			<Button type="submit" disabled={pending} size={'sm'} className="gap-3 px-4 text-xs font-light">
-				{pending && <LoadingSpinner />}
-				{pending ? 'Resetting password' : 'Reset password'}
-			</Button>
-		);
-	};
+			return;
+		}
 
-	const requestReset = async (formData: FormData) => {
-		const error = await requestPasswordReset(formData.get('email') as string);
-		if (typeof error == 'string') return toast.error(error);
-		setEmailFormState(false);
-		setEmailSuccessState(true);
-	};
-
-	const setNewPassword = async (formData: FormData) => {
-		const error = await resetPassword(formData.get('password') as string);
-		if (typeof error == 'string') return toast.error(error);
-	};
+		if (resetPasswordState) toast.error(resetPasswordState);
+	}, [resetPasswordState, requestResetState]);
 
 	useEffect(() => {
 		supabase.auth.onAuthStateChange(async (event, session) => {
@@ -96,7 +77,7 @@ export const LoginForm = ({ requestPasswordReset, resetPassword }: props) => {
 			{isPageLoading && <PageLoader isLoading />}
 
 			{showEmailForm && (
-				<form className="grid gap-6" action={requestReset}>
+				<form className="grid gap-6" action={formData => requestResetAction(formData.get('email') as string)}>
 					<div className="grid gap-3">
 						<Label htmlFor="email">Email</Label>
 						<Input id="email" type="email" name="email" placeholder="hello@aveer.hr" required />
@@ -107,7 +88,10 @@ export const LoginForm = ({ requestPasswordReset, resetPassword }: props) => {
 							Login
 						</Link>
 
-						<RequestPasswordResetButton />
+						<Button type="submit" disabled={requestResetPending} size={'sm'} className="gap-3 px-4 text-xs font-light">
+							{requestResetPending && <LoadingSpinner />}
+							{requestResetPending ? 'Requesting reset' : 'Request reset'}
+						</Button>
 					</div>
 				</form>
 			)}
@@ -125,7 +109,7 @@ export const LoginForm = ({ requestPasswordReset, resetPassword }: props) => {
 			)}
 
 			{showNewPasswordForm && (
-				<form className="grid gap-6" action={setNewPassword}>
+				<form className="grid gap-6" action={formData => resetPasswordAction(formData.get('password') as string)}>
 					<div className="grid gap-2">
 						<div className="flex items-center justify-between">
 							<Label htmlFor="password">Password</Label>
@@ -141,7 +125,10 @@ export const LoginForm = ({ requestPasswordReset, resetPassword }: props) => {
 							Login
 						</Link>
 
-						<ResetPasswordButton />
+						<Button type="submit" disabled={resetPasswordPending} size={'sm'} className="gap-3 px-4 text-xs font-light">
+							{resetPasswordPending && <LoadingSpinner />}
+							{resetPasswordPending ? 'Resetting password' : 'Reset password'}
+						</Button>
 					</div>
 				</form>
 			)}

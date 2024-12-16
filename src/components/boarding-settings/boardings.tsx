@@ -9,7 +9,7 @@ interface props {
 }
 
 export const Boardings = async ({ org }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data, error } = await supabase.from('boarding_check_lists').select().eq('org', org);
 	if (!data || error) return error.message;

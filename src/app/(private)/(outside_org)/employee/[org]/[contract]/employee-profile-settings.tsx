@@ -79,7 +79,7 @@ export const EmployeeProfileSettings = ({ profile }: { profile: Tables<'profiles
 
 					<div className="space-y-4">
 						<h3 className="text-sm font-semibold text-support">Change password</h3>
-						<ChangePasswordForm updatePassword={updatePassword} />
+						<ChangePasswordForm />
 					</div>
 
 					<div className="space-y-4">

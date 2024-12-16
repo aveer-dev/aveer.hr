@@ -27,20 +27,14 @@ import {
 	TrailingNode,
 	Typography,
 	Underline,
-	emojiSuggestion,
-	UniqueID
+	emojiSuggestion
 } from '.';
 
 import { ImageUpload } from './ImageUpload';
-import { isChangeOrigin } from '@tiptap/extension-collaboration';
 
 export const ExtensionKit: any = [
 	Selection,
 	HorizontalRule,
-	UniqueID.configure({
-		types: ['paragraph', 'heading', 'blockquote', 'codeBlock', 'table'],
-		filterTransaction: transaction => !isChangeOrigin(transaction)
-	}),
 	StarterKit.configure({ dropcursor: false, horizontalRule: false }),
 	TextStyle,
 	FontSize,
@@ -88,7 +82,6 @@ export const ExtensionKit: any = [
 	Placeholder.configure({
 		placeholder: `Start typing... or press '/' for commands`
 	}),
-	SlashCommand,
 	Focus,
 	// Figcaption,
 	BlockquoteFigure,

@@ -5,8 +5,10 @@ import { createClient } from '@/utils/supabase/server';
 import { PageLoader } from '@/components/ui/page-loader';
 import { getFormEntities, getOrgLevels, getTeams, getRoles, getEmployees, getOrgSettings } from '@/utils/form-data-init';
 
-export default async function Home({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function Home(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
+	const searchParams = await props.searchParams;
+	const params = await props.params;
+	const supabase = await createClient();
 
 	const [contract, entities, levels, teams, roles, employees, data] = await Promise.all([
 		searchParams.duplicate ? await supabase.from('contracts').select().match({ id: searchParams.duplicate, org: params.org }).single() : undefined,

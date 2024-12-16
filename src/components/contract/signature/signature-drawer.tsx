@@ -5,28 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Signature } from 'lucide-react';
 import './style.scss';
 import { toast } from 'sonner';
-import { useState } from 'react';
-import { useFormStatus } from 'react-dom';
-import { employeeSignContract } from './contract.action';
+import { useActionState, useEffect, useState } from 'react';
+import { employeeSignContract, signContractAction } from './contract.action';
 
-export const SignatureDrawer = ({ job_title, id, org, first_name, signatureAction }: { id?: number; org?: string; job_title: string; first_name: string; signatureAction?: (payload: FormData) => Promise<string> }) => {
+export const SignatureDrawer = ({ job_title, id, org, first_name, signatureType }: { signatureType?: 'profile' | 'org'; id: number; org: string; job_title: string; first_name: string }) => {
 	const [drawerIsOpen, toggleDrawerState] = useState(false);
+	const [state, formAction, pending] = useActionState(signatureType ? signContractAction : employeeSignContract, '');
 
-	const signContract = async (formData: FormData) => {
-		const response = signatureAction ? await signatureAction(formData) : id && org && (await employeeSignContract({ payload: formData, id, org }));
-		if (response) return toast.error(response || 'Unable to sign contract');
-		toggleDrawerState(false);
-	};
-
-	const SubmitButton = () => {
-		const { pending } = useFormStatus();
-
-		return (
-			<Button type="submit" disabled={pending} size={'sm'} className="px-8 text-xs font-light">
-				{pending ? 'Signing contract' : 'Sign contract'}
-			</Button>
-		);
-	};
+	useEffect(() => {
+		if (state) toast.error(state);
+	}, [state]);
 
 	return (
 		<>
@@ -37,8 +25,9 @@ export const SignatureDrawer = ({ job_title, id, org, first_name, signatureActio
 						<Signature size={12} />
 					</Button>
 				</DrawerTrigger>
+
 				<DrawerContent>
-					<form className="mx-auto my-12 w-full max-w-sm" action={signContract}>
+					<form className="mx-auto my-12 w-full max-w-sm" action={formAction}>
 						<DrawerHeader className="gap-3">
 							<DrawerTitle>Sign Contract</DrawerTitle>
 							<DrawerDescription className="text-xs font-light leading-6">
@@ -57,13 +46,20 @@ export const SignatureDrawer = ({ job_title, id, org, first_name, signatureActio
 							className="signature m-4 mt-7 w-[calc(100%-32px)] border-b border-b-foreground text-2xl outline-none placeholder:font-karla"
 						/>
 
+						<input name="org" hidden defaultValue={org} />
+						<input name="id" hidden defaultValue={id} />
+						<input name="signature-type" hidden defaultValue={signatureType} />
+
 						<DrawerFooter className="grid grid-cols-2 items-center gap-4">
 							<DrawerClose asChild>
 								<Button type="button" variant="outline">
 									Cancel
 								</Button>
 							</DrawerClose>
-							<SubmitButton />
+
+							<Button type="submit" disabled={pending} size={'sm'} className="px-8 text-xs font-light">
+								{pending ? 'Signing contract' : 'Sign contract'}
+							</Button>
 						</DrawerFooter>
 					</form>
 				</DrawerContent>

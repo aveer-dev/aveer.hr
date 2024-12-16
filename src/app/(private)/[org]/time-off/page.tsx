@@ -5,12 +5,13 @@ import { columns } from '@/components/leave/column';
 import { ROLE } from '@/type/contract.types';
 
 interface props {
-	params: { [key: string]: string };
-	searchParams: { [key: string]: string };
+	params: Promise<{ [key: string]: string }>;
+	searchParams: Promise<{ [key: string]: string }>;
 }
 
-export default async function TimeOffPage({ params }: props) {
-	const supabase = createClient();
+export default async function TimeOffPage(props0: props) {
+	const params = await props0.params;
+	const supabase = await createClient();
 
 	const { data, error } = await supabase
 		.from('time_off')

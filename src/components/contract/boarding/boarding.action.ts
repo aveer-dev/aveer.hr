@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
 export const updateEmployeeBoarding = async (items: TablesInsert<'contract_check_list'>, org: string) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const {
 		data: { user },
@@ -27,7 +27,7 @@ export const updateEmployeeBoarding = async (items: TablesInsert<'contract_check
 };
 
 export const approveBoarding = async ({ isAllApproved, levels, id }: { isAllApproved: boolean; levels: LEVEL[]; id: number }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const {
 		data: { user },

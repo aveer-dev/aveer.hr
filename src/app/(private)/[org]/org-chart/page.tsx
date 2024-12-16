@@ -3,8 +3,12 @@ import FlowDiagram from './flow-diagram';
 import { Edge, Node, Position } from '@xyflow/react';
 import { Tables } from '@/type/database.types';
 
-export default async function OrgChartPage({ params: { org } }: { params: { org: string } }) {
-	const supabase = createClient();
+export default async function OrgChartPage(props: { params: Promise<{ org: string }> }) {
+	const params = await props.params;
+
+	const { org } = params;
+
+	const supabase = await createClient();
 
 	const [{ data: teams, error: teamsError }, { data: people, error: peopleError }, { data: managers, error: managersError }] = await Promise.all([
 		await supabase.from('teams').select().match({ org }),

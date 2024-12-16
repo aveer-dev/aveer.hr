@@ -9,7 +9,7 @@ import { Tables } from '@/type/database.types';
 import { TodoMenu } from './todo-menu';
 
 export const Todos = async ({ profile, contract, org, team }: { profileId?: string; org: string; contract: Tables<'contracts'>; team: number; profile: Tables<'profiles'> }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	if (!profile) return;
 

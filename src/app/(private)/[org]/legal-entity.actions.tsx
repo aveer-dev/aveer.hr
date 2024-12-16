@@ -8,7 +8,7 @@ export const createLegalEntity = async (payload: TablesInsert<'legal_entities'>)
 	const canUser = await doesUserHaveAdequatePermissions({ orgId: payload.org });
 	if (canUser !== true) return canUser;
 
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const response = await supabase.from('legal_entities').insert(payload).select('id').single();
 
@@ -19,7 +19,7 @@ export const updateLegalEntity = async (payload: TablesUpdate<'legal_entities'>)
 	const canUser = await doesUserHaveAdequatePermissions({ orgId: payload.org as string });
 	if (canUser !== true) return canUser;
 
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const response = await supabase.from('legal_entities').update(payload).match({ org: payload.org, id: payload?.id });
 

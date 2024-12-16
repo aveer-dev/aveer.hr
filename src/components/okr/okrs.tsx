@@ -6,7 +6,7 @@ interface props {
 }
 
 export const OKRs = async ({ org }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data, error } = await supabase.from('okrs').select().eq('org', org);
 

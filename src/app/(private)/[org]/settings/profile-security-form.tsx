@@ -7,11 +7,11 @@ import { Label } from '@/components/ui/label';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { updatePassword } from '@/api/update-password';
 
-export const SecurityForm = ({ updatePassword }: { updatePassword: (password: string) => Promise<string | undefined> }) => {
+export const SecurityForm = () => {
 	return (
 		<FormSection>
 			<FormSectionDescription>
@@ -20,33 +20,22 @@ export const SecurityForm = ({ updatePassword }: { updatePassword: (password: st
 			</FormSectionDescription>
 
 			<InputsContainer>
-				<ChangePasswordForm updatePassword={updatePassword} />
+				<ChangePasswordForm />
 			</InputsContainer>
 		</FormSection>
 	);
 };
 
-export const ChangePasswordForm = ({ updatePassword, className }: { className?: string; updatePassword: (password: string) => Promise<string | undefined> }) => {
+export const ChangePasswordForm = ({ className }: { className?: string }) => {
+	const [state, formAction, pending] = useActionState(updatePassword, '');
 	const [viewPassword, toggleViewPasswordState] = useState(false);
 
-	const SubmitButton = () => {
-		const { pending } = useFormStatus();
-
-		return (
-			<Button type="submit" disabled={pending} size={'sm'} className="gap-3 px-5 text-xs font-light">
-				{pending && <LoadingSpinner />}
-				{pending ? 'Updating password' : 'Update password'}
-			</Button>
-		);
-	};
-
-	const onSubmit = async (formData: FormData) => {
-		const error = await updatePassword(formData.get('name') as string);
-		if (error) return toast(error);
-	};
+	useEffect(() => {
+		if (state) toast.error(state);
+	}, [state]);
 
 	return (
-		<form className={cn('space-y-6', className)} action={onSubmit}>
+		<form className={cn('space-y-6', className)} action={formData => formAction(formData.get('name') as string)}>
 			<div className="w-full space-y-3">
 				<Label htmlFor="password">New password</Label>
 				<div className="relative flex items-center gap-2">
@@ -55,21 +44,14 @@ export const ChangePasswordForm = ({ updatePassword, className }: { className?: 
 						{viewPassword && <Eye size={12} />}
 						{!viewPassword && <EyeOff size={12} />}
 					</Button>
-					{/* <Button variant={'secondary'} size={'sm'}>
-								Get OTP
-							</Button> */}
 				</div>
 			</div>
 
-			{/* <div className="grid gap-3">
-						<div className="flex items-center">
-							<Label htmlFor="password">OTP</Label>
-						</div>
-						<Input id="password" type="password" name="password" required />
-					</div> */}
-
 			<div className="flex w-full items-center justify-end gap-4">
-				<SubmitButton />
+				<Button type="submit" disabled={pending} size={'sm'} className="gap-3 px-5 text-xs font-light">
+					{pending && <LoadingSpinner />}
+					{pending ? 'Updating password' : 'Update password'}
+				</Button>
 			</div>
 		</form>
 	);

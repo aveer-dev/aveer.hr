@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { Calendar } from './dashboard-calendar';
 
 export const DashboardCalendar = async ({ org }: { org: string }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const [{ data, error }, { data: calendar, error: calendarError }] = await Promise.all([
 		await supabase.from('contracts').select('id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name, id, date_of_birth)').match({ org, status: 'signed' }),

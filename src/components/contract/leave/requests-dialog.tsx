@@ -18,7 +18,7 @@ interface props {
 }
 
 export const LeaveRequests = async ({ org, contract, reviewType, orgSettings }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data, error } = await supabase
 		.from('time_off')

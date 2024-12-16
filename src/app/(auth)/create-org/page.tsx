@@ -6,7 +6,7 @@ import { TablesInsert } from '@/type/database.types';
 export default function CreateOrgPage() {
 	const createOrg = async (payload: TablesInsert<'organisations'>): Promise<string> => {
 		'use server';
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const { error, data } = await supabase.from('organisations').insert(payload).select('subdomain').single();
 		if (error || !data) return error.message;

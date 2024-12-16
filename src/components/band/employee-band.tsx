@@ -8,7 +8,7 @@ interface props {
 }
 
 export const EmployeeBand = async ({ org }: props) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data, error } = await supabase.from('employee_levels').select().eq('org', org);
 

@@ -3,7 +3,7 @@
 import { createClient } from '../supabase/server';
 
 export const signup = async (event: FormData) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const signupData = {
 		email: event.get('email') as string,

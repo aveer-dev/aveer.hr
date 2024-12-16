@@ -5,7 +5,7 @@ import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { createClient } from '@/utils/supabase/server';
 
 export const addAdminPerson = async (payload: TablesInsert<'profiles_roles'>) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: String(payload.organisation) });
 	if (canUpdate !== true) return canUpdate;
@@ -17,7 +17,7 @@ export const addAdminPerson = async (payload: TablesInsert<'profiles_roles'>) =>
 };
 
 export const removeAdminPerson = async (id: number, org: string) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const canUpdate = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (canUpdate !== true) return canUpdate;

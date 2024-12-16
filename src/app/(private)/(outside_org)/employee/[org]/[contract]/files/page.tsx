@@ -8,8 +8,9 @@ import { AddFile } from '@/components/file-management/add-file-link';
 import { TablesInsert } from '@/type/database.types';
 import { redirect } from 'next/navigation';
 
-export default async function ProfilePage({ params }: { params: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function ProfilePage(props: { params: Promise<{ [key: string]: string }> }) {
+	const params = await props.params;
+	const supabase = await createClient();
 
 	const { data, error } = await supabase
 		.from('contracts')
@@ -36,7 +37,7 @@ export default async function ProfilePage({ params }: { params: { [key: string]:
 	const addLink = async (payload: TablesInsert<'links'>) => {
 		'use server';
 
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const { error } = await supabase.from('links').upsert({ ...payload, org: data.org.subdomain });
 		if (error) return error.code == '23505' ? `Link with name '${payload.name}' already exists` : error.message;

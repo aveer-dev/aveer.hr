@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { differenceInBusinessDays } from 'date-fns';
 
 export const LeaveStat = async ({ days, total, label, org, profile }: { days: number; total: number; label: Database['public']['Enums']['leave_type_enum']; org: string; profile: string }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const percentage = (days / total) * 100;
 	const formatedPercentage = Number.isInteger(percentage) ? percentage : Number(percentage.toFixed(1));

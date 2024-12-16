@@ -5,8 +5,9 @@ import { BackButton } from '@/components/ui/back-button';
 import { ContractForm } from '@/components/forms/contract/form';
 import { getFormEntities, getOrgLevels, getTeams, getRoles, getPolicies, getEmployees } from '@/utils/form-data-init';
 
-export default async function EditContractPage({ params }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function EditContractPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
+	const params = await props.params;
+	const supabase = await createClient();
 
 	const [{ data, error }, entities, levels, teams, roles, policies, employees] = await Promise.all([
 		await supabase.from('open_roles').select().match({ org: params.org, id: params.role }).single(),

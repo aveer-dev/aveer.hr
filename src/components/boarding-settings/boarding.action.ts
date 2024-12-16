@@ -8,7 +8,7 @@ export const updateBoarding = async (boarding: TablesUpdate<'boarding_check_list
 	const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (typeof hasPermission == 'string') return hasPermission;
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { error } = await supabase
 		.from('boarding_check_lists')
 		.update({ ...boarding, org })
@@ -22,7 +22,7 @@ export const createBoarding = async (boarding: TablesInsert<'boarding_check_list
 	const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (typeof hasPermission == 'string') return hasPermission;
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { error } = await supabase.from('boarding_check_lists').insert({ ...boarding, org });
 	if (error) return error.message;
 
@@ -33,7 +33,7 @@ export const deleteBoarding = async (org: string, id?: number) => {
 	const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (typeof hasPermission == 'string') return hasPermission;
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { error } = await supabase.from('boarding_check_lists').delete().match({ id, org });
 	if (error) return error.code == '23503' ? 'Checklist is still connected to one or more employees' : error.message;
 	return true;

@@ -3,7 +3,7 @@ import { LEVEL } from '@/type/roles.types';
 import { createClient } from '@/utils/supabase/server';
 
 export const getApplicants = async ({ manager, contract, org }: { manager?: Tables<'managers'> | null; contract: any; org: string }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data, error } = await supabase
 		.from('job_applications')
@@ -27,7 +27,7 @@ export const getApplicants = async ({ manager, contract, org }: { manager?: Tabl
 };
 
 export const getLeaveRequests = async ({ manager, contract, org }: { manager?: Tables<'managers'> | null; contract: any; org: string }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data, error } = await supabase
 		.from('time_off')
@@ -55,7 +55,7 @@ export const getLeaveRequests = async ({ manager, contract, org }: { manager?: T
 };
 
 export const getBoardingRequests = async ({ manager, contract, org }: { manager?: Tables<'managers'> | null; contract: any; org: string }) => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	const { data, error } = await supabase.from('contract_check_list').select('*, contract:contracts!contract_check_list_contract_fkey(id, direct_report, job_title, team, profile:profiles!contracts_profile_fkey(first_name, last_name, id))').eq('org', org);
 

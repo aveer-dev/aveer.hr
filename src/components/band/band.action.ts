@@ -10,7 +10,7 @@ export const updateBand = async (band: TablesUpdate<'employee_levels'>, org: str
 
 	if (!band.id) return 'Band ID not found. Unable to update band';
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { error } = await supabase
 		.from('employee_levels')
 		.update({ ...band, org })
@@ -23,7 +23,7 @@ export const createBand = async (band: TablesInsert<'employee_levels'>, org: str
 	const hasPermission = await doesUserHaveAdequatePermissions({ orgId: org });
 	if (typeof hasPermission == 'string') return hasPermission;
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { error } = await supabase.from('employee_levels').insert({ ...band, org });
 	if (error) return error.message;
 	return true;
@@ -35,7 +35,7 @@ export const deleteBand = async (org: string, bandId?: number) => {
 
 	if (!bandId) return 'Band ID not found. Unable to delete band';
 
-	const supabase = createClient();
+	const supabase = await createClient();
 	const { error } = await supabase.from('employee_levels').delete().eq('id', bandId);
 	if (error) return error.code == '23503' ? 'Level is still connected to one or more employees' : error.message;
 	return true;

@@ -17,10 +17,11 @@ import { Files } from '@/components/files-settings';
 import { OKRs } from '@/components/okr/okrs';
 import { Appraisal } from '@/components/appraisal-forms/appraisal';
 import { AdminUsers } from '@/components/admin-user/admins';
-import { updatePassword } from '@/api/update-password';
 
-export default async function SettingsPage({ params, searchParams }: { params: { [key: string]: string }; searchParams: { [key: string]: string } }) {
-	const supabase = createClient();
+export default async function SettingsPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
+	const searchParams = await props.searchParams;
+	const params = await props.params;
+	const supabase = await createClient();
 
 	const {
 		data: { user },
@@ -36,7 +37,7 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 
 	const updateOrg = async (payload: TablesUpdate<'organisations'>) => {
 		'use server';
-		const supabase = createClient();
+		const supabase = await createClient();
 
 		const { error } = await supabase.from('organisations').update(payload).eq('subdomain', params.org);
 
@@ -118,7 +119,7 @@ export default async function SettingsPage({ params, searchParams }: { params: {
 				</TabsContent>
 
 				<TabsContent value="personal">
-					<SecurityForm updatePassword={updatePassword} />
+					<SecurityForm />
 
 					{profileResponse.data && <ProfileForm data={profileResponse.data} />}
 					{profileResponse.error && <div className="grid w-full border-t border-t-border py-10 text-center text-xs text-muted-foreground">Unable to fetch user data</div>}

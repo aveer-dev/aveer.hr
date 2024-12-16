@@ -89,7 +89,7 @@ export const MessageInput = ({ org, sender, message, onMessageSent }: { org: str
 
 					{editable && (
 						<>
-							<ContentItemMenu editor={editor} />
+							{/* <ContentItemMenu editor={editor} /> */}
 							<LinkMenu editor={editor} appendTo={menuContainerRef} />
 						</>
 					)}
