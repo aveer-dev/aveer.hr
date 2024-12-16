@@ -87,7 +87,7 @@ export default async function TimeoffPage(props: { params: Promise<{ [key: strin
 					</div>
 				)}
 
-				<DataTable data={timeOffRequest?.data?.map(item => ({ ...item, reviewType })) || []} columns={columns} />
+				<DataTable data={(timeOffRequest?.data?.map(item => ({ ...item, reviewType, contract: data, profile: data.profile })) || []) as any} columns={columns} />
 			</div>
 		</Suspense>
 	);

@@ -77,7 +77,7 @@ export const columns: LEAVE_COLUMN[] = [
 		id: 'actions',
 		cell: ({ row }) => {
 			return (
-				<LeaveReview reviewType={row.original.reviewType} data={row.original as any} contractId={row.original.activeUserContract}>
+				<LeaveReview reviewType={row.original.reviewType} data={row.original as any} contract={row.original.contract as any} contractId={row.original.activeUserContract}>
 					<Button variant={'outline'} className="h-8 gap-3">
 						Review
 						<PanelRightOpen size={12} />

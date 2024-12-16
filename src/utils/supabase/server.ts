@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { createClient as AdminClient } from '@supabase/supabase-js';
-import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
+import { cookies } from 'next/headers';
 import { Database } from '@/type/database.types';
 import { cookieOptions } from './cookieoptions';
 

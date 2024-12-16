@@ -10,10 +10,11 @@ import { ROLE } from '@/type/contract.types';
 import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/client';
 import { differenceInBusinessDays, format } from 'date-fns';
-import { Check, X } from 'lucide-react';
+import { Check, Edit, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { HTMLAttributes, ReactNode, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { LeaveRequestDialog } from '../contract/leave/leave-request-dialog';
 
 interface props {
 	children: ReactNode | string;
@@ -21,6 +22,7 @@ interface props {
 	reviewType: ROLE;
 	contractId?: number;
 	hideTooltip?: boolean;
+	contract?: Tables<'contracts'>;
 }
 interface LEVEL {
 	action?: string;
@@ -35,10 +37,11 @@ interface LEVEL {
 
 const supabase = createClient();
 
-export const LeaveReview = ({ data, reviewType, children, contractId, hideTooltip, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
+export const LeaveReview = ({ data, reviewType, children, contractId, hideTooltip, contract, ...props }: props & HTMLAttributes<HTMLButtonElement>) => {
 	const [levels, updateLevels] = useState<LEVEL[]>([]);
 	const [isReviewOpen, setReviewState] = useState(false);
 	const [isAnyLevelDenied, setDeniedLevelState] = useState(false);
+	const [orgSettings, setOrgSettings] = useState<Tables<'org_settings'>>();
 	const [isUpdating, setUpdateState] = useState({ denying: false, approving: false });
 	const [role] = useState<ROLE>(reviewType);
 	const router = useRouter();
@@ -142,6 +145,17 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 		if ((levels[index - 1] && levels[index - 1]?.action == 'denied') || isAnyLevelDenied) return <span className="text-xs font-light capitalize text-muted-foreground">Denied</span>;
 	};
 
+	const getOrgSettings = useCallback(async () => {
+		const { data: orgSettings, error } = await supabase.from('org_settings').select().match({ org: data.org });
+		if (!orgSettings || error) return;
+
+		setOrgSettings(orgSettings[0]);
+	}, [data.org]);
+
+	useEffect(() => {
+		if (reviewType == 'employee') getOrgSettings();
+	}, [getOrgSettings, reviewType]);
+
 	return (
 		<Sheet open={isReviewOpen} onOpenChange={setReviewState}>
 			{typeof children == 'string' && !hideTooltip && (
@@ -185,7 +199,24 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 				</SheetHeader>
 
 				<section className="mt-10 grid gap-4 py-4">
-					<h1 className="text-base font-bold">Leave details</h1>
+					<div className="flex items-center justify-between">
+						<h1 className="text-base font-bold">Leave details</h1>
+						{orgSettings && reviewType == 'employee' && data.status == 'pending' && (
+							<LeaveRequestDialog
+								contract={contract as any}
+								onCreateLeave={() => {
+									setReviewState(false);
+									router.refresh();
+								}}
+								orgSettings={orgSettings}
+								data={data}>
+								<Button className="" variant={'secondary'}>
+									<Edit size={12} />
+								</Button>
+							</LeaveRequestDialog>
+						)}
+					</div>
+
 					<ul className="mb-10 space-y-6">
 						<li className="space-y-2">
 							<h2 className="text-xs text-muted-foreground">Employee</h2>

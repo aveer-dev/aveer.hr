@@ -18,7 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { Label, labelVariants } from '@/components/ui/label';
 import { createClient } from '@/utils/supabase/client';
 import { toast } from 'sonner';
-import { Tables, TablesInsert } from '@/type/database.types';
+import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 
@@ -83,6 +83,11 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setCreatingState(true);
 
+		if (data) return updateLeave(values);
+		return createLeave(values);
+	};
+
+	const createLeave = async (values: z.infer<typeof formSchema>) => {
 		const leaveRequestData: TablesInsert<'time_off'> = {
 			from: values.dates.from as any,
 			to: values.dates.to as any,
@@ -110,6 +115,31 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 		if (onCreateLeave) onCreateLeave();
 		toggleDialog(false);
 		toast('😎 Leave request sent', { description: 'Fingers crossed now 🤞🏾' });
+		router.refresh();
+	};
+
+	const updateLeave = async (values: z.infer<typeof formSchema>) => {
+		const leaveRequestData: TablesUpdate<'time_off'> = {
+			from: values.dates.from as any,
+			to: values.dates.to as any,
+			contract: contract.id as number,
+			org: (contract.org as any).subdomain,
+			leave_type: values.leave_type,
+			hand_over_note: values.hand_over_note,
+			note: values.note,
+			status: approvalPolicy.length ? 'pending' : 'approved',
+			profile: (contract.profile as any)?.id,
+			levels: approvalPolicy
+		};
+		showHandover && (leaveRequestData.hand_over = Number(values.hand_over));
+
+		const { error } = await supabase.from('time_off').update(leaveRequestData).match({ id: data?.id });
+		setCreatingState(false);
+		if (error) return toast('❌ Oooops', { description: error.message });
+
+		if (onCreateLeave) onCreateLeave();
+		toggleDialog(false);
+		toast('😎 Leave request updated', { description: 'Fingers crossed now 🤞🏾' });
 		router.refresh();
 	};
 
@@ -330,7 +360,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 
 							<Button disabled={creatingRequest} type="submit" className="w-full gap-2">
 								{creatingRequest && <LoadingSpinner />}
-								{creatingRequest ? 'Requesting leave' : 'Request leave'}
+								{creatingRequest ? (data ? 'Updating leave' : 'Requesting leave') : data ? 'Update leave' : 'Request leave'}
 							</Button>
 						</form>
 					</Form>
