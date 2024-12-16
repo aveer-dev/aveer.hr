@@ -33,7 +33,7 @@ export const DashboardCharts = ({ org, contracts }: { org: string; contracts: nu
 				<div key={index} className="grid w-full max-w-80 gap-2">
 					<h3 className="text-sm font-medium">{stat.label}</h3>
 					<p className="text-8xl font-bold">
-						<NumberFlow isolate value={Number(stat.number)} trend={false} />
+						<NumberFlow isolate value={Number(stat.number)} trend={0} />
 					</p>
 				</div>
 			))}
