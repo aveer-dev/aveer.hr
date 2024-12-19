@@ -1581,11 +1581,15 @@ export type Database = {
           about_us: string | null
           additional_offerings: Json[] | null
           created_at: string
+          enable_task_manager: boolean
           id: number
           maternity_leave: number | null
           org: string
           paid_leave: number | null
           paternity_leave: number | null
+          plane_key: string | null
+          plane_project: string | null
+          plane_workspace_slug: string | null
           probation: number | null
           salary_date: string | null
           sick_leave: number | null
@@ -1596,11 +1600,15 @@ export type Database = {
           about_us?: string | null
           additional_offerings?: Json[] | null
           created_at?: string
+          enable_task_manager?: boolean
           id?: number
           maternity_leave?: number | null
           org: string
           paid_leave?: number | null
           paternity_leave?: number | null
+          plane_key?: string | null
+          plane_project?: string | null
+          plane_workspace_slug?: string | null
           probation?: number | null
           salary_date?: string | null
           sick_leave?: number | null
@@ -1611,11 +1619,15 @@ export type Database = {
           about_us?: string | null
           additional_offerings?: Json[] | null
           created_at?: string
+          enable_task_manager?: boolean
           id?: number
           maternity_leave?: number | null
           org?: string
           paid_leave?: number | null
           paternity_leave?: number | null
+          plane_key?: string | null
+          plane_project?: string | null
+          plane_workspace_slug?: string | null
           probation?: number | null
           salary_date?: string | null
           sick_leave?: number | null

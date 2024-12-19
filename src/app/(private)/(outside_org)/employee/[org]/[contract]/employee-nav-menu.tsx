@@ -40,7 +40,7 @@ export const NavMenu = ({ contract }: { contract: Tables<'contracts'> }) => {
 	}, [navItems, router]);
 
 	return (
-		<ul className="no-scrollbar flex max-w-full items-center gap-4 overflow-x-auto rounded-full border bg-background/30 px-2 py-2 shadow-md backdrop-blur transition-all duration-500 sm:max-w-fit">
+		<ul className="no-scrollbar flex max-w-full items-center gap-4 overflow-x-auto bg-background/30 px-2 py-2 transition-all duration-500 sm:max-w-fit">
 			{navItems.map((item, index) => (
 				<li
 					key={index}

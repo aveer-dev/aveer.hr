@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
 export default function SigninPage() {
-	const signin = async (prevState: any, payload: FormData) => {
+	const signin = async (_prevState: any, payload: FormData) => {
 		'use server';
 		const supabase = await createClient();
 
