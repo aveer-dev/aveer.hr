@@ -3,13 +3,15 @@ import { PriorityIcon } from './priority-icon';
 import Link from 'next/link';
 import { getAllIssues, getCycleIssues, getCycles, getProject, getStates } from './plane.actions';
 import { WorkActivityCharts } from './work-activity-chart';
-import { isWithinInterval } from 'date-fns';
-import { PLANE_ASSIGNEE, PLANE_CYCLE, PLANE_ISSUE, PLANE_STATE } from './plane.types';
+import { format, isWithinInterval } from 'date-fns';
+import { PLANE_ASSIGNEE, PLANE_CYCLE, PLANE_ISSUE, PLANE_PROJECT, PLANE_STATE } from './plane.types';
 import { IssueStateIcon } from './issue-state-icon';
 import { createClient } from '@/utils/supabase/server';
-import { Button } from '@/components/ui/button';
 import { PlaneSetupSheet } from './plane-setup-sheet';
 import { TablesUpdate } from '@/type/database.types';
+import { CyclesPopover } from './cycles-popover';
+import { Separator } from '@/components/ui/separator';
+import { Fragment } from 'react';
 
 export const WorkActivity = async ({ paramCycleId, org }: { paramCycleId?: string; org: string }) => {
 	const supabase = await createClient();
@@ -63,16 +65,23 @@ export const WorkActivity = async ({ paramCycleId, org }: { paramCycleId?: strin
 
 	const activeCycle = paramCycleId ? (cycles as PLANE_CYCLE[]).find(cycle => cycle.id === paramCycleId) : (cycles as PLANE_CYCLE[]).find(cycle => isWithinInterval(new Date(), { start: new Date(cycle.start_date), end: new Date(cycle.end_date) }));
 
-	if (!activeCycle) return;
+	let issues: PLANE_ISSUE[] = [];
+	let project: PLANE_PROJECT | null = null;
+	let issueStates: PLANE_STATE[] = [];
 
-	const [{ results: activeCycleIssues }, { results: allIssues }, { results: issueStates, detail: issueStateDetail, error: issueStateError }, project] = await Promise.all([
-		getCycleIssues({ cycleId: activeCycle.id, projectId, apiKey, workspaceSlug }),
-		getAllIssues({ projectId, apiKey, workspaceSlug }),
-		getStates({ projectId, apiKey, workspaceSlug }),
-		getProject({ projectId, apiKey, workspaceSlug })
-	]);
+	if (activeCycle) {
+		const [{ results: activeCycleIssues }, { results: allIssues }, { results: allIssueStates }, projectDetails] = await Promise.all([
+			getCycleIssues({ cycleId: activeCycle.id, projectId, apiKey, workspaceSlug }),
+			getAllIssues({ projectId, apiKey, workspaceSlug }),
+			getStates({ projectId, apiKey, workspaceSlug }),
+			getProject({ projectId, apiKey, workspaceSlug })
+		]);
 
-	const issues = (allIssues as PLANE_ISSUE[]).filter(issue => (activeCycleIssues as PLANE_ISSUE[]).find(activeIssue => activeIssue.id === issue.id)).sort((a, b) => a.sequence_id - b.sequence_id);
+		issueStates = allIssueStates as PLANE_STATE[];
+		project = projectDetails;
+		issues = (allIssues as PLANE_ISSUE[]).filter(issue => (activeCycleIssues as PLANE_ISSUE[]).find(activeIssue => activeIssue.id === issue.id)).sort((a, b) => a.sequence_id - b.sequence_id);
+	}
+
 	const assignees = issues
 		.filter(issue => issue.assignees.length > 0)
 		.flatMap(issue => issue.assignees)
@@ -88,43 +97,81 @@ export const WorkActivity = async ({ paramCycleId, org }: { paramCycleId?: strin
 		<section>
 			<h1 className="text-xl font-bold">Employee Performance</h1>
 
-			<WorkActivityCharts activeCycle={activeCycle} issues={issues as PLANE_ISSUE[]} states={issueStates as PLANE_STATE[]} cycles={cycles} />
+			<div className="mt-6 flex items-center justify-between">
+				<div className="flex items-center gap-3">
+					<h2 className="text-sm font-light">Cycles</h2>
+					<CyclesPopover activeCycle={activeCycle} cycles={cycles} />
+				</div>
 
-			<div className="mt-20">
-				<h2 className="text-xl font-medium">Issues</h2>
-
-				<Tabs defaultValue="priority" className="w-full">
-					<div className="mt-4 flex items-center gap-4">
-						<h3 className="w-fit text-sm">Filter by</h3>
-
-						<TabsList className="flex w-fit items-center">
-							<TabsTrigger value="priority">Priority</TabsTrigger>
-							<TabsTrigger value="people">People</TabsTrigger>
-						</TabsList>
+				{activeCycle && (
+					<div className="flex items-center gap-2">
+						<div className="flex items-center gap-1">
+							<h3 className="text-sm font-light">From</h3>
+							<p className="text-sm">{format(activeCycle?.start_date as string, 'PP')}</p>
+						</div>
+						-
+						<div className="flex items-center gap-1">
+							<h3 className="text-sm font-light">To</h3>
+							<p className="text-sm">{format(activeCycle?.end_date as string, 'PP')}</p>
+						</div>
 					</div>
-
-					<TabsContent value="priority">
-						<ul className="mt-6 space-y-3">
-							{(issues as PLANE_ISSUE[]).map(issue => (
-								<Issue key={issue.id} issue={issue} id={project?.identifier + '-' + issue.sequence_id} />
-							))}
-						</ul>
-					</TabsContent>
-
-					<TabsContent value="people">
-						<ul className="mt-6 space-y-3">
-							{assignees.map(assignee => (
-								<Person
-									key={assignee.id}
-									assignee={assignee}
-									personIssuesDone={issues.filter(issue => issue.assignees.find((person: any) => person.id === assignee.id && issue.state.name === 'Done')).length}
-									personIssues={issues.filter(issue => issue.assignees.find((person: any) => person.id === assignee.id)).length}
-								/>
-							))}
-						</ul>
-					</TabsContent>
-				</Tabs>
+				)}
 			</div>
+
+			{activeCycle && (
+				<>
+					<WorkActivityCharts activeCycle={activeCycle} issues={issues as PLANE_ISSUE[]} states={issueStates as PLANE_STATE[]} cycles={cycles} />
+
+					<div className="mt-20">
+						<h2 className="text-xl font-medium">Issues</h2>
+
+						<Tabs defaultValue="priority" className="w-full">
+							<div className="mt-4 flex items-center gap-4">
+								<h3 className="w-fit text-sm">Filter by</h3>
+
+								<TabsList className="flex w-fit items-center">
+									<TabsTrigger value="priority">Priority</TabsTrigger>
+									<TabsTrigger value="people">People</TabsTrigger>
+								</TabsList>
+							</div>
+
+							<TabsContent value="priority">
+								<ul className="mt-6 space-y-3">
+									{(issues as PLANE_ISSUE[]).map(issue => (
+										<Fragment key={issue.id}>
+											<Issue issue={issue} id={project?.identifier + '-' + issue.sequence_id} />
+
+											<Separator className="bg-border/30" />
+										</Fragment>
+									))}
+								</ul>
+							</TabsContent>
+
+							<TabsContent value="people">
+								<ul className="mt-6 space-y-3">
+									{assignees.map(assignee => (
+										<Fragment key={assignee.id}>
+											<Person
+												key={assignee.id}
+												assignee={assignee}
+												personIssuesDone={issues.filter(issue => issue.assignees.find((person: any) => person.id === assignee.id && issue.state.name === 'Done')).length}
+												personIssues={issues.filter(issue => issue.assignees.find((person: any) => person.id === assignee.id)).length}
+											/>
+											<Separator className="bg-border/30" />
+										</Fragment>
+									))}
+								</ul>
+							</TabsContent>
+						</Tabs>
+					</div>
+				</>
+			)}
+
+			{!activeCycle && (
+				<div className="mt-6 flex min-h-48 items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">
+					<p>No cycle selected</p>
+				</div>
+			)}
 		</section>
 	);
 };
@@ -134,7 +181,7 @@ const Issue = ({ issue, id }: { issue: PLANE_ISSUE; id?: string }) => {
 		<Link href={'#'} legacyBehavior passHref>
 			<li className="flex cursor-pointer items-center rounded-md py-2 transition-all duration-500 hover:bg-accent hover:px-2">
 				<PriorityIcon state={issue.priority as any} />
-				<p className="ml-2 text-sm">
+				<p className="ml-2 text-xs">
 					<span className="pr-2 font-light text-support">{id}</span>
 					{issue.name}
 				</p>

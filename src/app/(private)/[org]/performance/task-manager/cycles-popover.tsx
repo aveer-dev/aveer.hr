@@ -21,8 +21,8 @@ export const CyclesPopover = ({ cycles, activeCycle }: { activeCycle?: PLANE_CYC
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button variant="secondary" role="combobox" aria-expanded={open} className="gap-4">
-					{value?.name}
-					<ChevronDown size={12} className="scale-150" />
+					{value?.name || 'Select cycle'}
+					<ChevronDown size={12} />
 				</Button>
 			</PopoverTrigger>
 
