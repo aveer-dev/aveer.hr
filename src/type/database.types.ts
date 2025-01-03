@@ -1947,6 +1947,41 @@ export type Database = {
           },
         ]
       }
+      third_party_tokens: {
+        Row: {
+          created_at: string
+          id: number
+          platform: Database["public"]["Enums"]["third_party_auth_platforms"]
+          profile: string
+          refresh_token: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          platform: Database["public"]["Enums"]["third_party_auth_platforms"]
+          profile?: string
+          refresh_token?: string | null
+          token: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          platform?: Database["public"]["Enums"]["third_party_auth_platforms"]
+          profile?: string
+          refresh_token?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "third_party_tokens_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       time_off: {
         Row: {
           approved_at: string | null
@@ -2072,6 +2107,7 @@ export type Database = {
       leave_type_enum: "paid" | "sick" | "maternity" | "paternity" | "unpaid"
       policy_types: "time_off" | "role_application" | "boarding"
       role_status: "open" | "close"
+      third_party_auth_platforms: "google"
       user_type: "admin" | "employee"
       work_locations: "on-site" | "remote" | "hybrid"
     }

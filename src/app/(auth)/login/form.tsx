@@ -33,7 +33,7 @@ export const LoginForm = ({ loginAction }: props) => {
 			provider: 'google',
 
 			options: {
-				redirectTo: `${process.env.NEXT_PUBLIC_URL}/auth/callback`,
+				redirectTo: `${process.env.NEXT_PUBLIC_URL}/auth/signin-callback`,
 				queryParams: {
 					access_type: 'offline',
 					prompt: 'consent'
@@ -143,7 +143,7 @@ export const LoginForm = ({ loginAction }: props) => {
 					</Button>
 				</TextLoop>
 
-				<Link href="/signup" className="block w-full text-sm underline">
+				<Link href="/signup" className="block text-sm underline">
 					Sign up
 				</Link>
 			</div>
