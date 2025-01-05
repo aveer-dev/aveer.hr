@@ -189,7 +189,7 @@ export const SignupForm = ({ signupAction }: PROPS) => {
 				</TextLoop>
 
 				<Link href="/login" className="block text-sm underline">
-					Login
+					Do you have an account? Login
 				</Link>
 			</div>
 		</form>

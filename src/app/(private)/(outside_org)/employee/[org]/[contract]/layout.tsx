@@ -8,6 +8,7 @@ import { EmployeeProfileSettings } from './employee-profile-settings';
 import { EmployeePageSearch } from './employee-search';
 import { ContractsPopover } from './contracts-popover';
 import { Notifications } from './notifications';
+import { EmployeeCalendar } from './calendar';
 
 export default async function RootLayout(props: { children: React.ReactNode; params: Promise<{ [key: string]: string }> }) {
 	const params = await props.params;
@@ -80,6 +81,8 @@ export default async function RootLayout(props: { children: React.ReactNode; par
 						</div>
 
 						<div className="order-1 flex w-full items-center justify-end gap-3 sm:order-2 sm:w-fit sm:justify-start">
+							<EmployeeCalendar org={params.org} contractId={contract?.id} />
+
 							<Notifications contractId={contract?.id} messages={messages} />
 
 							<EmployeePageSearch />

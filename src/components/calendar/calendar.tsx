@@ -2,8 +2,8 @@
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { format, isSameDay } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, isPast, isSameDay } from 'date-fns';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { DayOfWeek, DayPicker } from 'react-day-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useState } from 'react';
@@ -14,6 +14,8 @@ import { Separator } from '@/components/ui/separator';
 import { ReminderDialog } from './reminder-dialog';
 import { useRouter } from 'next/navigation';
 import { CalendarConfigDialog } from './config-dialog';
+import { ROLE } from '@/type/contract.types';
+import { AlertDialogCancel } from '../ui/alert-dialog';
 
 interface props {
 	leaveDays: { date: Date; status: string; name: string; data: any }[];
@@ -22,10 +24,15 @@ interface props {
 	org: string;
 	profile: string;
 	contract: number;
-	calendar: { enable_calendar: boolean; calendar_employee_events: string[] | null } | null;
+	orgCalendarConfig: { enable_calendar: boolean; calendar_employee_events: string[] | null } | null;
+	calendarConfig?: Tables<'contract_calendar_config'>[] | null;
+	role?: ROLE;
+	contractId?: number;
+	calendarId?: string;
+	enableClose?: boolean;
 }
 
-export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contract, calendar }: props) => {
+export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contract, orgCalendarConfig, calendarConfig, role = 'admin', contractId, calendarId, enableClose }: props) => {
 	const router = useRouter();
 	const dayOfWeekMatcher: DayOfWeek = {
 		dayOfWeek: [0, 6]
@@ -75,9 +82,24 @@ export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contrac
 								<ChevronRight size={16} />
 							</Button>
 
-							<Separator orientation="vertical" className="h-3" />
+							{((calendarId && orgCalendarConfig?.enable_calendar) || role == 'admin') && (
+								<>
+									<Separator orientation="vertical" className="h-3" />
 
-							<CalendarConfigDialog calendar={calendar} org={org} />
+									<CalendarConfigDialog calendarId={calendarId} contractId={contractId} calendarConfig={calendarConfig} orgCalendarConfig={orgCalendarConfig} org={org} role={role} />
+								</>
+							)}
+
+							{enableClose && (
+								<>
+									<Separator orientation="vertical" className="h-3" />
+									<AlertDialogCancel asChild>
+										<Button variant={'ghost'} className="border-0">
+											<X size={16} />
+										</Button>
+									</AlertDialogCancel>
+								</>
+							)}
 						</nav>
 					);
 				},
@@ -102,8 +124,8 @@ export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contrac
 									<td
 										{...cellProps}
 										onClick={event => event.preventDefault()}
-										onDoubleClick={() => toggleAdd(!isAddOpen)}
-										className="relative h-28 w-full min-w-9 overflow-y-hidden border-r p-1 text-center text-sm last-of-type:border-r-0 focus-within:relative focus-within:z-20 data-[state=open]:bg-muted [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-r-md">
+										onDoubleClick={() => !isPast(day.date) && toggleAdd(!isAddOpen)}
+										className="relative h-28 w-full min-w-9 overflow-y-hidden border-r p-1 text-center text-sm transition-colors duration-500 last-of-type:border-r-0 focus-within:relative focus-within:z-20 data-[state=open]:bg-muted [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-r-md">
 										<div className={cn((modifiers.outside || modifiers.weekend) && 'opacity-10', modifiers.today && 'bg-slate-800 text-white', 'mb-2 ml-auto flex h-6 w-6 items-center justify-center rounded-full p-1 text-right text-lg')}>
 											{cellProps.children}
 										</div>
@@ -123,7 +145,9 @@ export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contrac
 														setActiveReminder(event.data);
 														setReminderOpenState(true);
 													}}
-													className={cn('flex w-full items-center gap-2 overflow-hidden rounded-lg p-1 text-left text-xs capitalize text-muted-foreground transition-all duration-500 hover:bg-accent')}>
+													className={cn(
+														'flex w-full items-center gap-2 overflow-hidden rounded-lg p-1 text-left text-xs capitalize text-muted-foreground transition-all duration-500 hover:bg-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1'
+													)}>
 													<div className={cn(event.type === 'dob' ? 'bg-blue-400' : 'bg-orange-400', 'h-3 w-[2px] rounded-sm')}></div>
 													<div className="w-10/12 truncate">
 														{event.name} {event.type === 'dob' ? '🎉' : ''}

@@ -428,6 +428,61 @@ export type Database = {
           },
         ]
       }
+      contract_calendar_config: {
+        Row: {
+          calendar_id: string
+          contract: number | null
+          created_at: string
+          id: number
+          org: string
+          platform: Database["public"]["Enums"]["third_party_auth_platforms"]
+          platform_id: string
+          profile: string | null
+        }
+        Insert: {
+          calendar_id: string
+          contract?: number | null
+          created_at?: string
+          id?: number
+          org: string
+          platform: Database["public"]["Enums"]["third_party_auth_platforms"]
+          platform_id: string
+          profile?: string | null
+        }
+        Update: {
+          calendar_id?: string
+          contract?: number | null
+          created_at?: string
+          id?: number
+          org?: string
+          platform?: Database["public"]["Enums"]["third_party_auth_platforms"]
+          platform_id?: string
+          profile?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_calendar_config_contract_fkey"
+            columns: ["contract"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_calendar_config_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "contract_calendar_config_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_check_list: {
         Row: {
           boarding: number

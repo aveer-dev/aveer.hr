@@ -144,7 +144,7 @@ export const LoginForm = ({ loginAction }: props) => {
 				</TextLoop>
 
 				<Link href="/signup" className="block text-sm underline">
-					Sign up
+					Don&apos;t have an account? Sign up
 				</Link>
 			</div>
 		</form>

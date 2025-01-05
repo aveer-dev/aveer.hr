@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { FullCalendar } from './calendar';
+import { FullCalendar } from '@/components/calendar/calendar';
 import { redirect } from 'next/navigation';
 
 export const CalendarPageComponent = async ({ org }: { org: string }) => {
@@ -32,7 +32,15 @@ export const CalendarPageComponent = async ({ org }: { org: string }) => {
 
 	return (
 		<section className="mx-auto">
-			<FullCalendar calendar={calendar} org={org} profile={user?.id!} contract={dobs?.find(contract => contract.profile?.id == user?.id)?.id as number} leaveDays={result} reminders={reminders || []} dobs={dobs!.filter(contract => contract.profile?.date_of_birth) as any} />
+			<FullCalendar
+				orgCalendarConfig={calendar}
+				org={org}
+				profile={user?.id!}
+				contract={dobs?.find(contract => contract.profile?.id == user?.id)?.id as number}
+				leaveDays={result}
+				reminders={reminders || []}
+				dobs={dobs!.filter(contract => contract.profile?.date_of_birth) as any}
+			/>
 		</section>
 	);
 };

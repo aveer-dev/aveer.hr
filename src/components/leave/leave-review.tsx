@@ -163,7 +163,7 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<SheetTrigger asChild>
-								<button {...props} className={cn('flex w-full items-center gap-2 overflow-hidden rounded-lg p-1 text-left text-xs capitalize text-muted-foreground transition-all duration-500 hover:bg-accent', props.className)}>
+								<button {...props} className={cn('flex w-full items-center gap-2 overflow-hidden rounded-lg p-1 text-left text-xs capitalize text-muted-foreground transition-all duration-500 hover:bg-secondary', props.className)}>
 									<div className={cn(`${data.status == 'approved' ? 'bg-green-400' : data.status == 'denied' ? 'bg-red-400' : data.status == 'pending' ? 'bg-orange-400' : 'bg-gray-400'}`, 'h-3 w-[2px] rounded-sm')}></div>
 									<div className="w-10/12 truncate">{children}</div>
 								</button>
@@ -183,7 +183,7 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 
 			{hideTooltip && typeof children == 'string' && (
 				<SheetTrigger asChild>
-					<button {...props} className={cn('flex w-full items-center gap-2 overflow-hidden rounded-lg p-1 text-left text-xs capitalize text-muted-foreground transition-all duration-500 hover:bg-accent', props.className)}>
+					<button {...props} className={cn('flex w-full items-center gap-2 overflow-hidden rounded-lg p-1 text-left text-xs capitalize text-muted-foreground transition-all duration-500 hover:bg-secondary', props.className)}>
 						<div className={cn(`${data.status == 'approved' ? 'bg-green-400' : data.status == 'denied' ? 'bg-red-400' : data.status == 'pending' ? 'bg-orange-400' : 'bg-gray-400'}`, 'h-3 w-[2px] rounded-sm')}></div>
 						<div className="w-10/12 truncate">{children}</div>
 					</button>
