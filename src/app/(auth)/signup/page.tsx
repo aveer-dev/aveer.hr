@@ -27,7 +27,7 @@ export default function SignupPage() {
 
 	return (
 		<div className="mx-auto grid w-[350px] gap-9">
-			<div className="mb-4 grid gap-2">
+			<div className="mb-2 grid gap-2">
 				<h1 className="text-xl font-bold">Welcome</h1>
 				<p className="text-balance text-xs font-normal text-muted-foreground">Enter your details below to setup your organisation account</p>
 			</div>

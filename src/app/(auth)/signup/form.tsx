@@ -140,7 +140,7 @@ export const SignupForm = ({ signupAction }: PROPS) => {
 				/>
 			</div>
 
-			<div className="!mt-4 w-full space-y-4 text-center">
+			<div className="!mt-4 w-full space-y-6 text-center">
 				<TextLoop
 					className="w-full"
 					activeIndex={buttonAnimationIndex}
