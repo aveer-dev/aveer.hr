@@ -13,6 +13,7 @@ import { ReminderForm } from './reminder-form';
 import { Separator } from '@/components/ui/separator';
 import { ReminderDialog } from './reminder-dialog';
 import { useRouter } from 'next/navigation';
+import { CalendarConfigDialog } from './config-dialog';
 
 interface props {
 	leaveDays: { date: Date; status: string; name: string; data: any }[];
@@ -21,9 +22,10 @@ interface props {
 	org: string;
 	profile: string;
 	contract: number;
+	calendar: { enable_calendar: boolean; calendar_employee_events: string[] | null } | null;
 }
 
-export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contract }: props) => {
+export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contract, calendar }: props) => {
 	const router = useRouter();
 	const dayOfWeekMatcher: DayOfWeek = {
 		dayOfWeek: [0, 6]
@@ -72,6 +74,10 @@ export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contrac
 							<Button variant={'ghost'} onClick={onNextClick}>
 								<ChevronRight size={16} />
 							</Button>
+
+							<Separator orientation="vertical" className="h-3" />
+
+							<CalendarConfigDialog calendar={calendar} org={org} />
 						</nav>
 					);
 				},

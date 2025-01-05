@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { TablesInsert } from '@/type/database.types';
 
 export async function GET(request: Request) {
 	const { searchParams, origin } = new URL(request.url);
@@ -13,11 +14,12 @@ export async function GET(request: Request) {
 		if (!error) {
 			const {
 				session: { provider_refresh_token, provider_token },
-				user: {
-					app_metadata: { provider }
-				}
+				user: { id: profile }
 			} = data;
-			await supabase.from('third_party_tokens').insert({ platform: provider as any, refresh_token: provider_refresh_token, token: provider_token as string });
+			const tokenData: TablesInsert<'third_party_tokens'> = { platform: 'google', refresh_token: provider_refresh_token, token: provider_token as string };
+			const { data: tokens } = await supabase.from('third_party_tokens').select('id').match({ platform: 'google', profile }).single();
+			if (data) tokenData.id = tokens?.id;
+			await supabase.from('third_party_tokens').upsert(tokenData, { ignoreDuplicates: false });
 
 			const forwardedHost = request.headers.get('x-forwarded-host'); // original origin before load balancer
 			const isLocalEnv = process.env.NODE_ENV === 'development';

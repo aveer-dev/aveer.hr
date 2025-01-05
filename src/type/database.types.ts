@@ -386,6 +386,48 @@ export type Database = {
           },
         ]
       }
+      calendars: {
+        Row: {
+          calendar_id: string
+          created_at: string
+          entity: number | null
+          id: number
+          org: string
+          platform: string
+        }
+        Insert: {
+          calendar_id: string
+          created_at?: string
+          entity?: number | null
+          id?: number
+          org: string
+          platform: string
+        }
+        Update: {
+          calendar_id?: string
+          created_at?: string
+          entity?: number | null
+          id?: number
+          org?: string
+          platform?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendars_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: true
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendars_org_fkey"
+            columns: ["org"]
+            isOneToOne: true
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       contract_check_list: {
         Row: {
           boarding: number
@@ -1580,7 +1622,9 @@ export type Database = {
         Row: {
           about_us: string | null
           additional_offerings: Json[] | null
+          calendar_employee_events: string[] | null
           created_at: string
+          enable_calendar: boolean
           enable_task_manager: boolean
           id: number
           maternity_leave: number | null
@@ -1599,7 +1643,9 @@ export type Database = {
         Insert: {
           about_us?: string | null
           additional_offerings?: Json[] | null
+          calendar_employee_events?: string[] | null
           created_at?: string
+          enable_calendar?: boolean
           enable_task_manager?: boolean
           id?: number
           maternity_leave?: number | null
@@ -1618,7 +1664,9 @@ export type Database = {
         Update: {
           about_us?: string | null
           additional_offerings?: Json[] | null
+          calendar_employee_events?: string[] | null
           created_at?: string
+          enable_calendar?: boolean
           enable_task_manager?: boolean
           id?: number
           maternity_leave?: number | null
@@ -1668,6 +1716,33 @@ export type Database = {
           subdomain?: string
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      platform_thirdparty_keys: {
+        Row: {
+          created_at: string
+          id: number
+          platform: Database["public"]["Enums"]["third_party_auth_platforms"]
+          platform_id: string | null
+          refresh_token: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          platform: Database["public"]["Enums"]["third_party_auth_platforms"]
+          platform_id?: string | null
+          refresh_token: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          platform?: Database["public"]["Enums"]["third_party_auth_platforms"]
+          platform_id?: string | null
+          refresh_token?: string
+          token?: string
         }
         Relationships: []
       }

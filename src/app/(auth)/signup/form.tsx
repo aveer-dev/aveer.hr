@@ -33,7 +33,6 @@ export const SignupForm = ({ signupAction }: PROPS) => {
 	const signupWithGoogle = async () => {
 		await supabase.auth.signInWithOAuth({
 			provider: 'google',
-
 			options: {
 				redirectTo: `${process.env.NEXT_PUBLIC_URL}/auth/signup-callback`,
 				queryParams: {
