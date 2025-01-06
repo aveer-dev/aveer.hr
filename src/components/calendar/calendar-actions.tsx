@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/server';
 import { Database, TablesInsert } from '@/type/database.types';
 
 const calendarAPI = async (org?: string) => {
-	const oAuth2Client = new OAuth2Client(process.env.SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID, process.env.SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET);
+	const oAuth2Client = new OAuth2Client(process.env.AVEER_CALENDAR_GOOGLE_CLIENT_ID, process.env.AVEER_CALENDAR_GOOGLE_SECRET);
 	const supabase = await createClient();
 
 	const [tokens, organisation] = await Promise.all([supabase.from('platform_thirdparty_keys').select('token, refresh_token').match({ platform: 'google' }).single(), org ? supabase.from('organisations').select('name').match({ subdomain: org }).single() : null]);
@@ -24,7 +24,7 @@ const calendarAPI = async (org?: string) => {
 };
 
 export const getAuthLink = async (org: string) => {
-	const oAuth2Client = new OAuth2Client(process.env.SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID, process.env.SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET, `${process.env.NEXT_PUBLIC_URL}/auth/google`);
+	const oAuth2Client = new OAuth2Client(process.env.AVEER_CALENDAR_GOOGLE_CLIENT_ID, process.env.AVEER_CALENDAR_GOOGLE_SECRET, `${process.env.NEXT_PUBLIC_URL}/auth/google`);
 	const authorizeUrl = oAuth2Client.generateAuthUrl({
 		access_type: 'offline',
 		scope: ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/calendar'],

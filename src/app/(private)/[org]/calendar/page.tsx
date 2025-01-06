@@ -8,7 +8,7 @@ export default async function CalendarPage(props: { params: Promise<{ [key: stri
 	return (
 		<Suspense
 			fallback={
-				<div className="mx-auto w-full space-y-2">
+				<div className="mx-auto w-full space-y-4">
 					<Skeleton className="h-10 w-full" />
 					<Skeleton className="h-96 w-full" />
 				</div>

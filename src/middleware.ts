@@ -15,6 +15,6 @@ export const config = {
 		 * - favicon.ico (favicon file)
 		 * Feel free to modify this pattern to include more paths.
 		 */
-		'/((?!monitoring|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'
+		'/((?!monitoring|_next/static|_next/image|favicon.ico|aveer-privacy-policy.pdf|.*\\.(?:svg|png|jpg|pdf|jpeg|gif|webp)$).*)'
 	]
 };
