@@ -2,6 +2,7 @@ import { SignInWithPasswordCredentials } from '@supabase/supabase-js';
 import { LoginForm } from './form';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
 export default function SigninPage() {
 	const signin = async (_prevState: any, payload: FormData) => {
@@ -20,12 +21,22 @@ export default function SigninPage() {
 
 	return (
 		<div className="mx-auto grid w-[350px] gap-9">
-			<div className="mb-4 grid gap-2">
+			<div className="mb-2 grid gap-2">
 				<h1 className="text-xl font-bold">Login</h1>
 				<p className="text-balance text-xs font-normal text-muted-foreground">Enter your email below to login to your account</p>
 			</div>
 
 			<LoginForm loginAction={signin} />
+
+			<div className="space-y-3">
+				<Link href="/signup" className="mx-auto block w-fit text-sm underline">
+					Don&apos;t have an account? Sign up
+				</Link>
+
+				<Link href="/aveer-privacy-policy.pdf" className="mx-auto block w-fit text-sm underline">
+					Privacy Policy
+				</Link>
+			</div>
 		</div>
 	);
 }

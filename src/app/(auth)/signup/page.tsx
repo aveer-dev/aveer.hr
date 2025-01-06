@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { SignupForm } from './form';
 import { redirect } from 'next/navigation';
 import { SignUpWithPasswordCredentials } from '@supabase/supabase-js';
+import Link from 'next/link';
 
 export default function SignupPage() {
 	const signup = async (_prevState: any, payload: FormData): Promise<string> => {
@@ -33,6 +34,16 @@ export default function SignupPage() {
 			</div>
 
 			<SignupForm signupAction={signup} />
+
+			<div className="space-y-3">
+				<Link href="/login" className="mx-auto block w-fit text-sm underline">
+					Do you have an account? Login
+				</Link>
+
+				<Link href="/aveer-privacy-policy.pdf" className="mx-auto block w-fit text-sm underline">
+					Privacy Policy
+				</Link>
+			</div>
 		</div>
 	);
 }
