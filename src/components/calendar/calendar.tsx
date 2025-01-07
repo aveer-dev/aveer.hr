@@ -1,8 +1,8 @@
 'use client';
 
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { format, isPast, isSameDay } from 'date-fns';
+import { addMonths, format, isPast, isSameDay } from 'date-fns';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { DayOfWeek, DayPicker } from 'react-day-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -45,10 +45,6 @@ export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contrac
 				months: 'flex flex-col sm:flex-col space-y-4 sm:space-y-0',
 				month: 'space-y-4 w-full',
 				month_caption: 'flex pt-1 relative items-center border-b mb-12 pb-3',
-				caption_label: 'text-xl font-bold',
-				nav: 'relative bg-transparent p-0 space-x-1 flex items-center justify-end -mb-9 z-[1]',
-				button_previous: cn(buttonVariants({ variant: 'ghost' }), ''),
-				button_next: cn(buttonVariants({ variant: 'ghost' }), ''),
 				month_grid: 'w-full border-collapse space-y-1',
 				weekdays: 'flex',
 				weekday: 'text-muted-foreground p-1 w-full min-w-9 font-normal text-[0.8rem] h-16 border-r font-bold last-of-type:border-r-0',
@@ -68,38 +64,50 @@ export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contrac
 			}}
 			autoFocus
 			components={{
-				Nav: ({ onNextClick, onPreviousClick }) => {
+				CaptionLabel: () => {
+					return <span></span>;
+				},
+				Nav: ({ onNextClick, onPreviousClick, previousMonth }) => {
 					return (
-						<nav className={cn('relative z-[1] -mb-9 flex items-center justify-end space-x-1 bg-transparent p-0')}>
-							<ReminderDialog org={org} contract={contract} profile={profile} />
+						<nav className={cn('relative flex items-center justify-between space-x-1 bg-transparent p-0')}>
+							<div className="flex items-center gap-3">
+								<div className="mr-2 text-2xl font-bold">{format(addMonths(previousMonth as Date, 1), 'MMMM yyyy')}</div>
 
-							<Separator orientation="vertical" className="h-3" />
+								<Separator orientation="vertical" className="h-3" />
 
-							<Button variant={'ghost'} onClick={onPreviousClick}>
-								<ChevronLeft size={16} />
-							</Button>
-							<Button variant={'ghost'} onClick={onNextClick}>
-								<ChevronRight size={16} />
-							</Button>
+								<div className="flex items-center">
+									<Button variant={'ghost'} onClick={onPreviousClick}>
+										<ChevronLeft size={16} />
+									</Button>
 
-							{((calendarId && orgCalendarConfig?.enable_calendar) || role == 'admin') && (
-								<>
-									<Separator orientation="vertical" className="h-3" />
+									<Button variant={'ghost'} onClick={onNextClick}>
+										<ChevronRight size={16} />
+									</Button>
+								</div>
+							</div>
 
-									<CalendarConfigDialog calendarId={calendarId} contractId={contractId} calendarConfig={calendarConfig} orgCalendarConfig={orgCalendarConfig} org={org} role={role} />
-								</>
-							)}
+							<div className="flex items-center space-x-1">
+								<ReminderDialog org={org} contract={contract} profile={profile} />
 
-							{enableClose && (
-								<>
-									<Separator orientation="vertical" className="h-3" />
-									<AlertDialogCancel asChild>
-										<Button variant={'ghost'} className="border-0">
-											<X size={16} />
-										</Button>
-									</AlertDialogCancel>
-								</>
-							)}
+								{((calendarId && orgCalendarConfig?.enable_calendar) || role == 'admin') && (
+									<>
+										<Separator orientation="vertical" className="h-3" />
+
+										<CalendarConfigDialog calendarId={calendarId} contractId={contractId} calendarConfig={calendarConfig} orgCalendarConfig={orgCalendarConfig} org={org} role={role} />
+									</>
+								)}
+
+								{enableClose && (
+									<>
+										<Separator orientation="vertical" className="h-3" />
+										<AlertDialogCancel asChild>
+											<Button variant={'ghost'} className="border-0">
+												<X size={16} />
+											</Button>
+										</AlertDialogCancel>
+									</>
+								)}
+							</div>
 						</nav>
 					);
 				},
