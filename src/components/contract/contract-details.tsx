@@ -23,7 +23,7 @@ import { EmployeeTabs } from './employee-tabs';
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
 	const supabase = await createClient();
 	const [{ data, error }, { data: orgSettings }] = await Promise.all([
-		await supabase
+		supabase
 			.from('contracts')
 			.select(
 				`*, org:organisations!contracts_org_fkey(id, name, subdomain),
@@ -38,7 +38,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 			.match({ org, id })
 			.single(),
 
-		await supabase.from('org_settings').select().match({ org })
+		supabase.from('org_settings').select().match({ org })
 	]);
 
 	if (error) {

@@ -2,11 +2,9 @@ import { Suspense } from 'react';
 import { Contract } from '@/components/contract/contract-details';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default async function ContractPage(
-    props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }
-) {
-    const params = await props.params;
-    return (
+export default async function ContractPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
+	const params = await props.params;
+	return (
 		<Suspense
 			fallback={
 				<div className="mx-auto grid w-full max-w-4xl gap-10 p-6 pt-0">
