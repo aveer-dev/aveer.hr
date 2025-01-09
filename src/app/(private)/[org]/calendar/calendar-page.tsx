@@ -12,7 +12,7 @@ export const CalendarPageComponent = async ({ org }: { org: string }) => {
 	if (error || !user) return redirect('/login');
 
 	const [{ data: leaves, error: leaveError }, { data: reminders, error: reminderError }, { data: dobs, error: dobError }, { data: calendar, error: calendarError }] = await Promise.all([
-		supabase.from('time_off').select('*, profile:profiles!time_off_profile_fkey(first_name, last_name)').eq('org', org).neq('status', 'denied'),
+		supabase.from('time_off').select('*, profile:profiles!time_off_profile_fkey(first_name, last_name), hand_over(profile(first_name, last_name), job_title)').eq('org', org),
 		supabase.from('reminders').select('*, profile:profiles!reminders_profile_fkey(id, first_name, last_name)').match({ org, profile: user?.id }),
 		supabase.from('contracts').select('id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name, date_of_birth, id)').eq('org', org),
 		supabase.from('org_settings').select('enable_calendar, calendar_employee_events').eq('org', org).single()
