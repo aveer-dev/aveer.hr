@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { Details } from '@/components/ui/details';
-import { LoadingSpinner } from '@/components/ui/loader';
 import { Tables, TablesInsert } from '@/type/database.types';
 import { Dispatch, ReactNode, SetStateAction } from 'react';
 

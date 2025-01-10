@@ -5,7 +5,7 @@ import { NewMessageSheet } from './new-message-sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Icon } from './components/Icon';
+import { Icon } from '../../tiptap/components/Icon';
 
 const DateTime = ({ date }: { date: Date }) => {
 	return (

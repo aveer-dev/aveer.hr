@@ -1,0 +1,61 @@
+.ProseMirror {
+	[data-type='columns'] {
+		&.has-focus [data-type='column'],
+		&:hover [data-type='column'] {
+			@apply border-primary/20;
+		}
+
+		[data-type='column'].has-focus {
+			@apply border-primary/20;
+		}
+	}
+
+	[data-type='column'] {
+		@apply rounded border-2 border-dotted border-transparent p-1;
+		transition: border 160ms cubic-bezier(0.45, 0.05, 0.55, 0.95);
+
+		&:hover {
+			@apply border-primary/20;
+		}
+
+		&:has(.is-active),
+		&.has-focus {
+			@apply border-primary/20;
+		}
+	}
+
+	.node-imageBlock {
+		& img {
+			@apply overflow-hidden rounded-xl border-2 border-transparent;
+		}
+
+		&:hover img {
+			@apply border-2 border-neutral-100 dark:border-neutral-900;
+		}
+
+		&:has(.is-active) img,
+		&.has-focus img {
+			@apply border-2 border-neutral-800 dark:border-neutral-200;
+		}
+	}
+
+	.ProseMirror-gapcursor + .node-imageBlock,
+	.ProseMirror-gapcursor + .node-imageUpload,
+	.ProseMirror-gapcursor + [data-type='blockquoteFigure'] {
+		@apply outline-neutral-700 hover:outline-neutral-600 dark:outline-neutral-300 dark:hover:outline-neutral-400;
+	}
+
+	[data-type='blockquoteFigure'] > div {
+		@apply space-y-2 border-l-4 border-l-primary px-4;
+
+		figcaption {
+			@apply text-muted-foreground;
+		}
+	}
+
+	.node-tableOfContentsNode {
+		&.has-focus [data-node-view-wrapper] > * {
+			@apply rounded-lg shadow-[0_0_0_2px] shadow-black/30 transition-all dark:shadow-white/30;
+		}
+	}
+}

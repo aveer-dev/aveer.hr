@@ -2077,6 +2077,54 @@ export type Database = {
           },
         ]
       }
+      templates: {
+        Row: {
+          contract_variables: string[]
+          created_at: string
+          editors: number[]
+          entity: number | null
+          html: string
+          id: number
+          org: string
+          updated_at: string
+        }
+        Insert: {
+          contract_variables?: string[]
+          created_at?: string
+          editors: number[]
+          entity?: number | null
+          html?: string
+          id?: number
+          org: string
+          updated_at?: string
+        }
+        Update: {
+          contract_variables?: string[]
+          created_at?: string
+          editors?: number[]
+          entity?: number | null
+          html?: string
+          id?: number
+          org?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "templates_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "templates_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       third_party_tokens: {
         Row: {
           created_at: string
@@ -2203,6 +2251,13 @@ export type Database = {
       authorize_role: {
         Args: {
           org_name: string
+        }
+        Returns: boolean
+      }
+      check_contract_exists: {
+        Args: {
+          p_profile_id: string
+          p_contract_id: number
         }
         Returns: boolean
       }

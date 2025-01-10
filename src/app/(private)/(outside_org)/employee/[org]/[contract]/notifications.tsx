@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { CommandShortcut } from '@/components/ui/command';
 import { useState, useEffect } from 'react';
 import { generateHTML } from '@tiptap/html';
-import ExtensionKit from '@/components/layout/inbox/extensions/extension-kit';
+import ExtensionKit from '@/components/tiptap/extensions/extension-kit';
 import { updateMessage } from '@/components/layout/inbox/messages.actions';
 import { toast } from 'sonner';
 

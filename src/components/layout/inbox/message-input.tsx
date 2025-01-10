@@ -5,13 +5,13 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Send, Timer } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { TextMenu } from './components/menus';
-import { ExtensionKit } from './extensions/extension-kit';
-import { ContentItemMenu, LinkMenu } from './components/menus';
+import { TextMenu } from '@/components/tiptap/components/menus';
+import { ExtensionKit } from '@/components/tiptap/extensions/extension-kit';
+import { ContentItemMenu, LinkMenu } from '@/components/tiptap/components/menus';
 import { sendMessage, updateMessage } from './messages.actions';
 import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { toast } from 'sonner';
-import { Icon } from './components/Icon';
+import { Icon } from '@/components/tiptap/components/Icon';
 import { DatePicker } from '@/components/ui/date-picker';
 import { cn, getTime } from '@/lib/utils';
 import { format, isPast } from 'date-fns';
@@ -97,7 +97,11 @@ export const MessageInput = ({ org, sender, message, onMessageSent }: { org: str
 			)}
 
 			<div className={cn('absolute bottom-6 left-6 right-6 space-y-6')}>
-				{!!editor && editable && <TextMenu editor={editor} />}
+				{!!editor && editable && (
+					<div className="relative mx-auto flex w-fit gap-1 p-1">
+						<TextMenu editor={editor} />
+					</div>
+				)}
 
 				<Separator />
 
