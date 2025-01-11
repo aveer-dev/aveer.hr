@@ -285,7 +285,7 @@ importers:
         specifier: ^6.3.7
         version: 6.3.7
       use-debounce:
-        specifier: ^10.0.3
+        specifier: ^10.0.4
         version: 10.0.4(react@19.0.0)
       usehooks-ts:
         specifier: ^3.1.0

@@ -4,6 +4,7 @@ import { TemplatePageComponant } from './document-page';
 
 export default async function TemplatePage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
 	const params = await props.params;
+
 	return (
 		<Suspense
 			fallback={
@@ -120,7 +121,7 @@ export default async function TemplatePage(props: { params: Promise<{ [key: stri
 					</div>
 				</div>
 			}>
-			<TemplatePageComponant org={params.org} template={params.id} />
+			<TemplatePageComponant org={params.org} docId={params.id} />
 		</Suspense>
 	);
 }

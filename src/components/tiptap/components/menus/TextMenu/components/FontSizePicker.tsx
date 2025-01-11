@@ -13,7 +13,7 @@ const FONT_SIZES = [
 ];
 
 export type FontSizePickerProps = {
-	onChange: (value: string) => void; // eslint-disable-line no-unused-vars
+	onChange: (value: string) => void;
 	value: string;
 };
 

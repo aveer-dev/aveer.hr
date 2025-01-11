@@ -7,7 +7,7 @@ import { Send, Timer } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { TextMenu } from '@/components/tiptap/components/menus';
 import { ExtensionKit } from '@/components/tiptap/extensions/extension-kit';
-import { ContentItemMenu, LinkMenu } from '@/components/tiptap/components/menus';
+import { LinkMenu } from '@/components/tiptap/components/menus';
 import { sendMessage, updateMessage } from './messages.actions';
 import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { toast } from 'sonner';
@@ -18,6 +18,7 @@ import { format, isPast } from 'date-fns';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { DrawerClose } from '@/components/ui/drawer';
 import { DeleteMessageDialog } from './delete-message-dialog';
+import Document from '@tiptap/extension-document';
 
 export const MessageInput = ({ org, sender, message, onMessageSent }: { org: string; sender?: string; onMessageSent: () => void; message?: Tables<'inbox'> }) => {
 	const menuContainerRef = useRef(null);
@@ -31,7 +32,7 @@ export const MessageInput = ({ org, sender, message, onMessageSent }: { org: str
 	const editable = message ? sender == (message?.sender_profile as any).id : true;
 
 	const editor = useEditor({
-		extensions: ExtensionKit,
+		extensions: [Document, ...ExtensionKit],
 		immediatelyRender: false,
 		content: message?.message ? JSON.parse(message.message) : null,
 		editorProps: {

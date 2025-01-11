@@ -1,14 +1,20 @@
 import { createClient } from '@/utils/supabase/server';
-import { TemplateDoc } from './document';
+import { Document } from './document';
 
-export const TemplatePageComponant = async ({ org, template }: { org: string; template: string }) => {
+export const TemplatePageComponant = async ({ org, docId }: { org: string; docId: string }) => {
 	const supabase = await createClient();
 
-	if (template === 'new') return <TemplateDoc />;
+	const [
+		{ data, error },
+		{ data: adminUsers },
+		{
+			data: { user }
+		}
+	] = await Promise.all([supabase.from('documents').select().match({ org, id: docId }).single(), supabase.from('profiles_roles').select('*, profile(*)').match({ organisation: org }), supabase.auth.getUser()]);
 
-	const { data, error } = await supabase.from('templates').select().match({ org, id: template }).single();
+	if (docId === 'new') return <Document adminUsers={adminUsers} currentUserId={user?.id || ''} />;
 
 	if (error) return <div className="flex h-48 w-full items-center justify-center text-muted-foreground">{error.message}</div>;
 
-	return <TemplateDoc />;
+	return <Document doc={data} adminUsers={adminUsers} currentUserId={user?.id || ''} />;
 };

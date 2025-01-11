@@ -53,7 +53,7 @@
 	}
 
 	p {
-		@apply mb-4 leading-8;
+		@apply mb-4 text-sm leading-8 [word-spacing:0.05rem];
 	}
 
 	a {

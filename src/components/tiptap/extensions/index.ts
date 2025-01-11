@@ -23,7 +23,6 @@ export { FileHandler } from '@tiptap-pro/extension-file-handler';
 export { Selection } from './Selection';
 export { HorizontalRule } from './HorizontalRule';
 // export { Heading } from './Heading';
-// export { Document } from './Document';
 export { TrailingNode } from './TrailingNode';
 export { SlashCommand } from './SlashCommand';
 export { FontSize } from './FontSize';

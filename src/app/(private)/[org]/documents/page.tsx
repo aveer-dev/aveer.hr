@@ -1,16 +1,14 @@
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import Link from 'next/link';
+import { DocumentsPage } from './documents-page';
 
-export default function ContractsPage() {
+export default async function ContractsPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
+	const org = (await props.params).org;
+
 	return (
 		<section>
 			<div className="mb-8 flex items-center justify-between border-b pb-4">
-				<h1 className="text-2xl font-medium">Templates</h1>
-
-				<Button>New template</Button>
+				<h1 className="text-2xl font-medium">Documents</h1>
 			</div>
 
 			<Suspense
@@ -128,22 +126,7 @@ export default function ContractsPage() {
 						</div>
 					</div>
 				}>
-				<ul className="grid grid-cols-4 gap-x-20 gap-y-16">
-					<Link href={'./templates/new'} passHref legacyBehavior>
-						<li className="flex h-72 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-blue-400 transition-all duration-500 hover:border-solid">
-							<Plus size="12" /> New template
-						</li>
-					</Link>
-
-					<Link href={'./templates/123'} passHref legacyBehavior>
-						<li className="flex h-72 cursor-pointer flex-col items-center justify-center rounded-md border border-secondary bg-accent/50 text-left text-sm font-light drop-shadow-sm transition-all duration-500 hover:drop-shadow">
-							<div className="space-y-2">
-								<div>Employment Agreement</div>
-								<div className="text-xs text-muted-foreground">Created: 12th May, 2023</div>
-							</div>
-						</li>
-					</Link>
-				</ul>
+				<DocumentsPage org={org} />
 			</Suspense>
 		</section>
 	);

@@ -813,6 +813,76 @@ export type Database = {
           },
         ]
       }
+      documents: {
+        Row: {
+          contract_variables: string[]
+          created_at: string
+          editors: string[]
+          entity: number | null
+          html: string
+          id: number
+          json: string | null
+          locked: boolean
+          name: string
+          org: string
+          owner: string
+          private: boolean
+          updated_at: string
+        }
+        Insert: {
+          contract_variables?: string[]
+          created_at?: string
+          editors: string[]
+          entity?: number | null
+          html?: string
+          id?: number
+          json?: string | null
+          locked?: boolean
+          name?: string
+          org: string
+          owner?: string
+          private?: boolean
+          updated_at?: string
+        }
+        Update: {
+          contract_variables?: string[]
+          created_at?: string
+          editors?: string[]
+          entity?: number | null
+          html?: string
+          id?: number
+          json?: string | null
+          locked?: boolean
+          name?: string
+          org?: string
+          owner?: string
+          private?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_owner_fkey"
+            columns: ["owner"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "templates_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "templates_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       employee_levels: {
         Row: {
           created_at: string
@@ -2070,54 +2140,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "teams_org_fkey"
-            columns: ["org"]
-            isOneToOne: false
-            referencedRelation: "organisations"
-            referencedColumns: ["subdomain"]
-          },
-        ]
-      }
-      templates: {
-        Row: {
-          contract_variables: string[]
-          created_at: string
-          editors: number[]
-          entity: number | null
-          html: string
-          id: number
-          org: string
-          updated_at: string
-        }
-        Insert: {
-          contract_variables?: string[]
-          created_at?: string
-          editors: number[]
-          entity?: number | null
-          html?: string
-          id?: number
-          org: string
-          updated_at?: string
-        }
-        Update: {
-          contract_variables?: string[]
-          created_at?: string
-          editors?: number[]
-          entity?: number | null
-          html?: string
-          id?: number
-          org?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "templates_entity_fkey"
-            columns: ["entity"]
-            isOneToOne: false
-            referencedRelation: "legal_entities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "templates_org_fkey"
             columns: ["org"]
             isOneToOne: false
             referencedRelation: "organisations"

@@ -12,9 +12,10 @@ import { generateHTML } from '@tiptap/html';
 import ExtensionKit from '@/components/tiptap/extensions/extension-kit';
 import { updateMessage } from '@/components/layout/inbox/messages.actions';
 import { toast } from 'sonner';
+import Document from '@tiptap/extension-document';
 
 const getMessageBody = (json: string) => {
-	const output = generateHTML(JSON.parse(json), ExtensionKit);
+	const output = generateHTML(JSON.parse(json), [Document, ...ExtensionKit]);
 	return output;
 };
 

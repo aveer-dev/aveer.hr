@@ -1,7 +1,7 @@
 'use client';
 
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
-import { Bolt, Building2, CalendarDays, CalendarPlus, ChartPie, UserPlus, Users } from 'lucide-react';
+import { Bolt, Building2, CalendarDays, CalendarPlus, ChartPie, Files, UserPlus, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NavLink } from './link';
 import { usePathname } from 'next/navigation';
@@ -12,6 +12,7 @@ export function NavMenu({ orgId }: { orgId: string }) {
 	const navItems = [
 		{ label: 'People', href: '/', icon: Users },
 		{ label: 'Calendar', href: '/calendar', icon: CalendarDays },
+		{ label: 'Documents', href: '/documents', icon: Files },
 		{ label: 'Open Roles', href: '/open-roles', icon: UserPlus },
 		{ label: 'Time Off', href: '/time-off', icon: CalendarPlus },
 		{ label: 'Performance', href: '/performance', icon: ChartPie },
