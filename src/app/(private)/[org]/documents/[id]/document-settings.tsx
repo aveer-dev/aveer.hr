@@ -22,7 +22,7 @@ const FormSchema = z.object({
 	editors: z.string().array()
 });
 
-export const DocumentSettings = ({ adminUsers, editorIds, docId, org, owner, currentUserId }: { adminUsers?: Tables<'profiles_roles'>[] | null; editorIds?: string[]; org: string; docId: number; owner: string; currentUserId: string }) => {
+export const DocumentSettings = ({ adminUsers, isprivate, editorIds, docId, org, owner, currentUserId }: { isprivate: boolean; adminUsers?: Tables<'profiles_roles'>[] | null; editorIds?: string[]; org: string; docId: number; owner: string; currentUserId: string }) => {
 	const [usersSearchResult, setUsersSearchResult] = useState<Tables<'profiles_roles'>[]>([]);
 	const [editors, updateEditors] = useState(adminUsers?.filter(user => !!editorIds?.find(editor => (user.profile as any)?.id == editor)) || []);
 	const [adminUsersList, updateAdminUsersList] = useState<Tables<'profiles_roles'>[]>([]);
@@ -32,7 +32,7 @@ export const DocumentSettings = ({ adminUsers, editorIds, docId, org, owner, cur
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
-			private: true,
+			private: isprivate,
 			editors: editors.map(editor => (editor.profile as any)?.id) || []
 		}
 	});
@@ -106,7 +106,7 @@ export const DocumentSettings = ({ adminUsers, editorIds, docId, org, owner, cur
 
 								<CommandList>
 									<CommandGroup noPadding>
-										{usersSearchResult.map((user, index) => (
+										{usersSearchResult.map(user => (
 											<CommandItem key={user.id + 'search'} className="flex gap-2" onSelect={() => updateEditors([...editors, user])}>
 												<span>
 													{(user.profile as any)?.first_name} {(user.profile as any)?.last_name}

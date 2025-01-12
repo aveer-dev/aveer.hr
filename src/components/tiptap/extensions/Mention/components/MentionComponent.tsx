@@ -10,7 +10,7 @@ export function MentionComponent(props: NodeViewProps) {
 	}, [props.node.attrs.label]);
 
 	return (
-		<NodeViewWrapper className="inline w-fit">
+		<NodeViewWrapper className="mx-1 inline w-fit">
 			<span className={cn('rounded-md bg-accent p-1 text-sm')}>@{props.node.attrs.label}</span>
 		</NodeViewWrapper>
 	);

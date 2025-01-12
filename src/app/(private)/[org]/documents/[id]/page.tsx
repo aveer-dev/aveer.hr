@@ -1,6 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Suspense } from 'react';
 import { TemplatePageComponant } from './document-page';
+import { Separator } from '@/components/ui/separator';
 
 export default async function TemplatePage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
 	const params = await props.params;
@@ -8,116 +9,20 @@ export default async function TemplatePage(props: { params: Promise<{ [key: stri
 	return (
 		<Suspense
 			fallback={
-				<div className="mx-auto grid w-full max-w-4xl gap-10 p-6 pt-0">
-					<div className="flex justify-between">
-						<div className="flex gap-4">
-							<Skeleton className="h-10 w-10 rounded-full" />
-
-							<div className="grid gap-4">
-								<div className="flex gap-4">
-									<Skeleton className="h-7 w-48" />
-									<Skeleton className="h-7 w-16" />
-								</div>
-								<Skeleton className="h-4 w-10" />
-							</div>
-						</div>
-
-						<Skeleton className="h-9 w-32" />
+				<div className="mx-auto w-full max-w-5xl space-y-4 px-8">
+					<div className="flex items-center justify-between">
+						<Skeleton className="h-9 w-80" />
+						<Skeleton className="h-9 w-24" />
 					</div>
 
-					<Skeleton className="h-9 w-full max-w-2xl" />
+					<Separator className="w-full" />
 
-					<div className="grid gap-16">
-						<div>
-							<Skeleton className="mb-4 h-9 w-44" />
-							<div className="grid grid-cols-2 border-t border-t-border pt-6">
-								<div>
-									<Skeleton className="mb-6 h-5 w-20" />
-									<Skeleton className="mb-4 h-8 w-40" />
-									<Skeleton className="mb-4 h-5 w-28" />
-									<Skeleton className="mb-6 h-5 w-44" />
-									<Skeleton className="mb-6 h-5 w-36" />
-								</div>
-								<div>
-									<Skeleton className="mb-6 h-5 w-20" />
-									<Skeleton className="mb-4 h-8 w-40" />
-									<Skeleton className="mb-4 h-5 w-28" />
-									<Skeleton className="mb-6 h-5 w-44" />
-									<Skeleton className="mb-6 h-5 w-36" />
-								</div>
-							</div>
-						</div>
-
-						<div>
-							<Skeleton className="mb-4 h-9 w-44" />
-							<div className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-6">
-								<div>
-									<Skeleton className="mb-6 h-5 w-20" />
-									<Skeleton className="mb-6 h-5 w-44" />
-								</div>
-								<div>
-									<Skeleton className="mb-6 h-5 w-20" />
-									<Skeleton className="mb-6 h-5 w-36" />
-								</div>
-								<div>
-									<Skeleton className="mb-6 h-5 w-20" />
-									<Skeleton className="mb-6 h-5 w-44" />
-								</div>
-								<div>
-									<Skeleton className="mb-6 h-5 w-20" />
-									<Skeleton className="mb-6 h-5 w-36" />
-								</div>
-							</div>
-
-							<div className="mt-10">
-								<Skeleton className="mb-6 h-7 w-56" />
-								<Skeleton className="mb-4 h-5 w-96" />
-								<Skeleton className="mb-4 h-5 w-full max-w-xl" />
-								<Skeleton className="mb-4 h-5 w-full max-w-lg" />
-								<Skeleton className="mb-4 h-5 w-full max-w-xl" />
-								<Skeleton className="mb-4 h-5 w-full max-w-2xl" />
-							</div>
-						</div>
-
-						<div>
-							<Skeleton className="mb-4 h-9 w-44" />
-							<div className="grid grid-cols-2 border-t border-t-border pt-6">
-								<div>
-									<Skeleton className="mb-6 h-5 w-20" />
-									<Skeleton className="mb-4 h-8 w-40" />
-									<Skeleton className="mb-4 h-5 w-28" />
-									<Skeleton className="mb-6 h-5 w-44" />
-									<Skeleton className="mb-6 h-5 w-36" />
-								</div>
-								<div>
-									<Skeleton className="mb-6 h-5 w-20" />
-									<Skeleton className="mb-4 h-8 w-40" />
-									<Skeleton className="mb-4 h-5 w-28" />
-									<Skeleton className="mb-6 h-5 w-44" />
-									<Skeleton className="mb-6 h-5 w-36" />
-								</div>
-							</div>
-						</div>
-
-						<div>
-							<Skeleton className="mb-4 h-9 w-44" />
-							<div className="grid grid-cols-2 border-t border-t-border pt-6">
-								<div>
-									<Skeleton className="mb-6 h-5 w-20" />
-									<Skeleton className="mb-4 h-8 w-40" />
-									<Skeleton className="mb-4 h-5 w-28" />
-									<Skeleton className="mb-6 h-5 w-44" />
-									<Skeleton className="mb-6 h-5 w-36" />
-								</div>
-								<div>
-									<Skeleton className="mb-6 h-5 w-20" />
-									<Skeleton className="mb-4 h-8 w-40" />
-									<Skeleton className="mb-4 h-5 w-28" />
-									<Skeleton className="mb-6 h-5 w-44" />
-									<Skeleton className="mb-6 h-5 w-36" />
-								</div>
-							</div>
-						</div>
+					<div>
+						<Skeleton className="mb-6 h-5 w-72" />
+						<Skeleton className="mb-4 h-8 w-40" />
+						<Skeleton className="mb-4 h-5 w-52" />
+						<Skeleton className="mb-6 h-5 w-80" />
+						<Skeleton className="mb-6 h-5 w-60" />
 					</div>
 				</div>
 			}>

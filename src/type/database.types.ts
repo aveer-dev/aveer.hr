@@ -827,6 +827,7 @@ export type Database = {
           org: string
           owner: string
           private: boolean
+          template: boolean
           updated_at: string
         }
         Insert: {
@@ -842,6 +843,7 @@ export type Database = {
           org: string
           owner?: string
           private?: boolean
+          template?: boolean
           updated_at?: string
         }
         Update: {
@@ -857,6 +859,7 @@ export type Database = {
           org?: string
           owner?: string
           private?: boolean
+          template?: boolean
           updated_at?: string
         }
         Relationships: [

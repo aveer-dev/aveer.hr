@@ -23,7 +23,7 @@ export const NewDocumentButton = ({ createDocument }: { createDocument: () => Pr
 	};
 
 	return (
-		<Button onClick={onCreateDocument} className="flex h-72 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-blue-400 transition-all duration-500 hover:border-solid">
+		<Button onClick={onCreateDocument} className="flex h-72 w-full cursor-pointer items-center justify-center gap-2 rounded-md transition-all duration-500">
 			{isLoading ? <LoadingSpinner /> : <Plus size="12" />} New Document
 		</Button>
 	);

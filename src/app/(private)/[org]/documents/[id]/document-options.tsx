@@ -44,7 +44,7 @@ export const DocumentOptions = ({ currentUserId, document }: { currentUserId: st
 				</Button>
 			</DropdownMenuTrigger>
 
-			<DropdownMenuContent className="w-56 *:gap-3" align="end">
+			<DropdownMenuContent className="w-36 *:gap-3" align="end">
 				<DropdownMenuItem onSelect={onLockDocument}>
 					{isLocking ? <LoadingSpinner /> : document.locked ? <LockKeyholeOpen size={12} /> : <LockKeyhole size={12} />} {document.locked ? 'Unlock' : 'Lock'}
 				</DropdownMenuItem>

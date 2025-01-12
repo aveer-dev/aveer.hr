@@ -4,7 +4,7 @@ import { Settings2 } from 'lucide-react';
 import { Tables } from '@/type/database.types';
 import { DocumentSettings } from './document-settings';
 
-export const DocumentSettingsDialog = ({ adminUsers, editors, docId, org, owner, currentUserId }: { currentUserId: string; owner: string; adminUsers?: Tables<'profiles_roles'>[] | null; editors?: string[]; org: string; docId: number }) => {
+export const DocumentSettingsDialog = ({ adminUsers, isPrivate, editors, docId, org, owner, currentUserId }: { isPrivate: boolean; currentUserId: string; owner: string; adminUsers?: Tables<'profiles_roles'>[] | null; editors?: string[]; org: string; docId: number }) => {
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
@@ -19,7 +19,7 @@ export const DocumentSettingsDialog = ({ adminUsers, editors, docId, org, owner,
 					<AlertDialogDescription>Configure document settings</AlertDialogDescription>
 				</AlertDialogHeader>
 
-				<DocumentSettings currentUserId={currentUserId} adminUsers={adminUsers} editorIds={editors} org={org} docId={docId} owner={owner} />
+				<DocumentSettings isprivate={isPrivate} currentUserId={currentUserId} adminUsers={adminUsers} editorIds={editors} org={org} docId={docId} owner={owner} />
 			</AlertDialogContent>
 		</AlertDialog>
 	);
