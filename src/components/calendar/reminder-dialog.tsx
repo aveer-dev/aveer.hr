@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 import { ReminderForm } from './reminder-form';
 import { Tables } from '@/type/database.types';
 
-export const ReminderDialog = ({ reminder, org, contract, profile, children, isOpen, onClose }: { onClose?: () => void; isOpen?: boolean; reminder?: Tables<'reminders'>; org: string; contract: number; profile: string; children?: ReactNode }) => {
+export const ReminderDialog = ({ reminder, org, contract, profile, children, isOpen, onClose }: { onClose?: (state: boolean) => void; isOpen?: boolean; reminder?: Tables<'reminders'>; org: string; contract: number; profile: string; children?: ReactNode }) => {
 	const [isAddOpen, toggleAdd] = useState(isOpen || false);
 
 	return (
@@ -13,7 +13,7 @@ export const ReminderDialog = ({ reminder, org, contract, profile, children, isO
 			open={isAddOpen}
 			onOpenChange={state => {
 				toggleAdd(state);
-				onClose && onClose();
+				onClose && onClose(state)!;
 			}}>
 			{!children && !reminder && (
 				<AlertDialogTrigger asChild>
@@ -38,7 +38,7 @@ export const ReminderDialog = ({ reminder, org, contract, profile, children, isO
 					reminder={reminder}
 					onCreateReminder={() => toggleAdd(false)}
 					onClose={() => {
-						onClose && onClose();
+						onClose && onClose(false);
 						toggleAdd(false);
 					}}
 				/>

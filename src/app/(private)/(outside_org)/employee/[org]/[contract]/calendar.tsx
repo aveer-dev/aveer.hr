@@ -30,7 +30,7 @@ export const EmployeeCalendar = async ({ org, contractId }: { org: string; contr
 	const contractsQueryBuilder: QUERY_BUILDER & { status?: string } = { org, profile: user?.id! };
 	if (orgCalendarConfig?.enable_calendar && orgCalendarConfig?.calendar_employee_events?.includes('birthdays')) delete timeOffQuery.profile;
 
-	const [{ data: leaves, error: leaveError }, { data: reminders, error: reminderError }, { data: dobs, error: dobError }, { data: calendarConfig, error: calendarError }, { data: calendarDetails, error: calendarDetailsError }] = await Promise.all([
+	const [{ data: leaves, error: leaveError }, { data: reminders, error: reminderError }, { data: dobs, error: dobError }, { data: calendarConfig, error: calendarError }, { data: calendar, error: calendarDetailsError }] = await Promise.all([
 		supabase
 			.from('time_off')
 			.select('*, profile:profiles!time_off_profile_fkey(first_name, last_name)')
@@ -41,7 +41,7 @@ export const EmployeeCalendar = async ({ org, contractId }: { org: string; contr
 			.select('id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name, date_of_birth, id)')
 			.match({ ...contractsQueryBuilder }),
 		supabase.from('contract_calendar_config').select().match({ org, profile: user?.id! }),
-		supabase.from('calendars').select('calendar_id').match({ org, platform: 'google' }).single()
+		supabase.from('calendars').select().match({ org, platform: 'google' }).single()
 	]);
 
 	const result: { date: Date; name: string; status: string; data: any }[] = [];
@@ -73,8 +73,8 @@ export const EmployeeCalendar = async ({ org, contractId }: { org: string; contr
 				<section className="mt-8 min-h-96 space-y-8 overflow-scroll p-0.5">
 					<FullCalendar
 						orgCalendarConfig={orgCalendarConfig}
-						calendarConfig={calendarConfig}
-						calendarId={calendarDetails?.calendar_id}
+						employeeCalendarConfig={calendarConfig}
+						calendar={calendar}
 						contractId={contractId}
 						role="employee"
 						org={org}

@@ -386,6 +386,69 @@ export type Database = {
           },
         ]
       }
+      calendar_events: {
+        Row: {
+          attendees: Json
+          created_at: string
+          description: string | null
+          end: Json
+          entity: number | null
+          event_id: string
+          id: number
+          location: string | null
+          org: string
+          recurrence: string | null
+          start: Json
+          summary: string
+          time_zone: string | null
+        }
+        Insert: {
+          attendees: Json
+          created_at?: string
+          description?: string | null
+          end: Json
+          entity?: number | null
+          event_id: string
+          id?: number
+          location?: string | null
+          org: string
+          recurrence?: string | null
+          start: Json
+          summary: string
+          time_zone?: string | null
+        }
+        Update: {
+          attendees?: Json
+          created_at?: string
+          description?: string | null
+          end?: Json
+          entity?: number | null
+          event_id?: string
+          id?: number
+          location?: string | null
+          org?: string
+          recurrence?: string | null
+          start?: Json
+          summary?: string
+          time_zone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       calendars: {
         Row: {
           calendar_id: string

@@ -4,6 +4,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { calendar_v3 } from '@googleapis/calendar';
 import { createClient } from '@/utils/supabase/server';
 import { Database, TablesInsert } from '@/type/database.types';
+import { v4 as uuid } from 'uuid';
 
 const calendarAPI = async (org?: string) => {
 	const oAuth2Client = new OAuth2Client(process.env.AVEER_CALENDAR_GOOGLE_CLIENT_ID, process.env.AVEER_CALENDAR_GOOGLE_SECRET);
@@ -132,6 +133,37 @@ export const removeEmployeeFromCalendar = async ({ calendarId, platformId, org, 
 		} = await supabase.auth.getUser();
 
 		const { error } = await supabase.from('contract_calendar_config').delete().match({ org, platform, profile: user?.id });
+		if (error) throw error;
+
+		return true;
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const createGCalendarEvent = async ({ calendarId, payload }: { calendarId: string; payload: calendar_v3.Schema$Event }) => {
+	try {
+		const { gCalendar } = await calendarAPI();
+
+		const response = gCalendar.events.insert({ calendarId, conferenceDataVersion: 1, requestBody: { ...payload, visibility: 'private', guestsCanInviteOthers: false } });
+
+		return response;
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const createCalendarEvent = async ({ calendarId, payload, virtual }: { virtual?: boolean; org: string; calendarId: string; payload: TablesInsert<'calendar_events'> }) => {
+	const supabase = await createClient();
+
+	try {
+		const gCalendarPayload: calendar_v3.Schema$Event = { summary: payload.summary, description: payload.description, recurrence: [payload.recurrence as string], attendees: payload.attendees as any, start: payload.start as any, end: payload.end as any };
+		if (virtual) gCalendarPayload.conferenceData = { createRequest: { requestId: uuid(), conferenceSolutionKey: { type: 'hangoutsMeet' } } };
+
+		const event = await createGCalendarEvent({ calendarId, payload: gCalendarPayload });
+		if (!event.data.id) return 'Unable to create calendar event';
+
+		const { error } = await supabase.from('calendar_events').insert({ ...payload, event_id: event.data.id, time_zone: (payload.end as any).timeZone });
 		if (error) throw error;
 
 		return true;

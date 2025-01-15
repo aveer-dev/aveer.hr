@@ -20,9 +20,9 @@ interface Person {
  *              Defaults to searching against all keys if not provided.
  * @returns An array of Person objects that match the search query.
  */
-export const searchPeople = (people: Person[], query: string, keys?: (keyof Profile)[]): Person[] => {
+export const searchPeople = (people: Person[], query: string, keys?: (keyof Profile)[], allowEmpty: boolean = false): Person[] => {
 	if (!query) {
-		return people;
+		return allowEmpty ? [] : people;
 	}
 
 	const searchTerm = query.toLowerCase();

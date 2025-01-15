@@ -23,7 +23,7 @@ interface props {
 	isOpen?: boolean;
 	org: string;
 	orgCalendarConfig: { enable_calendar: boolean; calendar_employee_events: string[] | null } | null;
-	calendarConfig?: Tables<'contract_calendar_config'>[] | null;
+	employeeCalendarConfig?: Tables<'contract_calendar_config'>[] | null;
 	role?: ROLE;
 	contractId?: number;
 	calendarId?: string;
@@ -35,11 +35,11 @@ const FormSchema = z.object({
 	})
 });
 
-export const CalendarConfigDialog = ({ org, isOpen, orgCalendarConfig, calendarConfig, role = 'admin', contractId, calendarId }: props) => {
+export const CalendarConfigDialog = ({ org, isOpen, orgCalendarConfig, employeeCalendarConfig, role = 'admin', contractId, calendarId }: props) => {
 	const [isAddOpen, toggleAdd] = useState(isOpen || false);
 	const [isLoading, setLoading] = useState(false);
 	const [animationIndex, setAnimationIndex] = useState(orgCalendarConfig?.enable_calendar ? 1 : 0);
-	const [enableGoogleCalendar, setEnableGoogleCalendar] = useState(!!calendarConfig?.find(config => config.platform === 'google'));
+	const [enableGoogleCalendar, setEnableGoogleCalendar] = useState(!!employeeCalendarConfig?.find(config => config.platform === 'google'));
 
 	const enableOrgCalendar = async () => {
 		setLoading(true);
@@ -71,12 +71,12 @@ export const CalendarConfigDialog = ({ org, isOpen, orgCalendarConfig, calendarC
 	};
 
 	const toggleCalendarAccess = async (state: boolean) => {
-		if (!calendarConfig || !calendarId) return;
+		if (!employeeCalendarConfig || !calendarId) return;
 		setLoading(true);
 		setEnableGoogleCalendar(state);
 
 		try {
-			await (state ? addEmployeeToCalendar({ org, platform: 'google', platform_id: '', contract: contractId, calendar_id: calendarId }) : removeEmployeeFromCalendar({ org, platform: 'google', platformId: calendarConfig[0].platform_id, calendarId: calendarId }));
+			await (state ? addEmployeeToCalendar({ org, platform: 'google', platform_id: '', contract: contractId, calendar_id: calendarId }) : removeEmployeeFromCalendar({ org, platform: 'google', platformId: employeeCalendarConfig[0].platform_id, calendarId: calendarId }));
 			setLoading(false);
 		} catch (error) {
 			toast.error((error as any)?.message || error);

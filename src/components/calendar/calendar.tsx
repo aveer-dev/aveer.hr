@@ -16,6 +16,8 @@ import { useRouter } from 'next/navigation';
 import { CalendarConfigDialog } from './config-dialog';
 import { ROLE } from '@/type/contract.types';
 import { AlertDialogCancel } from '../ui/alert-dialog';
+import { CalendarOptions } from './calendar-options';
+// import { getAuthLink } from './calendar-actions';
 
 interface props {
 	leaveDays: { date: Date; status: string; name: string; data: any }[];
@@ -25,18 +27,23 @@ interface props {
 	profile: string;
 	contract: number;
 	orgCalendarConfig: { enable_calendar: boolean; calendar_employee_events: string[] | null } | null;
-	calendarConfig?: Tables<'contract_calendar_config'>[] | null;
+	employeeCalendarConfig?: Tables<'contract_calendar_config'>[] | null;
 	role?: ROLE;
 	contractId?: number;
-	calendarId?: string;
+	calendar: Tables<'calendars'> | null;
 	enableClose?: boolean;
 }
 
-export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contract, orgCalendarConfig, calendarConfig, role = 'admin', contractId, calendarId, enableClose }: props) => {
+export const FullCalendar = ({ leaveDays, calendar, reminders, dobs, org, profile, contract, orgCalendarConfig, employeeCalendarConfig, role = 'admin', contractId, enableClose }: props) => {
 	const router = useRouter();
 	const dayOfWeekMatcher: DayOfWeek = {
 		dayOfWeek: [0, 6]
 	};
+
+	// const googleAuth = async () => {
+	// 	const response = await getAuthLink(org);
+	// 	window.open(response);
+	// };
 
 	return (
 		<DayPicker
@@ -87,13 +94,15 @@ export const FullCalendar = ({ leaveDays, reminders, dobs, org, profile, contrac
 							</div>
 
 							<div className="flex items-center space-x-1">
-								<ReminderDialog org={org} contract={contract} profile={profile} />
+								<CalendarOptions calendarId={calendar?.calendar_id || ''} org={org} contract={contract} profile={profile} />
 
-								{((calendarId && orgCalendarConfig?.enable_calendar) || role == 'admin') && (
+								{/* <Button onClick={googleAuth}>Link</Button> */}
+
+								{((calendar?.calendar_id && orgCalendarConfig?.enable_calendar) || role == 'admin') && (
 									<>
 										<Separator orientation="vertical" className="h-3" />
 
-										<CalendarConfigDialog calendarId={calendarId} contractId={contractId} calendarConfig={calendarConfig} orgCalendarConfig={orgCalendarConfig} org={org} role={role} />
+										<CalendarConfigDialog calendarId={calendar?.calendar_id} contractId={contractId} employeeCalendarConfig={employeeCalendarConfig} orgCalendarConfig={orgCalendarConfig} org={org} role={role} />
 									</>
 								)}
 

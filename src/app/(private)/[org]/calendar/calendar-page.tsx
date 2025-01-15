@@ -11,11 +11,12 @@ export const CalendarPageComponent = async ({ org }: { org: string }) => {
 	} = await supabase.auth.getUser();
 	if (error || !user) return redirect('/login');
 
-	const [{ data: leaves, error: leaveError }, { data: reminders, error: reminderError }, { data: dobs, error: dobError }, { data: calendar, error: calendarError }] = await Promise.all([
+	const [{ data: leaves, error: leaveError }, { data: reminders, error: reminderError }, { data: dobs, error: dobError }, { data: orgCalendarSettings, error: calendarError }, { data: calendars, error: calendarsError }] = await Promise.all([
 		supabase.from('time_off').select('*, profile:profiles!time_off_profile_fkey(first_name, last_name), hand_over(profile(first_name, last_name), job_title)').eq('org', org).neq('status', 'denied'),
 		supabase.from('reminders').select('*, profile:profiles!reminders_profile_fkey(id, first_name, last_name)').match({ org, profile: user?.id }),
 		supabase.from('contracts').select('id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name, date_of_birth, id)').eq('org', org),
-		supabase.from('org_settings').select('enable_calendar, calendar_employee_events').eq('org', org).single()
+		supabase.from('org_settings').select('enable_calendar, calendar_employee_events').eq('org', org).single(),
+		supabase.from('calendars').select().match({ org, platform: 'google' }).single()
 	]);
 
 	const result: { date: Date; name: string; status: string; data: any }[] = [];
@@ -33,8 +34,9 @@ export const CalendarPageComponent = async ({ org }: { org: string }) => {
 	return (
 		<section className="mx-auto">
 			<FullCalendar
-				orgCalendarConfig={calendar}
+				orgCalendarConfig={orgCalendarSettings}
 				org={org}
+				calendar={calendars}
 				profile={user?.id!}
 				contract={dobs?.find(contract => contract.profile?.id == user?.id)?.id as number}
 				leaveDays={result}
