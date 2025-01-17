@@ -1,8 +1,8 @@
 import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { add, getWeekOfMonth } from 'date-fns';
-import { useEffect, useState } from 'react';
+import { getWeekOfMonth } from 'date-fns';
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -32,7 +32,7 @@ const getWeekDayReadableString = (weekDayString: WeekdayStr): string => {
 	return '';
 };
 
-export const RecurrenceDialog = ({ onClose, recurrenceString }: { recurrenceString?: string; onClose: (recurrence?: string) => void }) => {
+export const RecurrenceDialog = ({ onClose, recurrenceString, disabled }: { disabled: boolean; recurrenceString?: string; onClose: (recurrence?: string) => void }) => {
 	const [frequency, setFrequency] = useState<(typeof Frequencies)[0]>(Frequencies[0]);
 	const [interval, setInterval] = useState(1);
 	const [weekdays, setWeekDays] = useState<WeekdayStr[] | undefined>([]);
@@ -165,7 +165,9 @@ export const RecurrenceDialog = ({ onClose, recurrenceString }: { recurrenceStri
 	return (
 		<AlertDialog onOpenChange={state => state == true && loadRecurrenceString()}>
 			<AlertDialogTrigger asChild>
-				<Button variant="secondary">{!recurringString || recurringString == '' ? 'Does not repeat' : parseRecurrenceRule(recurringString)}</Button>
+				<Button disabled={disabled} variant="secondary" className="disabled:opacity-90">
+					{!recurringString || recurringString == '' ? 'Does not repeat' : parseRecurrenceRule(recurringString)}
+				</Button>
 			</AlertDialogTrigger>
 
 			<AlertDialogContent>

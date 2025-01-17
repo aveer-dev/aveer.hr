@@ -1,13 +1,13 @@
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Tables } from '@/type/database.types';
 import { EventForm } from './event-form';
 
 interface PROPS {
-	teams: Tables<'teams'>[] | null;
-	employees: Tables<'contracts'>[] | null;
+	teams?: Tables<'teams'>[] | null;
+	employees?: Tables<'contracts'>[] | null;
 	onClose?: (state: boolean) => void;
 	isOpen?: boolean;
 	event?: Tables<'calendar_events'>;
@@ -36,9 +36,9 @@ export const EventDialog = ({ event, org, calendarId, children, isOpen, onClose,
 
 			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 
-			<AlertDialogContent className="overflow-y-auto">
+			<AlertDialogContent className="block max-h-screen w-full overflow-y-auto bg-white/20 backdrop-blur-sm">
 				<AlertDialogHeader>
-					<AlertDialogTitle>Create event</AlertDialogTitle>
+					<AlertDialogTitle>{!event ? 'Create event' : 'Calendar event'}</AlertDialogTitle>
 					<AlertDialogDescription className="hidden"></AlertDialogDescription>
 				</AlertDialogHeader>
 

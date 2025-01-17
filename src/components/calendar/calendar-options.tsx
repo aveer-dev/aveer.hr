@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { EventDialog } from './event-dialog';
 import { Tables } from '@/type/database.types';
 
-export const CalendarOptions = ({ org, contract, profile, calendarId, teams, employees }: { employees: Tables<'contracts'>[] | null; teams: Tables<'teams'>[] | null; calendarId: string; org: string; contract: number; profile: string }) => {
+export const CalendarOptions = ({ org, contract, profile, calendarId, teams, employees }: { employees?: Tables<'contracts'>[] | null; teams?: Tables<'teams'>[] | null; calendarId: string; org: string; contract: number; profile: string }) => {
 	const [isOptionOpen, toggleOptionState] = useState(false);
 
 	return (

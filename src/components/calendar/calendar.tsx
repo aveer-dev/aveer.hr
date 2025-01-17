@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { addMonths, format, isPast, isSameDay } from 'date-fns';
-import { CalendarRangeIcon, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { DayOfWeek, DayPicker } from 'react-day-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useState } from 'react';
@@ -40,8 +40,8 @@ interface props {
 	contractId?: number;
 	calendar: Tables<'calendars'> | null;
 	enableClose?: boolean;
-	employees: Tables<'contracts'>[] | null;
-	teams: Tables<'teams'>[] | null;
+	employees?: Tables<'contracts'>[] | null;
+	teams?: Tables<'teams'>[] | null;
 }
 
 export const FullCalendar = ({ events, teams, employees, leaveDays, calendar, reminders, dobs, org, profile, contract, orgCalendarConfig, employeeCalendarConfig, role = 'admin', contractId, enableClose }: props) => {
@@ -105,8 +105,8 @@ export const FullCalendar = ({ events, teams, employees, leaveDays, calendar, re
 							</div>
 
 							<div className="flex items-center space-x-1">
-								{calendar && <CalendarOptions employees={employees} teams={teams} calendarId={calendar?.calendar_id} org={org} contract={contract} profile={profile} />}
-								{!calendar && (
+								{calendar && role == 'admin' && <CalendarOptions employees={employees} teams={teams} calendarId={calendar?.calendar_id} org={org} contract={contract} profile={profile} />}
+								{!calendar && role == 'admin' && (
 									<ReminderDialog org={org} contract={contract} profile={profile}>
 										<Button variant="ghost">
 											<Plus size={16} />
@@ -266,8 +266,8 @@ const EventItem = ({
 	teams
 }: {
 	onClose?: (state: boolean) => void;
-	employees: Tables<'contracts'>[] | null;
-	teams: Tables<'teams'>[] | null;
+	employees?: Tables<'contracts'>[] | null;
+	teams?: Tables<'teams'>[] | null;
 	org?: string;
 	calendarId?: string;
 	event: EVENT_ITEM;

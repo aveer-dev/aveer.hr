@@ -31,7 +31,7 @@ const formSchema = z.object({
 	description: z.string().optional(),
 	end: z.object({ dateTime: z.date({ message: 'Select end dateTime' }), timeZone: z.string() }),
 	start: z.object({ dateTime: z.date({ message: 'Select end dateTime' }), timeZone: z.string() }),
-	recurrence: z.string().optional(),
+	recurrence: z.string().optional().nullable(),
 	attendees: z.array(z.object({ email: z.string() })),
 	location: z.string().optional()
 });
@@ -56,8 +56,8 @@ export const EventForm = ({
 	employeeList,
 	event
 }: {
-	teamsList: Tables<'teams'>[] | null;
-	employeeList: EMPLOYEE[];
+	teamsList?: Tables<'teams'>[] | null;
+	employeeList?: EMPLOYEE[];
 	date?: Date;
 	org: string;
 	calendarId: string;
@@ -75,6 +75,7 @@ export const EventForm = ({
 	const [invitees, updateInvitees] = useState<{ single?: EMPLOYEE; team?: { name: string; id: number } }[]>((event?.attendees as any) || []);
 	const [locationType, setLocationType] = useState(event?.meeting_link ? 'virtual' : 'physical');
 	const [isTimezoneOpen, toggleTimezoneState] = useState(false);
+	const allowEdit = !!teams && !!employeeList;
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -168,7 +169,7 @@ export const EventForm = ({
 
 		const inviteesEmails = invitees
 			.map(invitee => {
-				if (invitee.team) return employeeList.filter(employee => employee?.team == invitee.team?.id).map(employee => employee?.profile.email);
+				if (invitee.team) return employeeList?.filter(employee => employee?.team == invitee.team?.id).map(employee => employee?.profile.email);
 
 				if (invitee.single) return invitee.single.profile.email;
 			})
@@ -196,7 +197,7 @@ export const EventForm = ({
 
 							<div className="w-full gap-1">
 								<FormControl>
-									<Input aria-label="Title" className="" placeholder="Event title" {...field} />
+									<Input readOnly={!allowEdit} aria-label="Title" className="" placeholder="Event title" {...field} />
 								</FormControl>
 								<FormMessage />
 							</div>
@@ -215,7 +216,7 @@ export const EventForm = ({
 
 							<div className="w-full gap-1">
 								<FormControl>
-									<Textarea className="w-full" placeholder="Note, description or reason" {...field} />
+									<Textarea readOnly={!allowEdit} className="w-full" placeholder="Note, description or reason" {...field} />
 								</FormControl>
 								<FormMessage className="w-full" />
 							</div>
@@ -245,11 +246,14 @@ export const EventForm = ({
 												field.onChange(date);
 												form.setValue('end.dateTime', add(date, { hours: 1 }));
 											}}>
-											<button className="border-b border-dashed text-xs">{format(field.value, 'PPP')}</button>
+											<button disabled={!allowEdit} className="border-b border-dashed text-xs">
+												{format(field.value, 'PPP')}
+											</button>
 										</DatePicker>
 									</FormControl>
 
 									<input
+										readOnly={!allowEdit}
 										className="border-b border-dashed bg-transparent text-xs"
 										value={getTime(field.value as any)}
 										onChange={event => {
@@ -279,12 +283,15 @@ export const EventForm = ({
 								<FormControl>
 									<div className="flex items-center justify-between gap-3">
 										<DatePicker disabled={{ before: form.getValues('start.dateTime') || new Date() }} selected={field.value} onSetDate={date => field.onChange(date)}>
-											<button className="border-b border-dashed text-xs">{format(field.value, 'PPP')}</button>
+											<button disabled={!allowEdit} className="border-b border-dashed text-xs">
+												{format(field.value, 'PPP')}
+											</button>
 										</DatePicker>
 
 										<input
 											className="border-b border-dashed bg-transparent text-xs"
 											value={getTime(field.value as any)}
+											readOnly={!allowEdit}
 											onChange={event => {
 												const time = event.target.value.split(':');
 												const startTime = getTime(form.getValues('start.dateTime') as any).split(':');
@@ -316,9 +323,9 @@ export const EventForm = ({
 							<Popover open={isTimezoneOpen} onOpenChange={toggleTimezoneState}>
 								<PopoverTrigger asChild>
 									<FormControl>
-										<Button variant="outline" role="combobox" className={cn('!-mt-2 w-full justify-between rounded-lg', !field.value && 'text-muted-foreground')}>
+										<Button disabled={!allowEdit} variant="outline" role="combobox" className={cn('!-mt-2 w-full justify-between rounded-lg disabled:opacity-90', !field.value && 'text-muted-foreground')}>
 											{field.value ? timezones.find(timezone => timezone.identifier === field.value)?.identifier : 'Select timezone'}
-											<ChevronsUpDown size={12} className="opacity-50" />
+											{allowEdit && <ChevronsUpDown size={12} className="opacity-50" />}
 										</Button>
 									</FormControl>
 								</PopoverTrigger>
@@ -369,20 +376,20 @@ export const EventForm = ({
 								<Repeat size={14} className="mt-3" />
 							</FormLabel>
 
-							<RecurrenceDialog recurrenceString={field?.value!} onClose={field.onChange} />
+							<RecurrenceDialog disabled={!allowEdit} recurrenceString={field?.value!} onClose={field.onChange} />
 
 							<FormMessage className="w-full" />
 						</FormItem>
 					)}
 				/>
 
-				<div className="flex gap-3">
-					<Label htmlFor="invitees" className="mt-4">
+				<div className={cn('flex gap-3', (!teams || !employeeList) && '!mt-8')}>
+					<Label htmlFor="invitees" className={cn(allowEdit && 'mt-4')}>
 						<UsersRound size={12} />
 					</Label>
 
 					<div>
-						{(!!teams.length || !!employeeList.length) && (
+						{allowEdit && (
 							<Command className="h-fit rounded-lg border md:min-w-[450px]" shouldFilter={false}>
 								<CommandInput
 									placeholder="Type an employee or team name to sesrch"
@@ -425,9 +432,9 @@ export const EventForm = ({
 							</Command>
 						)}
 
-						<ul className={cn('flex flex-wrap gap-2 empty:hidden', (!!teams.length || !!employeeList.length) && 'mt-6')}>
+						<ul className={cn('flex flex-wrap gap-2 empty:hidden', allowEdit && 'mt-6')}>
 							{invitees.map((invitee, index) => (
-								<li className="hov flex items-center gap-2 rounded-xl bg-accent pl-3 text-xs transition-all duration-500" key={index + 'invitee'}>
+								<li className={cn('hov flex items-center gap-2 rounded-xl pl-3 text-xs', allowEdit && 'bg-accent')} key={index + 'invitee'}>
 									{invitee?.single && (
 										<div className="flex items-center gap-2">
 											<span>
@@ -444,16 +451,18 @@ export const EventForm = ({
 										</div>
 									)}
 
-									<Button
-										variant={'ghost_destructive'}
-										type="button"
-										className="text-destructive"
-										onClick={() => {
-											invitees.splice(index, 1);
-											updateInvitees([...invitees]);
-										}}>
-										<Trash2 size={12} />
-									</Button>
+									{allowEdit && (
+										<Button
+											variant={'ghost_destructive'}
+											type="button"
+											className="text-destructive"
+											onClick={() => {
+												invitees.splice(index, 1);
+												updateInvitees([...invitees]);
+											}}>
+											<Trash2 size={12} />
+										</Button>
+									)}
 								</li>
 							))}
 						</ul>
@@ -465,12 +474,14 @@ export const EventForm = ({
 						<MapPin size={12} />
 					</Label>
 
-					<div className="w-full">
+					<div className={cn('ml-3 w-full', allowEdit && 'ml-0')}>
 						<Tabs defaultValue={locationType} onValueChange={setLocationType} className="flex w-full items-center gap-4">
-							<TabsList className="grid h-9 w-fit grid-cols-2">
-								<TabsTrigger value="virtual">Virtual</TabsTrigger>
-								<TabsTrigger value="physical">Physical</TabsTrigger>
-							</TabsList>
+							{allowEdit && (
+								<TabsList className="grid h-9 w-fit grid-cols-2">
+									<TabsTrigger value="virtual">Virtual</TabsTrigger>
+									<TabsTrigger value="physical">Physical</TabsTrigger>
+								</TabsList>
+							)}
 
 							<TabsContent value="virtual" className="mt-0 flex items-center gap-2">
 								<Badge variant={'secondary'} className="gap-3 py-2">
@@ -487,14 +498,14 @@ export const EventForm = ({
 								)}
 							</TabsContent>
 
-							<TabsContent value="physical" className="mt-0 w-[60%]">
+							<TabsContent value="physical" className="-ml-4 mt-0 w-[60%]">
 								<FormField
 									control={form.control}
 									name="location"
 									render={({ field }) => (
 										<FormItem className="flex w-full items-center gap-2">
 											<FormControl>
-												<Input className="h-9 w-full" placeholder="Event location or link" {...field} />
+												<Input readOnly={!allowEdit} className="h-9 w-full" placeholder="Event location or link" {...field} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -506,22 +517,24 @@ export const EventForm = ({
 				</div>
 
 				<div className="!mt-6 flex w-full justify-end space-x-4 text-right">
-					{!!event && (
+					{allowEdit && !!event && (
 						<Button type="button" disabled={isDeleting} variant={'secondary_destructive'} onClick={onDeleteEvent} className="mr-auto">
 							{isDeleting ? <LoadingSpinner className="text-destructive" /> : <Trash2 size={14} />}
 						</Button>
 					)}
 
 					{!date && (
-						<Button type="button" variant={'outline'} onClick={() => onClose && onClose()}>
+						<Button type="button" className={cn(!allowEdit && 'w-full')} variant={'outline'} onClick={() => onClose && onClose()}>
 							Close
 						</Button>
 					)}
 
-					<Button className="gap-3" disabled={isCreating} onClick={form.handleSubmit(onSubmit)} type="submit">
-						{isCreating && <LoadingSpinner />}
-						{event ? 'Update' : 'Create'} event
-					</Button>
+					{allowEdit && (
+						<Button className="gap-3" disabled={isCreating} onClick={form.handleSubmit(onSubmit)} type="submit">
+							{isCreating && <LoadingSpinner />}
+							{event ? 'Update' : 'Create'} event
+						</Button>
+					)}
 				</div>
 			</form>
 		</Form>

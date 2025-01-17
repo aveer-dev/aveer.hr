@@ -6,13 +6,14 @@ import { toast } from 'sonner';
 import { FullCalendar } from '@/components/calendar/calendar';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
+import { Tables } from '@/type/database.types';
 
 interface QUERY_BUILDER {
 	profile?: string;
 	org: string;
 }
 
-export const EmployeeCalendar = async ({ org, contractId }: { org: string; contractId?: number }) => {
+export const EmployeeCalendar = async ({ org, contractId, team }: { org: string; contractId?: number; team?: number | null }) => {
 	const supabase = await createClient();
 
 	const {
@@ -30,21 +31,24 @@ export const EmployeeCalendar = async ({ org, contractId }: { org: string; contr
 	const contractsQueryBuilder: QUERY_BUILDER & { status?: string } = { org, profile: user?.id! };
 	if (orgCalendarConfig?.enable_calendar && orgCalendarConfig?.calendar_employee_events?.includes('birthdays')) delete timeOffQuery.profile;
 
-	const [{ data: leaves, error: leaveError }, { data: reminders, error: reminderError }, { data: dobs, error: dobError }, { data: calendarConfig, error: calendarError }, { data: calendar, error: calendarDetailsError }] = await Promise.all([
-		supabase
-			.from('time_off')
-			.select('*, profile:profiles!time_off_profile_fkey(first_name, last_name)')
-			.match({ ...timeOffQuery }),
-		supabase.from('reminders').select('*, profile:profiles!reminders_profile_fkey(id, first_name, last_name)').match({ org, profile: user?.id! }),
-		supabase
-			.from('contracts')
-			.select('id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name, date_of_birth, id)')
-			.match({ ...contractsQueryBuilder }),
-		supabase.from('contract_calendar_config').select().match({ org, profile: user?.id! }),
-		supabase.from('calendars').select().match({ org, platform: 'google' }).single()
-	]);
+	const [{ data: leaves, error: leaveError }, { data: reminders, error: reminderError }, { data: dobs, error: dobError }, { data: calendarConfig, error: calendarError }, { data: calendar, error: calendarDetailsError }, { data: calendarEvents, error: calendarEventsError }] =
+		await Promise.all([
+			supabase
+				.from('time_off')
+				.select('*, profile:profiles!time_off_profile_fkey(first_name, last_name)')
+				.match({ ...timeOffQuery }),
+			supabase.from('reminders').select('*, profile:profiles!reminders_profile_fkey(id, first_name, last_name)').match({ org, profile: user?.id! }),
+			supabase
+				.from('contracts')
+				.select('id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name, date_of_birth, id)')
+				.match({ ...contractsQueryBuilder }),
+			supabase.from('contract_calendar_config').select().match({ org, profile: user?.id! }),
+			supabase.from('calendars').select().match({ org, platform: 'google' }).single(),
+			supabase.from('calendar_events').select().match({ org })
+		]);
 
 	const result: { date: Date; name: string; status: string; data: any }[] = [];
+	const events: { date: Date; data: Tables<'calendar_events'> }[] = [];
 
 	for (const item of leaves!) {
 		const startDate = new Date(item.from);
@@ -54,6 +58,20 @@ export const EmployeeCalendar = async ({ org, contractId }: { org: string; contr
 		const data = item;
 
 		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) result.push({ date: new Date(date), name, status, data });
+	}
+
+	for (const item of calendarEvents!) {
+		const startDate = new Date((item.start as any)?.dateTime);
+		const endDate = new Date((item.end as any)?.dateTime);
+		const data = item;
+
+		const isEmployeeInvited = !!(item.attendees as any[]).find(employee => {
+			if (employee.single) return employee.single.id == contractId;
+			if (employee.team) return employee.team.id == team;
+			return false;
+		});
+
+		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) if (isEmployeeInvited) events.push({ date: new Date(date), data });
 	}
 
 	return (
@@ -84,6 +102,7 @@ export const EmployeeCalendar = async ({ org, contractId }: { org: string; contr
 						reminders={reminders || []}
 						dobs={dobs!.filter(contract => contract.profile?.date_of_birth) as any}
 						enableClose={true}
+						events={events}
 					/>
 				</section>
 			</AlertDialogContent>
