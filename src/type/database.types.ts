@@ -396,6 +396,7 @@ export type Database = {
           event_id: string
           id: number
           location: string | null
+          meeting_link: string | null
           org: string
           recurrence: string | null
           start: Json
@@ -411,6 +412,7 @@ export type Database = {
           event_id: string
           id?: number
           location?: string | null
+          meeting_link?: string | null
           org: string
           recurrence?: string | null
           start: Json
@@ -426,6 +428,7 @@ export type Database = {
           event_id?: string
           id?: number
           location?: string | null
+          meeting_link?: string | null
           org?: string
           recurrence?: string | null
           start?: Json

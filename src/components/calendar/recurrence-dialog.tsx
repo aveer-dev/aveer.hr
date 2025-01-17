@@ -1,179 +1,171 @@
 import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { addOrdinalSuffix, cn, Frequency, generateRecurrence, parseRecurrenceRule, Weekday, weekday, frequency as frequencyList } from '@/lib/utils';
-import { getWeekOfMonth } from 'date-fns';
+import { add, getWeekOfMonth } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '../ui/date-picker';
+import { RRule, ALL_WEEKDAYS, WeekdayStr, Options } from 'rrule';
+import { addOrdinalSuffix, cn, parseRecurrence, parseRecurrenceRule } from '@/lib/utils';
 
 const yearMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const Frequencies: { label: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly'; freq: number; small: 'day' | 'week' | 'month' | 'year' }[] = [
+	{ label: 'Daily', small: 'day', freq: 3 },
+	{ label: 'Weekly', small: 'week', freq: 2 },
+	{ label: 'Monthly', small: 'month', freq: 1 },
+	{ label: 'Yearly', small: 'year', freq: 0 }
+];
 
 const daysOfMonth = Array.from({ length: 31 }, (_, i) => i + 1);
 
-const getFrequencyReadableString = (frequency: Frequency): string => {
-	if (frequency == 'DAILY') return 'day';
-	if (frequency == 'WEEKLY') return 'week';
-	if (frequency == 'MONTHLY') return 'month';
-	if (frequency == 'YEARLY') return 'year';
+const getWeekDayReadableString = (weekDayString: WeekdayStr): string => {
+	if (weekDayString == 'SU') return 'Sun';
+	if (weekDayString == 'MO') return 'Mon';
+	if (weekDayString == 'TU') return 'Tue';
+	if (weekDayString == 'WE') return 'Wed';
+	if (weekDayString == 'TH') return 'Thu';
+	if (weekDayString == 'FR') return 'Fri';
+	if (weekDayString == 'SA') return 'Sat';
 	return '';
 };
 
-const getWeekDayReadableString = (frequency: Weekday): string => {
-	if (frequency == 'SU') return 'Sun';
-	if (frequency == 'MO') return 'Mon';
-	if (frequency == 'TU') return 'Tue';
-	if (frequency == 'WE') return 'Wed';
-	if (frequency == 'TH') return 'Thu';
-	if (frequency == 'FR') return 'Fri';
-	if (frequency == 'SA') return 'Sat';
-	return '';
-};
-
-export const RecurrenceDialog = ({ onClose }: { onClose: (recurrence?: string) => void }) => {
-	const [frequency, setFrequency] = useState('null');
+export const RecurrenceDialog = ({ onClose, recurrenceString }: { recurrenceString?: string; onClose: (recurrence?: string) => void }) => {
+	const [frequency, setFrequency] = useState<(typeof Frequencies)[0]>(Frequencies[0]);
 	const [interval, setInterval] = useState(1);
-	const [weekdays, setWeekDays] = useState<string[] | undefined>([]);
+	const [weekdays, setWeekDays] = useState<WeekdayStr[] | undefined>([]);
+	const [selectWeekDay, setSelectWeekDay] = useState<string>('');
 	const [monthDay, setMonthDays] = useState<number[] | undefined>();
 	const [bymonth, setByMonth] = useState<number[] | undefined>(undefined);
-	const [recurenceMonthOnThe, setRecurenceMonthOnThe] = useState<{ week: number | undefined; day: string | undefined }>({ week: undefined, day: undefined });
-	const [recurenceMonthType, setRecurenceMonthType] = useState('each');
+	const [monthType, setMonthType] = useState('each');
 	const [endRepeat, setEndRepeat] = useState('never');
 	const [until, setUntil] = useState<Date | undefined>(undefined);
 	const [count, setCount] = useState<number>(0);
-	const [position, setPosition] = useState<number>(0);
-	const [recurringString, setRecurringString] = useState('');
+	const [position, setPosition] = useState<number>(1);
+	const [recurringString, setRecurringString] = useState(recurrenceString);
 
-	useEffect(() => {
-		if (endRepeat == 'after') {
-			setCount(1);
-			setUntil(undefined);
-			return;
+	const getRecurrenceString = () => {
+		if (!frequency) return;
+
+		const rules: Partial<Options> = {
+			freq: frequency.freq,
+			interval
+		};
+
+		// set end repeat rules
+		if (endRepeat == 'after') rules.count = count;
+		if (endRepeat == 'on date') rules.until = until;
+
+		// if weekly repeat
+		if (frequency.label == 'Weekly') rules.byweekday = weekdays?.map(day => RRule[day]);
+
+		// if monthly repeat
+		if (frequency.label == 'Monthly') {
+			if (monthType == 'each') rules.bymonthday = monthDay;
+			if (monthType == 'on-the') {
+				if (weekdays && weekdays.length) rules.byweekday = weekdays?.map(day => RRule[day].nth(position));
+				if (monthDay && monthDay.length) rules.bymonthday = monthDay;
+			}
 		}
 
-		if (endRepeat == 'on date') {
-			setCount(0);
-			setUntil(new Date());
-			return;
+		// if yearly repeat
+		if (frequency.label == 'Yearly') {
+			rules.bymonth = bymonth;
+			if (weekdays && weekdays.length) rules.byweekday = weekdays.map(day => RRule[day].nth(position));
+			if (!weekdays?.length) rules.bymonthday = position;
 		}
 
-		if (endRepeat == 'never') {
-			setCount(0);
-			setUntil(undefined);
-			return;
-		}
-	}, [endRepeat]);
+		const rule = new RRule(rules);
+		setRecurringString(rule.toString());
+		onClose(rule.toString());
+		console.log(rule.toString());
+	};
 
-	useEffect(() => {
-		if (recurenceMonthType == 'on-the') {
-			setMonthDays(undefined);
-			setRecurenceMonthOnThe({ week: getWeekOfMonth(new Date()), day: weekday[new Date().getDay()] });
-			return;
+	const loadRecurrenceString = () => {
+		if (!recurrenceString) return;
+
+		const data = parseRecurrence(recurrenceString);
+		if (data.frequency) setFrequency(Frequencies[Frequencies.findIndex(item => item.freq == RRule[data.frequency])]);
+		if (data.count) {
+			setCount(data.count);
+			setEndRepeat('after');
+		}
+		if (data.bymonth) setByMonth(typeof data.bymonth == 'number' ? [data.bymonth] : data.bymonth);
+		if (data.position) setPosition(data.position);
+		if (data.interval) setInterval(data.interval);
+		if (data.monthDay) setMonthDays(typeof data.monthDay == 'number' ? [data.monthDay] : data.monthDay);
+		if (data.until) {
+			setUntil(until);
+			setEndRepeat('on date');
+		}
+		if (data.weekdays) {
+			setWeekDays(data.weekdays);
+			setSelectWeekDay(data.weekdays[0]);
 		}
 
-		if (recurenceMonthType == 'each') {
-			setMonthDays([new Date().getDate()]);
-			setRecurenceMonthOnThe({ week: undefined, day: undefined });
+		if (data.frequency == 'MONTHLY' && data.position) setMonthType('on-the');
+	};
+
+	const onChangeFrequency = (frequency: (typeof Frequencies)[0]) => {
+		setFrequency(frequency);
+
+		if (frequency.label == 'Daily') {
 			setWeekDays(undefined);
-			setPosition(0);
-			return;
-		}
-	}, [recurenceMonthType]);
-
-	useEffect(() => {
-		if (recurenceMonthOnThe?.week) setPosition(recurenceMonthOnThe?.week);
-
-		if (recurenceMonthOnThe?.day) {
-			if (weekday.find(day => day == recurenceMonthOnThe?.day)) {
-				setWeekDays([recurenceMonthOnThe?.day]);
-				return;
-			}
-
-			if (recurenceMonthOnThe?.day == 'day') {
-				setMonthDays([-1]);
-				setPosition(0);
-			}
-
-			if (recurenceMonthOnThe?.day == 'weekend') {
-				setWeekDays(['SA', 'SU']);
-				setMonthDays(undefined);
-				return;
-			}
-
-			if (recurenceMonthOnThe?.day == 'weekday') {
-				setWeekDays(['MO', 'TU', 'WE', 'TH', 'FR']);
-				setMonthDays(undefined);
-				return;
-			}
-		}
-	}, [recurenceMonthOnThe]);
-
-	const onFrequencyChange = (value: Frequency) => {
-		setFrequency(value);
-
-		if (value == 'MONTHLY') {
-			setMonthDays([new Date().getDate()]);
-			setWeekDays(undefined);
-			setRecurenceMonthType('each');
-			setByMonth(undefined);
-			return;
-		}
-
-		if (value == 'WEEKLY') {
-			setWeekDays([weekday[new Date().getDay()]]);
+			setSelectWeekDay('');
 			setMonthDays(undefined);
-			setPosition(0);
 			setByMonth(undefined);
+			setPosition(0);
+
 			return;
 		}
 
-		if (value == 'DAILY') {
-			setWeekDays(undefined);
+		if (frequency.label == 'Weekly') {
+			setWeekDays([ALL_WEEKDAYS[new Date().getDay() - 1]]);
+			setSelectWeekDay('');
 			setMonthDays(undefined);
-			setPosition(0);
 			setByMonth(undefined);
+			setPosition(0);
+
 			return;
 		}
 
-		if (value == 'YEARLY') {
+		if (frequency.label == 'Monthly') return setMonthType('each');
+
+		if (frequency.label == 'Yearly') {
+			setWeekDays([ALL_WEEKDAYS[new Date().getDay()]]);
+			setSelectWeekDay(ALL_WEEKDAYS[new Date().getDay()]);
+			setMonthDays(undefined);
 			setByMonth([new Date().getMonth() + 1]);
-			setRecurenceMonthOnThe({ week: getWeekOfMonth(new Date()), day: weekday[new Date().getDay()] });
-			setWeekDays([weekday[new Date().getDay()]]);
-			setMonthDays(undefined);
+			setPosition(getWeekOfMonth(new Date()));
+
 			return;
 		}
 	};
 
-	const getRecurrenceString = () => {
-		if (frequency == 'null') {
-			setRecurringString('');
-			onClose();
-			return;
+	const onMonthTypeChange = (value: string) => {
+		setMonthType(value);
+
+		if (value == 'each') {
+			setWeekDays(undefined);
+			setMonthDays([new Date().getDate()]);
+			setByMonth(undefined);
+			setPosition(0);
 		}
-
-		const recurrence = generateRecurrence({
-			frequency,
-			interval,
-			weekdays,
-			count,
-			until,
-			monthDay,
-			position,
-			bymonth
-		});
-		console.log('🚀 ~ getRecurrenceString ~ recurrence:', recurrence);
-
-		setRecurringString(recurrence);
-		onClose(recurrence);
+		if (value == 'on-the') {
+			setWeekDays([ALL_WEEKDAYS[new Date().getDay() - 1]]);
+			setSelectWeekDay(ALL_WEEKDAYS[new Date().getDay() - 1]);
+			setMonthDays(undefined);
+			setByMonth(undefined);
+			setPosition(getWeekOfMonth(new Date()));
+		}
 	};
 
 	return (
-		<AlertDialog>
+		<AlertDialog onOpenChange={state => state == true && loadRecurrenceString()}>
 			<AlertDialogTrigger asChild>
-				<Button variant="secondary">{recurringString == '' ? 'Does not repeat' : parseRecurrenceRule(recurringString)}</Button>
+				<Button variant="secondary">{!recurringString || recurringString == '' ? 'Does not repeat' : parseRecurrenceRule(recurringString)}</Button>
 			</AlertDialogTrigger>
 
 			<AlertDialogContent>
@@ -184,44 +176,49 @@ export const RecurrenceDialog = ({ onClose }: { onClose: (recurrence?: string) =
 
 				<div className="w-full">
 					<div className="flex w-full items-center gap-4">
-						<Select onValueChange={onFrequencyChange} value={frequency}>
+						<Select onValueChange={value => onChangeFrequency(Frequencies[Frequencies.findIndex(item => item.freq == Number(value))])} value={String(frequency.freq)}>
 							<SelectTrigger id="frequency" className={cn('w-full duration-300')}>
 								<SelectValue placeholder="Select repeat frequency" />
 							</SelectTrigger>
 
 							<SelectContent>
-								<SelectItem className="uppercase" value={'null'}>
-									Does not repeat
-								</SelectItem>
-
-								{frequencyList.map(freq => (
-									<SelectItem key={freq} className="uppercase" value={freq}>
-										{freq}
+								{Frequencies.map(freq => (
+									<SelectItem key={freq.freq} value={String(freq.freq)}>
+										{freq.label}
 									</SelectItem>
 								))}
 							</SelectContent>
 						</Select>
 
-						{frequency !== 'null' && (
+						{!!frequency && (
 							<>
 								<div className="flex h-10 w-fit items-center gap-2 rounded-lg border bg-input-bg px-3">
 									<Label className="text-sm text-primary">Every </Label>
-									<Input value={interval} onChange={event => setInterval(Number(event.target.value))} inputMode="numeric" className="h-8 w-10 text-center" type="number" placeholder="" />
-									<span className="w-fit whitespace-nowrap text-sm">{`${getFrequencyReadableString(frequency)}${interval > 1 ? 's' : ''}`}</span>
+									<Input
+										value={interval}
+										min={1}
+										max={99}
+										onChange={event => (Number(event.target.value) <= 1 ? setInterval(1) : Number(event.target.value) <= 1 ? setInterval(1) : setInterval(Number(event.target.value)))}
+										inputMode="numeric"
+										className="h-8 w-10 text-center"
+										type="number"
+										placeholder=""
+									/>
+									<span className="w-fit whitespace-nowrap text-sm">{`${frequency.small}${interval > 1 ? 's' : ''}`}</span>
 								</div>
 
-								{frequency == 'WEEKLY' && <span className="w-fit whitespace-nowrap text-sm"> on:</span>}
-								{frequency == 'YEARLY' && <span className="w-fit whitespace-nowrap text-sm"> in:</span>}
+								{frequency.label == 'Weekly' && <span className="w-fit whitespace-nowrap text-sm"> on:</span>}
+								{frequency.label == 'Yearly' && <span className="w-fit whitespace-nowrap text-sm"> in:</span>}
 							</>
 						)}
 					</div>
 
-					{frequency !== 'null' && (
+					{!!frequency && (
 						<>
 							<div className="mt-3 flex w-full flex-wrap items-center gap-4">
-								{frequency == 'WEEKLY' && (
-									<ToggleGroup value={weekdays} onValueChange={setWeekDays} type="multiple" className="mt-1 w-fit rounded-lg bg-secondary/75 p-1">
-										{weekday.map(day => (
+								{frequency.label == 'Weekly' && (
+									<ToggleGroup value={weekdays} onValueChange={value => value.length >= 1 && setWeekDays(value as any)} type="multiple" className="mt-1 w-fit rounded-lg bg-secondary/75 p-1">
+										{ALL_WEEKDAYS.map(day => (
 											<ToggleGroupItem
 												value={day}
 												key={day + 'day-toggle'}
@@ -233,8 +230,8 @@ export const RecurrenceDialog = ({ onClose }: { onClose: (recurrence?: string) =
 									</ToggleGroup>
 								)}
 
-								{frequency == 'MONTHLY' && (
-									<RadioGroup value={recurenceMonthType} onValueChange={setRecurenceMonthType} className="mt-3 w-full space-y-4">
+								{frequency.label == 'Monthly' && (
+									<RadioGroup value={monthType} onValueChange={onMonthTypeChange} className="mt-3 w-full space-y-4">
 										<div className="flex gap-3">
 											<RadioGroupItem value="each" id="r1" />
 
@@ -242,8 +239,8 @@ export const RecurrenceDialog = ({ onClose }: { onClose: (recurrence?: string) =
 												<p className="-mt-0.5 ml-1 text-sm">Each</p>
 
 												<ToggleGroup
-													disabled={recurenceMonthType !== 'each'}
-													onValueChange={value => setMonthDays(value.map(item => Number(item)))}
+													disabled={monthType !== 'each'}
+													onValueChange={value => value.length >= 1 && setMonthDays(value.map(item => Number(item)))}
 													value={monthDay?.map(item => String(item))}
 													type="multiple"
 													className="grid w-fit grid-cols-7 rounded-lg bg-secondary p-1">
@@ -258,7 +255,7 @@ export const RecurrenceDialog = ({ onClose }: { onClose: (recurrence?: string) =
 													))}
 												</ToggleGroup>
 
-												{!!monthDay?.length && recurenceMonthType == 'each' && (
+												{!!monthDay?.length && monthType == 'each' && (
 													<p className="ml-1 text-xs font-light text-muted-foreground">Repeat each {monthDay?.sort().map((day, index) => `${addOrdinalSuffix(Number(day))}${index !== monthDay.length - 1 ? ', ' : ''}`)} of every month</p>
 												)}
 											</Label>
@@ -267,10 +264,10 @@ export const RecurrenceDialog = ({ onClose }: { onClose: (recurrence?: string) =
 										<div className="flex w-full items-center gap-3 space-x-2">
 											<RadioGroupItem value="on-the" id="r2" />
 
-											<Label htmlFor="r2" className="flex w-full items-center gap-2">
+											<Label htmlFor="r2" className="flex w-full items-center gap-2 text-primary">
 												<p className="w-fit whitespace-nowrap text-sm">On the</p>
 
-												<Select value={String(recurenceMonthOnThe.week)} disabled={recurenceMonthType !== 'on-the'} onValueChange={value => setRecurenceMonthOnThe({ ...recurenceMonthOnThe, week: Number(value) })}>
+												<Select value={String(position)} disabled={monthType !== 'on-the'} onValueChange={value => setPosition(Number(value))}>
 													<SelectTrigger className="w-full">
 														<SelectValue placeholder="Select week in month" />
 													</SelectTrigger>
@@ -286,22 +283,35 @@ export const RecurrenceDialog = ({ onClose }: { onClose: (recurrence?: string) =
 													</SelectContent>
 												</Select>
 
-												<Select value={recurenceMonthOnThe.day} disabled={recurenceMonthType !== 'on-the'} onValueChange={value => setRecurenceMonthOnThe({ ...recurenceMonthOnThe, day: value })}>
+												<Select
+													value={selectWeekDay}
+													disabled={monthType !== 'on-the'}
+													onValueChange={value => {
+														setSelectWeekDay(value);
+
+														if (value == 'day') {
+															setWeekDays([]);
+															setMonthDays([position]);
+															return;
+														}
+
+														setMonthDays([]);
+														setWeekDays(value.split(',') as any[]);
+													}}>
 													<SelectTrigger className="w-full">
 														<SelectValue placeholder="Select day of the week" />
 													</SelectTrigger>
+
 													<SelectContent>
-														<SelectItem value="SU">Sunday</SelectItem>
-														<SelectItem value="MO">Monday</SelectItem>
-														<SelectItem value="TU">Tuesday</SelectItem>
-														<SelectItem value="WE">Wednessday</SelectItem>
-														<SelectItem value="TH">Thursday</SelectItem>
-														<SelectItem value="FR">Friday</SelectItem>
-														<SelectItem value="SA">Saturday</SelectItem>
+														{ALL_WEEKDAYS.map(day => (
+															<SelectItem key={day + 'weekday'} value={day}>
+																{getWeekDayReadableString(day)}
+															</SelectItem>
+														))}
 														<SelectSeparator />
 														<SelectItem value="day">Day</SelectItem>
-														<SelectItem value="weekend">Weekend</SelectItem>
-														<SelectItem value="weekday">Weekday</SelectItem>
+														<SelectItem value="SA,SU">Weekend</SelectItem>
+														<SelectItem value="MO,TU,WE,TH,FR">Weekday</SelectItem>
 													</SelectContent>
 												</Select>
 											</Label>
@@ -309,9 +319,9 @@ export const RecurrenceDialog = ({ onClose }: { onClose: (recurrence?: string) =
 									</RadioGroup>
 								)}
 
-								{frequency == 'YEARLY' && (
+								{frequency.label == 'Yearly' && (
 									<>
-										<ToggleGroup value={bymonth?.map(month => String(month))} onValueChange={values => setByMonth(values.map(month => Number(month)))} type="multiple" className="mt-3 grid w-fit grid-cols-6 rounded-lg bg-secondary p-1">
+										<ToggleGroup value={bymonth?.map(month => String(month))} onValueChange={values => values.length >= 1 && setByMonth(values.map(month => Number(month)))} type="multiple" className="mt-3 grid w-fit grid-cols-6 rounded-lg bg-secondary p-1">
 											{yearMonths.map((month, index) => (
 												<ToggleGroupItem
 													value={String(index + 1)}
@@ -326,34 +336,46 @@ export const RecurrenceDialog = ({ onClose }: { onClose: (recurrence?: string) =
 										<div className="mt-3 flex w-full items-center gap-2">
 											<p className="w-fit whitespace-nowrap text-sm">On the</p>
 
-											<Select value={String(recurenceMonthOnThe.week)} onValueChange={value => setRecurenceMonthOnThe({ ...recurenceMonthOnThe, week: Number(value) })}>
+											<Select value={String(position)} onValueChange={value => setPosition(Number(value))}>
 												<SelectTrigger className="w-full">
 													<SelectValue placeholder="Select week in month" />
 												</SelectTrigger>
 												<SelectContent>
-													<SelectItem value="1">First</SelectItem>
-													<SelectItem value="2">Second</SelectItem>
-													<SelectItem value="3">Third</SelectItem>
-													<SelectItem value="4">Fourth</SelectItem>
-													<SelectItem value="5">Fifth</SelectItem>
+													<SelectItem value={'1'}>First</SelectItem>
+													<SelectItem value={'2'}>Second</SelectItem>
+													<SelectItem value={'3'}>Third</SelectItem>
+													<SelectItem value={'4'}>Fourth</SelectItem>
+													<SelectItem value={'5'}>Fifth</SelectItem>
 													<SelectSeparator />
-													<SelectItem value="-2">Second to last</SelectItem>
-													<SelectItem value="-1">Last</SelectItem>
+													<SelectItem value={'-2'}>Second to last</SelectItem>
+													<SelectItem value={'-1'}>Last</SelectItem>
 												</SelectContent>
 											</Select>
 
-											<Select value={recurenceMonthOnThe.day} onValueChange={value => setRecurenceMonthOnThe({ ...recurenceMonthOnThe, day: value })}>
+											<Select
+												value={selectWeekDay}
+												onValueChange={value => {
+													setSelectWeekDay(value);
+
+													if (value == 'day') {
+														setWeekDays([]);
+														setMonthDays([position]);
+														return;
+													}
+
+													setMonthDays([]);
+													setWeekDays(value.split(',') as any[]);
+												}}>
 												<SelectTrigger className="w-full">
 													<SelectValue placeholder="Select day of the week" />
 												</SelectTrigger>
+
 												<SelectContent>
-													<SelectItem value="SU">Sunday</SelectItem>
-													<SelectItem value="MO">Monday</SelectItem>
-													<SelectItem value="TU">Tuesday</SelectItem>
-													<SelectItem value="WE">Wednessday</SelectItem>
-													<SelectItem value="TH">Thursday</SelectItem>
-													<SelectItem value="FR">Friday</SelectItem>
-													<SelectItem value="SA">Saturday</SelectItem>
+													{ALL_WEEKDAYS.map(day => (
+														<SelectItem key={day + 'weekday'} value={day}>
+															{getWeekDayReadableString(day)}
+														</SelectItem>
+													))}
 													<SelectSeparator />
 													<SelectItem value="day">Day</SelectItem>
 													<SelectItem value="weekend">Weekend</SelectItem>
@@ -387,12 +409,21 @@ export const RecurrenceDialog = ({ onClose }: { onClose: (recurrence?: string) =
 
 									{endRepeat == 'after' && (
 										<div className="flex h-10 w-fit items-center gap-2 rounded-lg border bg-input-bg px-3">
-											<Input value={count} onChange={event => setCount(Number(event.target.value))} min={1} inputMode="numeric" className="h-8 w-10 text-center" type="number" placeholder="" />
+											<Input
+												max={365}
+												value={count}
+												onChange={event => (Number(event.target.value) <= 0 ? setCount(1) : Number(event.target.value) >= 365 ? setCount(365) : setCount(Number(event.target.value)))}
+												min={1}
+												inputMode="numeric"
+												className="h-8 w-10 text-center"
+												type="number"
+												placeholder=""
+											/>
 											<span className="w-fit whitespace-nowrap text-sm">Occurence</span>
 										</div>
 									)}
 
-									{endRepeat == 'on date' && until && <DatePicker selected={until} onSetDate={setUntil} />}
+									{endRepeat == 'on date' && <DatePicker selected={until} onSetDate={setUntil} />}
 								</div>
 							</div>
 						</>
@@ -400,9 +431,9 @@ export const RecurrenceDialog = ({ onClose }: { onClose: (recurrence?: string) =
 				</div>
 
 				<AlertDialogFooter className="mt-6">
-					<AlertDialogCancel className="w-full">Cloe</AlertDialogCancel>
+					<AlertDialogCancel className="w-full">Close</AlertDialogCancel>
 
-					<AlertDialogAction className="w-full" onClick={getRecurrenceString}>
+					<AlertDialogAction onClick={getRecurrenceString} className="w-full">
 						Set frequency
 					</AlertDialogAction>
 				</AlertDialogFooter>

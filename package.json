@@ -99,6 +99,7 @@
 		"react-hook-form": "^7.53.0",
 		"recharts": "^2.15.0",
 		"resend": "^4.0.0",
+		"rrule": "^2.8.1",
 		"sass": "^1.77.8",
 		"sonner": "^1.7.1",
 		"tailwind-merge": "^2.4.0",

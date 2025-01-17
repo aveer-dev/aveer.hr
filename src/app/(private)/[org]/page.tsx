@@ -64,7 +64,9 @@ export default async function OrgPage(props: { params: Promise<{ [key: string]: 
 					<DashboardCharts contracts={count} org={(await props.params).org} />
 				</Suspense>
 			</div>
+
 			<DashboardCalendar org={(await props.params).org} />
+
 			<Suspense fallback={<Skeleton className="h-96 w-full max-w-[1200px]"></Skeleton>}>
 				<ClientTable org={(await props.params).org} data={data as unknown as PERSON[]} />
 			</Suspense>

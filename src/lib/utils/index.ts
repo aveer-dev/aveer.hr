@@ -63,3 +63,4 @@ export { generateRecurrence, weekday, frequency, type Frequency, type Weekday } 
 export { parseRecurrenceRule } from './parseRecurrenceString';
 export { searchTeams } from './team-search';
 export { getAllTimezones, getCurrentTimezone } from './timezone';
+export { parseRecurrence } from './revertRecurrenceString';

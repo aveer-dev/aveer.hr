@@ -4,21 +4,27 @@ import { DayOfWeek, DayPicker } from 'react-day-picker';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { format, getDay, getYear, isFirstDayOfMonth, isSameDay, isThisMonth, isToday, setYear } from 'date-fns';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Maximize } from 'lucide-react';
+import { ArrowUpRight, CalendarRange, ChevronLeft, ChevronRight, Maximize } from 'lucide-react';
 import { useEffect } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LeaveReview } from '@/components/leave/leave-review';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NavLink } from '@/components/ui/link';
 import { Separator } from '../ui/separator';
+import { Tables } from '@/type/database.types';
+import { EventDialog } from '../calendar/event-dialog';
 
 interface props {
 	org: string;
 	leaveDays: { date: Date; status: string; name: string; data: any }[];
 	birthdays: { id: number; job_title: string; profile: { id: string; last_name: string; first_name: string; date_of_birth: string | null } | null }[];
+	events: { date: Date; data: Tables<'calendar_events'> }[];
+	teams: Tables<'teams'>[] | null;
+	employees: Tables<'contracts'>[];
+	calendar: Tables<'calendars'> | null;
 }
 
-export const Calendar = ({ leaveDays, birthdays, org }: props) => {
+export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, calendar }: props) => {
 	const dayOfWeekMatcher: DayOfWeek = {
 		dayOfWeek: [0, 6]
 	};
@@ -39,7 +45,8 @@ export const Calendar = ({ leaveDays, birthdays, org }: props) => {
 			}}
 			modifiers={{
 				weekend: dayOfWeekMatcher,
-				leaveDay: leaveDays.map(day => day.date)
+				leaveDay: leaveDays.map(day => day.date),
+				event: events.map(day => day.date)
 			}}
 			components={{
 				Nav: ({ onNextClick, onPreviousClick }) => {
@@ -90,7 +97,8 @@ export const Calendar = ({ leaveDays, birthdays, org }: props) => {
 					const isStartOfMonth = isFirstDayOfMonth(date);
 					const year = getYear(date);
 					const isBirthday = birthdays.filter(birthday => (birthday.profile?.date_of_birth ? isSameDay(date, setYear(birthday.profile?.date_of_birth, year)) : false));
-					const dateHasEvent = (modifiers.leaveDay && !modifiers.weekend) || !!isBirthday.length;
+					const cevents = modifiers.event ? events.filter(event => isSameDay(event.date, date)) : [];
+					const dateHasEvent = (modifiers.leaveDay && !modifiers.weekend) || !!isBirthday.length || !!cevents.length;
 					const dayLeaves = leaveDays.filter(leaveDay => isSameDay(leaveDay.date, date));
 
 					return (
@@ -125,6 +133,11 @@ export const Calendar = ({ leaveDays, birthdays, org }: props) => {
 															Bithdays
 														</TabsTrigger>
 													)}
+													{!!cevents.length && calendar && (
+														<TabsTrigger className="py-1" value="events">
+															Events
+														</TabsTrigger>
+													)}
 												</TabsList>
 											)}
 
@@ -148,6 +161,21 @@ export const Calendar = ({ leaveDays, birthdays, org }: props) => {
 																	<ArrowUpRight size={12} />
 																</NavLink>
 															</li>
+														))}
+													</ul>
+												</TabsContent>
+											)}
+
+											{!!cevents.length && calendar && (
+												<TabsContent value="birthday">
+													<ul className="space-y-1">
+														{cevents.map(event => (
+															<EventDialog key={event.data.id} event={event.data} teams={teams} employees={employees} org={org} calendarId={calendar?.calendar_id}>
+																<li className="2 flex max-w-56 items-center gap-2 rounded-sm p-1 py-2 text-xs transition-all duration-300 hover:bg-muted">
+																	<CalendarRange size={12} />
+																	{event.data.summary}
+																</li>
+															</EventDialog>
 														))}
 													</ul>
 												</TabsContent>

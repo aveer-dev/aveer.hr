@@ -3,7 +3,7 @@
 import { OAuth2Client } from 'google-auth-library';
 import { calendar_v3 } from '@googleapis/calendar';
 import { createClient } from '@/utils/supabase/server';
-import { Database, TablesInsert } from '@/type/database.types';
+import { Database, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { v4 as uuid } from 'uuid';
 
 const calendarAPI = async (org?: string) => {
@@ -145,7 +145,7 @@ export const createGCalendarEvent = async ({ calendarId, payload }: { calendarId
 	try {
 		const { gCalendar } = await calendarAPI();
 
-		const response = gCalendar.events.insert({ calendarId, conferenceDataVersion: 1, requestBody: { ...payload, visibility: 'private', guestsCanInviteOthers: false } });
+		const response = await gCalendar.events.insert({ calendarId, conferenceDataVersion: 1, requestBody: { ...payload, visibility: 'private', guestsCanInviteOthers: false } });
 
 		return response;
 	} catch (error) {
@@ -153,17 +153,71 @@ export const createGCalendarEvent = async ({ calendarId, payload }: { calendarId
 	}
 };
 
-export const createCalendarEvent = async ({ calendarId, payload, virtual }: { virtual?: boolean; org: string; calendarId: string; payload: TablesInsert<'calendar_events'> }) => {
+export const createCalendarEvent = async ({ calendarId, payload, attendees, virtual }: { attendees: { email: string }[]; virtual?: boolean; calendarId: string; payload: TablesInsert<'calendar_events'> }) => {
 	const supabase = await createClient();
 
 	try {
-		const gCalendarPayload: calendar_v3.Schema$Event = { summary: payload.summary, description: payload.description, recurrence: [payload.recurrence as string], attendees: payload.attendees as any, start: payload.start as any, end: payload.end as any };
+		const gCalendarPayload: calendar_v3.Schema$Event = { summary: payload.summary, description: payload.description, location: payload.location, recurrence: [payload.recurrence as string], attendees, start: payload.start as any, end: payload.end as any };
 		if (virtual) gCalendarPayload.conferenceData = { createRequest: { requestId: uuid(), conferenceSolutionKey: { type: 'hangoutsMeet' } } };
 
 		const event = await createGCalendarEvent({ calendarId, payload: gCalendarPayload });
 		if (!event.data.id) return 'Unable to create calendar event';
 
-		const { error } = await supabase.from('calendar_events').insert({ ...payload, event_id: event.data.id, time_zone: (payload.end as any).timeZone });
+		const { error, data } = await supabase
+			.from('calendar_events')
+			.insert({ ...payload, event_id: event.data.id, time_zone: (payload.end as any).timeZone, meeting_link: event.data?.hangoutLink })
+			.select()
+			.single();
+		if (error) throw error;
+
+		return data;
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const updateGCalendarEvent = async ({ calendarId, payload, eventId }: { eventId: string; calendarId: string; payload: calendar_v3.Schema$Event }) => {
+	try {
+		const { gCalendar } = await calendarAPI();
+
+		const response = await gCalendar.events.update({ calendarId, eventId, conferenceDataVersion: 1, requestBody: { ...payload, visibility: 'private', guestsCanInviteOthers: false } });
+
+		return response;
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const updateCalendarEvent = async ({ calendarId, payload, attendees, virtual, id }: { id: number; attendees: { email: string }[]; virtual?: boolean; calendarId: string; payload: TablesUpdate<'calendar_events'> }) => {
+	const supabase = await createClient();
+
+	try {
+		const gCalendarPayload: calendar_v3.Schema$Event = { summary: payload.summary, description: payload.description, location: payload.location, recurrence: [payload.recurrence as string], attendees, start: payload.start as any, end: payload.end as any };
+		if (virtual) gCalendarPayload.conferenceData = { createRequest: { requestId: uuid(), conferenceSolutionKey: { type: 'hangoutsMeet' } } };
+
+		const event = await updateGCalendarEvent({ calendarId, payload: gCalendarPayload, eventId: payload.event_id! });
+		if (!event.data.id) return 'Unable to update calendar event';
+
+		const { error } = await supabase
+			.from('calendar_events')
+			.update({ ...payload, time_zone: (payload.end as any).timeZone, meeting_link: event.data?.hangoutLink || null })
+			.match({ org: payload.org, id });
+		if (error) throw error;
+
+		return true;
+	} catch (error) {
+		throw error;
+	}
+};
+
+export const deleteCalendarEvent = async ({ calendarId, eventId, id }: { id: number; eventId: string; calendarId: string }) => {
+	const supabase = await createClient();
+
+	try {
+		const { gCalendar } = await calendarAPI();
+		await gCalendar.events.delete({ calendarId, eventId });
+
+		const { error } = await supabase.from('calendar_events').delete().match({ id });
 		if (error) throw error;
 
 		return true;

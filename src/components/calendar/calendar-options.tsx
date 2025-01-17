@@ -6,8 +6,9 @@ import { BellPlus, CalendarRangeIcon, Plus } from 'lucide-react';
 import { ReminderDialog } from './reminder-dialog';
 import { useState } from 'react';
 import { EventDialog } from './event-dialog';
+import { Tables } from '@/type/database.types';
 
-export const CalendarOptions = ({ org, contract, profile, calendarId }: { calendarId: string; org: string; contract: number; profile: string }) => {
+export const CalendarOptions = ({ org, contract, profile, calendarId, teams, employees }: { employees: Tables<'contracts'>[] | null; teams: Tables<'teams'>[] | null; calendarId: string; org: string; contract: number; profile: string }) => {
 	const [isOptionOpen, toggleOptionState] = useState(false);
 
 	return (
@@ -19,7 +20,7 @@ export const CalendarOptions = ({ org, contract, profile, calendarId }: { calend
 			</DropdownMenuTrigger>
 
 			<DropdownMenuContent className="w-28">
-				<EventDialog org={org} onClose={toggleOptionState} calendarId={calendarId} profile={profile}>
+				<EventDialog teams={teams} employees={employees} org={org} onClose={toggleOptionState} calendarId={calendarId}>
 					<DropdownMenuItem onSelect={event => event.preventDefault()} className="gap-3">
 						<CalendarRangeIcon size={12} /> Event
 					</DropdownMenuItem>
