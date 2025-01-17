@@ -46,16 +46,7 @@ interface EMPLOYEE {
 	profile: { first_name: string; last_name: string; id: string; email: string };
 }
 
-export const EventForm = ({
-	date,
-	org,
-	calendarId,
-	onCreateEvent,
-	teamsList,
-	onClose,
-	employeeList,
-	event
-}: {
+interface PROPS {
 	teamsList?: Tables<'teams'>[] | null;
 	employeeList?: EMPLOYEE[];
 	date?: Date;
@@ -64,7 +55,9 @@ export const EventForm = ({
 	onCreateEvent: () => void;
 	onClose: () => void;
 	event?: Tables<'calendar_events'>;
-}) => {
+}
+
+export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onClose, employeeList, event }: PROPS) => {
 	const [employees, setEmployees] = useState<EMPLOYEE[]>([]);
 	const [teams, setTeams] = useState<Tables<'teams'>[]>([]);
 	const [filteredEmployees, setFilteredEmployees] = useState<EMPLOYEE[]>([]);
@@ -72,8 +65,8 @@ export const EventForm = ({
 	const [isCreating, setCreatingState] = useState(false);
 	const [isDeleting, setDeletingState] = useState(false);
 	const router = useRouter();
-	const [invitees, updateInvitees] = useState<{ single?: EMPLOYEE; team?: { name: string; id: number } }[]>((event?.attendees as any) || []);
-	const [locationType, setLocationType] = useState(event?.meeting_link ? 'virtual' : 'physical');
+	const [invitees, updateInvitees] = useState<{ single?: EMPLOYEE; team?: { name: string; id: number }; all?: boolean }[]>((event?.attendees as any) || []);
+	const [locationType, setLocationType] = useState(!event || event?.meeting_link ? 'virtual' : 'physical');
 	const [isTimezoneOpen, toggleTimezoneState] = useState(false);
 	const allowEdit = !!teams && !!employeeList;
 
@@ -172,10 +165,13 @@ export const EventForm = ({
 				if (invitee.team) return employeeList?.filter(employee => employee?.team == invitee.team?.id).map(employee => employee?.profile.email);
 
 				if (invitee.single) return invitee.single.profile.email;
+
+				if (invitee.all) return employeeList?.map(employee => employee?.profile.email);
 			})
 			.flat();
 
 		form.setValue('attendees', [...new Set(inviteesEmails.map(email => ({ email: email as string })))]);
+		console.log('🚀 ~ useEffect ~ [...new Set(inviteesEmails.map(email => ({ email: email as string })))]:', [...new Set(inviteesEmails.map(email => ({ email: email as string })))]);
 	}, [employeeList, invitees, teamsList, form]);
 
 	const copy = (text: string) => {
@@ -186,6 +182,7 @@ export const EventForm = ({
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+				{/* Event name */}
 				<FormField
 					control={form.control}
 					name="summary"
@@ -205,6 +202,7 @@ export const EventForm = ({
 					)}
 				/>
 
+				{/* Event description */}
 				<FormField
 					control={form.control}
 					name="description"
@@ -224,6 +222,7 @@ export const EventForm = ({
 					)}
 				/>
 
+				{/* Event datetime */}
 				<div className="flex w-full items-center justify-between gap-3">
 					<FormField
 						control={form.control}
@@ -315,6 +314,7 @@ export const EventForm = ({
 					/>
 				</div>
 
+				{/* timezone */}
 				<FormField
 					control={form.control}
 					name="start.timeZone"
@@ -367,6 +367,7 @@ export const EventForm = ({
 					)}
 				/>
 
+				{/* recurrence */}
 				<FormField
 					control={form.control}
 					name="recurrence"
@@ -383,6 +384,7 @@ export const EventForm = ({
 					)}
 				/>
 
+				{/* attendees */}
 				<div className={cn('flex gap-3', (!teams || !employeeList) && '!mt-8')}>
 					<Label htmlFor="invitees" className={cn(allowEdit && 'mt-4')}>
 						<UsersRound size={12} />
@@ -396,6 +398,7 @@ export const EventForm = ({
 									className="h-10"
 									id="invitees"
 									onValueChange={value => {
+										if (invitees.find(invitee => invitee.all)) return;
 										const employeeResult: any[] = searchPeople(employees as any, value, ['first_name', 'last_name'], true);
 										const teamResult: any[] = searchTeams(teams, value, ['name']);
 										if (employeeResult) setFilteredEmployees(employeeResult);
@@ -404,10 +407,29 @@ export const EventForm = ({
 								/>
 
 								<CommandList>
+									{!invitees[0]?.all && (
+										<CommandItem
+											className="flex gap-2"
+											onSelect={() => {
+												setFilteredEmployees([]);
+												setFilteredETeams([]);
+												updateInvitees([{ all: true }]);
+											}}>
+											<span>All employees</span>
+										</CommandItem>
+									)}
+
 									{!!filteredEmployees.length && (
 										<CommandGroup noPadding heading="Employees">
 											{filteredEmployees.map(employee => (
-												<CommandItem key={employee.id + 'employee'} className="flex gap-2" onSelect={() => updateInvitees([...invitees, { single: employee }])}>
+												<CommandItem
+													key={employee.id + 'employee'}
+													className="flex gap-2"
+													onSelect={() => {
+														setFilteredEmployees([]);
+														setFilteredETeams([]);
+														updateInvitees([...invitees, { single: employee }]);
+													}}>
 													<span>
 														{employee.profile?.first_name} {employee.profile?.last_name}
 													</span>
@@ -422,7 +444,14 @@ export const EventForm = ({
 									{!!filteredTeams.length && (
 										<CommandGroup noPadding heading="Teams">
 											{filteredTeams.map(team => (
-												<CommandItem key={team.id + 'team'} className="flex gap-2" onSelect={() => updateInvitees([...invitees, { team: { id: team.id, name: team.name } }])}>
+												<CommandItem
+													key={team.id + 'team'}
+													className="flex gap-2"
+													onSelect={() => {
+														setFilteredEmployees([]);
+														setFilteredETeams([]);
+														updateInvitees([...invitees, { team: { id: team.id, name: team.name } }]);
+													}}>
 													{team.name}
 												</CommandItem>
 											))}
@@ -451,6 +480,12 @@ export const EventForm = ({
 										</div>
 									)}
 
+									{invitee?.all && (
+										<div className="">
+											<span>All employees</span>
+										</div>
+									)}
+
 									{allowEdit && (
 										<Button
 											variant={'ghost_destructive'}
@@ -469,6 +504,7 @@ export const EventForm = ({
 					</div>
 				</div>
 
+				{/* location */}
 				<div className="!mt-8 flex items-center gap-3">
 					<Label htmlFor="invitees" className="">
 						<MapPin size={12} />
@@ -516,6 +552,7 @@ export const EventForm = ({
 					</div>
 				</div>
 
+				{/* Form actions */}
 				<div className="!mt-6 flex w-full justify-end space-x-4 text-right">
 					{allowEdit && !!event && (
 						<Button type="button" disabled={isDeleting} variant={'secondary_destructive'} onClick={onDeleteEvent} className="mr-auto">

@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '../ui/switch';
 import { Tables } from '@/type/database.types';
 import { Alert, AlertDescription } from '../ui/alert';
+import { useRouter } from 'next/navigation';
 
 interface props {
 	isOpen?: boolean;
@@ -40,6 +41,7 @@ export const CalendarConfigDialog = ({ org, isOpen, orgCalendarConfig, employeeC
 	const [isLoading, setLoading] = useState(false);
 	const [animationIndex, setAnimationIndex] = useState(orgCalendarConfig?.enable_calendar ? 1 : 0);
 	const [enableGoogleCalendar, setEnableGoogleCalendar] = useState(!!employeeCalendarConfig?.find(config => config.platform === 'google'));
+	const router = useRouter();
 
 	const enableOrgCalendar = async () => {
 		setLoading(true);
@@ -47,6 +49,7 @@ export const CalendarConfigDialog = ({ org, isOpen, orgCalendarConfig, employeeC
 			await Promise.all([enableOrganisationCalendar(org), createOrgCalendar(org)]);
 			setAnimationIndex(1);
 			setLoading(false);
+			router.refresh();
 		} catch (error: any) {
 			setLoading(false);
 			setAnimationIndex(0);
