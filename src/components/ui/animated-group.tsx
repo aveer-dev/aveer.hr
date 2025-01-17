@@ -133,9 +133,10 @@ function AnimatedGroup({ children, className, variants, preset, as = 'div', asCh
 	const MotionComponent = motion.create(as as keyof JSX.IntrinsicElements);
 
 	const MotionChild = motion.create(asChild as keyof JSX.IntrinsicElements);
+	const props = { className };
 
 	return (
-		<MotionComponent initial="hidden" animate="visible" variants={containerVariants} className={className}>
+		<MotionComponent initial="hidden" animate="visible" variants={containerVariants} {...props}>
 			{React.Children.map(children, (child, index) => (
 				<MotionChild key={index} variants={itemVariants}>
 					{child}
