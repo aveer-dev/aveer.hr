@@ -893,6 +893,7 @@ export type Database = {
           org: string
           owner: string
           private: boolean
+          signatures: Json[] | null
           template: boolean
           updated_at: string
         }
@@ -909,6 +910,7 @@ export type Database = {
           org: string
           owner?: string
           private?: boolean
+          signatures?: Json[] | null
           template?: boolean
           updated_at?: string
         }
@@ -925,6 +927,7 @@ export type Database = {
           org?: string
           owner?: string
           private?: boolean
+          signatures?: Json[] | null
           template?: boolean
           updated_at?: string
         }

@@ -23,7 +23,7 @@ export const SlashCommand = Extension.create({
 			placement: 'bottom-start',
 			theme: 'slash-command',
 			maxWidth: '16rem',
-			offset: [0, 0],
+			offset: [16, 8],
 			popperOptions: {
 				strategy: 'fixed',
 				modifiers: [
@@ -179,8 +179,14 @@ export const SlashCommand = Extension.create({
 									return props.editor.storage[extensionName].rect;
 								}
 
-								// Account for when the editor is bound inside a container that doesn't go all the way to the edge of the screen
-								return new DOMRect(rect.x, rect.y, rect.width, rect.height);
+								let yPos = rect.y;
+
+								if (rect.top + component.element.offsetHeight + 40 > window.innerHeight) {
+									const diff = rect.top + component.element.offsetHeight - window.innerHeight + 40;
+									yPos = rect.y - diff;
+								}
+
+								return new DOMRect(rect.x, yPos, rect.width, rect.height);
 							};
 
 							let scrollHandler = () => {

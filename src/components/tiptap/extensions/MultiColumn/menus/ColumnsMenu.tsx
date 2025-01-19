@@ -8,12 +8,6 @@ import { ColumnLayout } from '../Columns';
 import { Toolbar } from '@/components/tiptap/components/Toolbar';
 import { Icon } from '@/components/tiptap/components/Icon';
 
-// import { MenuProps } from '@/components/menus/types';
-// import { getRenderContainer } from '@/lib/utils/getRenderContainer';
-// import { Toolbar } from '@/components/ui/Toolbar';
-// import { ColumnLayout } from '../Columns';
-// import { Icon } from '@/components/ui/Icon';
-
 export const ColumnsMenu = ({ editor, appendTo }: MenuProps) => {
 	const getReferenceClientRect = useCallback(() => {
 		const renderContainer = getRenderContainer(editor, 'columns');

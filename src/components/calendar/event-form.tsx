@@ -171,7 +171,6 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 			.flat();
 
 		form.setValue('attendees', [...new Set(inviteesEmails.map(email => ({ email: email as string })))]);
-		console.log('🚀 ~ useEffect ~ [...new Set(inviteesEmails.map(email => ({ email: email as string })))]:', [...new Set(inviteesEmails.map(email => ({ email: email as string })))]);
 	}, [employeeList, invitees, teamsList, form]);
 
 	const copy = (text: string) => {

@@ -21,9 +21,7 @@ interface Person {
  * @returns An array of Person objects that match the search query.
  */
 export const searchPeople = (people: Person[], query: string, keys?: (keyof Profile)[], allowEmpty: boolean = false): Person[] => {
-	if (!query) {
-		return allowEmpty ? [] : people;
-	}
+	if (!query) return allowEmpty ? [] : people;
 
 	const searchTerm = query.toLowerCase();
 

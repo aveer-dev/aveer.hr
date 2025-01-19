@@ -1,4 +1,4 @@
-import { Heading1, Heading2, Heading3, List, ListOrdered, ListTodo, ListCollapse, Quote, SquareCode, Table, Columns2, Minus, Book, Image } from 'lucide-react';
+import { Heading1, Heading2, Heading3, List, ListOrdered, ListCollapse, Quote, Table, Columns2, Minus, Book, Image, Signature } from 'lucide-react';
 import { Group } from './types';
 
 export const GROUPS: Group[] = [
@@ -109,6 +109,15 @@ export const GROUPS: Group[] = [
 				aliases: ['hr'],
 				action: (editor: any) => {
 					editor.chain().focus().setHorizontalRule().run();
+				}
+			},
+			{
+				name: 'signatureFigure',
+				label: 'Signature Slot',
+				iconName: Signature,
+				description: 'Insert a signature slot',
+				action: (editor: any) => {
+					editor.chain().focus().setSignatureSlot().run();
 				}
 			},
 			{

@@ -215,4 +215,17 @@
 			@apply bg-accent/50;
 		}
 	}
+
+	/* Signature Placeholder */
+	[data-type='signatureFigure'] {
+		@apply my-10;
+
+		figcaption {
+			@apply mt-4 text-sm;
+
+			&.is-empty::before {
+				content: 'Type @ to add signee';
+			}
+		}
+	}
 }

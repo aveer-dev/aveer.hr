@@ -29,6 +29,7 @@ export { FontSize } from './FontSize';
 export { Figure } from './Figure';
 // export { Figcaption } from './Figcaption';
 export { BlockquoteFigure } from './BlockquoteFigure';
+export { SignatureFigure } from './Signature';
 export { Quote } from './BlockquoteFigure/Quote';
 export { QuoteCaption } from './BlockquoteFigure/QuoteCaption';
 export { Link } from './Link';
