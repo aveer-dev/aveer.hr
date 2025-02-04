@@ -1,5 +1,5 @@
+import uploadImage from '@/components/tiptap/lib/api';
 import { DragEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { API } from '../../../lib/api';
 import { toast } from 'sonner';
 
 export const useUploader = ({ onUpload }: { onUpload: (url: string) => void }) => {
@@ -9,7 +9,7 @@ export const useUploader = ({ onUpload }: { onUpload: (url: string) => void }) =
 		async (file: File) => {
 			setLoading(true);
 			try {
-				const url = await API.uploadImage(file);
+				const url = await uploadImage(file, '/', 'documents-assets');
 
 				onUpload(url);
 			} catch (errPayload: any) {

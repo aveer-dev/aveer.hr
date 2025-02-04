@@ -1,9 +1,9 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { format } from 'date-fns';
-import { DocumentsList } from './documents-list';
+import { DocumentsList } from '@/app/(private)/[org]/documents/documents-list';
 
-export const DocumentsPage = async ({ org }: { org: string }) => {
+export const DocumentsPage = async ({ org, contract }: { org: string; contract: number }) => {
 	const supabase = await createClient();
 
 	const [
@@ -21,20 +21,16 @@ export const DocumentsPage = async ({ org }: { org: string }) => {
 		'use server';
 
 		const supabase = await createClient();
-		const {
-			data: { user }
-		} = await supabase.auth.getUser();
-		if (!user) return redirect('/login');
 
 		const res = await supabase
 			.from('documents')
-			.insert({ org, shared_with: [{ profile: user.id, access: 'owner' }], name: `New Document - ${format(new Date(), 'PPP')}` })
+			.insert({ org, shared_with: [{ profile: user.id, access: 'owner', contract: contract }], name: `New Document - ${format(new Date(), 'PPP')}` })
 			.select()
 			.single();
 		return res;
 	};
 
-	const documents = data.filter(document => document.shared_with?.filter((person: any) => person.profile == user.id) || document.owner == user.id);
+	const documents = data.filter(document => document.shared_with?.filter((person: any) => person.contract == contract) || document.owner == user.id);
 
 	return <DocumentsList documents={documents} createDocument={createDocument} />;
 };

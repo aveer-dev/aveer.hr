@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
-import { Document } from './document';
 import { getEmployees } from '@/utils/form-data-init';
+import { Document } from '@/app/(private)/[org]/documents/[id]/document';
 
 export const TemplatePageComponant = async ({ org, docId }: { org: string; docId: string }) => {
 	const supabase = await createClient();
@@ -15,5 +15,5 @@ export const TemplatePageComponant = async ({ org, docId }: { org: string; docId
 
 	if (error) return <div className="flex h-48 w-full items-center justify-center text-muted-foreground">{error.message}</div>;
 
-	return <Document doc={data} currentUserId={user?.id || ''} employees={employees} />;
+	return <Document parentContainerId="documentEmployee" doc={data} currentUserId={user?.id || ''} employees={employees} />;
 };

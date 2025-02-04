@@ -9,12 +9,14 @@ import { ButtonHTMLAttributes, useEffect, useState } from 'react';
 import { Button, ButtonProps } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PopoverClose } from '@radix-ui/react-popover';
+import { cn } from '@/lib/utils';
 
 export type ContentItemMenuProps = {
 	editor: Editor;
+	disabled: boolean;
 };
 
-export const ContentItemMenu = ({ editor }: ContentItemMenuProps) => {
+export const ContentItemMenu = ({ editor, disabled }: ContentItemMenuProps) => {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const data = useData();
 	const actions = useContentItemActions(editor, data.currentNode, data.currentNodePos);
@@ -47,13 +49,13 @@ export const ContentItemMenu = ({ editor }: ContentItemMenuProps) => {
 				zIndex: 10
 			}}>
 			<div className="flex items-center gap-0.5">
-				<Toolbar.Button onClick={actions.handleAdd} className="p-1.5">
+				<Toolbar.Button onClick={actions.handleAdd} className={cn('p-1.5', disabled && 'pointer-events-none opacity-0')}>
 					<Icon name="Plus" />
 				</Toolbar.Button>
 
 				<Popover open={menuOpen} onOpenChange={setMenuOpen}>
 					<PopoverTrigger asChild>
-						<Button variant={'ghost'} className="h-fit w-fit p-1.5">
+						<Button variant={'ghost'} className={cn('h-fit w-fit p-1.5', disabled && 'pointer-events-none opacity-0')}>
 							<Icon name="GripVertical" size={14} />
 						</Button>
 					</PopoverTrigger>

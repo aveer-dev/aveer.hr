@@ -1,25 +1,31 @@
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Settings2 } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { Tables } from '@/type/database.types';
 import { DocumentSettings } from './document-settings';
 
-export const DocumentSettingsDialog = ({ adminUsers, isPrivate, editors, docId, org, owner, currentUserId }: { isPrivate: boolean; currentUserId: string; owner: string; adminUsers?: Tables<'profiles_roles'>[] | null; editors?: string[]; org: string; docId: number }) => {
+interface props {
+	employees?: Tables<'contracts'>[] | null;
+	doc: Tables<'documents'>;
+	currentUserId: string;
+}
+
+export const DocumentSettingsDialog = ({ doc, currentUserId, employees }: props) => {
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
 				<Button variant={'ghost'}>
-					<Settings2 size={14} />
+					<Share2 size={14} />
 				</Button>
 			</AlertDialogTrigger>
 
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Document settings</AlertDialogTitle>
+					<AlertDialogTitle>Share &quot;{doc.name}&quot;</AlertDialogTitle>
 					<AlertDialogDescription>Configure document settings</AlertDialogDescription>
 				</AlertDialogHeader>
 
-				<DocumentSettings isprivate={isPrivate} currentUserId={currentUserId} adminUsers={adminUsers} editorIds={editors} org={org} docId={docId} owner={owner} />
+				<DocumentSettings employees={employees} doc={doc} currentUserId={currentUserId} />
 			</AlertDialogContent>
 		</AlertDialog>
 	);

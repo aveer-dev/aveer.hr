@@ -1,0 +1,19 @@
+.ProseMirror {
+	/* Signature Placeholder */
+	[data-type='signatureFigure'] {
+		@apply my-8;
+	}
+
+	/* signature figure */
+	figure[data-type='signatureImage'] {
+		@apply my-8;
+
+		img {
+			@apply max-w-[8rem];
+		}
+
+		figcaption {
+			@apply text-sm font-medium;
+		}
+	}
+}

@@ -883,60 +883,86 @@ export type Database = {
         Row: {
           contract_variables: string[]
           created_at: string
-          editors: string[]
           entity: number | null
           html: string
           id: number
           json: string | null
+          link_id: string
           locked: boolean
           name: string
           org: string
           owner: string
+          owner_employee: number | null
+          parent_id: number | null
           private: boolean
+          shared_with: Json[]
           signatures: Json[] | null
+          signed_lock: boolean
           template: boolean
           updated_at: string
         }
         Insert: {
           contract_variables?: string[]
           created_at?: string
-          editors: string[]
           entity?: number | null
           html?: string
           id?: number
           json?: string | null
+          link_id?: string
           locked?: boolean
           name?: string
           org: string
           owner?: string
+          owner_employee?: number | null
+          parent_id?: number | null
           private?: boolean
+          shared_with?: Json[]
           signatures?: Json[] | null
+          signed_lock?: boolean
           template?: boolean
           updated_at?: string
         }
         Update: {
           contract_variables?: string[]
           created_at?: string
-          editors?: string[]
           entity?: number | null
           html?: string
           id?: number
           json?: string | null
+          link_id?: string
           locked?: boolean
           name?: string
           org?: string
           owner?: string
+          owner_employee?: number | null
+          parent_id?: number | null
           private?: boolean
+          shared_with?: Json[]
           signatures?: Json[] | null
+          signed_lock?: boolean
           template?: boolean
           updated_at?: string
         }
         Relationships: [
           {
+            foreignKeyName: "documents_owner_employee_fkey"
+            columns: ["owner_employee"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "documents_owner_fkey"
             columns: ["owner"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
             referencedColumns: ["id"]
           },
           {

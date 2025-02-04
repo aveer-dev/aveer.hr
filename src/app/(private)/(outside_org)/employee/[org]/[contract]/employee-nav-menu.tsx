@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { CalendarClock, FilePenLine, FileStack, FolderOpenDot, House, ListChecks, Signature, UserRoundCog, UsersRound } from 'lucide-react';
+import { CalendarClock, FilePenLine, Files, FileStack, FolderOpenDot, House, ListChecks, Signature, UserRoundCog, UsersRound } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -20,6 +20,7 @@ export const NavMenu = ({ contract }: { contract: Tables<'contracts'> }) => {
 		{ label: 'Contract', icon: Signature, page: 'contract', shortcut: 'c', enabled: true },
 		{ label: 'Appraisal', icon: FilePenLine, page: 'appraisal', shortcut: 'a', enabled: contract.status == 'signed' },
 		{ label: 'Boarding', icon: ListChecks, page: 'boarding', shortcut: 'b', enabled: contract.status == 'signed' },
+		{ label: 'Documents', icon: Files, page: 'documents', shortcut: 'd', enabled: contract.status == 'signed' },
 		{ label: 'Files', icon: FolderOpenDot, page: 'files', shortcut: 'f', enabled: contract.status == 'signed' }
 	]);
 

@@ -1,22 +1,32 @@
-import { Editor, NodeViewWrapper } from '@tiptap/react';
+import { Editor, Node, NodeViewWrapper } from '@tiptap/react';
 import { useCallback } from 'react';
 
 import { SignaturePad } from './SignaturePad';
+import { TablesUpdate } from '@/type/database.types';
 
-export const SignatureUpload = ({ getPos, editor }: { getPos: () => number; editor: Editor }) => {
+export const SignatureUpload = ({ editor, extension }: { getPos: () => number; editor: Editor; extension: Node }) => {
+	const {
+		options: { profile, document, signatories }
+	} = extension;
+
 	const onUpload = useCallback(
-		(url: string) => {
+		(url: string, id: string) => {
 			if (url) {
-				editor.chain().setImageBlock({ src: url }).deleteRange({ from: getPos(), to: getPos() }).focus().run();
+				editor.chain().deleteNode('signatureFigure').focus().run();
+				editor
+					.chain()
+					.setSignature({ src: url, caption: `${profile.first_name} ${profile.last_name}`, id })
+					.focus()
+					.run();
 			}
 		},
-		[getPos, editor]
+		[editor, profile.first_name, profile.last_name]
 	);
 
 	return (
 		<NodeViewWrapper>
 			<div className="m-0 p-0" data-drag-handle>
-				<SignaturePad onUpload={onUpload} />
+				<SignaturePad fullName={`${profile.first_name} ${profile.last_name}`} onUpload={onUpload} />
 			</div>
 		</NodeViewWrapper>
 	);

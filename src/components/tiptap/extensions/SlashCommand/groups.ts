@@ -111,15 +111,15 @@ export const GROUPS: Group[] = [
 					editor.chain().focus().setHorizontalRule().run();
 				}
 			},
-			{
-				name: 'signatureFigure',
-				label: 'Signature Slot',
-				iconName: Signature,
-				description: 'Insert a signature slot',
-				action: (editor: any) => {
-					editor.chain().focus().setSignatureSlot().run();
-				}
-			},
+			// {
+			// 	name: 'signatureFigure',
+			// 	label: 'Signature Slot',
+			// 	iconName: Signature,
+			// 	description: 'Insert a signature slot',
+			// 	action: (editor: any) => {
+			// 		editor.chain().focus().setSignatureSlot().run();
+			// 	}
+			// },
 			{
 				name: 'toc',
 				label: 'Table of Contents',

@@ -1,7 +1,5 @@
 'use client';
 
-import { API } from '../lib/api';
-
 import {
 	BlockquoteFigure,
 	Color,
@@ -28,6 +26,7 @@ import {
 	Underline,
 	emojiSuggestion
 } from '.';
+import uploadImage from '../lib/api';
 
 import { ImageUpload } from './ImageUpload';
 
@@ -46,19 +45,19 @@ export const ExtensionKit: any = [
 	Underline,
 	// CharacterCount.configure({ limit: 50000 }),
 	ImageUpload.configure(),
-	ImageBlock,
+	ImageBlock.configure({ allowBase64: true }),
 	FileHandler.configure({
 		allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
 		onDrop: (currentEditor, files, pos) => {
 			files.forEach(async file => {
-				const url = await API.uploadImage(file);
+				const url = await uploadImage(file, '/', 'documents-assets');
 
 				currentEditor.chain().setImageBlockAt({ pos, src: url }).focus().run();
 			});
 		},
 		onPaste: (currentEditor, files) => {
 			files.forEach(async file => {
-				const url = await API.uploadImage(file);
+				const url = await uploadImage(file, '/', 'documents-assets');
 
 				return currentEditor.chain().setImageBlockAt({ pos: currentEditor.state.selection.anchor, src: url }).focus().run();
 			});

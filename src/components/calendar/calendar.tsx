@@ -18,7 +18,7 @@ import { ROLE } from '@/type/contract.types';
 import { AlertDialogCancel } from '../ui/alert-dialog';
 import { CalendarOptions } from './calendar-options';
 import { EventDialog } from './event-dialog';
-// import { getAuthLink } from './calendar-actions';
+import { getAuthLink } from './calendar-actions';
 
 interface EVENT_ITEM {
 	type: 'leave' | 'reminder' | 'dob' | 'event';
@@ -50,10 +50,10 @@ export const FullCalendar = ({ events, teams, employees, leaveDays, calendar, re
 		dayOfWeek: [0, 6]
 	};
 
-	// const googleAuth = async () => {
-	// 	const response = await getAuthLink(org);
-	// 	window.open(response);
-	// };
+	const googleAuth = async () => {
+		const response = await getAuthLink(org);
+		window.open(response);
+	};
 
 	return (
 		<DayPicker
@@ -114,7 +114,7 @@ export const FullCalendar = ({ events, teams, employees, leaveDays, calendar, re
 									</ReminderDialog>
 								)}
 
-								{/* <Button onClick={googleAuth}>Link</Button> */}
+								<Button onClick={googleAuth}>Link</Button>
 
 								{((calendar?.calendar_id && orgCalendarConfig?.enable_calendar) || role == 'admin') && (
 									<>

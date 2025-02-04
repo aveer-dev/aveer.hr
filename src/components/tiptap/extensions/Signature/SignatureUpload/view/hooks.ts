@@ -1,15 +1,15 @@
+import uploadImage from '@/components/tiptap/lib/api';
 import { DragEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { API } from '../../../../lib/api';
 import { toast } from 'sonner';
 
 export const useUploader = ({ onUpload }: { onUpload: (url: string) => void }) => {
 	const [loading, setLoading] = useState(false);
 
 	const uploadFile = useCallback(
-		async (file: File) => {
+		async (file: ArrayBuffer, path: string) => {
 			setLoading(true);
 			try {
-				const url = await API.uploadImage(file);
+				const url = await uploadImage(file, path, 'signatures');
 
 				onUpload(url);
 			} catch (errPayload: any) {

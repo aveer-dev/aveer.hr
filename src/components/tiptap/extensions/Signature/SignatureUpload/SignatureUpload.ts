@@ -3,8 +3,8 @@ import { SignatureUpload as SignatureUploadComponent } from './view/SignatureUpl
 
 declare module '@tiptap/core' {
 	interface Commands<ReturnType> {
-		imageUpload: {
-			setImageUpload: () => ReturnType;
+		signatureUpload: {
+			setSignatureUpload: () => ReturnType;
 		};
 	}
 }
@@ -24,6 +24,16 @@ export const SignatureUpload = Node.create({
 
 	inline: false,
 
+	addOptions() {
+		return {
+			profile: null,
+			uploadPath: '',
+			onSignDocuemnt: () => null,
+			document: null,
+			signatories: []
+		};
+	},
+
 	parseHTML() {
 		return [
 			{
@@ -38,10 +48,10 @@ export const SignatureUpload = Node.create({
 
 	addCommands() {
 		return {
-			setImageUpload:
+			setSignatureUpload:
 				() =>
 				({ commands }) =>
-					commands.insertContent(`<div data-type="${this.name}"></div>`)
+					commands.insertContent('')
 		};
 	},
 

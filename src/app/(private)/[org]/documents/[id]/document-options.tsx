@@ -29,7 +29,8 @@ export const DocumentOptions = ({ currentUserId, document }: { currentUserId: st
 	const onLockDocument = async (event: Event) => {
 		event.preventDefault();
 		setLockState(true);
-		const { error } = await updateDocument({ org: document.org, id: document.id, locked: !document.locked });
+
+		const { error } = await updateDocument({ org: (document.org as any).subdomain, id: document.id, locked: !document.locked });
 		setLockState(false);
 
 		if (error) return toast.error(error.message);
@@ -38,16 +39,16 @@ export const DocumentOptions = ({ currentUserId, document }: { currentUserId: st
 		toggleOptionState(false);
 	};
 
-	const onTemplateSwitch = async () => {
-		setTemplateState(true);
-		const { error } = await updateDocument({ org: document.org, id: document.id, template: !document.template });
-		setTemplateState(false);
+	// const onTemplateSwitch = async () => {
+	// 	setTemplateState(true);
+	// 	const { error } = await updateDocument({ org: document.org, id: document.id, template: !document.template });
+	// 	setTemplateState(false);
 
-		if (error) return toast.error(error.message);
-		toast.success(`Document ${!document.locked ? 'is now a template document' : 'is now a normal document'}`);
-		router.refresh();
-		toggleOptionState(false);
-	};
+	// 	if (error) return toast.error(error.message);
+	// 	toast.success(`Document ${!document.locked ? 'is now a template document' : 'is now a normal document'}`);
+	// 	router.refresh();
+	// 	toggleOptionState(false);
+	// };
 
 	return (
 		<DropdownMenu open={isOptionOpen} onOpenChange={toggleOptionState}>
@@ -58,7 +59,7 @@ export const DocumentOptions = ({ currentUserId, document }: { currentUserId: st
 			</DropdownMenuTrigger>
 
 			<DropdownMenuContent className="w-44 *:gap-3" align="end">
-				<DropdownMenuItem onSelect={onLockDocument}>
+				<DropdownMenuItem disabled={document.signed_lock} onSelect={onLockDocument}>
 					{isLocking ? <LoadingSpinner /> : document.locked ? <LockKeyholeOpen size={12} /> : <LockKeyhole size={12} />} {document.locked ? 'Unlock' : 'Lock'}
 				</DropdownMenuItem>
 
@@ -68,16 +69,18 @@ export const DocumentOptions = ({ currentUserId, document }: { currentUserId: st
 					</DropdownMenuItem>
 				</DocumentDupDialog>
 
-				<DropdownMenuItem onClick={onDeleteDocument}>{isDeleting ? <LoadingSpinner /> : <Trash2 size={12} />} Delete</DropdownMenuItem>
+				<DropdownMenuItem disabled={document.signed_lock} onSelect={onDeleteDocument}>
+					{isDeleting ? <LoadingSpinner /> : <Trash2 size={12} />} Delete
+				</DropdownMenuItem>
 
-				<DropdownMenuItem onClick={event => event.preventDefault()} disabled={isTemplating}>
+				{/* <DropdownMenuItem onClick={event => event.preventDefault()} disabled={isTemplating || document.signed_lock}>
 					{isTemplating ? <LoadingSpinner /> : <BookDashed className="w-3" />} Template
 					<Switch checked={document.template} disabled={isTemplating} id="template" className="ml-auto scale-50" onCheckedChange={onTemplateSwitch} />
-				</DropdownMenuItem>
+				</DropdownMenuItem> */}
 
-				<DropdownMenuItem>
+				{/* <DropdownMenuItem>
 					<Download size={12} /> Download
-				</DropdownMenuItem>
+				</DropdownMenuItem> */}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

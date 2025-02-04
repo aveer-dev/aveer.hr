@@ -44,3 +44,4 @@ export { TableOfContents } from '@tiptap-pro/extension-table-of-contents';
 export { Table, TableCell, TableHeader, TableRow } from './Table';
 export { Document } from './Document';
 export { Mention } from '@tiptap/extension-mention';
+export { SignatureImage } from './SignatureImage';
