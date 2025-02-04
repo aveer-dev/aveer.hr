@@ -18,7 +18,7 @@ export default async function ContractPage(props: { params: Promise<{ [key: stri
 		.select(
 			'*, profile:profiles!contracts_profile_fkey(*), org:organisations!contracts_org_fkey(name, id, subdomain), entity:legal_entities!contracts_entity_fkey(name, id, incorporation_country:countries!legal_entities_incorporation_country_fkey(country_code, name, currency_code))'
 		)
-		.eq('id', params.contract)
+		.eq('id', Number(params.contract))
 		.single();
 
 	if (error) {

@@ -5,7 +5,11 @@ export default async function ProfilePage(props: { params: Promise<{ [key: strin
 	const params = await props.params;
 	const supabase = await createClient();
 
-	const { data, error } = await supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(country_code, name)), org:organisations!contracts_org_fkey(name, id, subdomain)').eq('id', params.contract).single();
+	const { data, error } = await supabase
+		.from('contracts')
+		.select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(country_code, name)), org:organisations!contracts_org_fkey(name, id, subdomain)')
+		.eq('id', Number(params.contract))
+		.single();
 
 	if (error) {
 		return (

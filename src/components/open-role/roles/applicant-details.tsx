@@ -37,7 +37,11 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 	const router = useRouter();
 
 	const getPeopleInLevels = useCallback(async (profileId: string) => {
-		const { data, error } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(first_name, last_name)').eq('id', profileId).single();
+		const { data, error } = await supabase
+			.from('contracts')
+			.select('profile:profiles!contracts_profile_fkey(first_name, last_name)')
+			.eq('id', profileId as any)
+			.single();
 		if (error) return;
 
 		return data.profile;

@@ -9,7 +9,7 @@ export default async function ProfilePage(props: { params: Promise<{ [key: strin
 	const { data, error } = await supabase
 		.from('contracts')
 		.select('*, team:teams!contracts_team_fkey(name, id), profile:profiles!contracts_profile_fkey(first_name, last_name, email, id), org:organisations!contracts_org_fkey(name, id, subdomain)')
-		.eq('id', params.contract)
+		.eq('id', Number(params.contract))
 		.single();
 
 	if (error) {

@@ -104,12 +104,14 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 							)}
 						/>
 
-						<div className="flex items-center">
-							<Input className="h-9 rounded-e-none focus-visible:ring-0 focus-visible:ring-transparent" readOnly defaultValue={`https://${(doc.org as any)?.subdomain}.aveer.hr/shared-doc/${doc.link_id}`} />
-							<Button className="rounded-s-none" type="button" onClick={copyLink.bind(this, `https://${(doc.org as any)?.subdomain}.aveer.hr/shared-doc/${doc.link_id}`)}>
-								Copy link
-							</Button>
-						</div>
+						{!doc.private && (
+							<div className="flex items-center">
+								<Input className="h-9 rounded-e-none focus-visible:ring-0 focus-visible:ring-transparent" readOnly defaultValue={`https://${(doc.org as any)?.subdomain}.aveer.hr/shared-doc/${doc.link_id}`} />
+								<Button className="rounded-s-none" type="button" onClick={copyLink.bind(this, `https://${(doc.org as any)?.subdomain}.aveer.hr/shared-doc/${doc.link_id}`)}>
+									Copy link
+								</Button>
+							</div>
+						)}
 
 						<div className="space-y-3">
 							<Label>People with access</Label>

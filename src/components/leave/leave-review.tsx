@@ -47,7 +47,7 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 	const router = useRouter();
 
 	const getPeopleInLevels = useCallback(async (contractId: string) => {
-		const { data, error } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(first_name, last_name)').eq('id', contractId).single();
+		const { data, error } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(first_name, last_name)').eq('id', Number(contractId)).single();
 		if (error) return;
 
 		return data.profile;

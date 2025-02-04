@@ -18,7 +18,7 @@ export const DocumentDupDialog = ({ children, onClose, document, currentUserId }
 		if (!documentName) return;
 		setLoadState(true);
 
-		const payload: TablesInsert<'documents'> = copyConfigs ? { ...document, name: documentName, owner: currentUserId } : { name: documentName, html: document.html, org: document.org, editors: [currentUserId] };
+		const payload: TablesInsert<'documents'> = copyConfigs ? { ...document, name: documentName, owner: currentUserId } : { name: documentName, html: document.html, org: document.org, shared_with: [document.shared_with] };
 		if (payload.id) delete payload.id;
 		const { error, data } = await createDocument(payload);
 		setLoadState(false);

@@ -46,7 +46,7 @@ export const BoardingReview = ({ data, reviewType, children, contractId, onRevie
 	const router = useRouter();
 
 	const getPeopleInLevels = useCallback(async (id: string) => {
-		const { data, error } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(first_name, last_name)').eq('id', id).single();
+		const { data, error } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(first_name, last_name)').eq('id', Number(id)).single();
 		if (error) return;
 
 		return data.profile;

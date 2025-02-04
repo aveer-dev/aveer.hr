@@ -44,6 +44,7 @@ export const ContentItemMenu = ({ editor, disabled }: ContentItemMenuProps) => {
 			pluginKey="ContentItemMenu"
 			editor={editor}
 			onNodeChange={data.handleNodeChange}
+			className={cn(disabled && 'pointer-events-none absolute -left-96 opacity-0')}
 			tippyOptions={{
 				offset: [-1, 12],
 				zIndex: 10

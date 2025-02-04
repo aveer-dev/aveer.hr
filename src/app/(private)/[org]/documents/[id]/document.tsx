@@ -17,7 +17,7 @@ import { Document as TiptapDocument } from '@/components/tiptap/extensions/Docum
 import { CustomMention, suggestion } from '@/components/tiptap/extensions/Mention';
 import { DocumentSettingsDialog } from './document-settings-dialog';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { ChevronDown, ChevronLeft, EyeOff, Globe, Info, LockKeyhole, Save } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Globe, Info, LockKeyhole, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from 'use-debounce';
 import { sendToSignatories, updateDocument } from '../document.actions';
@@ -35,7 +35,7 @@ import { DocumentDupForSignature } from './document-dup-signature-dialog';
 
 interface PROPS {
 	doc: Tables<'documents'>;
-	currentUserId: string;
+	currentUserId?: string;
 	employees?: Tables<'contracts'>[] | null;
 	parentContainerId?: string;
 }
@@ -54,6 +54,8 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 
 	useEffect(() => {
 		const onUpdateDocument = async () => {
+			if (!currentUserId || doc.locked) return;
+
 			if (!doc.locked && !doc.signed_lock) {
 				setSavingState(true);
 				setSavedState(false);
@@ -105,7 +107,7 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 	const editor = useEditor({
 		extensions: [
 			TiptapDocument,
-			SignatureFigure.configure({ profile: getEmployee()?.profile, uploadPath: `${getEmployee().org}/${getEmployee().id}`, onSignDocuemnt: updateDocument, document: doc, signatories }),
+			SignatureFigure.configure({ profile: getEmployee()?.profile, uploadPath: `${getEmployee()?.org}/${getEmployee()?.id}`, onSignDocuemnt: updateDocument, document: doc, signatories }),
 			...ExtensionKit,
 			SlashCommand,
 			TableOfContents.configure({
@@ -186,20 +188,25 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 			<div className="relative space-y-6">
 				<div className="mx-8 mb-8 flex items-center justify-between border-b pb-6">
 					<div className="flex w-full items-center gap-3 text-sm font-light text-muted-foreground">
-						<Link href={'../documents'} className={cn(buttonVariants({ variant: 'secondary' }), 'rounded-full')} onClick={() => router.back()}>
-							<ChevronLeft size={14} />
-						</Link>
+						{currentUserId && (
+							<Link href={'../documents'} className={cn(buttonVariants({ variant: 'secondary' }), 'rounded-full')} onClick={() => router.back()}>
+								<ChevronLeft size={14} />
+							</Link>
+						)}
 
-						<Input
-							value={name}
-							readOnly={doc.locked || doc.signed_lock || userPermittedAction() == 'viewer'}
-							onChange={event => updateName(event.target.value)}
-							className={cn('w-full px-0.5 py-2 pl-2 text-sm font-medium text-primary outline-none')}
-							placeholder="Enter document's name"
-						/>
+						{currentUserId && (
+							<Input
+								value={name}
+								readOnly={doc.locked || doc.signed_lock || userPermittedAction() == 'viewer'}
+								onChange={event => updateName(event.target.value)}
+								className={cn('w-full px-0.5 py-2 pl-2 text-sm font-medium text-primary outline-none')}
+								placeholder="Enter document's name"
+							/>
+						)}
+						{!currentUserId && <h1 className={cn('w-full px-0.5 py-2 pl-2 text-2xl font-bold text-primary')}>{name}</h1>}
 					</div>
 
-					{doc && (!doc.locked || !doc.signed_lock || userPermittedAction() !== 'viewer') && (
+					{doc && (!doc.locked || !doc.signed_lock || userPermittedAction() !== 'viewer') && currentUserId && (
 						<div className="flex items-center gap-3">
 							{doc?.locked && (
 								<TooltipProvider>
@@ -259,7 +266,7 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 				</div>
 
 				<EditorContent editor={editor} className="flex-1 overflow-y-auto" />
-				<ContentItemMenu editor={editor} disabled={doc.locked || doc.signed_lock} />
+				<ContentItemMenu editor={editor} disabled={doc.locked || doc.signed_lock || !userPermittedAction() || userPermittedAction() == 'viewer'} />
 				<LinkMenu editor={editor} appendTo={menuContainerRef} />
 				<TextMenuBubble editor={editor} />
 				<ColumnsMenu editor={editor} appendTo={menuContainerRef} />

@@ -68,9 +68,9 @@ export const DashboardFilters = ({ toggleTableLoadingState, updateData, org }: p
             )
         `);
 			if (nationality) query = query.not('profile', 'is', null).not('profile.nationality', 'is', null).eq('profile.nationality.country_code', nationality);
-			if (status) query = query.eq('status', status);
-			if (employment_type) query = query.eq('employment_type', employment_type);
-			if (team) query = query.eq('team', team);
+			if (status) query = query.eq('status', status as any);
+			if (employment_type) query = query.eq('employment_type', employment_type as any);
+			if (team) query = query.eq('team', team as any);
 
 			const { data, error } = await query.eq('org', org).order('id');
 			toggleTableLoadingState(false);
