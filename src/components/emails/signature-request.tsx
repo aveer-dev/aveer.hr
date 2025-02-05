@@ -1,6 +1,5 @@
 import { Img } from '@react-email/components';
 import { EmailContainer } from './email-template';
-import { format } from 'date-fns';
 
 export const SignatureRequestEmail = ({ orgName, docName }: { orgName?: string; docName: string }) => {
 	return (
@@ -25,4 +24,11 @@ export const SignatureRequestEmail = ({ orgName, docName }: { orgName?: string; 
 			</div>
 		</EmailContainer>
 	);
+};
+
+export default SignatureRequestEmail;
+
+SignatureRequestEmail.PreviewProps = {
+	orgName: 'Emmy',
+	endDate: 'New document'
 };

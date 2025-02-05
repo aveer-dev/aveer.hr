@@ -12,9 +12,10 @@ import { createClient } from '@/utils/supabase/client';
 import { differenceInBusinessDays, format } from 'date-fns';
 import { Check, Edit, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { HTMLAttributes, ReactNode, useCallback, useEffect, useState } from 'react';
+import { HTMLAttributes, ReactNode, useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { LeaveRequestDialog } from '../contract/leave/leave-request-dialog';
+import { emailEmployee } from './leave.actions';
 
 interface props {
 	children: ReactNode | string;
@@ -43,7 +44,7 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 	const [isAnyLevelDenied, setDeniedLevelState] = useState(false);
 	const [orgSettings, setOrgSettings] = useState<Tables<'org_settings'>>();
 	const [isUpdating, setUpdateState] = useState({ denying: false, approving: false });
-	const [role] = useState<ROLE>(reviewType);
+	const role = reviewType;
 	const router = useRouter();
 
 	const getPeopleInLevels = useCallback(async (contractId: string) => {
@@ -74,90 +75,103 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 		[contractId, getPeopleInLevels, role]
 	);
 
-	useEffect(() => {
-		if (isReviewOpen && data.levels) processLevels(data.levels);
-	}, [data, isReviewOpen, processLevels]);
+	const updateLeave = useCallback(
+		async (levels: LEVEL[]) => {
+			const isAnyDenied = !!levels.find(level => level.action == 'denied');
+			const isAllApproved = !levels.find(level => level.action == 'denied' || !level.action);
 
-	const updateLeave = async (levels: LEVEL[]) => {
-		const isAnyDenied = !!levels.find(level => level.action == 'denied');
-		const isAllApproved = !levels.find(level => level.action == 'denied' || !level.action);
-		const { error } = await supabase
-			.from('time_off')
-			.update({ levels: levels as any, status: isAllApproved ? 'approved' : isAnyDenied ? 'denied' : 'pending' })
-			.eq('id', data.id);
+			const { error } = await supabase
+				.from('time_off')
+				.update({ levels: levels as any, status: isAllApproved ? 'approved' : isAnyDenied ? 'denied' : 'pending' })
+				.eq('id', data.id);
 
-		if (isAllApproved) {
-			await supabase
-				.from('contracts')
-				.update({ [`${data.leave_type}_leave_used`]: differenceInBusinessDays(data.to, data.from) + 1 + Number(data.contract[`${data.leave_type}_leave_used`] as any) })
-				.eq('id', data.contract.id);
-		}
+			if (contract && (isAllApproved || isAnyDenied)) emailEmployee({ from: data.from, to: data.to, profile: contract?.profile as any, org: contract?.org as any, status: isAllApproved ? 'approved' : 'denied', leaveType: data.leave_type, contract: contract?.id });
 
-		setUpdateState({ denying: false, approving: false });
-		if (error) return toast.error('Unable to update leave', { description: error.message });
+			if (isAllApproved) {
+				await supabase
+					.from('contracts')
+					.update({ [`${data.leave_type}_leave_used`]: differenceInBusinessDays(data.to, data.from) + 1 + Number(data.contract[`${data.leave_type}_leave_used`] as any) })
+					.eq('id', data.contract.id);
+			}
 
-		toast.success('Leave updated successfully');
-		setReviewState(false);
-		router.refresh();
-	};
+			setUpdateState({ denying: false, approving: false });
+			if (error) return toast.error('Unable to update leave', { description: error.message });
 
-	const LeaveActions = ({ className, index, level }: { className?: string; index: number; level: LEVEL }) => {
-		const onAction = (action: 'approved' | 'denied') => {
-			setUpdateState({ denying: action == 'denied', approving: action == 'approved' });
-			const newLevels = levels.map(lv => {
-				const item: LEVEL = { id: lv.id, level: lv.level, type: lv.type };
-				lv.action && (item.action = lv.action);
-				lv.created_at && (item.created_at = lv.created_at);
-				return item;
-			});
-			const newLevel: LEVEL = { id: contractId ? String(contractId) : '', level: level.level, type: level.type, action, created_at: new Date() };
-			newLevels[index] = newLevel;
+			toast.success('Leave updated successfully');
+			setReviewState(false);
+			router.refresh();
+		},
+		[contract, data.contract, data.from, data.id, data.leave_type, data.to, router]
+	);
 
-			updateLeave(newLevels);
-		};
+	const LeaveActions = useCallback(
+		({ className, index, level }: { className?: string; index: number; level: LEVEL }) => {
+			const onAction = (action: 'approved' | 'denied') => {
+				setUpdateState({ denying: action == 'denied', approving: action == 'approved' });
+				const newLevels = levels.map(lv => {
+					const item: LEVEL = { id: lv.id, level: lv.level, type: lv.type };
+					lv.action && (item.action = lv.action);
+					lv.created_at && (item.created_at = lv.created_at);
+					return item;
+				});
+				const newLevel: LEVEL = { id: contractId ? String(contractId) : '', level: level.level, type: level.type, action, created_at: new Date() };
+				newLevels[index] = newLevel;
 
-		return (
-			<div className={cn('flex items-center gap-3', className)}>
-				<Button onClick={() => onAction('approved')} disabled={isUpdating.approving} className="flex h-7 items-center gap-2 bg-green-50 text-green-400 hover:bg-green-100 focus:ring-green-400 focus-visible:ring-green-400">
-					{!isUpdating.approving && <Check size={12} />} {isUpdating.approving && <LoadingSpinner className="text-green-400" />} Approve
-				</Button>
-				<Button onClick={() => onAction('denied')} disabled={isUpdating.denying} className="flex h-7 items-center gap-2 bg-red-50 text-red-400 hover:bg-red-100 focus:ring-red-400 focus-visible:ring-red-400">
-					{!isUpdating.denying && <X size={12} />}
-					{isUpdating.denying && <LoadingSpinner className="text-red-400" />} Deny
-				</Button>
-			</div>
-		);
-	};
+				updateLeave(newLevels);
+			};
 
-	const Approvals = ({ index, level }: { index: number; level: LEVEL }) => {
-		if (!levels[index - 1] && !level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role)) return <span className="text-xs font-light capitalize text-muted-foreground">Pending approval</span>;
+			return (
+				<div className={cn('flex items-center gap-3', className)}>
+					<Button onClick={() => onAction('approved')} disabled={isUpdating.approving} className="flex h-7 items-center gap-2 bg-green-50 text-green-400 hover:bg-green-100 focus:ring-green-400 focus-visible:ring-green-400">
+						{!isUpdating.approving && <Check size={12} />} {isUpdating.approving && <LoadingSpinner className="text-green-400" />} Approve
+					</Button>
+					<Button onClick={() => onAction('denied')} disabled={isUpdating.denying} className="flex h-7 items-center gap-2 bg-red-50 text-red-400 hover:bg-red-100 focus:ring-red-400 focus-visible:ring-red-400">
+						{!isUpdating.denying && <X size={12} />}
+						{isUpdating.denying && <LoadingSpinner className="text-red-400" />} Deny
+					</Button>
+				</div>
+			);
+		},
+		[contractId, isUpdating.approving, isUpdating.denying, levels, updateLeave]
+	);
 
-		if (levels[index - 1] && levels[index - 1].action && !level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role) && !isAnyLevelDenied) return <span className="text-xs font-light capitalize text-muted-foreground">Pending approval</span>;
+	const Approvals = useCallback(
+		({ index, level }: { index: number; level: LEVEL }) => {
+			if (!levels[index - 1] && !level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role)) return <span className="text-xs font-light capitalize text-muted-foreground">Pending approval</span>;
 
-		if (((levels[index - 1] && !levels[index - 1].action) || (!level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role))) && !isAnyLevelDenied)
-			return <span className="text-xs font-light capitalize text-muted-foreground">Pending level {index} approval</span>;
+			if (levels[index - 1] && levels[index - 1].action && !level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role) && !isAnyLevelDenied) return <span className="text-xs font-light capitalize text-muted-foreground">Pending approval</span>;
 
-		if (!level.action && (level.type == 'employee' ? level.is_employee : level.type == role) && ((levels[index - 1] && levels[index - 1]?.action && levels[index - 1]?.action !== 'denied') || !levels[index - 1]) && !isAnyLevelDenied)
-			return <LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'pointer-events-none opacity-30')} />;
+			if (((levels[index - 1] && !levels[index - 1].action) || (!level.action && (level.type == 'employee' ? !level.is_employee : level.type !== role))) && !isAnyLevelDenied)
+				return <span className="text-xs font-light capitalize text-muted-foreground">Pending level {index} approval</span>;
 
-		if (level.action && levels[index - 1]?.action !== 'denied') return <span className="text-xs font-light capitalize text-muted-foreground">{level.action}</span>;
+			if (!level.action && (level.type == 'employee' ? level.is_employee : level.type == role) && ((levels[index - 1] && levels[index - 1]?.action && levels[index - 1]?.action !== 'denied') || !levels[index - 1]) && !isAnyLevelDenied)
+				return <LeaveActions index={index} level={level} className={cn(isAnyLevelDenied && 'pointer-events-none opacity-30')} />;
 
-		if ((levels[index - 1] && levels[index - 1]?.action == 'denied') || isAnyLevelDenied) return <span className="text-xs font-light capitalize text-muted-foreground">Denied</span>;
-	};
+			if (level.action && levels[index - 1]?.action !== 'denied') return <span className="text-xs font-light capitalize text-muted-foreground">{level.action}</span>;
+
+			if ((levels[index - 1] && levels[index - 1]?.action == 'denied') || isAnyLevelDenied) return <span className="text-xs font-light capitalize text-muted-foreground">Denied</span>;
+		},
+		[LeaveActions, isAnyLevelDenied, levels, role]
+	);
 
 	const getOrgSettings = useCallback(async () => {
 		const { data: orgSettings, error } = await supabase.from('org_settings').select().match({ org: data.org });
+
 		if (!orgSettings || error) return;
 
 		setOrgSettings(orgSettings[0]);
 	}, [data.org]);
 
-	useEffect(() => {
+	const onOpen = (state: boolean) => {
+		setReviewState(state);
+		if (!state) return;
+
 		if (reviewType == 'employee') getOrgSettings();
-	}, [getOrgSettings, reviewType]);
+		if (data.levels) processLevels(data.levels);
+	};
 
 	return (
-		<Sheet open={isReviewOpen} onOpenChange={setReviewState}>
+		<Sheet open={isReviewOpen} onOpenChange={onOpen}>
 			{typeof children == 'string' && !hideTooltip && (
 				<TooltipProvider>
 					<Tooltip>

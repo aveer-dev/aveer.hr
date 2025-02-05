@@ -26,3 +26,9 @@ export const TerminateContractEmail = ({ orgName }: { orgName?: string }) => {
 		</EmailContainer>
 	);
 };
+
+export default TerminateContractEmail;
+
+TerminateContractEmail.PreviewProps = {
+	orgName: 'Emmy'
+};

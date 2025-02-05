@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
+import { emailAdmins } from './leave.actions';
 
 const formSchema = z.object({
 	dates: z.object({ from: z.date(), to: z.date() }),
@@ -92,7 +93,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 			from: values.dates.from as any,
 			to: values.dates.to as any,
 			contract: contract.id as number,
-			org: (contract.org as any).subdomain,
+			org: (contract.org as any)?.subdomain,
 			leave_type: values.leave_type,
 			hand_over_note: values.hand_over_note,
 			note: values.note,
@@ -105,6 +106,9 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 		const { error } = await supabase.from('time_off').insert(leaveRequestData);
 		setCreatingState(false);
 		if (error) return toast('❌ Oooops', { description: error.message });
+
+		// send email notification
+		emailAdmins({ from: values.dates.from, to: values.dates.to, org: contract.org as any, leaveType: values.leave_type, employeeName: `${(contract.profile as any)?.first_name} ${(contract.profile as any)?.last_name}` });
 
 		if (leaveRequestData.status == 'approved')
 			await supabase

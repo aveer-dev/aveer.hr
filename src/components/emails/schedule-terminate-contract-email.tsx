@@ -27,3 +27,10 @@ export const ScheduleTerminationContractEmail = ({ orgName, endDate }: { orgName
 		</EmailContainer>
 	);
 };
+
+export default ScheduleTerminationContractEmail;
+
+ScheduleTerminationContractEmail.PreviewProps = {
+	orgName: 'Emmy',
+	endDate: new Date()
+};

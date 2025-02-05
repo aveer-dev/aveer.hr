@@ -28,6 +28,7 @@ import { formSchema, LEVEL } from './types';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { PolicyLevels } from './policy-levels';
+import { generateRandomString } from '@/utils/generate-string';
 
 const supabase = createClient();
 
@@ -270,7 +271,7 @@ export const ApprovalPolicy = ({ data, org, children, className, onCreate, type 
 								<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 									<SortableContext items={levels.map(item => item.level)} strategy={verticalListSortingStrategy}>
 										{levels.map((level, index) => (
-											<PolicyLevels id={level.level} index={index} key={level.level} levels={levels} level={level} updateLevels={updateLevels} employees={employees} form={form} />
+											<PolicyLevels id={level.level} index={index} key={level.level + generateRandomString(4)} levels={levels} level={level} updateLevels={updateLevels} employees={employees} form={form} />
 										))}
 									</SortableContext>
 								</DndContext>
