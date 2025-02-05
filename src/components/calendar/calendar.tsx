@@ -114,7 +114,7 @@ export const FullCalendar = ({ events, teams, employees, leaveDays, calendar, re
 									</ReminderDialog>
 								)}
 
-								<Button onClick={googleAuth}>Link</Button>
+								{/* <Button onClick={googleAuth}>Link</Button> */}
 
 								{((calendar?.calendar_id && orgCalendarConfig?.enable_calendar) || role == 'admin') && (
 									<>
