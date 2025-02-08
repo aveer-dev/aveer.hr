@@ -2,8 +2,6 @@
 
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { updatePassword } from '@/api/update-password';
-import { ChangePasswordForm } from '@/app/(private)/[org]/settings/profile-security-form';
 import { ProfileFormComponent } from '@/components/forms/profile-form';
 import { Button } from '@/components/ui/button';
 import { Cog, Command, Info, X } from 'lucide-react';
@@ -11,6 +9,7 @@ import { Tables } from '@/type/database.types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CommandShortcut } from '@/components/ui/command';
 import { useState, useEffect } from 'react';
+import { ChangePasswordForm } from '@/app/[org]/(org)/settings/profile-security-form';
 
 export const EmployeeProfileSettings = ({ profile }: { profile: Tables<'profiles'> }) => {
 	const [open, setOpen] = useState(false);
