@@ -76,6 +76,7 @@ export async function updateSession(request: NextRequest) {
 
 	// for employee subdomains, rewrite to employee pages
 	if (subdomain && subdomain === 'employee') return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
+	if (subdomain && subdomain === 'app') return NextResponse.rewrite(new URL(`/app${path}`, request.url));
 
 	// for other pages, rewrite to org pages
 	if (subdomain && subdomain !== 'employee') {
