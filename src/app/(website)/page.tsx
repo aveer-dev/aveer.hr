@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { GetStartedForm } from './get-started-form';
 import { createClient } from '@/utils/supabase/server';
 
-export const LandingPage = async () => {
+export default async function LandingPage() {
 	const addToWaitList = async (_prevState: any, payload: FormData) => {
 		'use server';
 
@@ -75,6 +75,4 @@ export const LandingPage = async () => {
 			</div>
 		</section>
 	);
-};
-
-export default LandingPage;
+}

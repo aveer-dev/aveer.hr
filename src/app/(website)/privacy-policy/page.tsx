@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-export const PrivacyPolicyPage = () => {
+export default async function PrivacyPolicyPage() {
 	return (
 		<div className="tiptap container mx-auto mt-16 max-w-6xl px-5 py-8 font-light sm:mt-24">
 			<h1 className="mb-6 border-b pb-8 text-3xl font-bold">Global Privacy Policy</h1>
@@ -276,6 +276,4 @@ export const PrivacyPolicyPage = () => {
 			<p className="mb-8">If you have questions or concerns regarding privacy using our Service, please contact us at: aveer.calendar@gmail.com.</p>
 		</div>
 	);
-};
-
-export default PrivacyPolicyPage;
+}
