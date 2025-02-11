@@ -65,6 +65,13 @@ export async function updateSession(request: NextRequest) {
 		return NextResponse.redirect(`${url.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}${path}`);
 	}
 
+	// if user nevigates to /app page, redirect to app subdomain
+	if (url.pathname.includes('/app')) {
+		const searchParams = request.nextUrl.searchParams.toString();
+		const path = `${url.pathname.split('/app')[1]}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
+		return NextResponse.redirect(`${url.protocol}//app.${process.env.NEXT_PUBLIC_DOMAIN}${path}`);
+	}
+
 	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/app/login`, request.url));
 
 	// for employee subdomains, rewrite to employee pages
