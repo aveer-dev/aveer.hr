@@ -33,7 +33,7 @@ export default function SigninPage() {
 					Don&apos;t have an account? Sign up
 				</Link>
 
-				<Link href="/privacy-policy" className="mx-auto block w-fit text-sm underline">
+				<Link href="https://aveer.hr/privacy-policy" className="mx-auto block w-fit text-sm underline">
 					Privacy Policy
 				</Link>
 			</div>

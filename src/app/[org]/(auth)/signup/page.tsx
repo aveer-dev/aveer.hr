@@ -40,7 +40,7 @@ export default function SignupPage() {
 					Do you have an account? Login
 				</Link>
 
-				<Link href="/privacy-policy" className="mx-auto block w-fit text-sm underline">
+				<Link href="https://aveer.hr/privacy-policy" className="mx-auto block w-fit text-sm underline">
 					Privacy Policy
 				</Link>
 			</div>

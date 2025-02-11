@@ -26,7 +26,7 @@ export default function WebsiteLayout({ children }: Readonly<{ children: React.R
 				<footer className="w-full">
 					<ul className="mx-auto w-fit">
 						<li>
-							<Link href={'/privacy-policy'} className="border-b text-sm">
+							<Link href={'https://aveer.hr/privacy-policy'} className="border-b text-sm">
 								Privacy policy
 							</Link>
 						</li>

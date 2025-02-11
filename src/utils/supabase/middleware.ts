@@ -34,6 +34,7 @@ export async function updateSession(request: NextRequest) {
 	if (
 		!user.data.user &&
 		request.nextUrl.pathname !== '/' &&
+		request.nextUrl.pathname !== 'privacy-policy' &&
 		!request.nextUrl.pathname.includes('login') &&
 		!request.nextUrl.pathname.includes('signup') &&
 		!request.nextUrl.pathname.includes('auth') &&
