@@ -55,6 +55,7 @@ export async function updateSession(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams.toString();
 	const path = `${url.pathname}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
 
+	// for firebase sw
 	if (subdomain && path.includes('firebase-messaging-sw')) return NextResponse.rewrite(new URL(`/firebase-messaging-sw.js`, request.url));
 
 	// if user nevigates to employee page, redirect to employee subdomain
@@ -64,13 +65,13 @@ export async function updateSession(request: NextRequest) {
 		return NextResponse.redirect(`${url.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}${path}`);
 	}
 
-	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/app/login`, request.url));
+	if (subdomain && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/app/login`, request.url));
 
 	// for employee subdomains, rewrite to employee pages
 	if (subdomain && subdomain === 'employee') return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
 
 	// for other pages, rewrite to org pages
-	if (subdomain && subdomain !== 'employee' && subdomain !== 'app') {
+	if (subdomain && subdomain !== 'employee') {
 		if (path.split('/')[1] == subdomain) return NextResponse.rewrite(new URL(`${path}`, request.url));
 		return NextResponse.rewrite(new URL(`/${subdomain}${path}`, request.url));
 	}
