@@ -44,11 +44,11 @@ export const Header = async ({ orgId, messages }: { orgId?: string; messages?: T
 
 			<div className="flex items-center justify-between px-6 py-4">
 				<div className="flex items-center gap-3">
-					<NavLink org={orgId} href={'/'} className="font-logo text-xl font-light">
+					<NavLink org={orgId} href={'/app'} className="font-logo text-xl font-light">
 						aveer.hr
 					</NavLink>
 
-					{data?.user && orgId && <AccountTypeToggle orgId={orgId} />}
+					{data?.user && orgId && orgId !== 'app' && <AccountTypeToggle orgId={orgId} />}
 				</div>
 
 				<div className="flex items-center gap-4">
@@ -65,7 +65,7 @@ export const Header = async ({ orgId, messages }: { orgId?: string; messages?: T
 				</div>
 			</div>
 
-			{orgId && orgId !== 'employee' && data?.user && (
+			{orgId && orgId !== 'employee' && orgId !== 'app' && data?.user && (
 				<div className="no-scrollbar flex items-center justify-between overflow-x-auto px-6 pt-4">
 					<NavMenu orgId={orgId} />
 

@@ -1,4 +1,5 @@
 import { Header } from '@/components/layout/header';
+import { OrgWrapper } from './org-wrapper';
 
 export default async function RootLayout(props: { children: React.ReactNode; params: Promise<{ [key: string]: string }> }) {
 	const params = await props.params;
@@ -9,7 +10,9 @@ export default async function RootLayout(props: { children: React.ReactNode; par
 		<>
 			<Header orgId={params.org} />
 
-			<main className="mx-auto mt-[min(7%,4rem)] min-h-screen w-full max-w-7xl px-4 py-0 pb-28 sm:px-6">{children}</main>
+			<main className="mx-auto mt-[min(7%,4rem)] min-h-screen w-full max-w-7xl px-4 py-0 pb-28 sm:px-6">
+				<OrgWrapper org={params.org}>{children}</OrgWrapper>
+			</main>
 		</>
 	);
 }

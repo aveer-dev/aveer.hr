@@ -1,7 +1,7 @@
 'use client';
 
-import { CustomNode } from '@/app/(private)/[org]/org-chart/flow-diagram/custom-node';
 import { Background, Controls, ReactFlow, Node, Edge } from '@xyflow/react';
+import { CustomNode } from './custom-node';
 
 const nodeTypes = {
 	custom: CustomNode

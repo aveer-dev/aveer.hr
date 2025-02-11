@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { ReactNode, useState } from 'react';
-import { createDocument } from '../document.actions';
+import { createDocument } from './document.actions';
 import { Tables, TablesInsert } from '@/type/database.types';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function EmployeeOrgPage() {
-	return redirect('/');
+	return redirect('/app');
 }

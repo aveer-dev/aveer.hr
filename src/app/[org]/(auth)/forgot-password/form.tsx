@@ -84,7 +84,7 @@ export const LoginForm = ({ requestPasswordReset, resetPassword }: props) => {
 					</div>
 
 					<div className="flex w-full items-center justify-end gap-4">
-						<Link href="/login" className="text-xs">
+						<Link href="/app/login" className="text-xs">
 							Login
 						</Link>
 
@@ -102,7 +102,7 @@ export const LoginForm = ({ requestPasswordReset, resetPassword }: props) => {
 						Recovery email with password recovery instructions has been sent to the email address provided <span className="text-xl">🍻</span>
 					</p>
 
-					<Link href={'/login'} className={cn(buttonVariants({ variant: 'secondary' }), 'w-fit')}>
+					<Link href={'/app/login'} className={cn(buttonVariants({ variant: 'secondary' }), 'w-fit')}>
 						Login
 					</Link>
 				</div>
@@ -121,7 +121,7 @@ export const LoginForm = ({ requestPasswordReset, resetPassword }: props) => {
 					</div>
 
 					<div className="flex w-full items-center justify-end gap-4">
-						<Link href="/login" className="text-xs">
+						<Link href="/app/login" className="text-xs">
 							Login
 						</Link>
 

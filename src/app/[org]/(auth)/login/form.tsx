@@ -71,7 +71,7 @@ export const LoginForm = ({ loginAction }: props) => {
 			<div className="grid gap-3">
 				<div className="flex items-center">
 					<Label htmlFor="password">Password</Label>
-					<Link href="/forgot-password" className="ml-auto inline-block text-xs underline">
+					<Link href="./forgot-password" className="ml-auto inline-block text-xs underline">
 						Forgot?
 					</Link>
 				</div>

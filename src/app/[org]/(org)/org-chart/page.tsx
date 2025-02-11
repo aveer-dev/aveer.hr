@@ -141,10 +141,6 @@ export default async function OrgChartPage(props: { params: Promise<{ org: strin
 
 	return (
 		<div className="absolute bottom-0 left-0 right-0 top-32 mx-auto space-y-8 p-0">
-			{/* <div className="w-full items-center gap-6">
-				<h1 className="text-2xl font-medium">Organisation Chart</h1>
-			</div> */}
-
 			<div className="h-[85vh] w-full">
 				<FlowDiagram defaultNodes={nodes} edges={edges} />
 			</div>

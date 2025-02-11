@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { createLegalEntity } from './legal-entity.actions';
+import { useRouter } from 'next/navigation';
 
 const supabase = createClient();
 
@@ -27,6 +28,7 @@ const nameAndRegionFormSchema = z.object({
 });
 
 export const OnboardingForm = ({ org }: { data?: TablesUpdate<'legal_entities'>; org: string }) => {
+	const router = useRouter();
 	const [countries, setCountries] = useState<{ name: string; dial_code: string; country_code: string }[]>([]);
 	const [states, setStates] = useState<Tables<'states'>[]>([]);
 	const [isCountryOpen, toggleCountryState] = useState(false);
@@ -73,7 +75,10 @@ export const OnboardingForm = ({ org }: { data?: TablesUpdate<'legal_entities'>;
 		if (legalRes?.error) return toast.error(legalRes.error.message);
 
 		if (legalRes.status == 204) toast.success('🥂 Cheers', { description: 'Legal entity updated successfully' });
-		if (legalRes.status == 201) toast.success('🎉 Yaay', { description: 'Legal entity created successfully' });
+		if (legalRes.status == 201) {
+			toast.success('🎉 Yaay', { description: 'Legal entity created successfully' });
+			router.refresh();
+		}
 
 		toggleSubmitState(false);
 	};

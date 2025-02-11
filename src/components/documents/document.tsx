@@ -20,7 +20,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { ChevronDown, ChevronLeft, Globe, Info, LockKeyhole, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from 'use-debounce';
-import { sendToSignatories, updateDocument } from '../document.actions';
+import { sendToSignatories, updateDocument } from './document.actions';
 import { toast } from 'sonner';
 import { DocumentOptions } from './document-options';
 import { Separator } from '@/components/ui/separator';

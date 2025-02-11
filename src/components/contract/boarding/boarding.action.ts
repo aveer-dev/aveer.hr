@@ -12,7 +12,7 @@ export const updateEmployeeBoarding = async (items: TablesInsert<'contract_check
 		data: { user },
 		error: authError
 	} = await supabase.auth.getUser();
-	if (!user || authError) return redirect('/login');
+	if (!user || authError) return redirect('/app/login');
 
 	const isAuthContract = await supabase.from('contracts').select('id').match({ profile: user?.id, org });
 	if (!isAuthContract.data || !isAuthContract.data.length) return `You don't have the necessary permission to update checklist`;
@@ -33,7 +33,7 @@ export const approveBoarding = async ({ isAllApproved, levels, id }: { isAllAppr
 		data: { user },
 		error: authError
 	} = await supabase.auth.getUser();
-	if (!user || authError) return redirect('/login');
+	if (!user || authError) return redirect('/app/login');
 
 	const { error, data } = await supabase
 		.from('contract_check_list')

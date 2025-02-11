@@ -2,7 +2,7 @@ import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescript
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ReactNode, useState } from 'react';
-import { duplicateAndSendToSignatories } from '../document.actions';
+import { duplicateAndSendToSignatories } from './document.actions';
 import { Tables } from '@/type/database.types';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';

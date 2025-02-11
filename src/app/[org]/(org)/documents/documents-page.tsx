@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { format } from 'date-fns';
-import { DocumentsList } from './documents-list';
+import { DocumentsList } from '@/components/documents/documents-list';
 
 export const DocumentsPage = async ({ org }: { org: string }) => {
 	const supabase = await createClient();
@@ -13,7 +13,7 @@ export const DocumentsPage = async ({ org }: { org: string }) => {
 		}
 	] = await Promise.all([supabase.from('documents').select('*').match({ org }).order('updated_at', { ascending: false }), supabase.auth.getUser()]);
 
-	if (!user) return redirect('/login');
+	if (!user) return redirect('/app/login');
 
 	if (error) return <div className="flex min-h-48 items-center justify-center rounded-md bg-accent italic">{error.message}</div>;
 
@@ -24,7 +24,7 @@ export const DocumentsPage = async ({ org }: { org: string }) => {
 		const {
 			data: { user }
 		} = await supabase.auth.getUser();
-		if (!user) return redirect('/login');
+		if (!user) return redirect('/app/login');
 
 		const res = await supabase
 			.from('documents')

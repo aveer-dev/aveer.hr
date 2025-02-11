@@ -2363,6 +2363,27 @@ export type Database = {
           },
         ]
       }
+      waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+          source: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+          source?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

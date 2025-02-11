@@ -20,7 +20,7 @@ export const EmployeeCalendar = async ({ org, contractId, team }: { org: string;
 		data: { user },
 		error
 	} = await supabase.auth.getUser();
-	if (error || !user) return redirect('/login');
+	if (error || !user) return redirect('/app/login');
 
 	const { data: orgCalendarConfig, error: calendarConfigError } = await supabase.from('org_settings').select('enable_calendar, calendar_employee_events').eq('org', org).single();
 	if (calendarConfigError) toast.error(calendarConfigError.message);

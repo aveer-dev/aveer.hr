@@ -23,7 +23,7 @@ export default function SignupPage() {
 		const { error } = await supabase.auth.signUp(signupData);
 		if (error) return error.message;
 
-		return redirect('/create-org');
+		return redirect('/app/create-org');
 	};
 
 	return (
@@ -36,11 +36,11 @@ export default function SignupPage() {
 			<SignupForm signupAction={signup} />
 
 			<div className="space-y-3">
-				<Link href="/login" className="mx-auto block w-fit text-sm underline">
+				<Link href="./login" className="mx-auto block w-fit text-sm underline">
 					Do you have an account? Login
 				</Link>
 
-				<Link href="/aveer-privacy-policy.pdf" className="mx-auto block w-fit text-sm underline">
+				<Link href="/privacy-policy" className="mx-auto block w-fit text-sm underline">
 					Privacy Policy
 				</Link>
 			</div>

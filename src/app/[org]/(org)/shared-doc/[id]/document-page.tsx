@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
-import { Document } from '../../documents/[id]/document';
+import { Document } from '@/components/documents/document';
 
 export const SharedDocumentPageComponent = async ({ org, docId }: { org: string; docId: string }) => {
 	const supabase = await createClient();

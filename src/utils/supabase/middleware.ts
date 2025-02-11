@@ -29,6 +29,7 @@ export async function updateSession(request: NextRequest) {
 	// validate access, logout if needed
 	if (
 		!user.data.user &&
+		request.nextUrl.pathname !== '/' &&
 		!request.nextUrl.pathname.includes('login') &&
 		!request.nextUrl.pathname.includes('signup') &&
 		!request.nextUrl.pathname.includes('auth') &&
@@ -36,7 +37,7 @@ export async function updateSession(request: NextRequest) {
 		!request.nextUrl.pathname.includes('job') &&
 		!request.nextUrl.pathname.includes('shared-doc')
 	) {
-		return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/login`, request.url));
+		return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/app/login`, request.url));
 	}
 
 	// start ----- handleSubdomainMapping(request);
@@ -63,7 +64,7 @@ export async function updateSession(request: NextRequest) {
 		return NextResponse.redirect(`${url.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}${path}`);
 	}
 
-	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/login`, request.url));
+	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/app/login`, request.url));
 
 	// for employee subdomains, rewrite to employee pages
 	if (subdomain && subdomain === 'employee') return NextResponse.rewrite(new URL(`/employee${path}`, request.url));

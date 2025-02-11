@@ -10,7 +10,7 @@ export default async function ContractorPage() {
 		error: userError
 	} = await supabase.auth.getUser();
 
-	if (!user || userError) return redirect('/login');
+	if (!user || userError) return redirect('/app/login');
 
 	const { data, error } = await supabase.from('contracts').select().eq('profile', user.id);
 

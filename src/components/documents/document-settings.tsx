@@ -11,7 +11,7 @@ import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from '@
 import { Label } from '@/components/ui/label';
 import { useCallback, useEffect, useState } from 'react';
 import { Tables } from '@/type/database.types';
-import { updateDocument } from '../document.actions';
+import { updateDocument } from './document.actions';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';

@@ -1,5 +1,5 @@
 import { Node, NodeProps, Handle, Position } from '@xyflow/react';
-import { BaseNode } from '@/app/(private)/[org]/org-chart/flow-diagram/base-node';
+import { BaseNode } from './base-node';
 import { Separator } from '@/components/ui/separator';
 
 export type CustomNodeType = Node<{

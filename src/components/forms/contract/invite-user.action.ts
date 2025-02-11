@@ -34,9 +34,6 @@ export const inviteUser = async (contract: string, profile: string, isManager: b
 	const parsedContract: TablesInsert<'contracts'> = JSON.parse(contract);
 	const parsedProfile: TablesInsert<'profiles'> = JSON.parse(profile);
 
-	const userHasPermission = await doesUserHaveAdequatePermissions({ orgId: parsedContract.org });
-	if (userHasPermission !== true) return userHasPermission;
-
 	const {
 		error,
 		data: { user }

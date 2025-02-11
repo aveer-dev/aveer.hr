@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { getEmployees } from '@/utils/form-data-init';
-import { Document } from '@/app/(private)/[org]/documents/[id]/document';
+import { Document } from '@/components/documents/document';
 
 export const TemplatePageComponant = async ({ org, docId }: { org: string; docId: string }) => {
 	const supabase = await createClient();

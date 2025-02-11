@@ -16,7 +16,7 @@ export default function SigninPage() {
 		const { error } = await supabase.auth.signInWithPassword(signinData);
 
 		if (error) return error.message;
-		return redirect('/');
+		return redirect('/app');
 	};
 
 	return (
@@ -29,11 +29,11 @@ export default function SigninPage() {
 			<LoginForm loginAction={signin} />
 
 			<div className="space-y-3">
-				<Link href="/signup" className="mx-auto block w-fit text-sm underline">
+				<Link href="./signup" className="mx-auto block w-fit text-sm underline">
 					Don&apos;t have an account? Sign up
 				</Link>
 
-				<Link href="/aveer-privacy-policy.pdf" className="mx-auto block w-fit text-sm underline">
+				<Link href="/privacy-policy" className="mx-auto block w-fit text-sm underline">
 					Privacy Policy
 				</Link>
 			</div>

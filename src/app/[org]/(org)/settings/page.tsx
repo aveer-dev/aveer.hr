@@ -2,7 +2,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SecurityForm } from './profile-security-form';
 import { ProfileForm } from '@/components/forms/profile-form';
 import { createClient } from '@/utils/supabase/server';
-import { OrgForm } from '@/app/(auth)/create-org/form';
 import { TablesUpdate } from '@/type/database.types';
 import { EmployeeBand } from '@/components/band/employee-band';
 import { Suspense } from 'react';
@@ -17,6 +16,7 @@ import { Files } from '@/components/files-settings';
 import { OKRs } from '@/components/okr/okrs';
 import { Appraisal } from '@/components/appraisal-forms/appraisal';
 import { AdminUsers } from '@/components/admin-user/admins';
+import { OrgForm } from '../../(auth)/create-org/form';
 
 export default async function SettingsPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
 	const searchParams = await props.searchParams;

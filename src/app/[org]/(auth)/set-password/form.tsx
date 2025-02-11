@@ -66,7 +66,7 @@ export const PasswordForm = ({ passwordAction }: props) => {
 			</div>
 
 			<div className="flex w-full items-center justify-end gap-4">
-				<Link href="/login" className="text-xs">
+				<Link href="/app/login" className="text-xs">
 					Login
 				</Link>
 

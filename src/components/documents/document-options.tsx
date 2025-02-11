@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { BookCopy, BookDashed, Download, EllipsisVertical, LockKeyhole, LockKeyholeOpen, Trash2 } from 'lucide-react';
-import { deleteDocument, updateDocument } from '../document.actions';
+import { deleteDocument, updateDocument } from './document.actions';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useState } from 'react';

@@ -23,11 +23,11 @@ export async function GET(request: Request) {
 			const isLocalEnv = process.env.NODE_ENV === 'development';
 			if (isLocalEnv) {
 				// we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
-				return NextResponse.redirect(`${origin}/create-org`);
+				return NextResponse.redirect(`${origin}/app/create-org`);
 			} else if (forwardedHost) {
-				return NextResponse.redirect(`https://${forwardedHost}/create-org`);
+				return NextResponse.redirect(`https://${forwardedHost}/app/create-org`);
 			} else {
-				return NextResponse.redirect(`${origin}/create-org`);
+				return NextResponse.redirect(`${origin}/app/create-org`);
 			}
 		}
 	}

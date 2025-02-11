@@ -8,10 +8,8 @@ export const CalendarPageComponent = async ({ org }: { org: string }) => {
 	const supabase = await createClient();
 
 	const {
-		data: { user },
-		error
+		data: { user }
 	} = await supabase.auth.getUser();
-	if (error || !user) return redirect('/login');
 
 	const [
 		{ data: leaves, error: leaveError },

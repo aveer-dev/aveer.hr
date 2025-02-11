@@ -24,7 +24,7 @@ export const createDocument = async (document: TablesInsert<'documents'>) => {
 	const {
 		data: { user }
 	} = await supabase.auth.getUser();
-	if (!user) return redirect('/login');
+	if (!user) return redirect('/app/login');
 
 	const response = await supabase.from('documents').insert(document).select().single();
 

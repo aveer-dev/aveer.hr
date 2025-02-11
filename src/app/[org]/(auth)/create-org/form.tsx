@@ -91,7 +91,7 @@ export const OrgForm = ({ formAction, data }: PROPS) => {
 
 		const isSubdomainChanged = data ? data?.subdomain !== orgData.subdomain : false;
 		if (isSubdomainChanged) return process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? (location.href = `http://${prefixText}.${process.env.NEXT_PUBLIC_DOMAIN}/settings?type=org`) : router.replace(`../${prefixText}/settings?type=org`);
-		router.push('/');
+		router.push(`/${orgData.subdomain}`);
 	};
 
 	return (
