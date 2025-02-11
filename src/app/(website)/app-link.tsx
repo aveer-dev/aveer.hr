@@ -13,18 +13,10 @@ export const AppLink = async () => {
 
 	return (
 		<ul className="flex items-center gap-6">
-			{!isLoggedIn && (
-				<li>
-					<Link href={'/app/login'} className="text-sm">
-						Login
-					</Link>
-				</li>
-			)}
-
 			<li className="relative">
 				<GlowEffect colors={['#FF5733', '#33FF57', '#3357FF', '#F1C40F']} mode="colorShift" blur="soft" duration={3} scale={1} className="rounded-full" />
-				<Link href={'/app/login'} className={cn(buttonVariants(), 'relative gap-3 rounded-full text-sm')}>
-					{isLoggedIn ? 'Go to dashboard' : 'Request access'}
+				<Link href={'/app'} className={cn(buttonVariants(), 'relative gap-3 rounded-full text-sm')}>
+					{isLoggedIn ? 'Go to dashboard' : 'Login'}
 					<ChevronRight size={12} />
 				</Link>
 			</li>
