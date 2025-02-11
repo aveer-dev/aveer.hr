@@ -26,6 +26,10 @@ export async function updateSession(request: NextRequest) {
 	// refreshing the auth token
 	const user = await supabase.auth.getUser();
 
+	// get the domain string
+	let hostname = request.headers.get('host');
+	const domain = decodeURIComponent(hostname as string);
+
 	// validate access, logout if needed
 	if (
 		!user.data.user &&
@@ -37,15 +41,11 @@ export async function updateSession(request: NextRequest) {
 		!request.nextUrl.pathname.includes('job') &&
 		!request.nextUrl.pathname.includes('shared-doc')
 	) {
-		return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/app/login`, request.url));
+		return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}${domain?.includes('localhost') ? '/app' : ''}/login`, request.url));
 	}
 
 	// start ----- handleSubdomainMapping(request);
 	const url = request.nextUrl;
-
-	// get the domain string
-	let hostname = request.headers.get('host');
-	const domain = decodeURIComponent(hostname as string);
 
 	// if on localhost or user disable/unset subdomain, cancel mapping
 	if (domain?.includes('localhost') || process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'false' || !process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN) return;
@@ -65,18 +65,10 @@ export async function updateSession(request: NextRequest) {
 		return NextResponse.redirect(`${url.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}${path}`);
 	}
 
-	// if user nevigates to /app page route, redirect to app subdomain
-	if (url.pathname.includes('/app')) {
-		const searchParams = request.nextUrl.searchParams.toString();
-		const path = `${url.pathname.split('/app')[1]}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
-		return NextResponse.redirect(`${url.protocol}//app.${process.env.NEXT_PUBLIC_DOMAIN}${path}`);
-	}
-
-	if (subdomain && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/app/login`, request.url));
+	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/app/login`, request.url));
 
 	// for employee subdomains, rewrite to employee pages
 	if (subdomain && subdomain === 'employee') return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
-	if (subdomain && subdomain === 'app') return NextResponse.rewrite(new URL(`/app${path}`, request.url));
 
 	// for other pages, rewrite to org pages
 	if (subdomain && subdomain !== 'employee') {
