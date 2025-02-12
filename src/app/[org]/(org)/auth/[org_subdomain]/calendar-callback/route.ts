@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { TablesInsert } from '@/type/database.types';
 
-export async function GET(request: Request, { params }: { params: Promise<{ org: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ org_subdomain: string }> }) {
 	const { searchParams, origin } = new URL(request.url);
 	const code = searchParams.get('code');
-	const org = (await params).org;
+	const org = (await params).org_subdomain;
 
 	if (code) {
 		const supabase = await createClient();

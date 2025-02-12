@@ -33,7 +33,7 @@ export const LoginForm = ({ loginAction }: props) => {
 			provider: 'google',
 
 			options: {
-				redirectTo: `${process.env.NEXT_PUBLIC_URL}/auth/signin-callback`,
+				redirectTo: `${process.env.NEXT_PUBLIC_URL}/app/auth/signin-callback`,
 				queryParams: {
 					access_type: 'offline',
 					prompt: 'consent'

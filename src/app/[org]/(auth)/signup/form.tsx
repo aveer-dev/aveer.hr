@@ -34,7 +34,7 @@ export const SignupForm = ({ signupAction }: PROPS) => {
 		await supabase.auth.signInWithOAuth({
 			provider: 'google',
 			options: {
-				redirectTo: `${process.env.NEXT_PUBLIC_URL}/auth/signup-callback`,
+				redirectTo: `${process.env.NEXT_PUBLIC_URL}/app/auth/signup-callback`,
 				queryParams: {
 					access_type: 'offline',
 					prompt: 'consent'
