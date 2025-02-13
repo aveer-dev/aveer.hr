@@ -2,8 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
-import Link from 'next/link';
-import { buttonVariants } from '@/components/ui/button';
+import { buttonVariants, Button } from '@/components/ui/button';
 import { Tables } from '@/type/database.types';
 import { cn } from '@/lib/utils';
 
@@ -46,11 +45,7 @@ export const jobColumns: ColumnDef<Tables<'open_roles'>>[] = [
 	{
 		id: 'actions',
 		cell: ({ row }) => {
-			return (
-				<Link href={`./jobs/${row.original.id}`} className={cn(buttonVariants(), 'px-4')}>
-					More details
-				</Link>
-			);
+			return <Button className="px-4">More details</Button>;
 		}
 	}
 ];

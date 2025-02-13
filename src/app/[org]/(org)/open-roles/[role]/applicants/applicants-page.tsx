@@ -4,7 +4,7 @@ import { KanbanBoard } from '@caldwell619/react-kanban';
 import { CustomCard } from '@/components/job-applicants/types';
 import { BackButton } from '@/components/ui/back-button';
 
-export const ApplicantsPageComponent = async ({ roleId, org, className }: { roleId: string; org: string; className?: string }) => {
+export const ApplicantsPageComponent = async ({ roleId, org, className, asComponent = false }: { asComponent?: boolean; roleId: string; org: string; className?: string }) => {
 	const supabase = await createClient();
 
 	const [{ data, error }, { data: role, error: roleError }] = await Promise.all([
@@ -42,13 +42,15 @@ export const ApplicantsPageComponent = async ({ roleId, org, className }: { role
 
 	return (
 		<div>
-			<div className="relative mb-10 flex w-full items-center justify-between border-b pb-4">
-				<BackButton />
+			{!asComponent && (
+				<div className="relative mb-10 flex w-full items-center justify-between border-b pb-4">
+					<BackButton />
 
-				<h1 className="text-xl font-medium">
-					Applicants: <span className="font-medium text-muted-foreground">{role?.job_title}</span>
-				</h1>
-			</div>
+					<h1 className="text-xl font-medium">
+						Applicants: <span className="font-medium text-muted-foreground">{role?.job_title}</span>
+					</h1>
+				</div>
+			)}
 			<ApplicantsBoard initialBoards={initialBoards as any} className={className} />;
 		</div>
 	);

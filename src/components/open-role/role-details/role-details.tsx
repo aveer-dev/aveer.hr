@@ -64,90 +64,88 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 	};
 
 	return (
-		<>
-			<section className="mx-auto grid max-w-4xl gap-10 pb-6 pt-0">
-				<div className="flex justify-between">
-					<div className="relative">
-						<BackButton />
+		<section className="mx-auto mb-56 grid max-w-4xl gap-10 pb-6 pt-0">
+			<div className="flex justify-between">
+				<div className="relative">
+					<BackButton />
 
-						<div className="mt-6 grid gap-3 lg:mt-0">
-							<h1 className="flex items-center gap-4 text-2xl font-bold">
-								{data?.job_title}{' '}
-								{data.state == 'closed' && type == 'job' && (
-									<Badge className="font-light text-muted-foreground" variant={'secondary'}>
-										{data.state}
-									</Badge>
-								)}
-							</h1>
-							<p className="flex gap-4 text-xs font-light">
-								<span className="capitalize">{(data?.entity as any)?.name}</span> • <span className="capitalize">{data?.employment_type}</span> •{' '}
-								<span className="flex items-center gap-1">
-									{data.work_location === 'remote' && <House className="text-muted-foreground" size={10} />}
-									{data.work_location === 'on-site' && <Building2 className="text-muted-foreground" size={12} />}
-									{data.work_location}
-								</span>
-							</p>
-						</div>
-					</div>
-
-					<div className="lg: fixed bottom-0 left-0 flex w-full gap-3 border-t bg-background p-4 lg:relative lg:w-fit lg:border-t-0 lg:p-0">
-						{user && type == 'role' && (
-							<>
-								<ToggleRoleStatus status={data?.state} org={orgId} role={role} />
-
-								<Popover>
-									<PopoverTrigger asChild>
-										<Button variant="secondary" className="h-[32px]" size={'sm'}>
-											<EllipsisVertical size={14} />
-										</Button>
-									</PopoverTrigger>
-
-									<PopoverContent align="end" className="w-48 p-2">
-										<Link href={`./${role}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
-											<FilePenLine size={12} />
-											Edit Role
-										</Link>
-
-										<Link href={`./new?duplicate=${role}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
-											<Copy size={12} />
-											Duplicate
-										</Link>
-
-										<TerminateOpening deleteRole={deleteRole} />
-									</PopoverContent>
-								</Popover>
-							</>
-						)}
-
-						{type == 'job' && data.state == 'open' && (
-							<Link href={'#application-form'} className={cn(buttonVariants())}>
-								Apply to role
-							</Link>
-						)}
+					<div className="mt-6 grid gap-3 lg:mt-0">
+						<h1 className="flex items-center gap-4 text-2xl font-bold">
+							{data?.job_title}{' '}
+							{data.state == 'closed' && type == 'job' && (
+								<Badge className="font-light text-muted-foreground" variant={'secondary'}>
+									{data.state}
+								</Badge>
+							)}
+						</h1>
+						<p className="flex gap-4 text-xs font-light">
+							<span className="capitalize">{(data?.entity as any)?.name}</span> • <span className="capitalize">{data?.employment_type}</span> •{' '}
+							<span className="flex items-center gap-1">
+								{data.work_location === 'remote' && <House className="text-muted-foreground" size={10} />}
+								{data.work_location === 'on-site' && <Building2 className="text-muted-foreground" size={12} />}
+								{data.work_location}
+							</span>
+						</p>
 					</div>
 				</div>
 
-				<Tabs defaultValue="details" className="">
-					{type == 'role' && (
-						<TabsList className="grid w-fit grid-cols-2">
-							<TabsTrigger value="details">Details</TabsTrigger>
-							<TabsTrigger value="applicants">Applicants</TabsTrigger>
-						</TabsList>
+				<div className="lg: fixed bottom-0 left-0 flex w-full gap-3 border-t bg-background p-4 lg:relative lg:w-fit lg:border-t-0 lg:p-0">
+					{user && type == 'role' && (
+						<>
+							<ToggleRoleStatus status={data?.state} org={orgId} role={role} />
+
+							<Popover>
+								<PopoverTrigger asChild>
+									<Button variant="secondary" className="h-[32px]" size={'sm'}>
+										<EllipsisVertical size={14} />
+									</Button>
+								</PopoverTrigger>
+
+								<PopoverContent align="end" className="w-48 p-2">
+									<Link href={`./${role}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
+										<FilePenLine size={12} />
+										Edit Role
+									</Link>
+
+									<Link href={`./new?duplicate=${role}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
+										<Copy size={12} />
+										Duplicate
+									</Link>
+
+									<TerminateOpening deleteRole={deleteRole} />
+								</PopoverContent>
+							</Popover>
+						</>
 					)}
 
-					<TabsContent value="details" className="grid gap-10">
-						<Details data={data} formType={type} />
+					{type == 'job' && data.state == 'open' && (
+						<Link href={'#application-form'} className={cn(buttonVariants())}>
+							Apply to role
+						</Link>
+					)}
+				</div>
+			</div>
+
+			<Tabs defaultValue="details" className="">
+				{type == 'role' && (
+					<TabsList className="grid w-fit grid-cols-2">
+						<TabsTrigger value="details">Details</TabsTrigger>
+						<TabsTrigger value="applicants">Applicants</TabsTrigger>
+					</TabsList>
+				)}
+
+				<TabsContent value="details" className="grid gap-10">
+					<Details data={data} formType={type} />
+
+					{data.state == 'open' && <JobApplicationForm enableLocation={data?.enable_location} enableVoluntary={data?.enable_voluntary_data} roleId={Number(role)} org={orgId} submit={submitApplication} />}
+				</TabsContent>
+
+				{type == 'role' && (
+					<TabsContent value="applicants" className="relative mt-8 w-full">
+						<ApplicantsPageComponent asComponent org={orgId} roleId={role} className="absolute left-0 top-0 mr-10 max-w-7xl overflow-auto" />
 					</TabsContent>
-
-					{type == 'role' && (
-						<TabsContent value="applicants" className="relative mt-8 w-full">
-							<ApplicantsPageComponent org={orgId} roleId={role} className="absolute left-0 top-0 mr-10 max-w-7xl overflow-auto" />
-						</TabsContent>
-					)}
-				</Tabs>
-			</section>
-
-			{data.state == 'open' && <JobApplicationForm enableLocation={data?.enable_location} enableVoluntary={data?.enable_voluntary_data} roleId={Number(role)} org={orgId} submit={submitApplication} />}
-		</>
+				)}
+			</Tabs>
+		</section>
 	);
 };

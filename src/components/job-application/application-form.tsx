@@ -166,7 +166,7 @@ export function JobApplicationForm({ org, roleId, submit, enableLocation, enable
 	}, [roleId, form]);
 
 	return (
-		<section className="mx-auto mt-16 grid max-w-4xl gap-4 p-6 pt-24" id="application-form">
+		<section className="mx-auto mt-16 grid max-w-4xl gap-4 pt-24" id="application-form">
 			<h1 className="text-2xl font-bold">Application Form</h1>
 
 			<ApplicationSuccessDialog org={org} applicationId={applicationId} isOpen={showSuccessDialog} toggle={toggleSuccessDialog} />

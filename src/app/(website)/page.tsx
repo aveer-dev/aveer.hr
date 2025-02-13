@@ -26,7 +26,7 @@ export default async function LandingPage() {
 					<TextLoop
 						className="overflow-y-clip"
 						auto
-						interval={4}
+						interval={3}
 						transition={{
 							type: 'spring',
 							stiffness: 900,

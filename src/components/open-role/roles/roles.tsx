@@ -64,7 +64,7 @@ export const Roles = async ({ orgId, type }: props) => {
 				)}
 			</div>
 
-			<DataTable org={orgId} columns={type == 'job' ? jobColumns : columns} data={data} link="/open-roles" />
+			<DataTable org={orgId} columns={type == 'job' ? jobColumns : columns} data={data} link={type == 'job' ? '/jobs' : '/open-roles'} />
 		</div>
 	);
 };
