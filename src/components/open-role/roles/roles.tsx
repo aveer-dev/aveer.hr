@@ -64,7 +64,7 @@ export const Roles = async ({ orgId, type }: props) => {
 				)}
 			</div>
 
-			<DataTable org={orgId} subColumns={type == 'role' ? 'applicants' : undefined} columns={type == 'job' ? jobColumns : columns} data={data} />
+			<DataTable org={orgId} columns={type == 'job' ? jobColumns : columns} data={data} link="/open-roles" />
 		</div>
 	);
 };

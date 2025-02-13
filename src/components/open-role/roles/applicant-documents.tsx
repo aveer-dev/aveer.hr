@@ -80,7 +80,7 @@ export const ApplicantDocuments = ({ applicantData, documents, setDocuments }: p
 				)}
 
 				{document.format !== 'png' && document.format !== 'jpg' && document.format !== 'jpeg' && document.format !== 'pdf' && document.url && (
-					<div className="flex w-full max-w-[350px] flex-col items-center justify-center gap-4 text-center text-xs">
+					<div className="mx-auto mt-16 flex w-full flex-col items-center justify-center gap-4 rounded-md border bg-muted/70 px-16 py-12 text-center text-xs">
 						<p>Unable to open preview of this document format, sorry for the inconvinience, we&apos;re working on it.</p>
 						<p>Please download document to preview</p>
 

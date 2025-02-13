@@ -1,5 +1,3 @@
-'use server';
-
 import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 import { Building2, Copy, EllipsisVertical, FilePenLine, House } from 'lucide-react';
@@ -14,6 +12,8 @@ import { JobApplicationForm } from '@/components/job-application/application-for
 import { submitApplication } from '@/components/forms/contract/role.action';
 import { Badge } from '@/components/ui/badge';
 import { Details } from '@/components/ui/details';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ApplicantsPageComponent } from '@/app/[org]/(org)/open-roles/[role]/applicants/applicants-page';
 
 interface props {
 	role: string;
@@ -28,9 +28,9 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 		.select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)), level:employee_levels!profile_contract_level_fkey(level, role)')
 		.match({ id: role, org: orgId })
 		.single();
+
 	const {
-		data: { user },
-		error: authError
+		data: { user }
 	} = await supabase.auth.getUser();
 
 	if (error || !data) {
@@ -44,6 +44,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 
 	const deleteRole = async (): Promise<string> => {
 		'use server';
+
 		const supabase = await createClient();
 
 		const {
@@ -100,15 +101,18 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 											<EllipsisVertical size={14} />
 										</Button>
 									</PopoverTrigger>
+
 									<PopoverContent align="end" className="w-48 p-2">
 										<Link href={`./${role}/edit`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
 											<FilePenLine size={12} />
 											Edit Role
 										</Link>
+
 										<Link href={`./new?duplicate=${role}`} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'w-full justify-start gap-3')}>
 											<Copy size={12} />
 											Duplicate
 										</Link>
+
 										<TerminateOpening deleteRole={deleteRole} />
 									</PopoverContent>
 								</Popover>
@@ -123,7 +127,24 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 					</div>
 				</div>
 
-				<Details data={data} formType={type} />
+				<Tabs defaultValue="details" className="">
+					{type == 'role' && (
+						<TabsList className="grid w-fit grid-cols-2">
+							<TabsTrigger value="details">Details</TabsTrigger>
+							<TabsTrigger value="applicants">Applicants</TabsTrigger>
+						</TabsList>
+					)}
+
+					<TabsContent value="details" className="grid gap-10">
+						<Details data={data} formType={type} />
+					</TabsContent>
+
+					{type == 'role' && (
+						<TabsContent value="applicants" className="relative mt-8 w-full">
+							<ApplicantsPageComponent org={orgId} roleId={role} className="absolute left-0 top-0 mr-10 max-w-7xl overflow-auto" />
+						</TabsContent>
+					)}
+				</Tabs>
 			</section>
 
 			{data.state == 'open' && <JobApplicationForm enableLocation={data?.enable_location} enableVoluntary={data?.enable_voluntary_data} roleId={Number(role)} org={orgId} submit={submitApplication} />}

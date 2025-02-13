@@ -4,24 +4,21 @@ import { Check, ChevronsUpDown, Info } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { updateApplication } from './application.action';
-import { Tables, TablesUpdate } from '@/type/database.types';
+import { updateApplicant, updateApplication } from './application.action';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ApplicantBadge } from '@/components/ui/applicant-stage-badge';
-import { createClient } from '@/utils/supabase/client';
+import { APPLICANT } from '@/type/roles.types';
 
 const stages = ['review', 'interview', 'offer', 'hired', 'reject'];
 
 interface props {
-	onUpdateItem: (data: Tables<'job_applications'> & { role: Tables<'roles'> & { policy: Tables<'approval_policies'> } }) => void;
+	onUpdateItem: (data: APPLICANT) => void;
 	className?: string;
-	applicant: Tables<'job_applications'> & { org: Tables<'organisations'> };
+	applicant: APPLICANT;
 }
-
-const supabase = createClient();
 
 export const UpdateApplication = ({ onUpdateItem, applicant, className }: props) => {
 	const [open, setOpen] = useState(false);
@@ -29,26 +26,10 @@ export const UpdateApplication = ({ onUpdateItem, applicant, className }: props)
 	const [isUpdating, setUpdateState] = useState(false);
 	const [showRejectionDialog, toggleRejectionDialog] = useState(false);
 
-	const getDefaultApprovalPolicy = useCallback(async () => {
-		const { data, error } = await supabase.from('approval_policies').select().match({ org: applicant.org.subdomain, type: 'role_application', is_default: true });
-		if (error) {
-			toast.error('Unable to fetch default application review policy', { description: error.message });
-			return;
-		}
-
-		if (data && data.length > 0) return data[0].levels;
-		return;
-	}, [applicant.org]);
-
 	const onUpdateApplication = async (stage: string) => {
 		setUpdateState(true);
 
-		const applicationLevels = applicant.levels?.length ? applicant.levels : await getDefaultApprovalPolicy();
-
-		const payload: TablesUpdate<'job_applications'> = { stage };
-		if (stage == 'interview' && applicationLevels) payload.levels = applicationLevels as any;
-
-		const response = await updateApplication(applicant.id, payload, applicant.org.subdomain);
+		const response = await updateApplicant({ applicant, stage });
 		setUpdateState(false);
 
 		if (typeof response == 'string') return toast('😭 Error', { description: response });
@@ -69,14 +50,13 @@ export const UpdateApplication = ({ onUpdateItem, applicant, className }: props)
 		};
 
 		if (applicant.stage == 'applicant') setToReview();
-		if (!applicant.levels) getDefaultApprovalPolicy();
-	}, [getDefaultApprovalPolicy, onUpdateItem, applicant]);
+	}, [onUpdateItem, applicant]);
 
 	return (
 		<>
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
-					<Button variant="outline" role="combobox" aria-expanded={open} className={cn('w-40 justify-between', className)}>
+					<Button variant="outline" role="combobox" aria-expanded={open} className={cn('h-10 w-40 justify-between', className)}>
 						Stage:
 						<div className="flex items-center gap-1">
 							{isUpdating && <LoadingSpinner />}

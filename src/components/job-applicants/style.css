@@ -1,0 +1,15 @@
+.react-kanban-board {
+	@apply min-h-[62vh] p-0 pr-10;
+}
+
+.react-kanban-column {
+	@apply m-0 bg-transparent p-0;
+}
+
+[data-rfd-droppable-id='board-droppable'] {
+	@apply space-x-16;
+}
+
+.react-kanban-card-skeleton {
+	@apply h-44 border border-dashed;
+}

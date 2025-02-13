@@ -96,6 +96,7 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 							<MoreHorizontal className="h-4 w-4" />
 						</Button>
 					</DropdownMenuTrigger>
+
 					<DropdownMenuContent align="end">
 						<DropdownMenuItem className="h-7 p-0 font-light" onClick={event => event.stopPropagation()}>
 							<Button
@@ -109,7 +110,10 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 							</Button>
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={event => event.stopPropagation()} className="h-7 p-0 text-xs font-light">
-							<DropdownListItem href={`./open-roles/${row.original.id}`}>View</DropdownListItem>
+							<DropdownListItem href={`./open-roles/${row.original.id}`}>Open</DropdownListItem>
+						</DropdownMenuItem>
+						<DropdownMenuItem onClick={event => event.stopPropagation()} className="h-7 p-0 text-xs font-light">
+							<DropdownListItem href={`./open-roles/${row.original.id}/applicants`}>Applicants</DropdownListItem>
 						</DropdownMenuItem>
 						<DropdownMenuItem onClick={event => event.stopPropagation()} className="h-7 p-0 text-xs font-light">
 							<DropdownListItem href={`./open-roles/${row.original.id}/edit`}>Edit</DropdownListItem>

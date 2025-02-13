@@ -1,6 +1,7 @@
 'use server';
 
-import { TablesUpdate } from '@/type/database.types';
+import { Tables, TablesUpdate } from '@/type/database.types';
+import { APPLICANT } from '@/type/roles.types';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { createClient } from '@/utils/supabase/server';
 
@@ -21,4 +22,23 @@ export const updateApplication = async (id: number, payload: TablesUpdate<'job_a
 	if (error) return error.message;
 
 	return data;
+};
+
+const getDefaultApprovalPolicy = async (org: string) => {
+	const supabase = await createClient();
+
+	const { data, error } = await supabase.from('approval_policies').select().match({ org, type: 'role_application', is_default: true });
+
+	return { data, error };
+};
+
+export const updateApplicant = async ({ applicant, stage }: { applicant: APPLICANT; stage: string }) => {
+	const applicationLevels = applicant.levels?.length ? applicant.levels : await getDefaultApprovalPolicy(applicant.org.subdomain);
+
+	const payload: TablesUpdate<'job_applications'> = { stage };
+	if (stage == 'interview' && applicationLevels) payload.levels = applicationLevels as any;
+
+	const response = await updateApplication(applicant.id, payload, applicant.org.subdomain);
+
+	return response;
 };

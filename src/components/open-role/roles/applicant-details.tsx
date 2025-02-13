@@ -16,10 +16,11 @@ import { APPLICANT, DOCUMENT, LEVEL } from '@/type/roles.types';
 import { ApplicantDocuments } from './applicant-documents';
 import { LevelsAction } from './level-actions';
 import { ROLE } from '@/type/contract.types';
+import { UpdateApplication } from './applicant-actions';
 
 interface props {
-	data: Tables<'job_applications'> & { org: { name: string; subdomain: string }; role: Tables<'open_roles'> & { policy: Tables<'approval_policies'> }; levels: LEVEL[] };
-	onUpdate?: () => void;
+	data: APPLICANT;
+	onUpdate?: (data: APPLICANT, oldStage?: string) => void;
 	children?: ReactNode;
 	className?: string;
 	userRole: ROLE;
@@ -71,12 +72,17 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 	}, [applicantData, processLevels, isDetailOpen, userRole, role]);
 
 	const onClose = (isClose: boolean) => {
-		if (isClose == false) data.stage !== applicantData.stage || data.levels !== applicantData.levels ? onUpdate && onUpdate() : router.refresh();
+		if (isClose == false) data.stage !== applicantData.stage || data.levels !== applicantData.levels ? onUpdate && onUpdate(applicantData, data.stage) : router.refresh();
 	};
 
 	const onSetDocuments = useCallback((documents: DOCUMENT[]) => {
 		setDocuments(documents);
 	}, []);
+
+	const onUpdateApplicantState = (applicant: APPLICANT) => {
+		onUpdate!(applicant, data.stage);
+		setApplicantData(applicant);
+	};
 
 	return (
 		<Sheet
@@ -85,7 +91,7 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 				setDetailState(state);
 			}}>
 			<SheetTrigger asChild>
-				<button className={cn('gap-3', !children && buttonVariants({ variant: 'secondary' }), className)}>
+				<button className={cn('gap-3', !children && buttonVariants({ variant: 'outline' }), className)}>
 					{!children && (
 						<>
 							Review
@@ -97,12 +103,12 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 				</button>
 			</SheetTrigger>
 
-			<SheetContent hideClose className="overflow-y-auto p-0 sm:w-full sm:max-w-full">
+			<SheetContent hideClose className="overflow-y-auto p-0 sm:max-w-xl">
 				<SheetHeader className="relative rounded-md bg-accent/70 p-6 text-left">
 					<div className="flex flex-col justify-between gap-y-6 sm:flex-row">
 						<div className="flex items-center gap-1">
 							<SheetTitle className="max-w-64 truncate text-xl">
-								<span className="font-light">Role:</span> {applicantData?.role?.job_title}{' '}
+								<span className="font-light"></span> {applicantData?.role?.job_title}{' '}
 							</SheetTitle>
 							<SheetDescription></SheetDescription>
 						</div>
@@ -128,7 +134,7 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 							{applicantData?.first_name} {applicantData?.last_name}
 						</h1>
 
-						<div>
+						<div className="space-y-2">
 							<a href={`mailto:${applicantData?.email}`} className="flex w-fit items-center gap-1 text-sm font-light underline decoration-muted-foreground decoration-dashed underline-offset-4">
 								<span className="max-w-52 overflow-hidden text-ellipsis whitespace-nowrap">{applicantData?.email}</span>
 								<Mail size={12} className="text-muted-foreground" />
@@ -142,24 +148,28 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 					</div>
 
 					<Tabs defaultValue={applicantData.levels?.length > 0 ? 'overview' : 'details'}>
-						<TabsList className="mb-10 grid w-fit" style={{ gridTemplateColumns: `repeat(${documents.length + 1 + (applicantData.levels?.length ? 1 : 0)}, minmax(0, 1fr))` }}>
-							{applicantData.levels?.length > 0 && (
-								<TabsTrigger className="capitalize" value="overview">
-									Overview
-								</TabsTrigger>
-							)}
-
-							<TabsTrigger className="capitalize" value="details">
-								Details
-							</TabsTrigger>
-
-							{documents.length > 0 &&
-								documents.map((document, index) => (
-									<TabsTrigger key={index} className="capitalize" value={document.name}>
-										{document.name}
+						<div className="mb-10 flex justify-between">
+							<TabsList className="grid w-fit" style={{ gridTemplateColumns: `repeat(${documents.length + 1 + (applicantData.levels?.length ? 1 : 0)}, minmax(0, 1fr))` }}>
+								{applicantData.levels?.length > 0 && (
+									<TabsTrigger className="capitalize" value="overview">
+										Overview
 									</TabsTrigger>
-								))}
-						</TabsList>
+								)}
+
+								<TabsTrigger className="capitalize" value="details">
+									Details
+								</TabsTrigger>
+
+								{documents.length > 0 &&
+									documents.map((document, index) => (
+										<TabsTrigger key={index} className="capitalize" value={document.name}>
+											{document.name}
+										</TabsTrigger>
+									))}
+							</TabsList>
+
+							<UpdateApplication applicant={data as any} onUpdateItem={onUpdateApplicantState} />
+						</div>
 
 						<TabsContent value="overview">
 							<ul className="space-y-16">{levels?.map((level, index) => <LevelsAction key={index} level={level} index={index} role={role} levels={levels} contractId={contractId} applicantData={applicantData} setApplicantData={setApplicantData} />)}</ul>

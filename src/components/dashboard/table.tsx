@@ -6,22 +6,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { NavLink } from '@/components/ui/link';
-import { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
-import { ApplicantsSubTable } from '../open-role/roles/applicants-sub-table';
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
-	subColumns?: string;
 	loading?: boolean;
 	org?: string;
 	link?: string;
 }
 
-export function DataTable<TData, TValue>({ columns, data, org, loading, subColumns, link }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, org, loading, link }: DataTableProps<TData, TValue>) {
 	const table = useReactTable({
 		data,
 		columns,
@@ -54,7 +48,7 @@ export function DataTable<TData, TValue>({ columns, data, org, loading, subColum
 					{!loading ? (
 						table.getRowModel().rows?.length ? (
 							// table has data
-							table.getRowModel().rows.map(row => <TableContent subColumns={subColumns} key={row.id} row={row} link={link} org={org} />)
+							table.getRowModel().rows.map(row => <TableContent key={row.id} row={row} link={link} org={org} />)
 						) : (
 							// table data is empty
 							<TableRow>
@@ -166,38 +160,22 @@ export function DataTable<TData, TValue>({ columns, data, org, loading, subColum
 	);
 }
 
-const TableContent = ({ row, org, subColumns, link }: { row: Row<any>; org?: string; subColumns?: string; link?: string }) => {
-	const [showSubColumn, setSubColumnState] = useState(false);
+const TableContent = ({ row, org, link }: { row: Row<any>; org?: string; link?: string }) => {
 	return (
 		<>
-			<TableRow className={cn(subColumns && 'cursor-pointer', showSubColumn && 'bg-muted/50')} data-state={row.getIsSelected() && 'selected'} onClick={() => subColumns && setSubColumnState(!showSubColumn)}>
-				{row.getVisibleCells().map((cell, index) => (
+			<TableRow data-state={row.getIsSelected() && 'selected'}>
+				{row.getVisibleCells().map(cell => (
 					<TableCell key={cell.id} className={cn(link && 'p-0', 'whitespace-nowrap')}>
 						{link ? (
 							<NavLink org={org} scroll={true} className="block p-4" href={`${link}/${row.original.id}`}>
 								{flexRender(cell.column.columnDef.cell, cell.getContext())}
 							</NavLink>
 						) : (
-							<div className="flex items-center gap-3">
-								{flexRender(cell.column.columnDef.cell, cell.getContext())}
-								{index == 0 && subColumns && (
-									<Button
-										onClick={event => {
-											event.stopPropagation();
-											subColumns && setSubColumnState(!showSubColumn);
-										}}
-										variant={'ghost'}
-										size={'icon'}>
-										<ChevronRight size={14} className={cn(showSubColumn ? 'rotate-90' : '', 'transition-all')} />
-									</Button>
-								)}
-							</div>
+							flexRender(cell.column.columnDef.cell, cell.getContext())
 						)}
 					</TableCell>
 				))}
 			</TableRow>
-
-			{subColumns && showSubColumn && <ApplicantsSubTable org={org} roleId={row.original.id}></ApplicantsSubTable>}
 		</>
 	);
 };
