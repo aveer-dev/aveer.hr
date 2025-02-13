@@ -18,11 +18,21 @@ export const ApplicantsBoard = ({ initialBoards, className }: { initialBoards: K
 	const [board, updateBoard] = useState(initialBoards);
 
 	const onCardDragEnd = async (card: CustomCard, source: { fromPosition: number; fromColumnId: string }, destination: { toPosition: number; toColumnId: string }) => {
-		moveCard({ card: { ...card, stage: destination.toColumnId }, source, destination });
+		const newBoard = moveCard({ card: { ...card, stage: destination.toColumnId }, source, destination });
 
 		const response = await updateApplicant({ applicant: card as any, stage: destination.toColumnId });
 
 		if (typeof response == 'string') return toast('😭 Error', { description: response });
+
+		const cardColumnInNewBoard = newBoard?.columns.findIndex(column => column.id == destination.toColumnId);
+		if (cardColumnInNewBoard == undefined || cardColumnInNewBoard < 0) return;
+
+		const newBoardcardIndex = newBoard?.columns[cardColumnInNewBoard].cards.findIndex(newBoardcard => newBoardcard.id == card.id);
+		if (newBoardcardIndex == undefined || newBoardcardIndex < 0) return;
+
+		newBoard!.columns[cardColumnInNewBoard].cards[newBoardcardIndex] = response;
+
+		updateBoard(newBoard!);
 
 		router.refresh();
 	};
@@ -61,6 +71,8 @@ export const ApplicantsBoard = ({ initialBoards, className }: { initialBoards: K
 
 		const newBoard = { ...board, columns: newBoardColumns };
 		updateBoard(newBoard);
+
+		return newBoard;
 	};
 
 	return (

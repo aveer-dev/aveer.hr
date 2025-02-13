@@ -33,7 +33,7 @@ const getDefaultApprovalPolicy = async (org: string) => {
 };
 
 export const updateApplicant = async ({ applicant, stage }: { applicant: APPLICANT; stage: string }) => {
-	const applicationLevels = applicant.levels?.length ? applicant.levels : await getDefaultApprovalPolicy(applicant.org.subdomain);
+	const applicationLevels = applicant.levels?.length ? applicant.levels : (await getDefaultApprovalPolicy(applicant.org.subdomain))?.data![0]?.levels || [];
 
 	const payload: TablesUpdate<'job_applications'> = { stage };
 	if (stage == 'interview' && applicationLevels) payload.levels = applicationLevels as any;
