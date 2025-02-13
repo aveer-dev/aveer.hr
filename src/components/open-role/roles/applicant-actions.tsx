@@ -42,15 +42,8 @@ export const UpdateApplication = ({ onUpdateItem, applicant, className }: props)
 	};
 
 	useEffect(() => {
-		const setToReview = async () => {
-			const response = await updateApplication(applicant.id, { stage: 'review' }, applicant.org.subdomain);
-			if (typeof response == 'string') return toast('😭 Error', { description: response });
-			onUpdateItem(response as any);
-			setValue(response.stage);
-		};
-
-		if (applicant.stage == 'applicant') setToReview();
-	}, [onUpdateItem, applicant]);
+		setValue(applicant.stage);
+	}, [applicant.stage]);
 
 	return (
 		<>

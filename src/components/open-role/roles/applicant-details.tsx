@@ -17,6 +17,8 @@ import { ApplicantDocuments } from './applicant-documents';
 import { LevelsAction } from './level-actions';
 import { ROLE } from '@/type/contract.types';
 import { UpdateApplication } from './applicant-actions';
+import { updateApplication } from './application.action';
+import { toast } from 'sonner';
 
 interface props {
 	data: APPLICANT;
@@ -84,11 +86,19 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 		setApplicantData(applicant);
 	};
 
+	const setToReview = async () => {
+		const response = await updateApplication(data.id, { stage: 'review' }, data.org.subdomain);
+		if (typeof response == 'string') return toast('😭 Error', { description: response });
+		onUpdate!(response as any);
+		setApplicantData(response as any);
+	};
+
 	return (
 		<Sheet
 			onOpenChange={state => {
 				onClose(state);
 				setDetailState(state);
+				if (data.stage == 'applicant' && state) setToReview();
 			}}>
 			<SheetTrigger asChild>
 				<button className={cn('gap-3', !children && buttonVariants({ variant: 'outline' }), className)}>
@@ -168,7 +178,7 @@ export const ApplicantDetails = ({ data, onUpdate, children, className, userRole
 									))}
 							</TabsList>
 
-							<UpdateApplication applicant={data as any} onUpdateItem={onUpdateApplicantState} />
+							<UpdateApplication applicant={applicantData as any} onUpdateItem={onUpdateApplicantState} />
 						</div>
 
 						<TabsContent value="overview">
