@@ -142,7 +142,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 
 				{type == 'role' && (
 					<TabsContent value="applicants" className="relative mt-8 w-full">
-						<ApplicantsPageComponent asComponent org={orgId} roleId={role} className="absolute left-0 top-0 mr-10 max-w-7xl overflow-auto" />
+						<ApplicantsPageComponent asComponent org={orgId} roleId={role} className="absolute left-0 top-0 mr-10 max-w-7xl" />
 					</TabsContent>
 				)}
 			</Tabs>

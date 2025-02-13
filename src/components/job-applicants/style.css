@@ -1,5 +1,5 @@
 .react-kanban-board {
-	@apply h-full max-h-screen min-h-[62vh] p-0 pr-10;
+	@apply !overflow-y-auto p-0 pr-10;
 }
 
 .react-kanban-column {
