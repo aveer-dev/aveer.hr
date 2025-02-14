@@ -5,13 +5,20 @@ import { buttonVariants } from '@/components/ui/button';
 import { Undo2 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { redirect } from 'next/navigation';
 
 export const OrgWrapper = async ({ org, children }: { org: string; children: ReactNode }) => {
 	if (org == 'app') return children;
 
 	const supabase = await createClient();
 
-	const { data, error } = await supabase.from('organisations').select().match({ subdomain: org });
+	const { data: user, error: userError } = await supabase.auth.getUser();
+
+	if (!user || userError) return redirect('/app/login');
+
+	const [{ data, error }, { data: adminUser, error: adminUserError }] = await Promise.all([supabase.from('organisations').select().match({ subdomain: org }), supabase.from('profiles_roles').select().match({ organisations: org, profile: user.user?.id })]);
+
+	if (adminUserError || !adminUser || !adminUser.length) return redirect('/app/');
 
 	if (error || (data && !data.length))
 		return (
