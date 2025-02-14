@@ -16,7 +16,7 @@ export const OrgWrapper = async ({ org, children }: { org: string; children: Rea
 
 	if (!user || userError) return redirect('/app/login');
 
-	const [{ data, error }, { data: adminUser, error: adminUserError }] = await Promise.all([supabase.from('organisations').select().match({ subdomain: org }), supabase.from('profiles_roles').select().match({ organisations: org, profile: user.user?.id })]);
+	const [{ data, error }, { data: adminUser, error: adminUserError }] = await Promise.all([supabase.from('organisations').select().match({ subdomain: org }), supabase.from('profiles_roles').select().match({ organisation: org, profile: user.user?.id })]);
 
 	if (adminUserError || !adminUser || !adminUser.length) return redirect('/app/');
 
