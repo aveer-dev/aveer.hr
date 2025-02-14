@@ -18,17 +18,34 @@ export const OrgWrapper = async ({ org, children }: { org: string; children: Rea
 
 	const [{ data, error }, { data: adminUser, error: adminUserError }] = await Promise.all([supabase.from('organisations').select().match({ subdomain: org }), supabase.from('profiles_roles').select().match({ organisation: org, profile: user.user?.id })]);
 
-	if (adminUserError || !adminUser || !adminUser.length) return redirect('/app/');
-
 	if (error || (data && !data.length))
 		return (
 			<div className="fixed bottom-0 left-0 right-0 top-0 z-20 flex flex-col justify-center bg-white/20 backdrop-blur-md">
-				<Org404Wrapper>
+				<Org404Wrapper cursorText="404">
 					<div className="mx-auto max-w-xl">
 						<h1 className="mb-3 text-7xl font-extrabold">404</h1>
 
 						<h3 className="mb-3 text-lg font-bold">Organisation not found</h3>
 						<p className="text-sm">Unable to find your organisation, make sure you have the correct URL and try again</p>
+
+						<Link href={'/app'} className={cn(buttonVariants(), 'mt-6 gap-4')}>
+							<Undo2 size={12} />
+							Back home
+						</Link>
+					</div>
+				</Org404Wrapper>
+			</div>
+		);
+
+	if (adminUserError || !adminUser || !adminUser.length)
+		return (
+			<div className="fixed bottom-0 left-0 right-0 top-0 z-20 flex flex-col justify-center bg-white/20 backdrop-blur-md">
+				<Org404Wrapper cursorText="error">
+					<div className="mx-auto max-w-xl">
+						<h1 className="mb-3 text-4xl font-extrabold">Unauthorized</h1>
+
+						<h3 className="mb-3 text-lg font-bold">You do not have access</h3>
+						<p className="text-sm">You do not have access to this organisation, or your access has been revoked. Contact your admin or HR.</p>
 
 						<Link href={'/app'} className={cn(buttonVariants(), 'mt-6 gap-4')}>
 							<Undo2 size={12} />

@@ -5,7 +5,7 @@ import { CircleSlash } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState, useRef, ReactNode } from 'react';
 
-export const Org404Wrapper = ({ children }: { children: ReactNode }) => {
+export const Org404Wrapper = ({ children, cursorText }: { children: ReactNode; cursorText: string }) => {
 	const [isHovering, setIsHovering] = useState(false);
 	const targetRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +44,7 @@ export const Org404Wrapper = ({ children }: { children: ReactNode }) => {
 						{isHovering ? (
 							<motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.6 }} className="inline-flex w-full items-center justify-center">
 								<div className="inline-flex items-center text-sm text-white dark:text-black">
-									404
+									{cursorText}
 									<CircleSlash className="ml-1 h-4 w-4" />
 								</div>
 							</motion.div>
