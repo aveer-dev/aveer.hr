@@ -56,7 +56,16 @@ export const Notifications = ({ contractId, messages }: { contractId?: number; m
 	};
 
 	return (
-		<AlertDialog open={open} onOpenChange={setOpen}>
+		<AlertDialog
+			open={open}
+			onOpenChange={state => {
+				setOpen(state);
+
+				if (state && activeMessageId) {
+					const messageIndex = _messages.findIndex(message => message.id == activeMessageId);
+					isMessageRead(_messages[messageIndex]) ? false : onReadMessage(_messages[messageIndex], messageIndex);
+				}
+			}}>
 			<TooltipProvider>
 				<Tooltip>
 					<TooltipTrigger asChild>
