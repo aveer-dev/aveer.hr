@@ -8,15 +8,15 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
 const resend = new Resend(RESEND_API_KEY);
 
-const getEmailBody = async ({ link, name, title, body, type, org }: { link: string; name: string; title: string; body: string; org: string; type: string }) => {
-	const html = await renderAsync(React.createElement(NotificationEmail, { link, name, title, body, type, org }));
+const getEmailBody = async ({ link, name, title, body, type, org, contract }: { link: string; name: string; title: string; body: string; org: string; type: string; contract?: number }) => {
+	const html = await renderAsync(React.createElement(NotificationEmail, { link, name, title, body, type, org, contract }));
 
 	return html;
 };
 
-const SendEmail = async ({ payload, nameAndEmails }: { payload: WebhookPayload; nameAndEmails: { email: string; first_name: string }[] }) => {
+const SendEmail = async ({ payload, nameAndEmails }: { payload: WebhookPayload; nameAndEmails: { email: string; first_name: string; contract?: number }[] }) => {
 	for (const contact of nameAndEmails) {
-		const html = await getEmailBody({ link: payload.record.link, name: contact.first_name, title: payload.record.title, body: payload.record.body, org: payload.record.org, type: payload.record.for });
+		const html = await getEmailBody({ contract: contact?.contract, link: payload.record.link, name: contact.first_name, title: payload.record.title, body: payload.record.body, org: payload.record.org, type: payload.record.for });
 
 		const { error } = await resend.emails.send({
 			from: 'Aveer.hr <support@notification.aveer.hr>',
@@ -60,14 +60,13 @@ const getEmails = async ({ payload }: { payload: WebhookPayload }) => {
 	}
 
 	if (payload.record.contracts?.length > 0) {
-		const { data } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(email, first_name)').eq('org', payload.record.org).in('id', payload.record.contracts);
-		const details: { email: string; first_name: string }[] = data!.map(d => ({ email: (d.profile as unknown as { email: string })!.email, first_name: (d.profile as unknown as { first_name: string })!.first_name }));
+		const { data } = await supabase.from('contracts').select('id, profile:profiles!contracts_profile_fkey(email, first_name)').eq('org', payload.record.org).in('id', payload.record.contracts);
+		const details: { email: string; first_name: string; contract: number }[] = data!.map(d => ({ contract: d.id, email: (d.profile as unknown as { email: string })!.email, first_name: (d.profile as unknown as { first_name: string })!.first_name }));
 		return details;
 	}
 
-	const { data } = await supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(email, first_name)').match({ org: payload.record.org, status: 'signed' });
-
-	const details: { email: string; first_name: string }[] = data!.map(d => ({ email: (d.profile as unknown as { email: string })!.email, first_name: (d.profile as unknown as { first_name: string })!.first_name }));
+	const { data } = await supabase.from('contracts').select('id, profile:profiles!contracts_profile_fkey(email, first_name)').match({ org: payload.record.org, status: 'signed' });
+	const details: { email: string; first_name: string; contract: number }[] = data!.map(d => ({ contract: d.id, email: (d.profile as unknown as { email: string })!.email, first_name: (d.profile as unknown as { first_name: string })!.first_name }));
 
 	return details;
 };
@@ -76,6 +75,7 @@ const handler = async (request: Request): Promise<Response> => {
 	const payload: WebhookPayload = await request.json();
 
 	const namesAndEmails = await getEmails({ payload });
+
 	await SendEmail({ payload, nameAndEmails: namesAndEmails });
 
 	return new Response('Ok', {
