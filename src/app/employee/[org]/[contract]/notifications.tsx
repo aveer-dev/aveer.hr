@@ -13,6 +13,7 @@ import ExtensionKit from '@/components/tiptap/extensions/extension-kit';
 import { updateMessage } from '@/components/layout/inbox/messages.actions';
 import { toast } from 'sonner';
 import Document from '@tiptap/extension-document';
+import { useSearchParams } from 'next/navigation';
 
 const getMessageBody = (json: string) => {
 	const output = generateHTML(JSON.parse(json), [Document, ...ExtensionKit]);
@@ -20,8 +21,11 @@ const getMessageBody = (json: string) => {
 };
 
 export const Notifications = ({ contractId, messages }: { contractId?: number; messages: Tables<'inbox'>[] | null }) => {
+	const searchParams = useSearchParams();
+	const activeMessageId = messages?.find(message => message.id == Number(searchParams.get('messages')))?.id;
+
 	const [_messages, updateMessages] = useState(messages || []);
-	const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(!!activeMessageId);
 
 	if (messages && messages.length > 0) messages = messages.filter(message => !message.draft);
 
@@ -98,7 +102,7 @@ export const Notifications = ({ contractId, messages }: { contractId?: number; m
 
 				<section className="mt-8 min-h-96 space-y-8 overflow-scroll">
 					{_messages.length && (
-						<Accordion type="single" collapsible className="w-full">
+						<Accordion type="single" collapsible className="w-full" defaultValue={String(activeMessageId)}>
 							{_messages?.map((message, index) => (
 								<AccordionItem key={message.id} value={String(message.id)}>
 									<AccordionTrigger className="text-left" onClick={() => (isMessageRead(message) ? null : onReadMessage(message, index))}>
