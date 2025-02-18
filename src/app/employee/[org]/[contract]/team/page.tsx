@@ -1,6 +1,9 @@
 import { Teams } from '@/components/contract/teams';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
 import { isPast } from 'date-fns';
+import { Link, Undo2 } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
 export default async function ProfilePage(props: { params: Promise<{ [key: string]: string }> }) {
@@ -23,11 +26,15 @@ export default async function ProfilePage(props: { params: Promise<{ [key: strin
 			<div className="flex min-h-56 flex-col items-center justify-center gap-2 bg-muted text-center text-muted-foreground">
 				<p>Unable to fetch contract</p>
 				<p>{error?.message}</p>
+				<Link href={'/app/login'} className={cn(buttonVariants(), 'mt-6 gap-4')}>
+					<Undo2 size={12} />
+					Go to login
+				</Link>
 			</div>
 		);
 	}
 
-	if (data.status !== 'signed') redirect('./home');
+	if (data?.status !== 'signed') redirect('./home');
 
 	const manager = (await supabase.from('managers').select().match({ org: params.org, person: params.contract, team: data.team?.id })).data;
 

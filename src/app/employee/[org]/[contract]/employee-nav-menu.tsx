@@ -13,15 +13,15 @@ export const NavMenu = ({ contract }: { contract: Tables<'contracts'> }) => {
 
 	const [navItems] = useState([
 		{ label: 'Home', icon: House, page: 'home', shortcut: 'h', enabled: true },
-		{ label: 'Time-off', icon: CalendarClock, page: 'leave', shortcut: 'l', enabled: contract.status == 'signed' },
+		{ label: 'Time-off', icon: CalendarClock, page: 'leave', shortcut: 'l', enabled: contract?.status == 'signed' },
 		{ label: 'Profile', icon: UserRoundCog, page: 'profile', shortcut: 'p', enabled: true },
-		{ label: 'Team', icon: UsersRound, page: 'team', shortcut: 't', enabled: contract.status == 'signed' },
-		{ label: 'Requests', icon: FileStack, page: 'requests', shortcut: 'r', enabled: contract.status == 'signed' },
+		{ label: 'Team', icon: UsersRound, page: 'team', shortcut: 't', enabled: contract?.status == 'signed' },
+		{ label: 'Requests', icon: FileStack, page: 'requests', shortcut: 'r', enabled: contract?.status == 'signed' },
 		{ label: 'Contract', icon: Signature, page: 'contract', shortcut: 'c', enabled: true },
-		{ label: 'Appraisal', icon: FilePenLine, page: 'appraisal', shortcut: 'a', enabled: contract.status == 'signed' },
-		{ label: 'Boarding', icon: ListChecks, page: 'boarding', shortcut: 'b', enabled: contract.status == 'signed' },
-		{ label: 'Documents', icon: Files, page: 'documents', shortcut: 'd', enabled: contract.status == 'signed' },
-		{ label: 'Files', icon: FolderOpenDot, page: 'files', shortcut: 'f', enabled: contract.status == 'signed' }
+		{ label: 'Appraisal', icon: FilePenLine, page: 'appraisal', shortcut: 'a', enabled: contract?.status == 'signed' },
+		{ label: 'Boarding', icon: ListChecks, page: 'boarding', shortcut: 'b', enabled: contract?.status == 'signed' },
+		{ label: 'Documents', icon: Files, page: 'documents', shortcut: 'd', enabled: contract?.status == 'signed' },
+		{ label: 'Files', icon: FolderOpenDot, page: 'files', shortcut: 'f', enabled: contract?.status == 'signed' }
 	]);
 
 	const isPageActive = (page: string) => path.includes(`/${page}`);

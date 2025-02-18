@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { Todos } from './todo/todos';
 import { Payments } from './payments';
 import { Tables } from '@/type/database.types';
-import { Info } from 'lucide-react';
+import { Info, Undo2 } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -26,6 +26,10 @@ export default async function ContractPage(props: { params: Promise<{ [key: stri
 			<div className="flex min-h-56 flex-col items-center justify-center gap-2 bg-muted text-center text-muted-foreground">
 				<p>Unable to fetch contracts</p>
 				<p>{error?.message}</p>
+				<Link href={'/app/login'} className={cn(buttonVariants(), 'mt-6 gap-4')}>
+					<Undo2 size={12} />
+					Go to login
+				</Link>
 			</div>
 		);
 	}
