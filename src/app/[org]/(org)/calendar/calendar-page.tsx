@@ -1,10 +1,11 @@
 import { createClient } from '@/utils/supabase/server';
 import { FullCalendar } from '@/components/calendar/calendar';
-import { redirect } from 'next/navigation';
 import { Tables } from '@/type/database.types';
 import { getEmployees, getTeams } from '@/utils/form-data-init';
+import { getGCalendars } from '@/components/calendar/calendar-actions';
+import { GCalendarSetupDialog } from './google-calendar-setup';
 
-export const CalendarPageComponent = async ({ org }: { org: string }) => {
+export const CalendarPageComponent = async ({ org, isCalendarSetup }: { org: string; isCalendarSetup: boolean }) => {
 	const supabase = await createClient();
 
 	const {
@@ -23,7 +24,7 @@ export const CalendarPageComponent = async ({ org }: { org: string }) => {
 		supabase.from('time_off').select('*, profile:profiles!time_off_profile_fkey(first_name, last_name), hand_over(profile(first_name, last_name), job_title)').eq('org', org).neq('status', 'denied'),
 		supabase.from('reminders').select('*, profile:profiles!reminders_profile_fkey(id, first_name, last_name)').match({ org, profile: user?.id }),
 		getEmployees({ org }),
-		supabase.from('org_settings').select('enable_calendar, calendar_employee_events').eq('org', org).single(),
+		supabase.from('org_settings').select('enable_thirdparty_calendar, calendar_employee_events').eq('org', org).single(),
 		supabase.from('calendars').select().match({ org, platform: 'google' }).single(),
 		supabase.from('calendar_events').select().match({ org }),
 		getTeams({ org })
@@ -50,6 +51,8 @@ export const CalendarPageComponent = async ({ org }: { org: string }) => {
 		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) events.push({ date: new Date(date), data });
 	}
 
+	const gCalendars = isCalendarSetup ? await getGCalendars({ org }) : false;
+
 	return (
 		<section className="mx-auto">
 			<FullCalendar
@@ -65,6 +68,8 @@ export const CalendarPageComponent = async ({ org }: { org: string }) => {
 				teams={teams}
 				dobs={dobs!.filter(contract => contract.profile?.date_of_birth) as any}
 			/>
+
+			{gCalendars && gCalendars.data && <GCalendarSetupDialog calendars={gCalendars.data} org={org} />}
 		</section>
 	);
 };

@@ -4,6 +4,7 @@ import { CalendarPageComponent } from './calendar-page';
 
 export default async function CalendarPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
 	const org = (await props.params).org;
+	const searchParams = await props.searchParams;
 
 	return (
 		<Suspense
@@ -13,7 +14,7 @@ export default async function CalendarPage(props: { params: Promise<{ [key: stri
 					<Skeleton className="h-96 w-full" />
 				</div>
 			}>
-			<CalendarPageComponent org={org} />
+			<CalendarPageComponent org={org} isCalendarSetup={searchParams.state == 'success'} />
 		</Suspense>
 	);
 }

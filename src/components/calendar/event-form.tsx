@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn, getAllTimezones, getCurrentTimezone, getTime } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { add, format } from 'date-fns';
-import { Check, ChevronsUpDown, Copy, Hourglass, LetterText, MapPin, Repeat, Text, Trash2, UsersRound } from 'lucide-react';
+import { BellDot, Check, ChevronsUpDown, Copy, Hourglass, LetterText, MapPin, Plus, Repeat, Text, Trash2, UsersRound, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tables } from '@/type/database.types';
 import { toast } from 'sonner';
@@ -25,6 +25,8 @@ import { createCalendarEvent, deleteCalendarEvent, updateCalendarEvent } from '.
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '../ui/badge';
 import Image from 'next/image';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const formSchema = z.object({
 	summary: z.string().min(2, { message: 'Enter event title' }),
@@ -51,13 +53,21 @@ interface PROPS {
 	employeeList?: EMPLOYEE[];
 	date?: Date;
 	org: string;
-	calendarId: string;
+	calendar?: Tables<'calendars'> | null;
 	onCreateEvent: () => void;
 	onClose: () => void;
 	event?: Tables<'calendar_events'>;
 }
 
-export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onClose, employeeList, event }: PROPS) => {
+type period = 'minutes' | 'hours' | 'days' | 'weeks';
+
+interface reminder {
+	minutes: number;
+	period: period;
+	value: number;
+}
+
+export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClose, employeeList, event }: PROPS) => {
 	const [employees, setEmployees] = useState<EMPLOYEE[]>([]);
 	const [teams, setTeams] = useState<Tables<'teams'>[]>([]);
 	const [filteredEmployees, setFilteredEmployees] = useState<EMPLOYEE[]>([]);
@@ -65,10 +75,11 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 	const [isCreating, setCreatingState] = useState(false);
 	const [isDeleting, setDeletingState] = useState(false);
 	const router = useRouter();
-	const [invitees, updateInvitees] = useState<{ single?: EMPLOYEE; team?: { name: string; id: number }; all?: boolean }[]>((event?.attendees as any) || []);
+	const [invitees, updateInvitees] = useState<{ single?: EMPLOYEE; team?: { name: string; id: number; people: EMPLOYEE[] }; all?: EMPLOYEE[] }[]>((event?.attendees as any) || []);
 	const [locationType, setLocationType] = useState(!event || event?.meeting_link ? 'virtual' : 'physical');
 	const [isTimezoneOpen, toggleTimezoneState] = useState(false);
 	const allowEdit = !!teams && !!employeeList;
+	const [eventReminders, updateEventReminder] = useState<reminder[]>((event?.reminders as any) || []);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -85,22 +96,29 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		if (event) return updateEvent(values);
-
 		setCreatingState(true);
 
 		try {
 			const response = await createCalendarEvent({
-				calendarId,
+				calendar,
 				virtual: locationType == 'virtual',
 				attendees: values.attendees,
-				payload: { ...values, attendees: invitees as any, org, event_id: '', end: { dateTime: values.end.dateTime.toISOString(), timeZone: values.end.timeZone } as any, start: { dateTime: values.start.dateTime.toISOString(), timeZone: values.start.timeZone } as any }
+				payload: {
+					...values,
+					attendees: invitees as any,
+					calendar_id: calendar?.calendar_id,
+					org,
+					event_id: '',
+					end: { dateTime: values.end.dateTime.toISOString(), timeZone: values.end.timeZone } as any,
+					start: { dateTime: values.start.dateTime.toISOString(), timeZone: values.start.timeZone } as any,
+					reminders: eventReminders as any
+				}
 			});
 			if (typeof response !== 'string') event = response;
 
 			toast.success('Calendar event created successfully');
 			setCreatingState(false);
 			router.refresh();
-			// onCreateEvent();
 		} catch (error: any) {
 			toast.error(error?.message || error);
 			setCreatingState(false);
@@ -113,7 +131,7 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 
 		try {
 			await updateCalendarEvent({
-				calendarId,
+				calendar: calendar,
 				virtual: locationType == 'virtual',
 				attendees: values.attendees,
 				id: event?.id,
@@ -123,7 +141,8 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 					org,
 					event_id: event?.event_id,
 					end: { dateTime: values.end.dateTime.toISOString(), timeZone: values.end.timeZone } as any,
-					start: { dateTime: values.start.dateTime.toISOString(), timeZone: values.start.timeZone } as any
+					start: { dateTime: values.start.dateTime.toISOString(), timeZone: values.start.timeZone } as any,
+					reminders: eventReminders as any
 				}
 			});
 			toast.success('Calendar event updated successfully');
@@ -141,7 +160,9 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 
 		setDeletingState(true);
 		try {
-			const response = await deleteCalendarEvent({ id: event?.id as number, calendarId, eventId: event.event_id });
+			if (!calendar?.calendar_id) return;
+
+			const response = await deleteCalendarEvent({ id: event?.id as number, calendarId: calendar?.calendar_id, eventId: event.event_id });
 			setDeletingState(false);
 			if (typeof response == 'string') return toast.error(response);
 			toast.success('Event deleted successfully');
@@ -162,11 +183,11 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 
 		const inviteesEmails = invitees
 			.map(invitee => {
-				if (invitee.team) return employeeList?.filter(employee => employee?.team == invitee.team?.id).map(employee => employee?.profile.email);
+				if (invitee.team) return invitee.team.people.map(employee => employee?.profile.email);
 
 				if (invitee.single) return invitee.single.profile.email;
 
-				if (invitee.all) return employeeList?.map(employee => employee?.profile.email);
+				if (invitee.all) return invitee.all;
 			})
 			.flat();
 
@@ -176,6 +197,100 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 	const copy = (text: string) => {
 		navigator.clipboard.writeText(text);
 		toast.message('Meeting link copied to clipboard');
+	};
+
+	const onAddReminder = () => {
+		if (eventReminders.length >= 5) return;
+
+		const updatedEventReminders: reminder[] = [...eventReminders, { minutes: 0, period: 'minutes', value: 30 }];
+		updateEventReminder(updatedEventReminders);
+	};
+
+	const onUpdateAReminder = ({ index, value, period }: { index: number; value?: string; period?: period }) => {
+		if (Number(value) <= 0) return;
+
+		const reminder = eventReminders[index];
+
+		switch (period || reminder.period) {
+			case 'minutes':
+				reminder.minutes = Number(value) || reminder.value;
+				break;
+			case 'hours':
+				reminder.minutes = (Number(value) || reminder.value) * 60;
+				break;
+			case 'days':
+				reminder.minutes = (Number(value) || reminder.value) * 1440;
+				break;
+			case 'weeks':
+				reminder.minutes = (Number(value) || reminder.value) * 10080;
+				break;
+			default:
+				break;
+		}
+
+		if (reminder.minutes > 40320 && period) return;
+
+		eventReminders[index] = { ...reminder, value: Number(value) || reminder.value, period: period || reminder.period };
+		updateEventReminder([...eventReminders]);
+	};
+
+	const onRemoveReminder = (index: number) => {
+		const updatedReminders = [...eventReminders.slice(0, index), ...eventReminders.slice(index + 1)];
+		updateEventReminder(updatedReminders);
+	};
+
+	const onUpdateInviteesWithEployee = (employee: EMPLOYEE) => {
+		setFilteredEmployees([]);
+		setFilteredETeams([]);
+		updateInvitees([
+			...invitees,
+			{
+				single: {
+					id: employee.id,
+					job_title: employee.job_title,
+					team: employee.team,
+					profile: { first_name: employee.profile.first_name, last_name: employee.profile.last_name, id: employee.profile.id, email: employee.profile.email }
+				}
+			}
+		]);
+	};
+
+	const onUpdateInviteesWithTeam = (team: Tables<'teams'>) => {
+		setFilteredEmployees([]);
+		setFilteredETeams([]);
+		updateInvitees([
+			...invitees,
+			{
+				team: {
+					id: team.id,
+					name: team.name,
+					people:
+						employeeList
+							?.filter(employee => employee?.team == team.id)
+							.map(employee => ({
+								id: employee.id,
+								job_title: employee.job_title,
+								team: employee.team,
+								profile: { first_name: employee.profile.first_name, last_name: employee.profile.last_name, id: employee.profile.id, email: employee.profile.email }
+							})) || []
+				}
+			}
+		]);
+	};
+
+	const onUpdateInviteesWithAll = () => {
+		setFilteredEmployees([]);
+		setFilteredETeams([]);
+		updateInvitees([
+			{
+				all: employeeList?.map(employee => ({
+					id: employee.id,
+					job_title: employee.job_title,
+					team: employee.team,
+					profile: { first_name: employee.profile.first_name, last_name: employee.profile.last_name, id: employee.profile.id, email: employee.profile.email }
+				}))
+			}
+		]);
 	};
 
 	return (
@@ -407,13 +522,7 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 
 								<CommandList>
 									{!invitees[0]?.all && (
-										<CommandItem
-											className="flex gap-2"
-											onSelect={() => {
-												setFilteredEmployees([]);
-												setFilteredETeams([]);
-												updateInvitees([{ all: true }]);
-											}}>
+										<CommandItem className="flex gap-2" onSelect={onUpdateInviteesWithAll.bind(this)}>
 											<span>All employees</span>
 										</CommandItem>
 									)}
@@ -421,14 +530,7 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 									{!!filteredEmployees.length && (
 										<CommandGroup noPadding heading="Employees">
 											{filteredEmployees.map(employee => (
-												<CommandItem
-													key={employee.id + 'employee'}
-													className="flex gap-2"
-													onSelect={() => {
-														setFilteredEmployees([]);
-														setFilteredETeams([]);
-														updateInvitees([...invitees, { single: employee }]);
-													}}>
+												<CommandItem key={employee.id + 'employee'} className="flex gap-2" onSelect={onUpdateInviteesWithEployee.bind(this, employee)}>
 													<span>
 														{employee.profile?.first_name} {employee.profile?.last_name}
 													</span>
@@ -443,14 +545,7 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 									{!!filteredTeams.length && (
 										<CommandGroup noPadding heading="Teams">
 											{filteredTeams.map(team => (
-												<CommandItem
-													key={team.id + 'team'}
-													className="flex gap-2"
-													onSelect={() => {
-														setFilteredEmployees([]);
-														setFilteredETeams([]);
-														updateInvitees([...invitees, { team: { id: team.id, name: team.name } }]);
-													}}>
+												<CommandItem key={team.id + 'team'} className="flex gap-2" onSelect={onUpdateInviteesWithTeam.bind(this, team)}>
 													{team.name}
 												</CommandItem>
 											))}
@@ -548,6 +643,55 @@ export const EventForm = ({ date, org, calendarId, onCreateEvent, teamsList, onC
 								/>
 							</TabsContent>
 						</Tabs>
+					</div>
+				</div>
+
+				{/* reminders */}
+				<div className="!mt-8 flex items-start gap-3">
+					<div className="mt-4">
+						<BellDot size={12} />
+					</div>
+
+					<div className={cn('ml-3 w-full space-y-4', allowEdit && 'ml-0')}>
+						{eventReminders.map((reminder, index) => (
+							<div className="flex gap-4" key={index}>
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Input type="number" value={reminder.value} className="w-full" onChange={event => onUpdateAReminder({ index, value: event.target.value })} placeholder={`Number of ${reminder.period}`} />
+										</TooltipTrigger>
+
+										<TooltipContent>
+											<p>
+												Must be between 1 - {reminder.period == 'weeks' && '4 weeks'} {reminder.period == 'days' && '28 days'} {reminder.period == 'hours' && '672 hours'} {reminder.period == 'minutes' && '40,320 minutes'}
+											</p>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+
+								<Select value={reminder.period} onValueChange={(period: period) => onUpdateAReminder({ index, period })}>
+									<SelectTrigger className="w-full">
+										<SelectValue placeholder="Selected period" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectGroup>
+											<SelectItem value="minutes">Minutes</SelectItem>
+											<SelectItem value="hours">Hours</SelectItem>
+											<SelectItem value="days">Days</SelectItem>
+											<SelectItem value="weeks">Weeks</SelectItem>
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+
+								<Button variant={'ghost'} type="button" onClick={onRemoveReminder.bind(this, index)}>
+									<X size={12} />
+								</Button>
+							</div>
+						))}
+
+						<Button className="w-full gap-3 border" type="button" variant={'secondary'} onClick={onAddReminder}>
+							<Plus size={12} /> Add reminder
+						</Button>
 					</div>
 				</div>
 

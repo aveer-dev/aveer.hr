@@ -8,7 +8,16 @@ import { useState } from 'react';
 import { EventDialog } from './event-dialog';
 import { Tables } from '@/type/database.types';
 
-export const CalendarOptions = ({ org, contract, profile, calendarId, teams, employees }: { employees?: Tables<'contracts'>[] | null; teams?: Tables<'teams'>[] | null; calendarId: string; org: string; contract: number; profile: string }) => {
+interface props {
+	employees?: Tables<'contracts'>[] | null;
+	teams?: Tables<'teams'>[] | null;
+	calendar?: Tables<'calendars'> | null;
+	org: string;
+	contract: number;
+	profile: string;
+}
+
+export const CalendarOptions = ({ org, contract, profile, calendar, teams, employees }: props) => {
 	const [isOptionOpen, toggleOptionState] = useState(false);
 
 	return (
@@ -20,7 +29,7 @@ export const CalendarOptions = ({ org, contract, profile, calendarId, teams, emp
 			</DropdownMenuTrigger>
 
 			<DropdownMenuContent className="w-28">
-				<EventDialog teams={teams} employees={employees} org={org} onClose={toggleOptionState} calendarId={calendarId}>
+				<EventDialog teams={teams} employees={employees} org={org} onClose={toggleOptionState} calendar={calendar}>
 					<DropdownMenuItem onSelect={event => event.preventDefault()} className="gap-3">
 						<CalendarRangeIcon size={12} /> Event
 					</DropdownMenuItem>

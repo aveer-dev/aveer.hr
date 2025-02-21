@@ -1,7 +1,6 @@
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { CalendarRange } from 'lucide-react';
-import { toast } from 'sonner';
 
 import { FullCalendar } from '@/components/calendar/calendar';
 import { createClient } from '@/utils/supabase/server';
@@ -22,14 +21,14 @@ export const EmployeeCalendar = async ({ org, contractId, team }: { org: string;
 	} = await supabase.auth.getUser();
 	if (error || !user) return redirect('/app/login');
 
-	const { data: orgCalendarConfig, error: calendarConfigError } = await supabase.from('org_settings').select('enable_calendar, calendar_employee_events').eq('org', org).single();
-	if (calendarConfigError) toast.error(calendarConfigError.message);
+	const { data: orgCalendarConfig, error: calendarConfigError } = await supabase.from('org_settings').select('enable_thirdparty_calendar, calendar_employee_events').eq('org', org).single();
+	if (calendarConfigError) return;
 
 	const timeOffQuery: QUERY_BUILDER & { status?: string } = { org, status: 'approved', profile: user?.id! };
-	if (orgCalendarConfig?.enable_calendar && orgCalendarConfig?.calendar_employee_events?.includes('time-off')) delete timeOffQuery.profile;
+	if (orgCalendarConfig?.enable_thirdparty_calendar && orgCalendarConfig?.calendar_employee_events?.includes('time-off')) delete timeOffQuery.profile;
 
 	const contractsQueryBuilder: QUERY_BUILDER & { status?: string } = { org, profile: user?.id! };
-	if (orgCalendarConfig?.enable_calendar && orgCalendarConfig?.calendar_employee_events?.includes('birthdays')) delete timeOffQuery.profile;
+	if (orgCalendarConfig?.enable_thirdparty_calendar && orgCalendarConfig?.calendar_employee_events?.includes('birthdays')) delete timeOffQuery.profile;
 
 	const [{ data: leaves, error: leaveError }, { data: reminders, error: reminderError }, { data: dobs, error: dobError }, { data: calendarConfig, error: calendarError }, { data: calendar, error: calendarDetailsError }, { data: calendarEvents, error: calendarEventsError }] =
 		await Promise.all([

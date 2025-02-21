@@ -389,53 +389,66 @@ export type Database = {
       calendar_events: {
         Row: {
           attendees: Json
+          calendar_id: string | null
           created_at: string
           description: string | null
           end: Json
           entity: number | null
-          event_id: string
+          event_id: string | null
           id: number
           location: string | null
           meeting_link: string | null
           org: string
           recurrence: string | null
+          reminders: Json[] | null
           start: Json
           summary: string
           time_zone: string | null
         }
         Insert: {
           attendees: Json
+          calendar_id?: string | null
           created_at?: string
           description?: string | null
           end: Json
           entity?: number | null
-          event_id: string
+          event_id?: string | null
           id?: number
           location?: string | null
           meeting_link?: string | null
           org: string
           recurrence?: string | null
+          reminders?: Json[] | null
           start: Json
           summary: string
           time_zone?: string | null
         }
         Update: {
           attendees?: Json
+          calendar_id?: string | null
           created_at?: string
           description?: string | null
           end?: Json
           entity?: number | null
-          event_id?: string
+          event_id?: string | null
           id?: number
           location?: string | null
           meeting_link?: string | null
           org?: string
           recurrence?: string | null
+          reminders?: Json[] | null
           start?: Json
           summary?: string
           time_zone?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "calendar_events_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["calendar_id"]
+          },
           {
             foreignKeyName: "calendar_events_entity_fkey"
             columns: ["entity"]
@@ -447,6 +460,51 @@ export type Database = {
             foreignKeyName: "calendar_events_org_fkey"
             columns: ["org"]
             isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
+      calendar_platform_tokens: {
+        Row: {
+          created_at: string
+          entity: number | null
+          id: number
+          org: string
+          platform: Database["public"]["Enums"]["calendar_platform"] | null
+          refresh_token: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          entity?: number | null
+          id?: number
+          org: string
+          platform?: Database["public"]["Enums"]["calendar_platform"] | null
+          refresh_token: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          entity?: number | null
+          id?: number
+          org?: string
+          platform?: Database["public"]["Enums"]["calendar_platform"] | null
+          refresh_token?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_platform_tokens_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_platform_tokens_org_fkey"
+            columns: ["org"]
+            isOneToOne: true
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
           },
@@ -1406,6 +1464,7 @@ export type Database = {
           for: Database["public"]["Enums"]["user_type"]
           id: number
           link: string | null
+          notify_via: string[]
           org: string
           read: string[]
           schedule_at: string | null
@@ -1420,6 +1479,7 @@ export type Database = {
           for: Database["public"]["Enums"]["user_type"]
           id?: number
           link?: string | null
+          notify_via?: string[]
           org: string
           read?: string[]
           schedule_at?: string | null
@@ -1434,6 +1494,7 @@ export type Database = {
           for?: Database["public"]["Enums"]["user_type"]
           id?: number
           link?: string | null
+          notify_via?: string[]
           org?: string
           read?: string[]
           schedule_at?: string | null
@@ -1847,8 +1908,8 @@ export type Database = {
           additional_offerings: Json[] | null
           calendar_employee_events: string[] | null
           created_at: string
-          enable_calendar: boolean
           enable_task_manager: boolean
+          enable_thirdparty_calendar: boolean
           id: number
           maternity_leave: number | null
           org: string
@@ -1868,8 +1929,8 @@ export type Database = {
           additional_offerings?: Json[] | null
           calendar_employee_events?: string[] | null
           created_at?: string
-          enable_calendar?: boolean
           enable_task_manager?: boolean
+          enable_thirdparty_calendar?: boolean
           id?: number
           maternity_leave?: number | null
           org: string
@@ -1889,8 +1950,8 @@ export type Database = {
           additional_offerings?: Json[] | null
           calendar_employee_events?: string[] | null
           created_at?: string
-          enable_calendar?: boolean
           enable_task_manager?: boolean
+          enable_thirdparty_calendar?: boolean
           id?: number
           maternity_leave?: number | null
           org?: string
@@ -2413,6 +2474,7 @@ export type Database = {
       app_role: "admin"
       boarding_state: "initial" | "pending" | "approved"
       boarding_type: "on" | "off"
+      calendar_platform: "google"
       contract_state:
         | "awaiting signatures"
         | "awaiting org signature"

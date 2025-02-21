@@ -34,7 +34,7 @@ interface props {
 	org: string;
 	profile: string;
 	contract: number;
-	orgCalendarConfig: { enable_calendar: boolean; calendar_employee_events: string[] | null } | null;
+	orgCalendarConfig: { enable_thirdparty_calendar: boolean; calendar_employee_events: string[] | null } | null;
 	employeeCalendarConfig?: Tables<'contract_calendar_config'>[] | null;
 	role?: ROLE;
 	contractId?: number;
@@ -48,11 +48,6 @@ export const FullCalendar = ({ events, teams, employees, leaveDays, calendar, re
 	const router = useRouter();
 	const dayOfWeekMatcher: DayOfWeek = {
 		dayOfWeek: [0, 6]
-	};
-
-	const googleAuth = async () => {
-		const response = await getAuthLink(org);
-		window.open(response);
 	};
 
 	return (
@@ -105,22 +100,13 @@ export const FullCalendar = ({ events, teams, employees, leaveDays, calendar, re
 							</div>
 
 							<div className="flex items-center space-x-1">
-								{calendar && role == 'admin' && <CalendarOptions employees={employees} teams={teams} calendarId={calendar?.calendar_id} org={org} contract={contract} profile={profile} />}
-								{!calendar && role == 'admin' && (
-									<ReminderDialog org={org} contract={contract} profile={profile}>
-										<Button variant="ghost">
-											<Plus size={16} />
-										</Button>
-									</ReminderDialog>
-								)}
+								<CalendarOptions employees={employees} teams={teams} calendar={calendar} org={org} contract={contract} profile={profile} />
 
-								{/* <Button onClick={googleAuth}>Link</Button> */}
-
-								{((calendar?.calendar_id && orgCalendarConfig?.enable_calendar) || role == 'admin') && (
+								{((calendar?.calendar_id && orgCalendarConfig?.enable_thirdparty_calendar) || role == 'admin') && (
 									<>
 										<Separator orientation="vertical" className="h-3" />
 
-										<CalendarConfigDialog calendarId={calendar?.calendar_id} contractId={contractId} employeeCalendarConfig={employeeCalendarConfig} orgCalendarConfig={orgCalendarConfig} org={org} role={role} />
+										<CalendarConfigDialog calendar={calendar} contractId={contractId} employeeCalendarConfig={employeeCalendarConfig} orgCalendarConfig={orgCalendarConfig} org={org} role={role} />
 									</>
 								)}
 
@@ -167,12 +153,13 @@ export const FullCalendar = ({ events, teams, employees, leaveDays, calendar, re
 										<div className={cn((modifiers.outside || modifiers.weekend) && 'opacity-10', modifiers.today && 'bg-slate-800 text-white', 'mb-2 ml-auto flex h-6 w-6 items-center justify-center rounded-full p-1 text-right text-lg')}>
 											{cellProps.children}
 										</div>
+
 										{calendarEvents.slice(0, calendarEvents.length > 3 ? 2 : calendarEvents.length).map((event, index) => (
 											<EventItem
 												teams={teams}
 												employees={employees}
 												org={org}
-												calendarId={calendar?.calendar_id}
+												calendar={calendar}
 												key={index + 'calendarEvents'}
 												className={cn(modifiers.outside && 'opacity-10')}
 												event={event}
@@ -201,7 +188,7 @@ export const FullCalendar = ({ events, teams, employees, leaveDays, calendar, re
 															teams={teams}
 															employees={employees}
 															org={org}
-															calendarId={calendar?.calendar_id}
+															calendar={calendar}
 															key={index + 'pop-calendarEvents'}
 															className={cn(modifiers.outside && 'opacity-10')}
 															event={event}
@@ -260,7 +247,7 @@ const EventItem = ({
 	onClick,
 	className,
 	org,
-	calendarId,
+	calendar,
 	onClose,
 	employees,
 	teams
@@ -269,7 +256,7 @@ const EventItem = ({
 	employees?: Tables<'contracts'>[] | null;
 	teams?: Tables<'teams'>[] | null;
 	org?: string;
-	calendarId?: string;
+	calendar?: Tables<'calendars'> | null;
 	event: EVENT_ITEM;
 	onClick?: () => void;
 	className?: string;
@@ -284,7 +271,7 @@ const EventItem = ({
 
 	if (event.type == 'event') {
 		return (
-			<EventDialog teams={teams} employees={employees} org={org!} calendarId={calendarId!} onClose={onClose} event={event.data}>
+			<EventDialog teams={teams} employees={employees} org={org!} calendar={calendar!} onClose={onClose} event={event.data}>
 				<Item event={event} onClick={onClick} />
 			</EventDialog>
 		);

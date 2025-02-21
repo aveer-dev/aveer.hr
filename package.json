@@ -89,6 +89,7 @@
 		"cmdk": "^1.0.4",
 		"core-js": "^3.38.1",
 		"date-fns": "^3.6.0",
+		"date-fns-tz": "^3.2.0",
 		"firebase": "^11.0.1",
 		"google-auth-library": "^9.14.2",
 		"jwt-decode": "^4.0.0",

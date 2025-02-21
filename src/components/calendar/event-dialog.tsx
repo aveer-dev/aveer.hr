@@ -12,11 +12,11 @@ interface PROPS {
 	isOpen?: boolean;
 	event?: Tables<'calendar_events'>;
 	org: string;
-	calendarId: string;
+	calendar?: Tables<'calendars'> | null;
 	children?: ReactNode;
 }
 
-export const EventDialog = ({ event, org, calendarId, children, isOpen, onClose, teams, employees }: PROPS) => {
+export const EventDialog = ({ event, org, calendar, children, isOpen, onClose, teams, employees }: PROPS) => {
 	const [isAddOpen, toggleAdd] = useState(isOpen || false);
 
 	return (
@@ -36,27 +36,29 @@ export const EventDialog = ({ event, org, calendarId, children, isOpen, onClose,
 
 			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 
-			<AlertDialogContent className="block max-h-screen w-full overflow-y-auto bg-white/20 backdrop-blur-sm">
-				<AlertDialogHeader>
-					<AlertDialogTitle>{!event ? 'Create event' : 'Calendar event'}</AlertDialogTitle>
-					<AlertDialogDescription className="hidden"></AlertDialogDescription>
-				</AlertDialogHeader>
+			<AlertDialogContent className="block max-h-screen w-full max-w-full overflow-y-auto bg-white/20 backdrop-blur-sm">
+				<div className="mx-auto max-w-lg">
+					<AlertDialogHeader>
+						<AlertDialogTitle>{!event ? 'Create event' : 'Calendar event'}</AlertDialogTitle>
+						<AlertDialogDescription className="hidden"></AlertDialogDescription>
+					</AlertDialogHeader>
 
-				<EventForm
-					employeeList={employees as any}
-					teamsList={teams}
-					calendarId={calendarId}
-					onClose={() => {
-						toggleAdd(!isAddOpen);
-						onClose && onClose(false);
-					}}
-					event={event}
-					org={org}
-					onCreateEvent={() => {
-						toggleAdd(!isAddOpen);
-						onClose && onClose(false);
-					}}
-				/>
+					<EventForm
+						employeeList={employees as any}
+						teamsList={teams}
+						calendar={calendar}
+						onClose={() => {
+							toggleAdd(!isAddOpen);
+							onClose && onClose(false);
+						}}
+						event={event}
+						org={org}
+						onCreateEvent={() => {
+							toggleAdd(!isAddOpen);
+							onClose && onClose(false);
+						}}
+					/>
+				</div>
 			</AlertDialogContent>
 		</AlertDialog>
 	);
