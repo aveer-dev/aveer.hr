@@ -80,7 +80,6 @@ export const RecurrenceDialog = ({ onClose, recurrenceString, disabled }: { disa
 		const rule = new RRule(rules);
 		setRecurringString(rule.toString());
 		onClose(rule.toString());
-		console.log(rule.toString());
 	};
 
 	const loadRecurrenceString = () => {
@@ -165,7 +164,7 @@ export const RecurrenceDialog = ({ onClose, recurrenceString, disabled }: { disa
 	return (
 		<AlertDialog onOpenChange={state => state == true && loadRecurrenceString()}>
 			<AlertDialogTrigger asChild>
-				<Button disabled={disabled} variant="secondary" className="disabled:opacity-90">
+				<Button disabled={disabled} variant="secondary" className="w-full max-w-sm justify-start truncate disabled:opacity-90">
 					{!recurringString || recurringString == '' ? 'Does not repeat' : parseRecurrenceRule(recurringString)}
 				</Button>
 			</AlertDialogTrigger>
@@ -225,7 +224,7 @@ export const RecurrenceDialog = ({ onClose, recurrenceString, disabled }: { disa
 												value={day}
 												key={day + 'day-toggle'}
 												aria-label={`Toggle ${day}`}
-												className="border border-border/70 text-xs hover:text-primary hover:ring-1 hover:ring-ring data-[state=on]:bg-primary-foreground data-[state=on]:drop-shadow">
+												className="border border-border/70 text-xs hover:text-primary hover:ring-1 hover:ring-ring data-[state=on]:bg-black/80 data-[state=on]:text-white data-[state=on]:drop-shadow">
 												<span>{getWeekDayReadableString(day)}</span>
 											</ToggleGroupItem>
 										))}
@@ -389,7 +388,7 @@ export const RecurrenceDialog = ({ onClose, recurrenceString, disabled }: { disa
 								)}
 							</div>
 
-							<div className="mt-3 w-full space-y-2">
+							<div className="mt-6 w-full space-y-2">
 								<Label className="w-fit whitespace-nowrap" htmlFor="end-repeat">
 									End repeat
 								</Label>

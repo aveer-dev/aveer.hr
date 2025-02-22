@@ -14,7 +14,7 @@ export default async function CalendarPage(props: { params: Promise<{ [key: stri
 					<Skeleton className="h-96 w-full" />
 				</div>
 			}>
-			<CalendarPageComponent org={org} isCalendarSetup={searchParams.state == 'success'} />
+			<CalendarPageComponent org={org} isCalendarState={searchParams.state} />
 		</Suspense>
 	);
 }

@@ -170,7 +170,7 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 												<TabsContent value="birthday">
 													<ul className="space-y-1">
 														{cevents.map(event => (
-															<EventDialog key={event.data.id} event={event.data} teams={teams} employees={employees} org={org} calendarId={calendar?.calendar_id}>
+															<EventDialog key={event.data.id} event={event.data} teams={teams} employees={employees} org={org} calendar={calendar}>
 																<li className="2 flex max-w-56 items-center gap-2 rounded-sm p-1 py-2 text-xs transition-all duration-300 hover:bg-muted">
 																	<CalendarRange size={12} />
 																	{event.data.summary}

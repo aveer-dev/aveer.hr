@@ -1,8 +1,8 @@
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CalendarRange, Check, Info, Power, Settings2 } from 'lucide-react';
-import { addEmployeeToCalendar, createOrgCalendar, enableOrganisationCalendar, getAuthLink, getGCalendars, removeEmployeeFromCalendar, updateEmployeeCalendarEvents } from './calendar-actions';
+import { addEmployeeToCalendar, getAuthLink, removeEmployeeFromCalendar, updateEmployeeCalendarEvents } from './calendar-actions';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
 
@@ -17,7 +17,6 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '../ui/switch';
 import { Tables } from '@/type/database.types';
 import { Alert, AlertDescription } from '../ui/alert';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { Separator } from '../ui/separator';
 
 interface props {
@@ -38,6 +37,7 @@ const FormSchema = z.object({
 
 export const CalendarConfigDialog = ({ org, isOpen, orgCalendarConfig, employeeCalendarConfig, role = 'admin', contractId, calendar }: props) => {
 	const [isAddOpen, toggleAdd] = useState(isOpen || false);
+	const [isConnecting, setConnectingState] = useState(false);
 	const [isLoading, setLoading] = useState(false);
 	const [enableGoogleCalendar, setEnableGoogleCalendar] = useState(!!employeeCalendarConfig?.find(config => config.platform === 'google'));
 
@@ -75,6 +75,7 @@ export const CalendarConfigDialog = ({ org, isOpen, orgCalendarConfig, employeeC
 	};
 
 	const connectGoogleCalendar = async () => {
+		setConnectingState(true);
 		const response = await getAuthLink(org);
 		window.open(response, '_self');
 	};
@@ -94,22 +95,16 @@ export const CalendarConfigDialog = ({ org, isOpen, orgCalendarConfig, employeeC
 						<AlertDialogTitle>Calendar configurations</AlertDialogTitle>
 						<AlertDialogDescription className="sr-only">Calendar thrid-party connections and settings</AlertDialogDescription>
 
-						<div className="flex items-center justify-between rounded-lg bg-muted p-4">
+						<div className="mt-6 flex items-center justify-between">
 							<div className="text-sm text-support">Connect Google Calendar</div>
-							<Button disabled={!!(calendar && calendar.platform == 'google' && calendar?.calendar_id)} className="gap-3" onClick={connectGoogleCalendar}>
-								{!!(calendar && calendar.platform == 'google' && calendar?.calendar_id) ? (
-									<>
-										<Check size={12} /> Connected
-									</>
-								) : (
-									'Connect'
-								)}
+							<Button disabled={!!(calendar && calendar.platform == 'google' && calendar?.calendar_id) || true} className="gap-3" onClick={connectGoogleCalendar}>
+								{!!(calendar && calendar.platform == 'google' && calendar?.calendar_id) ? <>{isConnecting ? <LoadingSpinner /> : <Check size={12} />} Connected</> : 'Connect'}
 							</Button>
 						</div>
 
-						<Separator className="my-6" />
+						<Separator />
 
-						<p className="text-sm font-light leading-6">Set events employees are allowed to see.</p>
+						<p className="mb-3 mt-6 text-sm font-light leading-6 text-label">Set events employees are allowed to see.</p>
 						<Form {...form}>
 							<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 								<FormField
@@ -117,27 +112,32 @@ export const CalendarConfigDialog = ({ org, isOpen, orgCalendarConfig, employeeC
 									name="items"
 									render={() => (
 										<FormItem className="space-y-4">
-											{items.map(item => (
-												<FormField
-													key={item.id}
-													control={form.control}
-													name="items"
-													render={({ field }) => {
-														return (
-															<FormItem key={item.id} className="flex flex-row items-start justify-between space-x-3 space-y-0 rounded-md bg-secondary p-2">
-																<FormLabel className="text-sm font-normal">{item.label}</FormLabel>
-																<FormControl>
-																	<Checkbox
-																		checked={field.value?.includes(item.id)}
-																		onCheckedChange={checked => {
-																			return checked ? field.onChange([...field.value, item.id]) : field.onChange(field.value?.filter(value => value !== item.id));
-																		}}
-																	/>
-																</FormControl>
-															</FormItem>
-														);
-													}}
-												/>
+											{items.map((item, index) => (
+												<Fragment key={index}>
+													<FormField
+														key={item.id}
+														control={form.control}
+														name="items"
+														render={({ field }) => {
+															return (
+																<FormItem key={item.id} className="flex flex-row items-start justify-between space-x-3 space-y-0">
+																	<FormLabel className="text-sm font-normal">{item.label}</FormLabel>
+
+																	<FormControl>
+																		<Checkbox
+																			checked={field.value?.includes(item.id)}
+																			onCheckedChange={checked => {
+																				return checked ? field.onChange([...field.value, item.id]) : field.onChange(field.value?.filter(value => value !== item.id));
+																			}}
+																		/>
+																	</FormControl>
+																</FormItem>
+															);
+														}}
+													/>
+
+													{index !== items.length - 1 && <Separator />}
+												</Fragment>
 											))}
 											<FormMessage />
 										</FormItem>

@@ -5,16 +5,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Textarea } from '@/components/ui/textarea';
-import { cn, getAllTimezones, getCurrentTimezone, getTime } from '@/lib/utils';
+import { cn, getAllTimezones, getCurrentTimezone, getTime, parseRecurrenceRule } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { add, format } from 'date-fns';
-import { BellDot, Check, ChevronsUpDown, Copy, Hourglass, LetterText, MapPin, Plus, Repeat, Text, Trash2, UsersRound, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowRight, BellDot, Check, ChevronsUpDown, Copy, LetterText, MapPin, Plus, Text, Trash2, UsersRound, X } from 'lucide-react';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Tables } from '@/type/database.types';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
-import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { RecurrenceDialog } from './recurrence-dialog';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command';
@@ -187,7 +186,7 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 
 				if (invitee.single) return invitee.single.profile.email;
 
-				if (invitee.all) return invitee.all;
+				if (invitee.all) return invitee.all.map(employee => employee?.profile.email);
 			})
 			.flat();
 
@@ -295,15 +294,15 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 				{/* Event name */}
 				<FormField
 					control={form.control}
 					name="summary"
 					render={({ field }) => (
-						<FormItem className="flex flex-row gap-2">
-							<FormLabel>
-								<LetterText size={14} className="mt-5" />
+						<FormItem className="space-y-3">
+							<FormLabel className="flex items-center gap-2">
+								<LetterText size={14} /> Event title *
 							</FormLabel>
 
 							<div className="w-full gap-1">
@@ -321,9 +320,9 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 					control={form.control}
 					name="description"
 					render={({ field }) => (
-						<FormItem className="flex flex-row gap-2">
-							<FormLabel>
-								<Text size={14} className="mt-4" />
+						<FormItem className="space-y-3">
+							<FormLabel className="flex items-center gap-2">
+								<Text size={14} /> Event description
 							</FormLabel>
 
 							<div className="w-full gap-1">
@@ -336,172 +335,202 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 					)}
 				/>
 
-				{/* Event datetime */}
-				<div className="flex w-full items-center justify-between gap-3">
-					<FormField
-						control={form.control}
-						name="start.dateTime"
-						render={({ field }) => (
-							<FormItem className="flex flex-row items-center gap-3 space-y-0">
-								<FormLabel>
-									<Hourglass size={14} />
-								</FormLabel>
+				{!allowEdit && (
+					<div className="space-y-6 border-y py-10">
+						<div className="flex items-end gap-6">
+							<div>
+								<div className="mb-1 text-sm">{format(form.getValues().start.dateTime, 'PP')}</div>
+								<div className="text-5xl font-bold">{format(form.getValues().start.dateTime, 'p')}</div>
+							</div>
 
-								<div className="flex items-center justify-between gap-3">
-									<FormControl>
-										<DatePicker
-											disabled={{ before: new Date() }}
-											selected={field.value}
-											onSetDate={date => {
-												const time = getTime().split(':');
-												date.setHours(Number(time[0]));
-												date.setMinutes(Number(time[1]));
-												field.onChange(date);
-												form.setValue('end.dateTime', add(date, { hours: 1 }));
-											}}>
-											<button disabled={!allowEdit} className="border-b border-dashed text-xs">
-												{format(field.value, 'PPP')}
-											</button>
-										</DatePicker>
-									</FormControl>
+							<ArrowRight size={14} className="mb-4" />
 
-									<input
-										readOnly={!allowEdit}
-										className="border-b border-dashed bg-transparent text-xs"
-										value={getTime(field.value as any)}
-										onChange={event => {
-											const time = event.target.value.split(':');
-											const date = field.value;
-											date.setHours(Number(time[0]));
-											date.setMinutes(Number(time[1]));
-											field.onChange(date);
-											form.setValue('end.dateTime', add(date, { minutes: 30 }));
-										}}
-										type="time"
-									/>
-								</div>
+							<div>
+								{format(form.getValues().start.dateTime, 'PP') !== format(form.getValues().end.dateTime, 'PP') && <div className="mb-1 text-sm">{format(form.getValues().end.dateTime, 'PP')}</div>}
+								<div className="text-5xl font-bold">{format(form.getValues().end.dateTime, 'p')}</div>
+							</div>
 
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
+							<div>
+								<div className="text-xs text-support">Timezone</div>
+								<div className="text-sm text-primary">{form.getValues().start.timeZone}</div>
+							</div>
+						</div>
 
-					<Separator className="w-3" />
+						<div className="text-sm">{parseRecurrenceRule(form.getValues().recurrence as string)}</div>
+					</div>
+				)}
 
-					<FormField
-						control={form.control}
-						name="end.dateTime"
-						render={({ field }) => (
-							<FormItem className="flex flex-row items-center gap-2.5">
-								<FormControl>
-									<div className="flex items-center justify-between gap-3">
-										<DatePicker disabled={{ before: form.getValues('start.dateTime') || new Date() }} selected={field.value} onSetDate={date => field.onChange(date)}>
-											<button disabled={!allowEdit} className="border-b border-dashed text-xs">
-												{format(field.value, 'PPP')}
-											</button>
-										</DatePicker>
+				<div className="space-y-4">
+					{/* Event datetime */}
+					{allowEdit && (
+						<div className="!mt-10 flex w-full items-center justify-between gap-3">
+							<FormField
+								control={form.control}
+								name="start.dateTime"
+								render={({ field }) => (
+									<FormItem className="flex flex-row items-center gap-3 space-y-0">
+										<div className="flex items-center justify-between gap-3">
+											<div className="text-sm text-support">From</div>
+											<FormControl>
+												<DatePicker
+													disabled={{ before: new Date() }}
+													selected={field.value}
+													onSetDate={date => {
+														const time = getTime().split(':');
+														date.setHours(Number(time[0]));
+														date.setMinutes(Number(time[1]));
+														field.onChange(date);
+														form.setValue('end.dateTime', add(date, { hours: 1 }));
+													}}>
+													<Button disabled={!allowEdit} variant={'outline'} className="text-xs">
+														{format(field.value, 'PP')}
+													</Button>
+												</DatePicker>
+											</FormControl>
 
-										<input
-											className="border-b border-dashed bg-transparent text-xs"
-											value={getTime(field.value as any)}
-											readOnly={!allowEdit}
-											onChange={event => {
-												const time = event.target.value.split(':');
-												const startTime = getTime(form.getValues('start.dateTime') as any).split(':');
+											<input
+												readOnly={!allowEdit}
+												className={cn(buttonVariants({ variant: 'outline' }), 'text-xs')}
+												value={getTime(field.value as any)}
+												onChange={event => {
+													const time = event.target.value.split(':');
+													const date = field.value;
+													date.setHours(Number(time[0]));
+													date.setMinutes(Number(time[1]));
+													field.onChange(date);
+													form.setValue('end.dateTime', add(date, { minutes: 30 }));
+												}}
+												type="time"
+											/>
+										</div>
 
-												const date = field.value;
-												date.setHours(Number(time[0]));
-												date.setMinutes(Number(time[1]));
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-												if (Number(time[0]) <= Number(startTime[0]) && Number(time[1]) <= Number(startTime[1])) {
-													form.setValue('start.dateTime', date);
-												}
-												field.onChange(date);
-											}}
-											type="time"
-										/>
-									</div>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
+							<ArrowRight size={14} />
+
+							<FormField
+								control={form.control}
+								name="end.dateTime"
+								render={({ field }) => (
+									<FormItem className="flex flex-row items-center gap-2.5">
+										<FormControl>
+											<div className="flex items-center justify-between gap-3">
+												<div className="text-sm text-support">To</div>
+
+												<DatePicker disabled={{ before: form.getValues('start.dateTime') || new Date() }} selected={field.value} onSetDate={date => field.onChange(date)}>
+													<Button variant={'outline'} disabled={!allowEdit} className="text-xs">
+														{format(field.value, 'PP')}
+													</Button>
+												</DatePicker>
+
+												<input
+													className={cn(buttonVariants({ variant: 'outline' }), 'text-xs')}
+													value={getTime(field.value as any)}
+													readOnly={!allowEdit}
+													onChange={event => {
+														const time = event.target.value.split(':');
+														const startTime = getTime(form.getValues('start.dateTime') as any).split(':');
+
+														const date = field.value;
+														date.setHours(Number(time[0]));
+														date.setMinutes(Number(time[1]));
+
+														if (Number(time[0]) <= Number(startTime[0]) && Number(time[1]) <= Number(startTime[1])) {
+															form.setValue('start.dateTime', date);
+														}
+														field.onChange(date);
+													}}
+													type="time"
+												/>
+											</div>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
+					)}
+
+					{allowEdit && (
+						<div className="!mb-10 flex items-center gap-4">
+							{/* timezone */}
+							<FormField
+								control={form.control}
+								name="start.timeZone"
+								render={({ field }) => (
+									<FormItem className="flex w-full flex-col">
+										<Popover open={isTimezoneOpen} onOpenChange={toggleTimezoneState}>
+											<PopoverTrigger asChild>
+												<FormControl className="w-full">
+													<Button disabled={!allowEdit} variant="outline" role="combobox" className={cn('w-full justify-between rounded-lg disabled:opacity-90', !field.value && 'text-muted-foreground')}>
+														{field.value ? timezones.find(timezone => timezone.identifier === field.value)?.identifier : 'Select timezone'}
+														{allowEdit && <ChevronsUpDown size={12} className="opacity-50" />}
+													</Button>
+												</FormControl>
+											</PopoverTrigger>
+
+											<PopoverContent className="w-[450px] p-0" align="start">
+												<Command>
+													<CommandInput placeholder="Search time zones..." className="h-9" />
+
+													<CommandList className="max-h-[280px] overflow-y-auto">
+														<CommandEmpty>No time zone found.</CommandEmpty>
+
+														<CommandGroup>
+															{timezones.map(timezone => (
+																<CommandItem
+																	value={`${timezone.offset} ${timezone.identifier}`}
+																	key={timezone.identifier}
+																	onSelect={() => {
+																		field.onChange(timezone.identifier);
+																		form.setValue('end.timeZone', timezone.identifier);
+																		toggleTimezoneState(!isTimezoneOpen);
+																	}}
+																	className="flex items-center gap-2">
+																	<span>{timezone.offset}</span>
+																	<span>•</span>
+																	{timezone.name}
+																	<span>•</span>
+																	{timezone.identifier}
+																	<Check size={12} className={cn('ml-auto', timezone.identifier === field.value ? 'opacity-100' : 'opacity-0')} />
+																</CommandItem>
+															))}
+														</CommandGroup>
+													</CommandList>
+												</Command>
+											</PopoverContent>
+										</Popover>
+
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							{/* recurrence */}
+							<FormField
+								control={form.control}
+								name="recurrence"
+								render={({ field }) => (
+									<FormItem className="flex w-full flex-row items-center gap-2 space-y-0">
+										<FormLabel className="sr-only">Frequency</FormLabel>
+
+										<RecurrenceDialog disabled={!allowEdit} recurrenceString={field?.value!} onClose={field.onChange} />
+
+										<FormMessage className="w-full" />
+									</FormItem>
+								)}
+							/>
+						</div>
+					)}
 				</div>
 
-				{/* timezone */}
-				<FormField
-					control={form.control}
-					name="start.timeZone"
-					render={({ field }) => (
-						<FormItem className="ml-7 flex flex-col">
-							<Popover open={isTimezoneOpen} onOpenChange={toggleTimezoneState}>
-								<PopoverTrigger asChild>
-									<FormControl>
-										<Button disabled={!allowEdit} variant="outline" role="combobox" className={cn('!-mt-2 w-full justify-between rounded-lg disabled:opacity-90', !field.value && 'text-muted-foreground')}>
-											{field.value ? timezones.find(timezone => timezone.identifier === field.value)?.identifier : 'Select timezone'}
-											{allowEdit && <ChevronsUpDown size={12} className="opacity-50" />}
-										</Button>
-									</FormControl>
-								</PopoverTrigger>
-
-								<PopoverContent className="w-[450px] p-0" align="start">
-									<Command>
-										<CommandInput placeholder="Search time zones..." className="h-9" />
-
-										<CommandList className="max-h-[280px] overflow-y-auto">
-											<CommandEmpty>No time zone found.</CommandEmpty>
-
-											<CommandGroup>
-												{timezones.map(timezone => (
-													<CommandItem
-														value={`${timezone.offset} ${timezone.identifier}`}
-														key={timezone.identifier}
-														onSelect={() => {
-															field.onChange(timezone.identifier);
-															form.setValue('end.timeZone', timezone.identifier);
-															toggleTimezoneState(!isTimezoneOpen);
-														}}
-														className="flex items-center gap-2">
-														<span>{timezone.offset}</span>
-														<span>•</span>
-														{timezone.name}
-														<span>•</span>
-														{timezone.identifier}
-														<Check size={12} className={cn('ml-auto', timezone.identifier === field.value ? 'opacity-100' : 'opacity-0')} />
-													</CommandItem>
-												))}
-											</CommandGroup>
-										</CommandList>
-									</Command>
-								</PopoverContent>
-							</Popover>
-
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				{/* recurrence */}
-				<FormField
-					control={form.control}
-					name="recurrence"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-center gap-2">
-							<FormLabel>
-								<Repeat size={14} className="mt-3" />
-							</FormLabel>
-
-							<RecurrenceDialog disabled={!allowEdit} recurrenceString={field?.value!} onClose={field.onChange} />
-
-							<FormMessage className="w-full" />
-						</FormItem>
-					)}
-				/>
-
 				{/* attendees */}
-				<div className={cn('flex gap-3', (!teams || !employeeList) && '!mt-8')}>
-					<Label htmlFor="invitees" className={cn(allowEdit && 'mt-4')}>
-						<UsersRound size={12} />
+				<div className={cn('', (!teams || !employeeList) && '!mt-8')}>
+					<Label htmlFor="invitees" className={cn(allowEdit && 'mt-4', 'mb-2 flex items-center gap-2 text-sm')}>
+						<UsersRound size={12} /> Attendees
 					</Label>
 
 					<div>
@@ -555,9 +584,9 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 							</Command>
 						)}
 
-						<ul className={cn('flex flex-wrap gap-2 empty:hidden', allowEdit && 'mt-6')}>
+						<ul className={cn('!mb-8 mt-3 flex flex-wrap gap-2 empty:hidden')}>
 							{invitees.map((invitee, index) => (
-								<li className={cn('hov flex items-center gap-2 rounded-xl pl-3 text-xs', allowEdit && 'bg-accent')} key={index + 'invitee'}>
+								<li className={cn('hov flex items-center gap-2 rounded-xl bg-accent pl-3 text-xs', !allowEdit && 'h-9 pr-3')} key={index + 'invitee'}>
 									{invitee?.single && (
 										<div className="flex items-center gap-2">
 											<span>
@@ -599,22 +628,22 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 				</div>
 
 				{/* location */}
-				<div className="!mt-8 flex items-center gap-3">
-					<Label htmlFor="invitees" className="">
-						<MapPin size={12} />
+				<div className="!mt-8 space-y-3">
+					<Label htmlFor="invitees" className="flex items-center gap-2">
+						<MapPin size={12} /> Location
 					</Label>
 
 					<div className={cn('ml-3 w-full', allowEdit && 'ml-0')}>
 						<Tabs defaultValue={locationType} onValueChange={setLocationType} className="flex w-full items-center gap-4">
 							{allowEdit && (
-								<TabsList className="grid h-9 w-fit grid-cols-2">
+								<TabsList className="grid h-9 w-fit min-w-36 grid-cols-2">
 									<TabsTrigger value="virtual">Virtual</TabsTrigger>
 									<TabsTrigger value="physical">Physical</TabsTrigger>
 								</TabsList>
 							)}
 
 							<TabsContent value="virtual" className="mt-0 flex items-center gap-2">
-								<Badge variant={'secondary'} className="gap-3 py-2">
+								<Badge variant={'secondary'} className="h-9 gap-3 py-2">
 									<div className="">
 										<Image src={'/google-meet-logo.svg'} width={20} height={20} alt="google meet logo" />
 									</div>
@@ -628,12 +657,12 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 								)}
 							</TabsContent>
 
-							<TabsContent value="physical" className="-ml-4 mt-0 w-[60%]">
+							<TabsContent value="physical" className={cn(allowEdit ? '-ml-4' : '-ml-7', 'mt-0 w-full')}>
 								<FormField
 									control={form.control}
 									name="location"
 									render={({ field }) => (
-										<FormItem className="flex w-full items-center gap-2">
+										<FormItem className="flex h-9 w-full items-center gap-2">
 											<FormControl>
 												<Input readOnly={!allowEdit} className="h-9 w-full" placeholder="Event location or link" {...field} />
 											</FormControl>
@@ -647,75 +676,86 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 				</div>
 
 				{/* reminders */}
-				<div className="!mt-8 flex items-start gap-3">
-					<div className="mt-4">
-						<BellDot size={12} />
+				{allowEdit && (
+					<div className="!mt-8 space-y-3">
+						<div className="mt-4 flex items-center gap-2 text-xs font-light text-label">
+							<BellDot size={12} /> Event reminders
+						</div>
+
+						<div className={cn('ml-3 w-full space-y-4', allowEdit && 'ml-0')}>
+							{eventReminders.map((reminder, index) => (
+								<div className="flex gap-4" key={index}>
+									<TooltipProvider>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<Input readOnly={!allowEdit} type="number" value={reminder.value} className="w-full" onChange={event => onUpdateAReminder({ index, value: event.target.value })} placeholder={`Number of ${reminder.period}`} />
+											</TooltipTrigger>
+
+											<TooltipContent>
+												<p>
+													Must be between 1 - {reminder.period == 'weeks' && '4 weeks'} {reminder.period == 'days' && '28 days'} {reminder.period == 'hours' && '672 hours'} {reminder.period == 'minutes' && '40,320 minutes'}
+												</p>
+											</TooltipContent>
+										</Tooltip>
+									</TooltipProvider>
+
+									<Select disabled={!allowEdit} value={reminder.period} onValueChange={(period: period) => onUpdateAReminder({ index, period })}>
+										<SelectTrigger className="w-full disabled:opacity-90">
+											<SelectValue placeholder="Selected period" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectGroup>
+												<SelectItem value="minutes">Minutes</SelectItem>
+												<SelectItem value="hours">Hours</SelectItem>
+												<SelectItem value="days">Days</SelectItem>
+												<SelectItem value="weeks">Weeks</SelectItem>
+											</SelectGroup>
+										</SelectContent>
+									</Select>
+
+									{allowEdit && (
+										<Button variant={'ghost'} type="button" onClick={onRemoveReminder.bind(this, index)}>
+											<X size={12} />
+										</Button>
+									)}
+								</div>
+							))}
+
+							<Button className="w-full gap-3 border" type="button" variant={'secondary'} onClick={onAddReminder}>
+								<Plus size={12} /> Add reminder
+							</Button>
+						</div>
 					</div>
-
-					<div className={cn('ml-3 w-full space-y-4', allowEdit && 'ml-0')}>
-						{eventReminders.map((reminder, index) => (
-							<div className="flex gap-4" key={index}>
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Input type="number" value={reminder.value} className="w-full" onChange={event => onUpdateAReminder({ index, value: event.target.value })} placeholder={`Number of ${reminder.period}`} />
-										</TooltipTrigger>
-
-										<TooltipContent>
-											<p>
-												Must be between 1 - {reminder.period == 'weeks' && '4 weeks'} {reminder.period == 'days' && '28 days'} {reminder.period == 'hours' && '672 hours'} {reminder.period == 'minutes' && '40,320 minutes'}
-											</p>
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
-
-								<Select value={reminder.period} onValueChange={(period: period) => onUpdateAReminder({ index, period })}>
-									<SelectTrigger className="w-full">
-										<SelectValue placeholder="Selected period" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectGroup>
-											<SelectItem value="minutes">Minutes</SelectItem>
-											<SelectItem value="hours">Hours</SelectItem>
-											<SelectItem value="days">Days</SelectItem>
-											<SelectItem value="weeks">Weeks</SelectItem>
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-
-								<Button variant={'ghost'} type="button" onClick={onRemoveReminder.bind(this, index)}>
-									<X size={12} />
-								</Button>
-							</div>
-						))}
-
-						<Button className="w-full gap-3 border" type="button" variant={'secondary'} onClick={onAddReminder}>
-							<Plus size={12} /> Add reminder
-						</Button>
-					</div>
-				</div>
+				)}
 
 				{/* Form actions */}
-				<div className="!mt-6 flex w-full justify-end space-x-4 text-right">
-					{allowEdit && !!event && (
-						<Button type="button" disabled={isDeleting} variant={'secondary_destructive'} onClick={onDeleteEvent} className="mr-auto">
-							{isDeleting ? <LoadingSpinner className="text-destructive" /> : <Trash2 size={14} />}
-						</Button>
-					)}
+				{allowEdit && (
+					<div className="!mt-6 flex w-full justify-end space-x-4 text-right">
+						{!!event && (
+							<Button type="button" disabled={isDeleting} variant={'secondary_destructive'} onClick={onDeleteEvent} className="mr-auto">
+								{isDeleting ? <LoadingSpinner className="text-destructive" /> : <Trash2 size={14} />}
+							</Button>
+						)}
 
-					{!date && (
-						<Button type="button" className={cn(!allowEdit && 'w-full')} variant={'outline'} onClick={() => onClose && onClose()}>
-							Close
-						</Button>
-					)}
+						{!date && (
+							<Button type="button" className={cn(!allowEdit && 'w-full')} variant={'outline'} onClick={() => onClose && onClose()}>
+								Close
+							</Button>
+						)}
 
-					{allowEdit && (
-						<Button className="gap-3" disabled={isCreating} onClick={form.handleSubmit(onSubmit)} type="submit">
+						<Button
+							className="gap-3"
+							disabled={isCreating}
+							onClick={() => {
+								console.log(form.formState);
+								console.log(form.getValues());
+							}}
+							type="submit">
 							{isCreating && <LoadingSpinner />}
 							{event ? 'Update' : 'Create'} event
 						</Button>
-					)}
-				</div>
+					</div>
+				)}
 			</form>
 		</Form>
 	);

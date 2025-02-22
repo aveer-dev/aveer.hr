@@ -14,7 +14,7 @@ import { Undo2 } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-export default async function RootLayout(props: { children: React.ReactNode; params: Promise<{ [key: string]: string }> }) {
+export default async function RootLayout(props: { children: React.ReactNode; params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
 	const params = await props.params;
 
 	const { children } = props;

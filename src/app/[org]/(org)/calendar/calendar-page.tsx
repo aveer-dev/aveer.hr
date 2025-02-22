@@ -5,7 +5,7 @@ import { getEmployees, getTeams } from '@/utils/form-data-init';
 import { getGCalendars } from '@/components/calendar/calendar-actions';
 import { GCalendarSetupDialog } from './google-calendar-setup';
 
-export const CalendarPageComponent = async ({ org, isCalendarSetup }: { org: string; isCalendarSetup: boolean }) => {
+export const CalendarPageComponent = async ({ org, isCalendarState }: { org: string; isCalendarState: string }) => {
 	const supabase = await createClient();
 
 	const {
@@ -51,11 +51,12 @@ export const CalendarPageComponent = async ({ org, isCalendarSetup }: { org: str
 		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) events.push({ date: new Date(date), data });
 	}
 
-	const gCalendars = isCalendarSetup ? await getGCalendars({ org }) : false;
+	const gCalendars = isCalendarState == 'success' ? await getGCalendars({ org }) : false;
 
 	return (
 		<section className="mx-auto">
 			<FullCalendar
+				showCalendarConfigError={isCalendarState == 'error'}
 				employees={dobs}
 				orgCalendarConfig={orgCalendarSettings}
 				org={org}

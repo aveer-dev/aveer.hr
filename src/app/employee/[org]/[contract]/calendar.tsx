@@ -1,11 +1,7 @@
-import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { CalendarRange } from 'lucide-react';
-
-import { FullCalendar } from '@/components/calendar/calendar';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { Tables } from '@/type/database.types';
+import { EmployeeCalendarComponent } from './calendar-component';
 
 interface QUERY_BUILDER {
 	profile?: string;
@@ -67,44 +63,12 @@ export const EmployeeCalendar = async ({ org, contractId, team }: { org: string;
 		const isEmployeeInvited = !!(item.attendees as any[]).find(employee => {
 			if (employee.single) return employee.single.id == contractId;
 			if (employee.team) return employee.team.id == team;
+			if (employee.all) return employee.all.find((employee: any) => employee.id == contractId);
 			return false;
 		});
 
 		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) if (isEmployeeInvited) events.push({ date: new Date(date), data });
 	}
 
-	return (
-		<AlertDialog>
-			<AlertDialogTrigger asChild>
-				<Button className="h-8 w-8 rounded-2xl border p-0" variant={'secondary'}>
-					<CalendarRange size={12} />
-				</Button>
-			</AlertDialogTrigger>
-
-			<AlertDialogContent className="block max-h-screen w-full max-w-5xl overflow-y-auto bg-white/20 backdrop-blur-sm">
-				<AlertDialogHeader className="flex-row justify-between text-left">
-					<AlertDialogTitle className="sr-only">Calendar</AlertDialogTitle>
-					<AlertDialogDescription className="sr-only">Organisation calendar of company wide events and meetings</AlertDialogDescription>
-				</AlertDialogHeader>
-
-				<section className="mt-8 min-h-96 space-y-8 overflow-scroll p-0.5">
-					<FullCalendar
-						orgCalendarConfig={orgCalendarConfig}
-						employeeCalendarConfig={calendarConfig}
-						calendar={calendar}
-						contractId={contractId}
-						role="employee"
-						org={org}
-						profile={user?.id!}
-						contract={dobs?.find(contract => contract.profile?.id == user?.id)?.id as number}
-						leaveDays={result}
-						reminders={reminders || []}
-						dobs={dobs!.filter(contract => contract.profile?.date_of_birth) as any}
-						enableClose={true}
-						events={events}
-					/>
-				</section>
-			</AlertDialogContent>
-		</AlertDialog>
-	);
+	return <EmployeeCalendarComponent events={events} result={result} orgCalendarConfig={orgCalendarConfig} org={org} reminders={reminders} contractId={contractId} userId={user.id} dobs={dobs} calendarConfig={calendarConfig} calendar={calendar} calendarEvents={calendarEvents} />;
 };
