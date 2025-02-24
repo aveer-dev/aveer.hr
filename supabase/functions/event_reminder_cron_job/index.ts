@@ -3,7 +3,7 @@
 
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { sendEmailAndGetId } from '../_utils/send-email-get-Id.ts';
+import { sendEmailAndGetId } from '../_utils/send-emails.ts';
 import { subMinutes, addHours, isWithinInterval } from 'npm:date-fns';
 import { Person, CalendarEvent, AttendeeGroup, OrgDetails } from '../_utils/types.ts';
 
