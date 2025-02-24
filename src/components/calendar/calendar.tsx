@@ -140,18 +140,20 @@ export const FullCalendar = ({ showCalendarConfigError, calendarType = 'grid', e
 							<>{children}</>
 						);
 					},
-					Weekdays: ({ children, ...props }) => {
+					Weekdays: ({ children, className, ...props }) => {
 						return calendarType == 'grid' ? (
-							<tr className="flex" {...props}>
-								{children}
-							</tr>
+							<thead>
+								<tr className={cn(className, 'flex')} {...props}>
+									{children}
+								</tr>
+							</thead>
 						) : (
 							<></>
 						);
 					},
-					Weekday: ({ children, ...props }) => {
+					Weekday: ({ children, className, ...props }) => {
 						return calendarType == 'grid' ? (
-							<th className="h-16 w-full min-w-9 border-r p-1 text-[0.8rem] font-bold text-muted-foreground last-of-type:border-r-0" {...props}>
+							<th className={cn(className, 'h-16 w-full min-w-9 border-r p-1 text-[0.8rem] font-bold text-muted-foreground last-of-type:border-r-0')} {...props}>
 								{children}
 							</th>
 						) : (

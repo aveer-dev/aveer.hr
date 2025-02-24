@@ -11,6 +11,7 @@ import { LeaveReview } from '../leave/leave-review';
 import { EventDialog } from './event-dialog';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Badge } from '../ui/badge';
 
 interface EVENT_ITEM {
 	type: 'leave' | 'reminder' | 'dob' | 'event';
@@ -82,7 +83,7 @@ export const CalendarDayItem = ({ calendarType, props, leaveDays, reminders, dob
 						</td>
 					) : (
 						!modifiers.outside && (
-							<div {...(cellProps as any)} id={isToday(day.date) ? 'today' : 'day-of-the-month'} onClick={event => event.preventDefault()} onDoubleClick={() => !isPast(day.date) && toggleAdd(!isAddOpen)} className={cn(className, 'block w-full')}>
+							<div {...(cellProps as any)} id={isToday(day.date) ? 'today' : 'day-of-the-month'} onClick={event => event.preventDefault()} className={cn(className, calendarType == 'vertical' && 'py-1', 'block w-full')}>
 								<Day
 									calendar={calendar}
 									calendarEvents={calendarEvents}
@@ -153,25 +154,26 @@ const Day = ({ calendarEvents, props, teams, employees, isViewAllOpen, calendar,
 	const { day, modifiers, ...cellProps } = props;
 
 	return (
-		<div className={cn(calendarType == 'vertical' && 'flex items-center gap-4', 'w-full')}>
+		<>
 			<div
 				className={cn(
 					modifiers.weekend && calendarType == 'grid' && 'opacity-10',
-					modifiers.outside || calendarType == 'vertical' ? 'rounded-md p-2' : 'h-7 w-7 justify-center rounded-full p-1',
-					calendarType == 'grid' ? 'mb-2 ml-auto' : '',
-					modifiers.today && 'bg-slate-800 text-white',
+					modifiers.outside || calendarType == 'vertical' ? 'w-fit rounded-md p-2' : 'h-7 w-7 justify-center rounded-full p-1',
+					calendarType !== 'vertical' && 'mb-2 ml-auto',
+					modifiers.today && calendarType !== 'vertical' && 'bg-slate-800 text-white',
 					'flex items-center gap-3 text-lg'
 				)}>
 				<div className="text-left">
-					<div className="text-xs">{format(day.date, 'EEE')}</div>
+					{calendarType == 'vertical' && <div className="text-xs">{format(day.date, 'EEE')}</div>}
 					<div className="flex items-center gap-2">
 						{(modifiers.outside || calendarType == 'vertical') && <div className="text-sm text-muted-foreground">{format(day.date, 'MMM')}</div>}
 						<div className={cn(calendarType == 'vertical' && 'text-base')}>{cellProps.children}</div>
+						{modifiers.today && calendarType == 'vertical' && <Badge>Today</Badge>}
 					</div>
 				</div>
 			</div>
 
-			<div className={cn(calendarType == 'vertical' && 'min-h-16 border-b py-6', 'w-full')}>
+			<div className={cn(calendarType == 'vertical' && 'min-h-16 border-b py-3', 'w-full')}>
 				{calendarEvents.slice(0, calendarEvents.length > 3 ? 2 : calendarEvents.length).map((event, index) => (
 					<EventItem
 						teams={teams}
@@ -223,7 +225,7 @@ const Day = ({ calendarEvents, props, teams, employees, isViewAllOpen, calendar,
 					</Popover>
 				)}
 			</div>
-		</div>
+		</>
 	);
 };
 
