@@ -43,7 +43,13 @@ export const getAuthLink = async (org: string) => {
 
 	const authorizeUrl = oAuth2Client.generateAuthUrl({
 		access_type: 'offline',
-		scope: ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/calendar'],
+		scope: [
+			'https://www.googleapis.com/auth/userinfo.profile',
+			'https://www.googleapis.com/auth/calendar.acls',
+			'https://www.googleapis.com/auth/calendar.calendars',
+			'https://www.googleapis.com/auth/calendar.events',
+			'https://www.googleapis.com/auth/calendar.calendarlist.readonly'
+		],
 		state: org
 	});
 
