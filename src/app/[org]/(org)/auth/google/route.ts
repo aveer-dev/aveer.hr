@@ -5,9 +5,10 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
 	try {
 		const supabase = await createClient();
+		const isProduction = process.env.NODE_ENV === 'production';
 
 		const code = request.nextUrl.searchParams.get('code') as string;
-		const origin = request.nextUrl.origin;
+		const origin = isProduction ? `https://aveer.hr` : request.nextUrl.origin;
 		const state = request.nextUrl.searchParams.get('state') as string;
 
 		const oAuth2Client = new OAuth2Client(process.env.SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID, process.env.SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET, `${process.env.NEXT_PUBLIC_URL}/app/auth/google`);
