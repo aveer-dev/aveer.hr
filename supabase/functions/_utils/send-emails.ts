@@ -25,7 +25,7 @@ export async function sendEmailAndGetId(person: Person, event: CalendarEvent, or
 		const { data, error } = await resend.emails.send({
 			from: `${orgDetails.name} on Aveer.hr <support@notification.aveer.hr>`,
 			to: person.profile.email,
-			subject: `New event on aveer.hr | ${event.summary}`,
+			subject: `Event reminder on aveer.hr | ${event.summary}`,
 			scheduledAt,
 			html
 		});
@@ -55,7 +55,7 @@ export async function sendNewEventNotification(person: Person, event: CalendarEv
 		const { data, error } = await resend.emails.send({
 			from: `${orgDetails.name} on Aveer.hr <support@notification.aveer.hr>`,
 			to: person.profile.email,
-			subject: `New Event: ${event.summary}`,
+			subject: `New Event on aveer.hr | ${event.summary}`,
 			html
 		});
 

@@ -7,21 +7,28 @@ import { Person, CalendarEvent, AttendeeGroup, OrgDetails, WebhookPayload } from
 const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
 // Function to process all attendees and send/update emails
-async function processAttendees(event: CalendarEvent, orgDetails: OrgDetails, reminderTime: Date, existingEmailIds: Set<string> = new Set()): Promise<AttendeeGroup[]> {
+async function processAttendees(event: CalendarEvent, orgDetails: OrgDetails, reminderTime: Date): Promise<AttendeeGroup[]> {
+	const { data: existingEventData } = await supabase.from('calendar_events').select('attendees').eq('id', event.id).single();
+
+	const existingEmailIds = new Set<string>();
+	if (existingEventData) {
+		existingEventData.attendees.forEach(group => {
+			if (group.single?.email_id) existingEmailIds.add(group.single.email_id);
+			group.team?.people?.forEach(person => person.email_id && existingEmailIds.add(person.email_id));
+			group.all?.forEach(person => person.email_id && existingEmailIds.add(person.email_id));
+		});
+	}
+
 	const updatedAttendees = [...event.attendees];
 
 	for (const attendeeGroup of updatedAttendees) {
-		// Process single attendee
-		if (attendeeGroup.single) {
-			if (!existingEmailIds.has(attendeeGroup.single.email_id || '')) {
-				const emailData = await sendEmailAndGetId(attendeeGroup.single, event, orgDetails, reminderTime);
-				if (emailData) {
-					attendeeGroup.single.email_id = emailData.id;
-				}
+		if (attendeeGroup.single && !existingEmailIds.has(attendeeGroup.single.email_id || '')) {
+			const emailData = await sendEmailAndGetId(attendeeGroup.single, event, orgDetails, reminderTime);
+			if (emailData) {
+				attendeeGroup.single.email_id = emailData.id;
 			}
 		}
 
-		// Process team attendees
 		if (attendeeGroup.team?.people?.length) {
 			for (const person of attendeeGroup.team.people) {
 				if (!existingEmailIds.has(person.email_id || '')) {
@@ -33,7 +40,6 @@ async function processAttendees(event: CalendarEvent, orgDetails: OrgDetails, re
 			}
 		}
 
-		// Process all attendees
 		if (attendeeGroup.all?.length) {
 			for (const person of attendeeGroup.all) {
 				if (!existingEmailIds.has(person.email_id || '')) {
