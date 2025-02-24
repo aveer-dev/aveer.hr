@@ -7,6 +7,7 @@ import { ReminderDialog } from './reminder-dialog';
 import { useState } from 'react';
 import { EventDialog } from './event-dialog';
 import { Tables } from '@/type/database.types';
+import { ROLE } from '@/type/contract.types';
 
 interface props {
 	employees?: Tables<'contracts'>[] | null;
@@ -15,9 +16,10 @@ interface props {
 	org: string;
 	contract: number;
 	profile: string;
+	role?: ROLE;
 }
 
-export const CalendarOptions = ({ org, contract, profile, calendar, teams, employees }: props) => {
+export const CalendarOptions = ({ org, role = 'admin', contract, profile, calendar, teams, employees }: props) => {
 	const [isOptionOpen, toggleOptionState] = useState(false);
 
 	return (
@@ -29,7 +31,7 @@ export const CalendarOptions = ({ org, contract, profile, calendar, teams, emplo
 			</DropdownMenuTrigger>
 
 			<DropdownMenuContent className="w-28">
-				<EventDialog teams={teams} employees={employees} org={org} onClose={toggleOptionState} calendar={calendar}>
+				<EventDialog role={role} teams={teams} employees={employees} org={org} onClose={toggleOptionState} calendar={calendar}>
 					<DropdownMenuItem onSelect={event => event.preventDefault()} className="gap-3">
 						<CalendarRangeIcon size={12} /> Event
 					</DropdownMenuItem>

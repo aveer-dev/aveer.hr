@@ -1,0 +1,3 @@
+CREATE TRIGGER trigger_reminders_on_action AFTER INSERT OR UPDATE ON public.calendar_events FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('https://byprsbkeackkgjsjlcgp.supabase.co/functions/v1/calendar_event_reminder_notification', 'POST', '{"Content-type":"application/json"}', '{}', '5000');
+
+

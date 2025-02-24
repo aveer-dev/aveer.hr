@@ -26,6 +26,7 @@ import { Badge } from '../ui/badge';
 import Image from 'next/image';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ROLE } from '@/type/contract.types';
 
 const formSchema = z.object({
 	summary: z.string().min(2, { message: 'Enter event title' }),
@@ -56,6 +57,7 @@ interface PROPS {
 	onCreateEvent: () => void;
 	onClose: () => void;
 	event?: Tables<'calendar_events'>;
+	role?: ROLE;
 }
 
 type period = 'minutes' | 'hours' | 'days' | 'weeks';
@@ -66,7 +68,7 @@ interface reminder {
 	value: number;
 }
 
-export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClose, employeeList, event }: PROPS) => {
+export const EventForm = ({ date, role = 'admin', org, calendar, onCreateEvent, teamsList, onClose, employeeList, event }: PROPS) => {
 	const [employees, setEmployees] = useState<EMPLOYEE[]>([]);
 	const [teams, setTeams] = useState<Tables<'teams'>[]>([]);
 	const [filteredEmployees, setFilteredEmployees] = useState<EMPLOYEE[]>([]);
@@ -100,6 +102,7 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 		try {
 			const response = await createCalendarEvent({
 				calendar,
+				role,
 				virtual: locationType == 'virtual',
 				attendees: values.attendees,
 				payload: {
@@ -131,6 +134,7 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 		try {
 			await updateCalendarEvent({
 				calendar: calendar,
+				role,
 				virtual: locationType == 'virtual',
 				attendees: values.attendees,
 				id: event?.id,
@@ -347,7 +351,7 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 
 							<div>
 								{format(form.getValues().start.dateTime, 'PP') !== format(form.getValues().end.dateTime, 'PP') && <div className="mb-1 text-sm">{format(form.getValues().end.dateTime, 'PP')}</div>}
-								<div className="text-5xl font-bold">{format(form.getValues().end.dateTime, 'p')}</div>
+								<div className="text-4xl font-bold">{format(form.getValues().end.dateTime, 'p')}</div>
 							</div>
 
 							<div>
@@ -356,7 +360,7 @@ export const EventForm = ({ date, org, calendar, onCreateEvent, teamsList, onClo
 							</div>
 						</div>
 
-						<div className="text-sm">{parseRecurrenceRule(form.getValues().recurrence as string)}</div>
+						{form.getValues().recurrence && <div className="text-sm">{parseRecurrenceRule(form.getValues().recurrence as string)}</div>}
 					</div>
 				)}
 

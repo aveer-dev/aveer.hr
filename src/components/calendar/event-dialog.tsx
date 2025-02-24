@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, X } from 'lucide-react';
 import { Tables } from '@/type/database.types';
 import { EventForm } from './event-form';
+import { ROLE } from '@/type/contract.types';
 
 interface PROPS {
 	teams?: Tables<'teams'>[] | null;
@@ -15,9 +16,10 @@ interface PROPS {
 	calendar?: Tables<'calendars'> | null;
 	children?: ReactNode;
 	noTrigger?: boolean;
+	role?: ROLE;
 }
 
-export const EventDialog = ({ event, org, calendar, children, isOpen, onClose, teams, employees, noTrigger }: PROPS) => {
+export const EventDialog = ({ event, role = 'admin', org, calendar, children, isOpen, onClose, teams, employees, noTrigger }: PROPS) => {
 	const [isAddOpen, toggleAdd] = useState(isOpen || false);
 
 	return (
@@ -53,6 +55,7 @@ export const EventDialog = ({ event, org, calendar, children, isOpen, onClose, t
 					<EventForm
 						employeeList={employees as any}
 						teamsList={teams}
+						role={role}
 						calendar={calendar}
 						onClose={() => {
 							toggleAdd(!isAddOpen);

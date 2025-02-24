@@ -1,3 +1,4 @@
+// runs a cron job
 // written with AI
 
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';

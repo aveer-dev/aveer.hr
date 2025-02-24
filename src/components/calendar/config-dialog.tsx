@@ -97,14 +97,14 @@ export const CalendarConfigDialog = ({ org, isOpen, orgCalendarConfig, employeeC
 
 						<div className="mt-6 flex items-center justify-between">
 							<div className="text-sm text-support">Connect Google Calendar</div>
-							<Button disabled={!!(calendar && calendar.platform == 'google' && calendar?.calendar_id) || true} className="gap-3" onClick={connectGoogleCalendar}>
+							<Button disabled={!!(calendar && calendar.platform == 'google' && calendar?.calendar_id)} className="gap-3" onClick={connectGoogleCalendar}>
 								{!!(calendar && calendar.platform == 'google' && calendar?.calendar_id) ? <>{isConnecting ? <LoadingSpinner /> : <Check size={12} />} Connected</> : 'Connect'}
 							</Button>
 						</div>
 
 						<Separator />
 
-						<p className="mb-3 mt-6 text-sm font-light leading-6 text-label">Set events employees are allowed to see.</p>
+						<p className="mb-3 mt-6 text-xs font-light leading-6 text-label">Set events employees are allowed to see.</p>
 						<Form {...form}>
 							<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 								<FormField

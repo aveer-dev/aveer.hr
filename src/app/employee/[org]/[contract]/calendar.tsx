@@ -21,26 +21,24 @@ export const EmployeeCalendar = async ({ org, contractId, team }: { org: string;
 	if (calendarConfigError) return;
 
 	const timeOffQuery: QUERY_BUILDER & { status?: string } = { org, status: 'approved', profile: user?.id! };
-	if (orgCalendarConfig?.enable_thirdparty_calendar && orgCalendarConfig?.calendar_employee_events?.includes('time-off')) delete timeOffQuery.profile;
+	if (orgCalendarConfig?.calendar_employee_events?.includes('time-off')) delete timeOffQuery.profile;
 
 	const contractsQueryBuilder: QUERY_BUILDER & { status?: string } = { org, profile: user?.id! };
-	if (orgCalendarConfig?.enable_thirdparty_calendar && orgCalendarConfig?.calendar_employee_events?.includes('birthdays')) delete timeOffQuery.profile;
+	if (orgCalendarConfig?.calendar_employee_events?.includes('birthdays')) delete timeOffQuery.profile;
 
-	const [{ data: leaves, error: leaveError }, { data: reminders, error: reminderError }, { data: dobs, error: dobError }, { data: calendarConfig, error: calendarError }, { data: calendar, error: calendarDetailsError }, { data: calendarEvents, error: calendarEventsError }] =
-		await Promise.all([
-			supabase
-				.from('time_off')
-				.select('*, profile:profiles!time_off_profile_fkey(first_name, last_name)')
-				.match({ ...timeOffQuery }),
-			supabase.from('reminders').select('*, profile:profiles!reminders_profile_fkey(id, first_name, last_name)').match({ org, profile: user?.id! }),
-			supabase
-				.from('contracts')
-				.select('id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name, date_of_birth, id)')
-				.match({ ...contractsQueryBuilder }),
-			supabase.from('contract_calendar_config').select().match({ org, profile: user?.id! }),
-			supabase.from('calendars').select().match({ org, platform: 'google' }).single(),
-			supabase.from('calendar_events').select().match({ org })
-		]);
+	const [{ data: leaves, error: leaveError }, { data: reminders, error: reminderError }, { data: dobs, error: dobError }, { data: calendar, error: calendarDetailsError }, { data: calendarEvents, error: calendarEventsError }] = await Promise.all([
+		supabase
+			.from('time_off')
+			.select('*, profile:profiles!time_off_profile_fkey(first_name, last_name)')
+			.match({ ...timeOffQuery }),
+		supabase.from('reminders').select('*, profile:profiles!reminders_profile_fkey(id, first_name, last_name)').match({ org, profile: user?.id! }),
+		supabase
+			.from('contracts')
+			.select('id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name, date_of_birth, id)')
+			.match({ ...contractsQueryBuilder }),
+		supabase.from('calendars').select().match({ org, platform: 'google' }).single(),
+		supabase.from('calendar_events').select().match({ org })
+	]);
 
 	const result: { date: Date; name: string; status: string; data: any }[] = [];
 	const events: { date: Date; data: Tables<'calendar_events'> }[] = [];
@@ -70,5 +68,5 @@ export const EmployeeCalendar = async ({ org, contractId, team }: { org: string;
 		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) if (isEmployeeInvited) events.push({ date: new Date(date), data });
 	}
 
-	return <EmployeeCalendarComponent events={events} result={result} orgCalendarConfig={orgCalendarConfig} org={org} reminders={reminders} contractId={contractId} userId={user.id} dobs={dobs} calendarConfig={calendarConfig} calendar={calendar} calendarEvents={calendarEvents} />;
+	return <EmployeeCalendarComponent events={events} result={result} orgCalendarConfig={orgCalendarConfig} org={org} reminders={reminders} contractId={contractId} userId={user.id} dobs={dobs} calendar={calendar} calendarEvents={calendarEvents} />;
 };

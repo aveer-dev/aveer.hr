@@ -51,7 +51,7 @@ export const CalendarPageComponent = async ({ org, isCalendarState }: { org: str
 		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) events.push({ date: new Date(date), data });
 	}
 
-	const gCalendars = isCalendarState == 'success' ? await getGCalendars({ org }) : false;
+	const gCalendars = isCalendarState == 'success' && !calendars ? await getGCalendars({ org }) : false;
 
 	return (
 		<section className="mx-auto">

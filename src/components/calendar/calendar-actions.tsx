@@ -5,6 +5,7 @@ import { calendar_v3 } from '@googleapis/calendar';
 import { createClient } from '@/utils/supabase/server';
 import { Database, Json, Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { v4 as uuid } from 'uuid';
+import { ROLE } from '@/type/contract.types';
 
 export type GaxiosPromise<T = any> = Promise<GaxiosResponse<T>>;
 export interface GaxiosXMLHttpRequest {
@@ -108,6 +109,28 @@ export const addEmployeeToGCalendar = async ({ calendarId, org }: { calendarId: 
 	}
 };
 
+export const addEmployeesToGCalendar = async ({ calendarId, org }: { calendarId: string; org: string }) => {
+	try {
+		const { gCalendar } = await calendarAPI(org);
+		const supabase = await createClient();
+
+		const [{ data: employees, error }, { data: admins, error: adminsError }] = await Promise.all([
+			supabase.from('contracts').select('profile:profiles!contracts_profile_fkey(email, first_name, last_name)').match({ org, status: 'signed' }),
+			supabase.from('profiles_roles').select('profile(email, first_name, last_name)').match({ organisation: org, role: 'admin', disable: false })
+		]);
+		if (error) throw error;
+		if (adminsError) throw adminsError;
+
+		employees?.forEach(
+			async employee => await gCalendar.acl.insert({ calendarId, sendNotifications: false, requestBody: { role: !!admins.find(admin => admin.profile.email == employee.profile?.email) ? 'owner' : 'reader', scope: { type: 'user', value: employee?.profile?.email } } })
+		);
+
+		return;
+	} catch (error) {
+		throw error;
+	}
+};
+
 export const addEmployeeToCalendar = async (payload: TablesInsert<'contract_calendar_config'>) => {
 	try {
 		const aclRule = await addEmployeeToGCalendar({ calendarId: payload.calendar_id, org: payload.org });
@@ -187,7 +210,6 @@ export const uploadGEventsToDB = async ({ org, calendar }: { org: string; calend
 		if (!calendar.id) return;
 
 		const supabase = await createClient();
-
 		const { error } = await supabase.from('calendars').insert({ org, calendar_id: calendar.id as string, platform: 'google' });
 		if (error) throw error;
 
@@ -213,7 +235,7 @@ export const uploadGEventsToDB = async ({ org, calendar }: { org: string; calend
 		}));
 
 		if (insertPayload.length) {
-			const { error } = await supabase.from('calendar_events').insert(insertPayload);
+			const { error } = await supabase.from('calendar_events').upsert(insertPayload);
 			if (error) throw error;
 		}
 
@@ -223,13 +245,13 @@ export const uploadGEventsToDB = async ({ org, calendar }: { org: string; calend
 	}
 };
 
-export const createCalendarEvent = async ({ calendar, payload, attendees, virtual }: { attendees: { email: string }[]; virtual?: boolean; calendar?: Tables<'calendars'> | null; payload: TablesInsert<'calendar_events'> }) => {
+export const createCalendarEvent = async ({ calendar, payload, attendees, virtual, role }: { role: ROLE; attendees: { email: string }[]; virtual?: boolean; calendar?: Tables<'calendars'> | null; payload: TablesInsert<'calendar_events'> }) => {
 	const supabase = await createClient();
 
 	try {
 		let event: GaxiosResponse<calendar_v3.Schema$Event> | null = null;
 
-		if (calendar && calendar?.platform == 'google') {
+		if (role == 'admin' && calendar && calendar?.platform == 'google') {
 			const gCalendarPayload: calendar_v3.Schema$Event = { summary: payload.summary, description: payload.description, location: payload.location, recurrence: [payload.recurrence as string], attendees, start: payload.start as any, end: payload.end as any };
 			if (virtual) gCalendarPayload.conferenceData = { createRequest: { requestId: uuid(), conferenceSolutionKey: { type: 'hangoutsMeet' } } };
 
@@ -265,13 +287,13 @@ export const updateGCalendarEvent = async ({ calendarId, payload, eventId }: { e
 	}
 };
 
-export const updateCalendarEvent = async ({ calendar, payload, attendees, virtual, id }: { id: number; attendees: { email: string }[]; virtual?: boolean; calendar?: TablesUpdate<'calendars'> | null; payload: TablesUpdate<'calendar_events'> }) => {
+export const updateCalendarEvent = async ({ role, calendar, payload, attendees, virtual, id }: { role: ROLE; id: number; attendees: { email: string }[]; virtual?: boolean; calendar?: TablesUpdate<'calendars'> | null; payload: TablesUpdate<'calendar_events'> }) => {
 	const supabase = await createClient();
 
 	try {
 		let event: any | undefined = undefined;
 
-		if (calendar && calendar?.platform == 'google') {
+		if (role == 'admin' && calendar && calendar?.platform == 'google') {
 			const gCalendarPayload: calendar_v3.Schema$Event = { summary: payload.summary, description: payload.description, location: payload.location, recurrence: [payload.recurrence as string], attendees, start: payload.start as any, end: payload.end as any };
 			if (virtual) gCalendarPayload.conferenceData = { createRequest: { requestId: uuid(), conferenceSolutionKey: { type: 'hangoutsMeet' } } };
 
