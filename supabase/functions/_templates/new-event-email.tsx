@@ -3,13 +3,13 @@ import * as React from 'react';
 import { format } from 'npm:date-fns';
 import { Person, CalendarEvent, OrgDetails } from '../_utils/types.ts';
 
-interface EventEmailProps {
+interface NewEventEmailProps {
 	person: Person;
 	orgDetails?: OrgDetails;
 	event: CalendarEvent;
 }
 
-export const EventEmail = ({ orgDetails, person, event }: EventEmailProps) => {
+export const NewEventEmail = ({ orgDetails, person, event }: EventEmailProps) => {
 	const employeeLink = `https://employee.aveer.hr/${orgDetails.subdomain}/${person.id}/home?calendar=${event.id}`;
 
 	// no use case for admin yet
@@ -40,13 +40,13 @@ export const EventEmail = ({ orgDetails, person, event }: EventEmailProps) => {
 					/>
 				</Head>
 
-				<Preview>{`Event reminder on aveer.hr from ${orgDetails.name} | ${event.summary}`}</Preview>
+				<Preview>{`New event on aveer.hr from ${orgDetails.name} | ${event.summary}`}</Preview>
 
 				<Body>
 					<Container>
 						<Img width="100" src="https://byprsbkeackkgjsjlcgp.supabase.co/storage/v1/object/public/platform%20assets/logo/aveer-text.png" alt="aveer logo" />
 
-						<p className="mb-8 mt-10 text-sm leading-6">Hi {person.profile.first_name}, reminding you about your scheduled event:</p>
+						<p className="mb-8 mt-10 text-sm leading-6">Hi {person.profile.first_name}, you have a new scheduled event:</p>
 
 						<ul className="list-none space-y-6 !p-0">
 							<li className="m-0">
@@ -103,4 +103,4 @@ export const EventEmail = ({ orgDetails, person, event }: EventEmailProps) => {
 	);
 };
 
-export default EventEmail;
+export default NewEventEmail;

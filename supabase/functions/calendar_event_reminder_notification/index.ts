@@ -1,6 +1,6 @@
 import { createClient } from 'supabase';
 import { subMinutes, isWithinInterval, addHours } from 'npm:date-fns';
-import { sendEmailAndGetId } from '../_utils/send-email-get-Id.ts';
+import { sendEmailAndGetId, sendNewEventNotification } from '../_utils/send-emails.ts';
 import { Person, CalendarEvent, AttendeeGroup, OrgDetails, WebhookPayload } from '../_utils/types.ts';
 
 // Initialize clients
@@ -47,6 +47,36 @@ async function processAttendees(event: CalendarEvent, orgDetails: OrgDetails, re
 	}
 
 	return updatedAttendees;
+}
+
+// Function to send immediate notifications to all attendees about a new event
+async function notifyAllAttendees(event: CalendarEvent, orgDetails: OrgDetails): Promise<void> {
+	const attendees = event.attendees || [];
+	const notificationPromises: Promise<any>[] = [];
+
+	for (const attendeeGroup of attendees) {
+		// Process single attendee
+		if (attendeeGroup.single) {
+			notificationPromises.push(sendNewEventNotification(attendeeGroup.single, event, orgDetails));
+		}
+
+		// Process team attendees
+		if (attendeeGroup.team?.people?.length) {
+			for (const person of attendeeGroup.team.people) {
+				notificationPromises.push(sendNewEventNotification(person, event, orgDetails));
+			}
+		}
+
+		// Process all attendees
+		if (attendeeGroup.all?.length) {
+			for (const person of attendeeGroup.all) {
+				notificationPromises.push(sendNewEventNotification(person, event, orgDetails));
+			}
+		}
+	}
+
+	// Send all notifications in parallel
+	await Promise.allSettled(notificationPromises);
 }
 
 // Function to handle event updates
@@ -106,7 +136,10 @@ const handler = async (request: Request): Promise<Response> => {
 		if (type === 'UPDATE' && old_record) {
 			await handleEventUpdate(old_record, event, orgDetails);
 		} else if (type === 'INSERT') {
-			// Process new event
+			// Send immediate notifications about the new event
+			await notifyAllAttendees(event, orgDetails);
+
+			// Process reminders for the new event
 			for (const reminder of event.reminders) {
 				const reminderTime = subMinutes(new Date(event.start.dateTime), reminder.minutes);
 				if (isWithinInterval(reminderTime, { start: now, end: twentyFourHoursLater })) {
