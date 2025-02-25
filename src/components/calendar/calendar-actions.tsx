@@ -235,7 +235,7 @@ export const uploadGEventsToDB = async ({ org, calendar }: { org: string; calend
 			event_id: event.id as string,
 			location: event?.location,
 			meeting_link: event?.hangoutLink,
-			attendees: (event?.attendees || []) as Json,
+			attendees: [],
 			time_zone: event.end?.timeZone,
 			calendar_id: calendar.id
 		}));

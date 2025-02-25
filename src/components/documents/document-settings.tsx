@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 
 const FormSchema = z.object({
 	private: z.boolean().default(true).optional(),
-	shared_with: z.object({ contract: z.number().optional(), profile: z.string(), access: z.enum(['editor', 'viewer']) }).array()
+	shared_with: z.object({ contract: z.number().optional(), profile: z.string(), access: z.enum(['editor', 'viewer', 'owner']) }).array()
 });
 
 interface props {
@@ -167,7 +167,7 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 						Close
 					</AlertDialogCancel>
 
-					<Button className="w-full gap-3" type="submit" disabled={isUpdating}>
+					<Button className="w-full gap-3" type="submit" disabled={isUpdating} onClick={() => console.log(form.getValues(), form.formState)}>
 						{isUpdating && <LoadingSpinner />} Updat{isUpdating ? 'ing' : 'e'}
 					</Button>
 				</AlertDialogFooter>
