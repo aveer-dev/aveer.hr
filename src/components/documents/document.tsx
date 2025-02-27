@@ -188,11 +188,12 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 			<div className="relative space-y-6">
 				<div className="mx-8 mb-8 flex items-center justify-between border-b pb-6">
 					<div className="flex w-full items-center gap-3 text-sm font-light text-muted-foreground">
-						{currentUserId && (
+						{/* An issue with document being cached and current state not being saved before navigation */}
+						{/* {currentUserId && (
 							<Link href={'../documents'} className={cn(buttonVariants({ variant: 'secondary' }), 'rounded-full')} onClick={() => router.back()}>
 								<ChevronLeft size={14} />
 							</Link>
-						)}
+						)} */}
 
 						{currentUserId && (
 							<Input

@@ -14,7 +14,7 @@ export const DocumentAccessor = ({ accessor, access, onUpdateAccess, onRemove, o
 				<span className="font-light capitalize text-support">{accessor?.job_title}</span>
 			</div>
 
-			<div className="flex items-center gap-2">
+			<div className="flex items-center gap-2 pr-0.5">
 				{ownerProfileId == (accessor.profile as any)?.id ? (
 					<div className="text-sm text-muted-foreground">Owner</div>
 				) : (

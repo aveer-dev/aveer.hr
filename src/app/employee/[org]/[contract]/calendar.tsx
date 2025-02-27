@@ -58,12 +58,14 @@ export const EmployeeCalendar = async ({ org, contractId, team }: { org: string;
 		const endDate = new Date((item.end as any)?.dateTime);
 		const data = item;
 
-		const isEmployeeInvited = !!(item.attendees as any[]).find(employee => {
-			if (employee.single) return employee.single.id == contractId;
-			if (employee.team) return employee.team.id == team;
-			if (employee.all) return employee.all.find((employee: any) => employee.id == contractId);
-			return false;
-		});
+		const isEmployeeInvited = (item.attendees as any[]).length
+			? !!(item.attendees as any[]).find(employee => {
+					if (employee.single) return employee.single.id == contractId;
+					if (employee.team) return employee.team.id == team;
+					if (employee.all) return employee.all.find((employee: any) => employee.id == contractId);
+					return false;
+				})
+			: true;
 
 		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) if (isEmployeeInvited) events.push({ date: new Date(date), data });
 	}

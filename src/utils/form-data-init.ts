@@ -29,7 +29,8 @@ export const getTeams = async ({ org }: { org: string }) => {
 export const getEmployees = async ({ org }: { org: string }) => {
 	const supabase = await createClient();
 
-	const res = await supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(first_name, date_of_birth, id, last_name, email)').match({ org, status: 'signed' });
+	const { data } = await supabase.auth.getUser();
+	const res = await supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(first_name, date_of_birth, id, last_name, email)').match({ org, status: 'signed' }).or(`status.eq.signed, profile.eq.${data?.user?.id}`);
 
 	return res;
 };

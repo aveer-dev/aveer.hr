@@ -261,11 +261,11 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 							</li>
 						)}
 
-						{data.hand_over && (
+						{data?.hand_over && (
 							<li className="space-y-2">
 								<h2 className="text-xs text-muted-foreground">Handing over to</h2>
 								<p className="text-xs leading-6">
-									{(data.hand_over as any).profile.first_name} {(data.hand_over as any).profile.last_name} • <span>{(data.hand_over as any).job_title}</span>
+									{(data.hand_over as any)?.profile.first_name} {(data.hand_over as any)?.profile.last_name} • <span>{(data.hand_over as any)?.job_title}</span>
 								</p>
 							</li>
 						)}

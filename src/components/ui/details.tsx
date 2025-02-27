@@ -137,7 +137,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 					{(!!team || !!data.team) && (
 						<li className="grid gap-3">
 							<h4 className="text-sm font-medium">Team</h4>
-							<p className="text-sm font-light">{team || data.team.name}</p>
+							<p className="text-sm font-light">{team || data.team?.name}</p>
 						</li>
 					)}
 
@@ -158,7 +158,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 			{/* requirements */}
 			<div>
 				<div className="mb-4 flex items-center justify-between">
-					<h1 className="text-lg font-semibold">Job Requirements</h1>
+					<h1 className="text-lg font-semibold text-support">Job Requirements</h1>
 					{back && (
 						<Button onClick={() => back(false)} variant={'secondary'} size={'icon'} className={cn(data.first_name ? 'h-8' : 'h-5 w-5')}>
 							<Pencil size={12} />

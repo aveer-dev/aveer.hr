@@ -23,9 +23,15 @@ interface props {
 
 export const RoleDetails = async ({ role, orgId, type }: props) => {
 	const supabase = await createClient();
+
 	let { data, error } = await supabase
 		.from('open_roles')
-		.select('*, entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)), level:employee_levels!profile_contract_level_fkey(level, role)')
+		.select(
+			`*,
+            entity:legal_entities!profile_contract_entity_fkey(id, name, incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name)),
+            level:employee_levels!profile_contract_level_fkey(level, role),
+            team:teams(name, id)`
+		)
 		.match({ id: role, org: orgId })
 		.single();
 
@@ -134,7 +140,7 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 					</TabsList>
 				)}
 
-				<TabsContent value="details" className="grid gap-10">
+				<TabsContent value="details" className="grid gap-16">
 					<Details data={data} formType={type} />
 
 					{data.state == 'open' && <JobApplicationForm enableLocation={data?.enable_location} enableVoluntary={data?.enable_voluntary_data} roleId={Number(role)} org={orgId} submit={submitApplication} />}
