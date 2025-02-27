@@ -281,9 +281,9 @@ export const createCalendarEvent = async ({ calendar, payload, attendees, virtua
 	}
 };
 
-export const updateGCalendarEvent = async ({ calendarId, payload, eventId }: { eventId: string; calendarId: string; payload: calendar_v3.Schema$Event }) => {
+export const updateGCalendarEvent = async ({ calendarId, payload, eventId, org }: { eventId: string; calendarId: string; payload: calendar_v3.Schema$Event; org: string }) => {
 	try {
-		const { gCalendar } = await calendarAPI();
+		const { gCalendar } = await calendarAPI(org);
 
 		const response = await gCalendar.events.update({ calendarId, eventId, conferenceDataVersion: 1, requestBody: { ...payload, visibility: 'private', guestsCanInviteOthers: false } });
 
@@ -303,7 +303,7 @@ export const updateCalendarEvent = async ({ role, calendar, payload, attendees, 
 			const gCalendarPayload: calendar_v3.Schema$Event = { summary: payload.summary, description: payload.description, location: payload.location, recurrence: [payload.recurrence as string], attendees, start: payload.start as any, end: payload.end as any };
 			if (virtual) gCalendarPayload.conferenceData = { createRequest: { requestId: uuid(), conferenceSolutionKey: { type: 'hangoutsMeet' } } };
 
-			const event = await updateGCalendarEvent({ calendarId: calendar.calendar_id as string, payload: gCalendarPayload, eventId: payload.event_id! });
+			const event = await updateGCalendarEvent({ calendarId: calendar.calendar_id as string, payload: gCalendarPayload, eventId: payload.event_id!, org: payload.org as string });
 			if (!event.data.id) return 'Unable to update calendar event';
 		}
 

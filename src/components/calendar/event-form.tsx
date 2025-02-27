@@ -34,7 +34,7 @@ const formSchema = z.object({
 	end: z.object({ dateTime: z.date({ message: 'Select end dateTime' }), timeZone: z.string() }),
 	start: z.object({ dateTime: z.date({ message: 'Select end dateTime' }), timeZone: z.string() }),
 	recurrence: z.string().optional().nullable(),
-	attendees: z.array(z.object({ email: z.string() })),
+	attendees: z.array(z.object({ email: z.string() })).optional(),
 	location: z.string().optional()
 });
 
@@ -104,7 +104,7 @@ export const EventForm = ({ date, role = 'admin', org, calendar, onCreateEvent, 
 				calendar,
 				role,
 				virtual: locationType == 'virtual',
-				attendees: values.attendees,
+				attendees: values.attendees || [],
 				payload: {
 					...values,
 					attendees: invitees as any,
@@ -136,7 +136,7 @@ export const EventForm = ({ date, role = 'admin', org, calendar, onCreateEvent, 
 				calendar: calendar,
 				role,
 				virtual: locationType == 'virtual',
-				attendees: values.attendees,
+				attendees: values.attendees || [],
 				id: event?.id,
 				payload: {
 					...values,
@@ -298,7 +298,7 @@ export const EventForm = ({ date, role = 'admin', org, calendar, onCreateEvent, 
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+			<form className="space-y-8">
 				{/* Event name */}
 				<FormField
 					control={form.control}
@@ -655,7 +655,7 @@ export const EventForm = ({ date, role = 'admin', org, calendar, onCreateEvent, 
 								</Badge>
 
 								{event?.meeting_link && (
-									<Button variant={'secondary'} className="rounded-full" onClick={() => copy(event?.meeting_link!)}>
+									<Button variant={'secondary'} type="button" className="rounded-full" onClick={() => copy(event?.meeting_link!)}>
 										<Copy size={12} />
 									</Button>
 								)}
@@ -747,14 +747,7 @@ export const EventForm = ({ date, role = 'admin', org, calendar, onCreateEvent, 
 							</Button>
 						)}
 
-						<Button
-							className="gap-3"
-							disabled={isCreating}
-							onClick={() => {
-								console.log(form.formState);
-								console.log(form.getValues());
-							}}
-							type="submit">
+						<Button className="gap-3" disabled={isCreating} onClick={form.handleSubmit(onSubmit)} type="submit">
 							{isCreating && <LoadingSpinner />}
 							{event ? 'Update' : 'Create'} event
 						</Button>
