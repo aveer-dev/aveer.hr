@@ -23,7 +23,7 @@ export const CalendarPageComponent = async ({ org, isCalendarState }: { org: str
 	] = await Promise.all([
 		supabase.from('time_off').select('*, profile:profiles!time_off_profile_fkey(first_name, last_name), hand_over(profile(first_name, last_name), job_title)').eq('org', org).neq('status', 'denied'),
 		supabase.from('reminders').select('*, profile:profiles!reminders_profile_fkey(id, first_name, last_name)').match({ org, profile: user?.id }),
-		getEmployees({ org }),
+		supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(first_name, date_of_birth, id, last_name, email)').match({ org }).or(`status.eq.signed, profile.eq.${user?.id}`),
 		supabase.from('org_settings').select('enable_thirdparty_calendar, calendar_employee_events').eq('org', org).single(),
 		supabase.from('calendars').select().match({ org, platform: 'google' }).single(),
 		supabase.from('calendar_events').select().match({ org }),
