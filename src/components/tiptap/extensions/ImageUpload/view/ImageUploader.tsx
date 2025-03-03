@@ -3,13 +3,15 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { cn } from '@/lib/utils';
 import { Image as ImageIcon, Upload } from 'lucide-react';
-import { ChangeEvent, useCallback } from 'react';
+import { ChangeEvent, useCallback, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 
 export const ImageUploader = ({ onUpload }: { onUpload: (url: string) => void }) => {
 	const { loading, uploadFile } = useUploader({ onUpload });
 	const { handleUploadClick, ref } = useFileUpload();
 	const { draggedInside, onDrop, onDragEnter, onDragLeave } = useDropZone({ uploader: uploadFile });
+	const [imageURL, setImageURL] = useState('');
 
 	const onFileChange = useCallback((e: ChangeEvent<HTMLInputElement>) => (e.target.files ? uploadFile(e.target.files[0]) : null), [uploadFile]);
 
@@ -23,14 +25,19 @@ export const ImageUploader = ({ onUpload }: { onUpload: (url: string) => void })
 
 	const wrapperClass = cn('flex flex-col items-center justify-center px-8 py-10 rounded-lg bg-opacity-80', draggedInside && 'bg-neutral-100');
 
+	const onEmbedImageURL = () => {
+		if (!imageURL) return;
+		onUpload(imageURL);
+	};
+
 	return (
-		<Tabs defaultValue="account" className="w-full bg-muted">
+		<Tabs defaultValue="upload" className="w-full bg-muted">
 			<TabsList className="grid w-fit grid-cols-2">
-				<TabsTrigger value="account">Upload</TabsTrigger>
+				<TabsTrigger value="upload">Upload</TabsTrigger>
 				<TabsTrigger value="password">Add link</TabsTrigger>
 			</TabsList>
 
-			<TabsContent value="account">
+			<TabsContent value="upload">
 				<div className={wrapperClass} onDrop={onDrop} onDragOver={onDragEnter} onDragLeave={onDragLeave} contentEditable={false}>
 					<ImageIcon size={36} className="mb-4 text-black opacity-20 dark:text-white" />
 					<div className="flex flex-col items-center justify-center gap-2">
@@ -44,12 +51,19 @@ export const ImageUploader = ({ onUpload }: { onUpload: (url: string) => void })
 					</div>
 					<input className="h-0 w-0 overflow-hidden opacity-0" ref={ref} type="file" accept=".jpg,.jpeg,.png,.webp,.gif" onChange={onFileChange} />
 				</div>
+
+				{loading && (
+					<div className={wrapperClass}>
+						<LoadingSpinner className="text-neutral-500" />
+					</div>
+				)}
 			</TabsContent>
 
 			<TabsContent value="password">
-				<div className={wrapperClass} onDrop={onDrop} onDragOver={onDragEnter} onDragLeave={onDragLeave} contentEditable={false}>
-					<input className="h-0 w-0 overflow-hidden opacity-0" type="url" />
-				</div>
+				<form onSubmit={onEmbedImageURL} className={cn(wrapperClass, 'flex flex-row items-center gap-2')} contentEditable={false}>
+					<Input onChange={e => setImageURL(e.target.value)} value={imageURL} required type="url" placeholder="https://" inputMode="url" />
+					<Button>Embed image</Button>
+				</form>
 			</TabsContent>
 		</Tabs>
 	);
