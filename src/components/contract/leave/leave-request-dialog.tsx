@@ -90,8 +90,8 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 
 	const createLeave = async (values: z.infer<typeof formSchema>) => {
 		const leaveRequestData: TablesInsert<'time_off'> = {
-			from: values.dates.from as any,
-			to: values.dates.to as any,
+			from: format(values.dates.from, 'yyyy-MM-dd'),
+			to: format(values.dates.to, 'yyyy-MM-dd'),
 			contract: contract.id as number,
 			org: (contract.org as any)?.subdomain,
 			leave_type: values.leave_type,
