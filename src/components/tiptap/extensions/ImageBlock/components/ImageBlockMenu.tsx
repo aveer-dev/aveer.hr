@@ -79,15 +79,17 @@ export const ImageBlockMenu = ({ editor, appendTo }: MenuProps): JSX.Element => 
 			}}>
 			<Toolbar.Wrapper shouldShowContent={shouldShow()} ref={menuRef}>
 				<Toolbar.Button tooltip="Align image left" active={isImageLeft} onClick={onAlignImageLeft}>
-					<AlignHorizontalDistributeStart />
+					<AlignHorizontalDistributeStart size={12} />
 				</Toolbar.Button>
 				<Toolbar.Button tooltip="Align image center" active={isImageCenter} onClick={onAlignImageCenter}>
-					<AlignHorizontalDistributeCenter />
+					<AlignHorizontalDistributeCenter size={12} />
 				</Toolbar.Button>
 				<Toolbar.Button tooltip="Align image right" active={isImageRight} onClick={onAlignImageRight}>
-					<AlignHorizontalDistributeEnd />
+					<AlignHorizontalDistributeEnd size={12} />
 				</Toolbar.Button>
+
 				<Toolbar.Divider />
+
 				<ImageBlockWidth onChange={onWidthChange} value={width} />
 			</Toolbar.Wrapper>
 		</BaseBubbleMenu>

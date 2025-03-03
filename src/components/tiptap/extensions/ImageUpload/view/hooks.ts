@@ -1,4 +1,5 @@
 import uploadImage from '@/components/tiptap/lib/api';
+import { generateRandomString } from '@/utils/generate-string';
 import { DragEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -9,7 +10,7 @@ export const useUploader = ({ onUpload }: { onUpload: (url: string) => void }) =
 		async (file: File) => {
 			setLoading(true);
 			try {
-				const url = await uploadImage(file, '/', 'documents-assets');
+				const url = await uploadImage(file, `/${file.name || generateRandomString(10)}`, 'documents-assets');
 
 				onUpload(url);
 			} catch (errPayload: any) {

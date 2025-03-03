@@ -16,8 +16,8 @@ import { ColumnsMenu } from '@/components/tiptap/extensions/MultiColumn/menus';
 import { Document as TiptapDocument } from '@/components/tiptap/extensions/Document';
 import { CustomMention, suggestion } from '@/components/tiptap/extensions/Mention';
 import { DocumentSettingsDialog } from './document-settings-dialog';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { ChevronDown, ChevronLeft, Globe, Info, LockKeyhole, Save } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ChevronDown, Globe, Info, LockKeyhole, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from 'use-debounce';
 import { sendToSignatories, updateDocument } from './document.actions';
@@ -27,11 +27,11 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { LoadingSpinner } from '@/components/ui/loader';
-import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { AddSignatoryDialog } from './add-signatory-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { DocumentDupForSignature } from './document-dup-signature-dialog';
+import ImageBlockMenu from '../tiptap/extensions/ImageBlock/components/ImageBlockMenu';
 
 interface PROPS {
 	doc: Tables<'documents'>;
@@ -130,7 +130,7 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 			Columns,
 			UniqueID.configure({
 				attributeName: 'id',
-				types: ['paragraph', 'signatureFigure', 'heading', 'blockquote', 'codeBlock', 'table', 'signatureUpload']
+				types: ['paragraph', 'signatureFigure', 'heading', 'blockquote', 'codeBlock', 'table', 'signatureUpload', 'imageBlock']
 			}),
 			SignatureImage,
 			CustomMention.configure({ suggestion })
@@ -266,13 +266,16 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 					)}
 				</div>
 
-				<EditorContent editor={editor} className="flex-1 overflow-y-auto" />
-				<ContentItemMenu editor={editor} disabled={doc.locked || doc.signed_lock || !userPermittedAction() || userPermittedAction() == 'viewer'} />
-				<LinkMenu editor={editor} appendTo={menuContainerRef} />
-				<TextMenuBubble editor={editor} />
-				<ColumnsMenu editor={editor} appendTo={menuContainerRef} />
-				<TableRowMenu editor={editor} appendTo={menuContainerRef} />
-				<TableColumnMenu editor={editor} appendTo={menuContainerRef} />
+				<div ref={menuContainerRef}>
+					<EditorContent editor={editor} className="flex-1 overflow-y-auto" />
+					<ContentItemMenu editor={editor} disabled={doc.locked || doc.signed_lock || !userPermittedAction() || userPermittedAction() == 'viewer'} />
+					<LinkMenu editor={editor} appendTo={menuContainerRef} />
+					<TextMenuBubble editor={editor} />
+					<ColumnsMenu editor={editor} appendTo={menuContainerRef} />
+					<TableRowMenu editor={editor} appendTo={menuContainerRef} />
+					<TableColumnMenu editor={editor} appendTo={menuContainerRef} />
+					<ImageBlockMenu editor={editor} appendTo={menuContainerRef} />
+				</div>
 			</div>
 
 			{!!signatories.length && (

@@ -60,7 +60,7 @@ export const ImageBlock = Image.extend({
 	parseHTML() {
 		return [
 			{
-				tag: 'img'
+				tag: 'img[src^="http"]'
 			}
 		];
 	},

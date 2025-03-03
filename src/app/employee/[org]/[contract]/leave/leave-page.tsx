@@ -33,7 +33,10 @@ export const LeavePage = async ({ contract, org }: { contract: string; org: stri
 		await supabase
 			.from('time_off')
 			.select(
-				'*, hand_over:contracts!time_off_hand_over_fkey(id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)), contract:contracts!time_off_contract_fkey(job_title,id, team, unpaid_leave_used, sick_leave_used, paternity_leave_used, paid_leave_used, maternity_leave_used), profile:profiles!time_off_profile_fkey(*)'
+				`*,
+                hand_over:contracts!time_off_hand_over_fkey(id, job_title, profile:profiles!contracts_profile_fkey(first_name, last_name)),
+                contract:contracts!time_off_contract_fkey(job_title,id, team, unpaid_leave_used, sick_leave_used, paternity_leave_used, paid_leave_used, maternity_leave_used),
+                profile:profiles!time_off_profile_fkey(*)`
 			)
 			.match({ org, profile: (data.profile as any).id })
 			.order('created_at', { ascending: false }),

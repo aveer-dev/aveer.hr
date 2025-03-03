@@ -1,5 +1,6 @@
 'use client';
 
+import { generateRandomString } from '@/utils/generate-string';
 import {
 	BlockquoteFigure,
 	Color,
@@ -45,19 +46,19 @@ export const ExtensionKit: any = [
 	Underline,
 	// CharacterCount.configure({ limit: 50000 }),
 	ImageUpload.configure(),
-	ImageBlock.configure({ allowBase64: true }),
+	ImageBlock.configure({ allowBase64: false }),
 	FileHandler.configure({
 		allowedMimeTypes: ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
 		onDrop: (currentEditor, files, pos) => {
 			files.forEach(async file => {
-				const url = await uploadImage(file, '/', 'documents-assets');
+				const url = await uploadImage(file, `/${generateRandomString(10)}`, 'documents-assets');
 
 				currentEditor.chain().setImageBlockAt({ pos, src: url }).focus().run();
 			});
 		},
 		onPaste: (currentEditor, files) => {
 			files.forEach(async file => {
-				const url = await uploadImage(file, '/', 'documents-assets');
+				const url = await uploadImage(file, `/${generateRandomString(10)}`, 'documents-assets');
 
 				return currentEditor.chain().setImageBlockAt({ pos: currentEditor.state.selection.anchor, src: url }).focus().run();
 			});

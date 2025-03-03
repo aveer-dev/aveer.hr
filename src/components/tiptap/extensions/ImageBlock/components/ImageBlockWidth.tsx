@@ -1,3 +1,5 @@
+import { Slider } from '@/components/ui/slider';
+import { cn } from '@/lib/utils';
 import { memo, useCallback, useEffect, useState } from 'react';
 
 export type ImageBlockWidthProps = {
@@ -13,20 +15,15 @@ export const ImageBlockWidth = memo(({ onChange, value }: ImageBlockWidthProps) 
 	}, [value]);
 
 	const handleChange = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const nextValue = parseInt(e.target.value);
+		(value: number[]) => {
+			const nextValue = value[0];
 			onChange(nextValue);
 			setCurrentValue(nextValue);
 		},
 		[onChange]
 	);
 
-	return (
-		<div className="flex items-center gap-2">
-			<input className="h-2 appearance-none rounded border-0 bg-neutral-200 fill-neutral-300" type="range" min="25" max="100" step="25" onChange={handleChange} value={currentValue} />
-			<span className="select-none text-xs font-semibold text-neutral-500">{value}%</span>
-		</div>
-	);
+	return <Slider value={[currentValue]} max={100} step={1} min={1} className={cn('w-36')} onValueChange={handleChange} />;
 });
 
 ImageBlockWidth.displayName = 'ImageBlockWidth';
