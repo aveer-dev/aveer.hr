@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 export const emailAdmins = async ({ from, to, org, employeeName, leaveType }: { leaveType: string; from: Date; to: Date; org: { name: string; subdomain: string }; employeeName: string }) => {
 	const supabase = await createClient();
 
-	const { data, error } = await supabase.from('profiles_roles').select('profile(first_name, last_name, email)').match({ organisation: org, disable: false, role: 'admin' });
+	const { data, error } = await supabase.from('profiles_roles').select('profile(first_name, last_name, email)').match({ organisation: org.subdomain, disable: false, role: 'admin' });
 
 	if (error) throw error;
 
