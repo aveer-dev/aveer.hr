@@ -5,7 +5,7 @@ import { CircleSlash } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState, useRef, ReactNode } from 'react';
 
-export const Org404Wrapper = ({ children, cursorText }: { children: ReactNode; cursorText: string }) => {
+export const Error404Wrapper = ({ children, cursorText }: { children: ReactNode; cursorText: string }) => {
 	const [isHovering, setIsHovering] = useState(false);
 	const targetRef = useRef<HTMLDivElement>(null);
 
@@ -18,7 +18,7 @@ export const Org404Wrapper = ({ children, cursorText }: { children: ReactNode; c
 	};
 
 	return (
-		<>
+		<div className="fixed bottom-0 left-0 right-0 top-0 z-20 flex flex-col justify-center bg-white/20 backdrop-blur-md">
 			<Cursor
 				attachToParent
 				variants={{
@@ -54,6 +54,6 @@ export const Org404Wrapper = ({ children, cursorText }: { children: ReactNode; c
 			</Cursor>
 
 			<div ref={targetRef}>{children}</div>
-		</>
+		</div>
 	);
 };

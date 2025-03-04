@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
-import { Building2, Copy, EllipsisVertical, FilePenLine, House } from 'lucide-react';
+import { Building2, Copy, EllipsisVertical, FilePenLine, House, Undo2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Details } from '@/components/ui/details';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ApplicantsPageComponent } from '@/app/[org]/(org)/open-roles/[role]/applicants/applicants-page';
+import { Error404Wrapper } from '@/components/ui/error-404-wrapper';
 
 interface props {
 	role: string;
@@ -45,6 +46,24 @@ export const RoleDetails = async ({ role, orgId, type }: props) => {
 				<p className="text-xs">Unable to fetch roles, please refresh page to try again</p>
 				<p className="mt-6 text-xs text-muted-foreground">{error?.message}</p>
 			</div>
+		);
+	}
+
+	if (!user && type == 'job' && data.state == 'closed') {
+		return (
+			<Error404Wrapper cursorText="404">
+				<div className="mx-auto max-w-xl">
+					<h1 className="mb-3 text-7xl font-extrabold">404</h1>
+
+					<h3 className="mb-3 text-lg font-bold">Role is no longer open</h3>
+					<p className="text-sm">This job opening is no longer available for application. Checkout our jobs page for other roles available if any.</p>
+
+					<Link href={'../jobs'} className={cn(buttonVariants(), 'mt-6 gap-4')}>
+						<Undo2 size={12} />
+						Back to jobs page
+					</Link>
+				</div>
+			</Error404Wrapper>
 		);
 	}
 
