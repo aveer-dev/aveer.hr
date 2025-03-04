@@ -17,9 +17,11 @@ export const DocumentOptions = ({ currentUserId, document }: { currentUserId: st
 	const [isLocking, setLockState] = useState(false);
 	const [isTemplating, setTemplateState] = useState(false);
 
-	const onDeleteDocument = async () => {
+	const onDeleteDocument = async (event: Event) => {
+		event.preventDefault();
+
 		setDeleteState(true);
-		const { error } = await deleteDocument({ org: document.org, id: document.id });
+		const { error } = await deleteDocument({ org: (document.org as any).subdomain, id: document.id });
 		setDeleteState(false);
 
 		if (error) return toast.error(error.message);
