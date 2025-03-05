@@ -24,7 +24,6 @@ interface props {
 	org: string;
 	profile: string;
 	contract: number;
-	orgCalendarConfig: { enable_thirdparty_calendar: boolean; calendar_employee_events: string[] | null } | null;
 	role?: ROLE;
 	contractId?: number;
 	calendar: Tables<'calendars'> | null;
@@ -36,7 +35,7 @@ interface props {
 	calendarType?: 'grid' | 'vertical';
 }
 
-export const FullCalendar = ({ showCalendarConfigError, calendarType = 'grid', events, teams, employees, leaveDays, activeCalendarEvent, calendar, reminders, dobs, org, profile, contract, orgCalendarConfig, role = 'admin', contractId, enableClose }: props) => {
+export const FullCalendar = ({ showCalendarConfigError, calendarType = 'grid', events, teams, employees, leaveDays, activeCalendarEvent, calendar, reminders, dobs, org, profile, contract, role = 'admin', contractId, enableClose }: props) => {
 	const dayOfWeekMatcher: DayOfWeek = {
 		dayOfWeek: [0, 6]
 	};
@@ -98,7 +97,7 @@ export const FullCalendar = ({ showCalendarConfigError, calendarType = 'grid', e
 										<>
 											<Separator orientation="vertical" className="h-3" />
 
-											<CalendarConfigDialog calendar={calendar} contractId={contractId} orgCalendarConfig={orgCalendarConfig} org={org} />
+											<CalendarConfigDialog calendar={calendar} contractId={contractId} org={org} />
 										</>
 									)}
 

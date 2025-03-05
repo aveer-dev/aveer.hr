@@ -8,6 +8,7 @@ import { Info, Undo2 } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { DashboardCalendar } from '@/components/dashboard-calendar';
 
 export default async function ContractPage(props: { params: Promise<{ [key: string]: string }> }) {
 	const params = await props.params;
@@ -63,6 +64,8 @@ export default async function ContractPage(props: { params: Promise<{ [key: stri
 
 			<div className="space-y-14">
 				<Todos profile={data.profile as Tables<'profiles'>} contract={data as any} profileId={data.profile?.id} org={params.org} team={data.team as number} />
+
+				<DashboardCalendar userType="employee" org={params.org} />
 
 				<Payments contract={data as any} />
 			</div>

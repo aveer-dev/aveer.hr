@@ -79,7 +79,7 @@ export const EventForm = ({ date, role = 'admin', org, calendar, onCreateEvent, 
 	const [invitees, updateInvitees] = useState<{ single?: EMPLOYEE; team?: { name: string; id: number; people: EMPLOYEE[] }; all?: EMPLOYEE[] }[]>((event?.attendees as any) || []);
 	const [locationType, setLocationType] = useState(!event || event?.meeting_link ? 'virtual' : 'physical');
 	const [isTimezoneOpen, toggleTimezoneState] = useState(false);
-	const allowEdit = !!teams && !!employeeList;
+	const allowEdit = !!teams && !!employeeList && role == 'admin';
 	const [eventReminders, updateEventReminder] = useState<reminder[]>((event?.reminders as any) || []);
 
 	const form = useForm<z.infer<typeof formSchema>>({

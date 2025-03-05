@@ -8,7 +8,6 @@ import { EmployeeProfileSettings } from './employee-profile-settings';
 import { EmployeePageSearch } from './employee-search';
 import { ContractsPopover } from './contracts-popover';
 import { Notifications } from './notifications';
-import { EmployeeCalendar } from './calendar';
 import Link from 'next/link';
 import { Undo2 } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
@@ -89,8 +88,6 @@ export default async function RootLayout(props: { children: React.ReactNode; par
 						</div>
 
 						<div className="order-1 flex w-full items-center justify-end gap-3 sm:order-2 sm:w-fit sm:justify-start">
-							{contract?.status == 'signed' && <EmployeeCalendar org={params.org} contractId={contract?.id} team={contract?.team} />}
-
 							<Notifications contractId={contract?.id} messages={messages} />
 
 							<EmployeePageSearch />

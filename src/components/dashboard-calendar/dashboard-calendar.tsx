@@ -13,18 +13,23 @@ import { NavLink } from '@/components/ui/link';
 import { Separator } from '../ui/separator';
 import { Tables } from '@/type/database.types';
 import { EventDialog } from '../calendar/event-dialog';
+import { ROLE } from '@/type/contract.types';
+import { EmployeeCalendarComponent } from './calendar-component';
 
 interface props {
 	org: string;
 	leaveDays: { date: Date; status: string; name: string; data: any }[];
 	birthdays: { id: number; job_title: string; profile: { id: string; last_name: string; first_name: string; date_of_birth: string | null } | null }[];
 	events: { date: Date; data: Tables<'calendar_events'> }[];
+	calendarEvents: Tables<'calendar_events'>[] | null;
 	teams: Tables<'teams'>[] | null;
 	employees: Tables<'contracts'>[];
 	calendar: Tables<'calendars'> | null;
+	role: ROLE;
+	userId: string;
 }
 
-export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, calendar }: props) => {
+export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, calendar, role, calendarEvents, userId }: props) => {
 	const dayOfWeekMatcher: DayOfWeek = {
 		dayOfWeek: [0, 6]
 	};
@@ -34,6 +39,7 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 	return (
 		<DayPicker
 			className="mb-28"
+			autoFocus
 			classNames={{
 				month_caption: 'flex pt-1 relative items-center border-b mb-8 pb-3',
 				caption_label: 'text-xl font-bold',
@@ -61,9 +67,13 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 
 							<Separator orientation="vertical" className="h-3" />
 
-							<NavLink org={org} href={`/calendar`} className={cn(buttonVariants({ variant: 'ghost' }), '!mr-1.5')}>
-								<Maximize className="" size={16} />
-							</NavLink>
+							{role == 'admin' && (
+								<NavLink org={org} href={`/calendar`} className={cn(buttonVariants({ variant: 'ghost' }), '!mr-1.5')}>
+									<Maximize className="" size={16} />
+								</NavLink>
+							)}
+
+							{role == 'employee' && <EmployeeCalendarComponent org={org} dobs={birthdays} calendar={calendar} calendarEvents={calendarEvents} events={events} result={leaveDays} userId={userId} />}
 						</nav>
 					);
 				},
@@ -107,11 +117,13 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 								<button aria-label={props['aria-label']} data-day={(props as any)['data-day']} id={_isToday ? 'today' : isStartOfMonth ? 'start-of-month' : ''} className={cn(className, 'min-h-[132px] min-w-20 space-y-4 rounded-2xl bg-muted py-6 text-center')}>
 									<div className="text-sm">{days[getDay(date)]}</div>
 									<div className="text-lg font-bold">{children}</div>
-									{dateHasEvent && (
-										<div className={cn('relative mx-auto h-1 w-4 rounded-md bg-blue-300')}>
-											<div className={cn('absolute bottom-0 left-0 top-0 rounded-md bg-green-300', modifiers.leaveDay && !!isBirthday.length && 'w-1/2', modifiers.leaveDay && !isBirthday.length && 'w-full')}></div>
+									<div className={cn('relative mx-auto h-1 w-6 rounded-md')}>
+										<div className={cn('absolute bottom-0 left-0 top-0 flex w-full items-center justify-center rounded-md')}>
+											{!!isBirthday.length && <div className="h-1 w-full rounded-sm bg-blue-400"></div>}
+											{modifiers.event && <div className="h-1 w-full rounded-sm bg-primary/50"></div>}
+											{modifiers.leaveDay && <div className="h-1 w-full rounded-sm bg-green-300"></div>}
 										</div>
-									)}
+									</div>
 								</button>
 							</PopoverTrigger>
 
@@ -120,7 +132,7 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 									<>
 										<h3 className="text-sm font-medium">{format(date, 'PP')}</h3>
 
-										<Tabs defaultValue={!modifiers.weekend && !!dayLeaves.length && !!isBirthday.length ? 'leave' : !modifiers.weekend && !!dayLeaves.length ? 'leave' : 'birthday'} className="w-[400px]">
+										<Tabs defaultValue={!modifiers.weekend && !!dayLeaves.length && !!isBirthday.length ? 'leave' : !modifiers.weekend && !!dayLeaves.length ? 'leave' : 'birthday'}>
 											{!modifiers.weekend && !!dayLeaves.length && !!isBirthday.length && (
 												<TabsList className="mb-4 flex h-fit w-fit p-0.5">
 													{!modifiers.weekend && !!dayLeaves.length && (
@@ -170,7 +182,7 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 												<TabsContent value="birthday">
 													<ul className="space-y-1">
 														{cevents.map(event => (
-															<EventDialog key={event.data.id} event={event.data} teams={teams} employees={employees} org={org} calendar={calendar}>
+															<EventDialog key={event.data.id} role={role} event={event.data} teams={teams} employees={employees} org={org} calendar={calendar}>
 																<li className="2 flex max-w-56 items-center gap-2 rounded-sm p-1 py-2 text-xs transition-all duration-300 hover:bg-muted">
 																	<CalendarRange size={12} />
 																	{event.data.summary}
@@ -190,7 +202,6 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 					);
 				}
 			}}
-			autoFocus
 		/>
 	);
 };

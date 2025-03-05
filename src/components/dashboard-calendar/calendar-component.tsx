@@ -4,7 +4,7 @@ import { FullCalendar } from '@/components/calendar/calendar';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Tables } from '@/type/database.types';
-import { CalendarRange } from 'lucide-react';
+import { LayoutList } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -37,25 +37,19 @@ interface dobs {
 	} | null;
 }
 
-interface orgCalendarConfig {
-	enable_thirdparty_calendar: boolean;
-	calendar_employee_events: string[] | null;
-}
-
 interface props {
 	contractId?: number;
 	org: string;
 	dobs: dobs[] | null;
 	calendar: Tables<'calendars'> | null;
 	calendarEvents: Tables<'calendar_events'>[] | null;
-	reminders: reminder[] | null;
+	reminders?: reminder[] | null;
 	events: { date: Date; data: Tables<'calendar_events'> }[];
 	result: { date: Date; name: string; status: string; data: any }[];
 	userId: string;
-	orgCalendarConfig: orgCalendarConfig | null;
 }
 
-export const EmployeeCalendarComponent = ({ orgCalendarConfig, calendarEvents, reminders, dobs, org, contractId, calendar, result, events, userId }: props) => {
+export const EmployeeCalendarComponent = ({ calendarEvents, reminders, dobs, org, contractId, calendar, result, events, userId }: props) => {
 	const searchParams = useSearchParams();
 	const activeCalendarEventId = searchParams.get('calendar');
 	const activeCalendarEvent = activeCalendarEventId ? calendarEvents?.find(event => Number(activeCalendarEventId) == event.id) : undefined;
@@ -73,8 +67,8 @@ export const EmployeeCalendarComponent = ({ orgCalendarConfig, calendarEvents, r
 				}
 			}}>
 			<SheetTrigger asChild>
-				<Button className="h-8 w-8 rounded-2xl border p-0" variant={'secondary'}>
-					<CalendarRange size={12} />
+				<Button variant={'ghost'}>
+					<LayoutList size={16} />
 				</Button>
 			</SheetTrigger>
 
@@ -86,7 +80,6 @@ export const EmployeeCalendarComponent = ({ orgCalendarConfig, calendarEvents, r
 
 				<section className="min-h-96 space-y-8 p-0.5">
 					<FullCalendar
-						orgCalendarConfig={orgCalendarConfig}
 						calendar={calendar}
 						contractId={contractId}
 						calendarType="vertical"
