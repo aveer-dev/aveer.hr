@@ -58,7 +58,6 @@ export const CalendarPageComponent = async ({ org, isCalendarState }: { org: str
 			<FullCalendar
 				showCalendarConfigError={isCalendarState == 'error'}
 				employees={dobs}
-				orgCalendarConfig={orgCalendarSettings}
 				org={org}
 				calendar={calendars}
 				profile={user?.id!}

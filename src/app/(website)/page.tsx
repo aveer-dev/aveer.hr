@@ -57,7 +57,6 @@ export default async function LandingPage() {
 						<span className="pl-4">SMEs</span>
 						<span className="pl-4">Startups</span>
 						<span className="pl-4">Teams</span>
-						<span className="pl-4">Teams</span>
 					</TextLoop>
 					.
 				</h1>
