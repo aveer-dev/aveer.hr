@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
-import { Todos } from './todo/todos';
+import { Todos } from './todos';
 import { Payments } from './payments';
 import { Tables } from '@/type/database.types';
 import { Info, Undo2 } from 'lucide-react';
@@ -63,9 +63,9 @@ export default async function ContractPage(props: { params: Promise<{ [key: stri
 			)}
 
 			<div className="space-y-14">
-				<Todos profile={data.profile as Tables<'profiles'>} contract={data as any} profileId={data.profile?.id} org={params.org} team={data.team as number} />
-
 				<DashboardCalendar userType="employee" org={params.org} />
+
+				<Todos profile={data.profile as Tables<'profiles'>} contract={data as any} profileId={data.profile?.id} org={params.org} team={data.team as number} />
 
 				<Payments contract={data as any} />
 			</div>

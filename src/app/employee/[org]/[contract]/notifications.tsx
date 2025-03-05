@@ -79,7 +79,7 @@ export const Notifications = ({ contractId, messages }: { contractId?: number; m
 					<TooltipContent align="center">
 						<p>
 							<CommandShortcut className="flex items-center gap-1">
-								<Command size={12} /> N
+								<Command size={12} /> N | Messages
 							</CommandShortcut>
 						</p>
 					</TooltipContent>

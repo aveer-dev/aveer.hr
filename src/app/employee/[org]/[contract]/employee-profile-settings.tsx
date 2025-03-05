@@ -40,7 +40,7 @@ export const EmployeeProfileSettings = ({ profile }: { profile: Tables<'profiles
 					<TooltipContent align="center">
 						<p>
 							<CommandShortcut className="flex items-center gap-1">
-								<Command size={12} /> S
+								<Command size={12} /> S | Settings
 							</CommandShortcut>
 						</p>
 					</TooltipContent>

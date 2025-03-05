@@ -20,14 +20,15 @@ export const getApplicants = async ({ manager, contract, org }: { manager?: Tabl
 	return data?.filter(applicant => {
 		const levels: any[] = applicant.levels;
 
-		return manager
-			? applicant.role.team == (contract.team?.id || contract.team) || applicant.role.direct_report == contract.id || levels.find(level => level.id == (contract.profile.id || contract.profile))
-			: levels.find(level => level.id == (contract.profile.id || contract.profile));
+		return manager ? applicant.role.team == (contract.team?.id || contract.team) || applicant.role.direct_report == contract.id || levels.find(level => level.id == (contract.profile.id || contract.profile)) : levels.find(level => level.id == (contract.id || contract));
 	});
 };
 
-export const getLeaveRequests = async ({ manager, contract, org }: { manager?: Tables<'managers'> | null; contract: any; org: string }) => {
+export const getLeaveRequests = async ({ manager, contract, org, status }: { status?: string; manager?: Tables<'managers'> | null; contract: any; org: string }) => {
 	const supabase = await createClient();
+
+	const query: { org: string; status?: string } = { org };
+	if (status) query.status = status;
 
 	const { data, error } = await supabase
 		.from('time_off')
@@ -37,7 +38,7 @@ export const getLeaveRequests = async ({ manager, contract, org }: { manager?: T
             contract:contracts!time_off_contract_fkey(job_title, id, team, direct_report, unpaid_leave_used, sick_leave_used, paternity_leave_used, paid_leave_used, maternity_leave_used),
             profile:profiles!time_off_profile_fkey(*)`
 		)
-		.match({ org });
+		.match({ ...query });
 
 	if (error) return;
 

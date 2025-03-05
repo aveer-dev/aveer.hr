@@ -54,7 +54,7 @@ export const EmployeePageSearch = () => {
 
 					<TooltipContent align="center">
 						<CommandShortcut className="flex items-center gap-1">
-							<Command size={12} />K
+							<Command size={12} />K | Search
 						</CommandShortcut>
 					</TooltipContent>
 				</Tooltip>

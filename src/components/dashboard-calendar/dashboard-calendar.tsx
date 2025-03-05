@@ -38,11 +38,11 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 
 	return (
 		<DayPicker
-			className="mb-28"
+			className={cn(role == 'admin' && 'mb-28')}
 			autoFocus
 			classNames={{
-				month_caption: 'flex pt-1 relative items-center border-b mb-8 pb-3',
-				caption_label: 'text-xl font-bold',
+				month_caption: cn(role == 'admin' ? ' border-b mb-8' : 'mb-4', 'flex pt-1 relative items-center pb-3'),
+				caption_label: role == 'employee' ? 'text-sm font-normal text-support' : 'text-xl font-bold',
 				button_previous: cn(buttonVariants({ variant: 'ghost' }), ''),
 				button_next: cn(buttonVariants({ variant: 'ghost' }), ''),
 				today: '!bg-primary text-primary-foreground',
