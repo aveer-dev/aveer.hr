@@ -1,6 +1,7 @@
 import { ApplicantDetails } from '@/components/open-role/roles/applicant-details';
 import { CustomCard } from './types';
 import { APPLICANT } from '@/type/roles.types';
+import { ChevronRight } from 'lucide-react';
 
 export const BoardCard = (card: CustomCard, _options: any, onUpdateApplicant: (data: APPLICANT, oldStage?: string) => void) => {
 	return (
@@ -16,10 +17,10 @@ export const BoardCard = (card: CustomCard, _options: any, onUpdateApplicant: (d
 				</ul>
 			</div>
 
-			<div className="flex items-center justify-between border-t p-3 pt-5">
-				<p className="text-sm">{(card.role as any).job_title}</p>
-
-				<ApplicantDetails data={card as any} userRole="admin" onUpdate={onUpdateApplicant} />
+			<div className="w-full border-t">
+				<ApplicantDetails data={card as any} className="flex w-full items-center justify-between p-3 pt-5 text-xs" userRole="admin" onUpdate={onUpdateApplicant}>
+					Review <ChevronRight size={14} />
+				</ApplicantDetails>
 			</div>
 		</div>
 	);

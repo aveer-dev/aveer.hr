@@ -8,12 +8,12 @@ import { BoardHead } from './board-column-head';
 import { CustomCard } from './types';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { updateApplicant } from '@/components/open-role/roles/application.action';
+import { updateApplicant, updateApplication } from '@/components/open-role/roles/application.action';
 import { toast } from 'sonner';
 import { APPLICANT } from '@/type/roles.types';
 import { cn } from '@/lib/utils';
 
-export const ApplicantsBoard = ({ initialBoards, className }: { initialBoards: KanbanBoard<CustomCard>; className?: string }) => {
+export const ApplicantsBoard = ({ stages, initialBoards, className }: { stages: string[]; initialBoards: KanbanBoard<CustomCard>; className?: string }) => {
 	const router = useRouter();
 	const [board, updateBoard] = useState(initialBoards);
 
@@ -75,9 +75,56 @@ export const ApplicantsBoard = ({ initialBoards, className }: { initialBoards: K
 		return newBoard;
 	};
 
+	const moveAllCards = async (fromColumnId: string, toColumnId: string) => {
+		const columnMap = new Map<string, { column: Column<CustomCard>; index: number }>();
+		board.columns.forEach((column, index) => columnMap.set(column.id as string, { column, index }));
+
+		const fromColumnData = columnMap.get(fromColumnId);
+		const toColumnData = columnMap.get(toColumnId);
+
+		if (!fromColumnData || !toColumnData) return;
+
+		const fromColumn = fromColumnData.column;
+		const toColumn = toColumnData.column;
+		const toIndex = toColumnData.index;
+
+		// Move all cards
+		const movedCards = fromColumn.cards.map(card => ({ ...card, stage: toColumnId }));
+		toColumn.cards = [...toColumn.cards, ...movedCards];
+
+		// Clear the source column
+		fromColumn.cards = [];
+
+		// Update the board state
+		const newBoardColumns = [...board.columns];
+		newBoardColumns[fromColumnData.index] = fromColumn;
+		newBoardColumns[toIndex] = toColumn;
+
+		toColumn.cards.map(card =>
+			toast.promise(updateApplication(card.id, { id: card.id, stage: card.stage }, (card.org as any)?.subdomain || card.org), {
+				loading: `Moving applicant, ${card.first_name}...`,
+				success: res => {
+					if (typeof res === 'string') return res;
+					return `Applicant, ${card.first_name}, has been moved to ${toColumnId}`;
+				},
+				error: 'Error'
+			})
+		);
+
+		const newBoard = { ...board, columns: newBoardColumns };
+		updateBoard(newBoard);
+
+		router.refresh();
+	};
+
 	return (
 		<div className={cn(className)}>
-			<ControlledBoard allowAddCard={false} renderCard={(card, options) => BoardCard!(card as CustomCard, options, onUpdateApplicant)} renderColumnHeader={BoardHead} disableColumnDrag onCardDragEnd={onCardDragEnd as any}>
+			<ControlledBoard
+				allowAddCard={false}
+				renderCard={(card, options) => BoardCard!(card as CustomCard, options, onUpdateApplicant)}
+				renderColumnHeader={(column: Column<CustomCard>) => <BoardHead stages={stages} column={column} moveCards={moveAllCards} />}
+				disableColumnDrag
+				onCardDragEnd={onCardDragEnd as any}>
 				{board}
 			</ControlledBoard>
 		</div>

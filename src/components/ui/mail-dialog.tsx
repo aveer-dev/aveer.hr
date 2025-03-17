@@ -7,7 +7,11 @@ import { LoadingSpinner } from '@/components/ui/loader';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Input } from './input';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
+import { Badge } from './badge';
+import { createClient } from '@/utils/supabase/client';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 
 interface props {
 	message?: string;
@@ -23,10 +27,25 @@ interface props {
 	replyTo?: string;
 }
 
+const supabase = createClient();
+
 export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, recipients, onClose, name, title, description, children, replyTo }: props) => {
-	const sendMessage = (form: FormData) => {
+	const [copyEmail, setCopyEmail] = useState('');
+
+	useEffect(() => {
+		const getEmail = async () => {
+			const email = (await supabase.auth.getSession()).data.session?.user.email;
+			if (email) setCopyEmail(email);
+		};
+
+		getEmail();
+	}, []);
+
+	const sendMessage = async (form: FormData) => {
 		const mailMessage = form.get('message') as string;
-		const mailSubject = subject || (form.get('subject') as string);
+		const mailSubject = form.get('subject') as string;
+		const cc = (form.get('cc') as string).split(',');
+
 		if (!mailMessage || !mailSubject) return;
 
 		sendEmail({
@@ -34,9 +53,11 @@ export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, reci
 			to: recipients,
 			subject: mailSubject,
 			text: mailMessage,
+			cc,
 			replyTo
-		}).then(error => {
-			if (error) return toast.error((error as any).message);
+		}).then(response => {
+			if (response.error) return toast.error(response.error?.message);
+			toast.success('Email sent to applicants');
 			onClose && onClose('success');
 			toggleDialog && toggleDialog(false);
 		});
@@ -46,7 +67,7 @@ export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, reci
 		const { pending } = useFormStatus();
 
 		return (
-			<Button type="submit" disabled={pending} size={'sm'} className="gap-3 px-4 text-xs font-light">
+			<Button type="submit" disabled={pending} size={'sm'} className="gap-3 px-12 text-xs font-light">
 				{pending && <LoadingSpinner />}
 				{pending ? 'Sending' : 'Send'}
 			</Button>
@@ -60,16 +81,40 @@ export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, reci
 				<form action={sendMessage} className="grid gap-8">
 					<AlertDialogHeader>
 						<AlertDialogTitle>{title || 'Send a message'}</AlertDialogTitle>
-						<AlertDialogDescription>{description || 'Fill form below to send mail'}</AlertDialogDescription>
+						<AlertDialogDescription>{description || `Fill form below to send mail to`}</AlertDialogDescription>
+						<div className="flex flex-wrap gap-2">
+							{recipients.map(recipient => (
+								<Badge className="w-fit" variant={'secondary'} key={recipient}>
+									{recipient}
+								</Badge>
+							))}
+						</div>
 					</AlertDialogHeader>
 
 					<section className="grid gap-4">
-						{!subject && (
-							<div className="grid gap-2">
-								<Label htmlFor="subject">Subject</Label>
-								<Input required name="subject" placeholder="Mail subject" id="subject" />
-							</div>
-						)}
+						<div className="grid gap-2">
+							<Label htmlFor="subject" className="flex gap-1">
+								Cc
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<button>
+												<Info className="text-label" size={12} />
+											</button>
+										</TooltipTrigger>
+										<TooltipContent>
+											<p>Comma separated emails</p>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+							</Label>
+							<Input defaultValue={copyEmail} name="cc" id="cc" />
+						</div>
+
+						<div className="grid gap-2">
+							<Label htmlFor="subject">Subject</Label>
+							<Input required defaultValue={subject} name="subject" placeholder="Mail subject" id="subject" />
+						</div>
 
 						<div className="grid gap-2">
 							<Label htmlFor="message">Message</Label>
