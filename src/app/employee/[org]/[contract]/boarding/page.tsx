@@ -23,7 +23,7 @@ export default async function ProfilePage(props: { params: Promise<{ [key: strin
 		);
 	}
 
-	if (data.status !== 'signed') redirect('./home');
+	if (data.status !== 'signed' && data.status !== 'scheduled termination') redirect('./home');
 
 	const manager = (await supabase.from('managers').select().match({ org: params.org, person: params.contract, team: data.team?.id })).data;
 
