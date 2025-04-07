@@ -19,7 +19,7 @@ export const NavMenu = ({ contract }: { contract: Tables<'contracts'> }) => {
 		{ label: 'Requests', icon: FileStack, page: 'requests', shortcut: 'r', enabled: contract?.status == 'signed' },
 		{ label: 'Contract', icon: Signature, page: 'contract', shortcut: 'c', enabled: true },
 		{ label: 'Appraisal', icon: FilePenLine, page: 'appraisal', shortcut: 'a', enabled: contract?.status == 'signed' },
-		{ label: 'Boarding', icon: ListChecks, page: 'boarding', shortcut: 'b', enabled: contract?.status == 'signed' },
+		{ label: 'Boarding', icon: ListChecks, page: 'boarding', shortcut: 'b', enabled: contract?.status == 'signed' || contract?.status == 'scheduled termination' },
 		{ label: 'Documents', icon: Files, page: 'documents', shortcut: 'd', enabled: contract?.status == 'signed' },
 		{ label: 'Files', icon: FolderOpenDot, page: 'files', shortcut: 'f', enabled: contract?.status == 'signed' }
 	]);
