@@ -5,7 +5,7 @@ import { OnboardingForm } from './onboarding';
 import { DashboardCalendar } from '@/components/dashboard-calendar';
 import { DashboardCharts } from './chart.component';
 
-export const DashboardPage = async ({ org }: { org: string }) => {
+export const DashboardPage = async ({ org, searchParams }: { org: string; searchParams: { [key: string]: string | string[] | undefined } }) => {
 	const supabase = await createClient();
 
 	const [{ data, error, count }, { count: openRoles }] = await Promise.all([
