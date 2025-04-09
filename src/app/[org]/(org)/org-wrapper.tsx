@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { redirect } from 'next/navigation';
 
-export const OrgWrapper = async ({ org, children }: { org: string; children: ReactNode }) => {
+export const OrgWrapper = async ({ params, children }: { params: Promise<{ [key: string]: string }>; children: ReactNode }) => {
+	const org = (await params).org;
 	if (org == 'app') return children;
 
 	const supabase = await createClient();

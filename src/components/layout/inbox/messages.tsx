@@ -17,13 +17,13 @@ import { NavLink } from '@/components/ui/link';
 
 const supabase = createClient();
 
-export const Inbox = ({ org, sender, dbMessages }: { org: string; sender: string; dbMessages: Tables<'inbox'>[] }) => {
-	const [messages, setMessages] = useState<Tables<'inbox'>[]>(dbMessages || []);
+export const Inbox = ({ org, sender }: { org: string; sender: string }) => {
+	const [messages, setMessages] = useState<Tables<'inbox'>[]>([]);
 	const [notifications, updateNotifications] = useState<Tables<'notifications'>[]>([]);
 	const [activeTab, setActiveTab] = useState<string>('messages');
 	const [open, setOpen] = useState<boolean>();
 
-	const getMessages = async () => {
+	const getMessages = useCallback(async () => {
 		const { data, error } = await supabase
 			.from('inbox')
 			.select('*, sender_profile:profiles!inbox_sender_profile_fkey(id, first_name, last_name)')
@@ -32,7 +32,7 @@ export const Inbox = ({ org, sender, dbMessages }: { org: string; sender: string
 		if (error) return toast.error('Unable to fetch new message', { description: error.message });
 
 		setMessages(data);
-	};
+	}, [org, sender]);
 
 	const getNotifications = useCallback(async () => {
 		const { data, error } = await supabase.from('notifications').select('*, sender_profile:profiles!notifications_sender_profile_fkey(id, first_name, last_name)').match({ org });
@@ -54,7 +54,8 @@ export const Inbox = ({ org, sender, dbMessages }: { org: string; sender: string
 
 	useEffect(() => {
 		getNotifications();
-	}, [getNotifications]);
+		getMessages();
+	}, [getNotifications, getMessages]);
 
 	return (
 		<Drawer open={open} onOpenChange={setOpen} direction="right">

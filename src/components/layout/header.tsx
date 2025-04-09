@@ -6,22 +6,12 @@ import { createClient } from '@/utils/supabase/server';
 import { NavLink } from '@/components/ui/link';
 import { Inbox } from './inbox/messages';
 import { PushNotificationBanner } from './push-notification-banner';
-import { Tables } from '@/type/database.types';
 
-export const Header = async ({ orgId, messages }: { orgId?: string; messages?: Tables<'inbox'>[] | null }) => {
+export const Header = async ({ params }: { params?: Promise<{ [key: string]: string }> }) => {
 	const supabase = await createClient();
+	const orgId = params ? (await params).org : 'employee';
 
 	const { data } = await supabase.auth.getUser();
-
-	messages = !messages
-		? (
-				await supabase
-					.from('inbox')
-					.select('*, sender_profile:profiles!inbox_sender_profile_fkey(id, first_name, last_name)')
-					.or(`and(org.eq.${orgId},draft.eq.false),and(org.eq.${orgId},draft.eq.true,sender_profile.eq.${data.user?.id})`)
-					.order('created_at', { ascending: false })
-			).data
-		: messages;
 
 	const updateFCMToken = async (token: string) => {
 		'use server';
@@ -69,7 +59,7 @@ export const Header = async ({ orgId, messages }: { orgId?: string; messages?: T
 				<div className="no-scrollbar flex items-center justify-between overflow-x-auto px-6 pt-4">
 					<NavMenu orgId={orgId} />
 
-					<Inbox dbMessages={messages || []} org={orgId} sender={data.user.id} />
+					<Inbox org={orgId} sender={data.user.id} />
 				</div>
 			)}
 		</header>
