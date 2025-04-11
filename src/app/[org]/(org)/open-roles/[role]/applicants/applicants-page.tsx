@@ -51,7 +51,7 @@ export const ApplicantsPageComponent = async ({ roleId, org, className, asCompon
 					</h1>
 				</div>
 			)}
-			<ApplicantsBoard stages={stages} initialBoards={initialBoards as any} className={className} />;
+			<ApplicantsBoard stages={stages} initialBoards={initialBoards as any} className={className} />
 		</div>
 	);
 };

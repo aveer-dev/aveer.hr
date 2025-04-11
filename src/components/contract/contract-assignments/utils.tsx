@@ -1,10 +1,29 @@
 import { Tables } from '@/type/database.types';
-import { LEVEL } from '@/type/roles.types';
 import { createClient } from '@/utils/supabase/server';
 
+/**
+ * Fetches the default approval policy for a specific type (role_application, time_off, or boarding)
+ * @param org - Organization identifier
+ * @param type - Type of approval policy to fetch
+ */
+const getDefaultApprovalPolicy = async (org: string, type: 'role_application' | 'time_off' | 'boarding') => {
+	const supabase = await createClient();
+
+	const { data, error } = await supabase.from('approval_policies').select().match({ org, type, is_default: true });
+
+	return { data, error };
+};
+
+/**
+ * Fetches and filters job applicants based on their approval levels and manager status
+ * @param manager - Manager object if the current user is a manager
+ * @param contract - Contract object containing team and profile information
+ * @param org - Organization identifier
+ */
 export const getApplicants = async ({ manager, contract, org }: { manager?: Tables<'managers'> | null; contract: any; org: string }) => {
 	const supabase = await createClient();
 
+	// Fetch all job applications in interview stage for the organization
 	const { data, error } = await supabase
 		.from('job_applications')
 		.select(
@@ -17,19 +36,54 @@ export const getApplicants = async ({ manager, contract, org }: { manager?: Tabl
 
 	if (error) return error.message;
 
-	return data?.filter(applicant => {
-		const levels: any[] = applicant.levels;
+	// Cache for default levels to avoid multiple fetches
+	let defaultLevels: any[] = [];
 
-		return manager ? applicant.role.team == (contract.team?.id || contract.team) || applicant.role.direct_report == contract.id || levels.find(level => level.id == (contract.profile.id || contract.profile)) : levels.find(level => level.id == (contract.id || contract));
-	});
+	// Process each applicant asynchronously
+	const filteredApplicants = await Promise.all(
+		data?.map(async applicant => {
+			// If applicant has no levels, try to get default levels from policy
+			if (!applicant.levels?.length) {
+				// Only fetch default policy if we haven't already
+				if (!defaultLevels.length) {
+					const defaultPolicy = await getDefaultApprovalPolicy(org, 'role_application');
+					defaultLevels = defaultPolicy.data?.[0]?.levels || [];
+				}
+			}
+
+			// Use applicant's levels if they exist, otherwise use default levels
+			const levels: any[] = applicant.levels?.length ? applicant.levels : defaultLevels;
+
+			// Determine if applicant should be included based on manager status
+			const shouldInclude = manager
+				? // For managers: include if applicant is in their team OR they're the direct report OR they're in approval levels
+					applicant.role.team == (contract.team?.id || contract.team) || applicant.role.direct_report == contract.id || levels.find(level => level.id == (contract.profile.id || contract.profile))
+				: // For non-managers: include if they're in approval levels
+					levels.find(level => level.id == (contract.id || contract));
+
+			return shouldInclude ? applicant : null;
+		}) || []
+	);
+
+	// Filter out null values (applicants that didn't meet criteria)
+	return filteredApplicants.filter(Boolean);
 };
 
+/**
+ * Fetches and filters leave requests based on approval levels and manager status
+ * @param manager - Manager object if the current user is a manager
+ * @param contract - Contract object containing team and profile information
+ * @param org - Organization identifier
+ * @param status - Optional status filter for leave requests
+ */
 export const getLeaveRequests = async ({ manager, contract, org, status }: { status?: string; manager?: Tables<'managers'> | null; contract: any; org: string }) => {
 	const supabase = await createClient();
 
+	// Build query with optional status filter
 	const query: { org: string; status?: string } = { org };
 	if (status) query.status = status;
 
+	// Fetch all leave requests matching the query
 	const { data, error } = await supabase
 		.from('time_off')
 		.select(
@@ -42,33 +96,82 @@ export const getLeaveRequests = async ({ manager, contract, org, status }: { sta
 
 	if (error) return;
 
-	/* if current user is a manager, check if it's current user own boarding,
-	 * then check if it's for the team the current user is the manager of or the person is an independent reviewer
-	 *
-	 * else, just check if the person is an independent reviewer */
-	return data?.filter(timeoff => {
-		const levels = timeoff.levels as unknown as LEVEL[];
+	// Cache for default levels to avoid multiple fetches
+	let defaultLevels: any[] = [];
 
-		return manager
-			? manager.person !== timeoff.contract.id && (timeoff.contract.team == (contract.team?.id || contract.team) || timeoff.contract.direct_report == contract.id || levels.find(level => level.id == String(contract.id)))
-			: levels.find(level => level.id == String(contract.id));
-	});
+	// Process each leave request asynchronously
+	const filteredRequests = await Promise.all(
+		data?.map(async timeoff => {
+			// If request has no levels, try to get default levels from policy
+			if (!timeoff.levels?.length) {
+				// Only fetch default policy if we haven't already
+				if (!defaultLevels.length) {
+					const defaultPolicy = await getDefaultApprovalPolicy(org, 'time_off');
+					defaultLevels = defaultPolicy.data?.[0]?.levels || [];
+				}
+			}
+
+			// Use request's levels if they exist, otherwise use default levels
+			const levels = timeoff.levels?.length ? timeoff.levels : defaultLevels;
+
+			// Determine if request should be included based on manager status
+			const shouldInclude = manager
+				? // For managers: include if it's not their own request AND (they manage the team OR they're the direct report OR they're in approval levels)
+					manager.person !== timeoff.contract.id && (timeoff.contract.team == (contract.team?.id || contract.team) || timeoff.contract.direct_report == contract.id || levels.find(level => level.id == String(contract.id)))
+				: // For non-managers: include if they're in approval levels
+					levels.find(level => level.id == String(contract.id));
+
+			return shouldInclude ? timeoff : null;
+		}) || []
+	);
+
+	// Filter out null values (requests that didn't meet criteria)
+	return filteredRequests.filter(Boolean);
 };
 
+/**
+ * Fetches and filters boarding requests based on approval levels and manager status
+ * @param manager - Manager object if the current user is a manager
+ * @param contract - Contract object containing team and profile information
+ * @param org - Organization identifier
+ */
 export const getBoardingRequests = async ({ manager, contract, org }: { manager?: Tables<'managers'> | null; contract: any; org: string }) => {
 	const supabase = await createClient();
 
+	// Fetch all boarding requests for the organization
 	const { data, error } = await supabase.from('contract_check_list').select('*, contract:contracts!contract_check_list_contract_fkey(id, direct_report, job_title, team, profile:profiles!contracts_profile_fkey(first_name, last_name, id))').eq('org', org);
 
 	if (error) return error.message;
 
-	/* if current user is a manager, check if it's current user own boarding,
-	 * then check if it's for the team the current user is the manager of or the person is an independent reviewer
-	 *
-	 * else, just check if the person is an independent reviewer */
-	return data?.filter(boarding => {
-		const levels: any[] = boarding.levels;
+	// Cache for default levels to avoid multiple fetches
+	let defaultLevels: any[] = [];
 
-		return manager ? manager.person !== boarding.contract.id && (boarding.contract.team == (contract.team?.id || contract.team) || boarding.contract.direct_report == contract.id || levels.find(level => level.id == contract.id)) : levels.find(level => level.id == contract.id);
-	});
+	// Process each boarding request asynchronously
+	const filteredRequests = await Promise.all(
+		data?.map(async boarding => {
+			// If request has no levels, try to get default levels from policy
+			if (!boarding.levels?.length) {
+				// Only fetch default policy if we haven't already
+				if (!defaultLevels.length) {
+					const defaultPolicy = await getDefaultApprovalPolicy(org, 'boarding');
+					defaultLevels = defaultPolicy.data?.[0]?.levels || [];
+				}
+			}
+
+			// Use request's levels if they exist, otherwise use default levels
+			const levels: any[] = boarding.levels?.length ? boarding.levels : defaultLevels;
+
+			// Determine if request should be included based on manager status
+			const shouldInclude = manager
+				? // For managers: include if it's not their own request AND (they manage the team OR they're the direct report OR they're in approval levels)
+					manager.person !== boarding.contract.id && (boarding.contract.team == (contract.team?.id || contract.team) || boarding.contract.direct_report == contract.id || levels.find(level => level.id == contract.id))
+				: // For non-managers: include if they're in approval levels
+					levels.find(level => level.id == contract.id);
+
+			return shouldInclude ? boarding : null;
+		}) || []
+	);
+
+	// Filter out null values (requests that didn't meet criteria)
+	return filteredRequests.filter(Boolean);
 };

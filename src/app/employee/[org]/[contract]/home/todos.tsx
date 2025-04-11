@@ -27,10 +27,10 @@ export const Todos = async ({ profile, contract, org, team }: { profileId?: stri
 
 				<ul className="space-y-2 rounded-md pb-4 text-sm text-primary/90">
 					{todos.map((item, index) => {
-						if (typeof item == 'string') return;
+						if (!item || typeof item == 'string') return;
 						return (
-							<li key={index} className="flex items-center gap-2">
-								<div className="h-1 w-1 rounded-full bg-primary/40"></div>
+							<li key={index} className="flex items-center gap-1">
+								<div className="mt-0.5 h-1.5 w-1.5 rounded-full bg-primary/40"></div>
 
 								{!!(item as any)?.from && !!(item as any)?.to && (
 									<LeaveReview reviewType={'manager'} data={item as any} contract={(item as any)?.contract}>
