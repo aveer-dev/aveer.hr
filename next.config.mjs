@@ -2,9 +2,6 @@ import { withSentryConfig } from '@sentry/nextjs';
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
-	experimental: {
-		ppr: 'incremental'
-	},
 	reactStrictMode: false,
 	images: {
 		remotePatterns: [
@@ -25,10 +22,8 @@ const nextConfig = {
 			}
 		]
 	},
-	experimental: {
-		turbo: {
-			resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json']
-		}
+	turbopack: {
+		resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.mjs', '.json']
 	},
 	sassOptions: {
 		silenceDeprecations: ['legacy-js-api']

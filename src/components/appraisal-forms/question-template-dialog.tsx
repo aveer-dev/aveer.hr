@@ -1,0 +1,450 @@
+'use client';
+
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Plus, Grip, Settings2, Trash2, Loader2 } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Badge } from '../ui/badge';
+import { Tables } from '@/type/database.types';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
+import { QuestionSetupDialog } from './question-setup-dialog';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { createQuestionTemplate, updateQuestionTemplate, createTemplateQuestions, updateTemplateQuestions, getTemplateQuestions, deleteQuestionTemplate } from './appraisal.actions';
+import { Separator } from '../ui/separator';
+import { Label } from '../ui/label';
+import { LoadingSpinner } from '../ui/loader';
+import { DeleteTemplateDialog } from './delete-template-dialog';
+
+const questionSchema = z.object({
+	id: z.string(),
+	question: z.string().min(1, 'Question is required'),
+	managerQuestion: z.string().min(1, 'Manager question is required'),
+	type: z.enum(['textarea', 'yesno', 'scale', 'multiselect']),
+	options: z.array(z.string()).optional(),
+	required: z.boolean(),
+	teams: z.array(z.string()),
+	group: z.enum(['growth_and_development', 'company_values', 'competencies', 'private_manager_assessment'])
+});
+
+const templateSchema = z.object({
+	name: z.string().min(1, 'Template name is required'),
+	description: z.string().optional(),
+	is_draft: z.boolean(),
+	questions: z.array(questionSchema)
+});
+
+type QuestionFormValues = z.infer<typeof questionSchema>;
+type TemplateFormValues = z.infer<typeof templateSchema>;
+
+interface QuestionTemplateDialogProps {
+	children: React.ReactNode;
+	onSave?: () => void;
+	teams: Tables<'teams'>[];
+	template?: Tables<'question_templates'>;
+	template_questions?: Tables<'template_questions'>[];
+
+	org: string;
+}
+
+interface QuestionItemProps {
+	question: QuestionFormValues;
+	onEdit: () => void;
+	onRemove: () => void;
+}
+
+const QuestionItem = ({ question, onEdit, onRemove }: QuestionItemProps) => {
+	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: question.id });
+
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition
+	};
+
+	return (
+		<div ref={setNodeRef} style={style} className="flex gap-4">
+			<div className="flex flex-col items-center justify-between gap-4">
+				<Button type="button" {...attributes} {...listeners} variant={'ghost'} className="h-6 w-6 p-0">
+					<Grip className="h-3 w-3" />
+				</Button>
+
+				<div className="flex flex-col items-center gap-2">
+					<Button variant="ghost" type="button" size="icon" onClick={onEdit} className="h-6 w-6 p-0">
+						<Settings2 className="h-3 w-3" />
+					</Button>
+
+					<Button variant="ghost_destructive" type="button" size="icon" onClick={onRemove} className="h-6 w-6 p-0">
+						<Trash2 className="h-3 w-3" />
+					</Button>
+				</div>
+			</div>
+
+			<div className="flex w-full items-center gap-6 rounded-lg border p-4">
+				<div className="flex-1 space-y-4">
+					<div className="space-y-4">
+						<div className="space-y-4">
+							<div className="text-sm font-light leading-6">
+								{question.question}
+								{question.required && <span className="text-sm text-muted-foreground">*</span>}
+								<Badge variant="secondary" className="ml-2 whitespace-nowrap text-xs">
+									self review
+								</Badge>
+							</div>
+						</div>
+
+						<Separator />
+
+						<div className="flex items-center gap-2">
+							<div className="text-sm font-light leading-6">
+								{question.managerQuestion}
+								{question.required && <span className="text-sm text-muted-foreground">*</span>}
+								<Badge variant="secondary" className="ml-2 whitespace-nowrap text-xs">
+									manager review
+								</Badge>
+							</div>
+						</div>
+					</div>
+
+					{question.type === 'multiselect' && question.options && question.options.length > 0 && (
+						<div className="space-y-2">
+							<Label>Options</Label>
+							<div className="space-y-2">
+								{question.options.map((option, i) => (
+									<div key={i} className="flex items-center gap-2">
+										<Input value={option} readOnly />
+									</div>
+								))}
+							</div>
+						</div>
+					)}
+				</div>
+			</div>
+		</div>
+	);
+};
+
+export const QuestionTemplateDialog = ({ children, onSave, teams, template, template_questions, org }: QuestionTemplateDialogProps) => {
+	const [isOpen, setIsOpen] = useState(false);
+	const [isQuestionDialogOpen, setIsQuestionDialogOpen] = useState(false);
+	const [editingQuestion, setEditingQuestion] = useState<QuestionFormValues | undefined>();
+	const [selectedGroup, setSelectedGroup] = useState<QuestionFormValues['group']>('growth_and_development');
+	const [isSaving, setIsSaving] = useState(false);
+	const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+	const router = useRouter();
+
+	const form = useForm<TemplateFormValues>({
+		resolver: zodResolver(templateSchema),
+		defaultValues: {
+			name: template?.name || '',
+			description: template?.description || '',
+			is_draft: template?.is_draft || false,
+			questions:
+				template_questions?.map(q => ({
+					id: q.id.toString(),
+					question: q.question,
+					managerQuestion: q.manager_question || '',
+					type: q.type as QuestionFormValues['type'],
+					options: q.options || [],
+					required: q.required || false,
+					teams: q.team_ids?.map(id => id.toString()) || [],
+					group: (q.group as QuestionFormValues['group']) || 'growth_and_development'
+				})) || []
+		}
+	});
+
+	const sensors = useSensors(
+		useSensor(PointerSensor),
+		useSensor(KeyboardSensor, {
+			coordinateGetter: sortableKeyboardCoordinates
+		})
+	);
+
+	const handleDragEnd = (event: { active: any; over: any }) => {
+		const { active, over } = event;
+
+		if (active.id !== over.id) {
+			const questions = form.getValues('questions');
+			const oldIndex = questions.findIndex(q => q.id === active.id);
+			const newIndex = questions.findIndex(q => q.id === over.id);
+			form.setValue('questions', arrayMove(questions, oldIndex, newIndex));
+		}
+	};
+
+	const handleAddQuestion = (question: QuestionFormValues) => {
+		const currentQuestions = form.getValues('questions');
+		const questionWithGroup = { ...question, group: selectedGroup };
+		const updatedQuestions = editingQuestion ? currentQuestions.map(q => (q.id === question.id ? questionWithGroup : q)) : [...currentQuestions, questionWithGroup];
+
+		form.reset({
+			...form.getValues(),
+			questions: updatedQuestions
+		});
+
+		if (editingQuestion) {
+			setEditingQuestion(undefined);
+		}
+	};
+
+	const fetchTemplateQuestions = useCallback(async () => {
+		if (!template?.id) return;
+
+		try {
+			setIsLoadingQuestions(true);
+			const questions = await getTemplateQuestions({ org, templateId: template?.id });
+			const mappedQuestions = questions.map(q => ({
+				id: q.id.toString(),
+				question: q.question,
+				managerQuestion: q.manager_question || '',
+				type: q.type as QuestionFormValues['type'],
+				options: q.options || [],
+				required: q.required || false,
+				teams: q.team_ids?.map(id => id.toString()) || [],
+				group: (q.group as QuestionFormValues['group']) || 'growth_and_development',
+				org: org
+			}));
+			form.setValue('questions', mappedQuestions);
+			form.reset({ ...form.getValues(), questions: mappedQuestions });
+		} catch (error) {
+			toast.error('Error fetching template questions', { description: error instanceof Error ? error.message : 'Unknown error' });
+		} finally {
+			setIsLoadingQuestions(false);
+		}
+	}, [template?.id, org, form]);
+
+	const handleSave = async () => {
+		try {
+			setIsSaving(true);
+			const values = form.getValues();
+
+			if (template) {
+				// Update existing template
+				await updateQuestionTemplate(template.id, {
+					name: values.name,
+					description: values.description,
+					is_draft: values.is_draft
+				});
+
+				await updateTemplateQuestions(
+					template.id,
+					values.questions.map((q, index) => ({
+						id: parseInt(q.id),
+						question: q.question,
+						manager_question: q.managerQuestion,
+						type: q.type,
+						options: q.options,
+						required: q.required,
+						team_ids: q.teams.map(id => parseInt(id)),
+						order_index: index,
+						template_id: template.id,
+						org: org,
+						group: q.group
+					})),
+					template_questions || []
+				);
+			} else {
+				// Create new template
+				const newTemplate = await createQuestionTemplate({
+					name: values.name,
+					description: values.description,
+					is_draft: values.is_draft,
+					org: org
+				});
+
+				await createTemplateQuestions(
+					newTemplate.id,
+					values.questions.map((q, index) => ({
+						question: q.question,
+						manager_question: q.managerQuestion,
+						type: q.type,
+						options: q.options,
+						required: q.required,
+						team_ids: q.teams.map(id => parseInt(id)),
+						order_index: index,
+						template_id: newTemplate.id,
+						org: org,
+						group: q.group
+					})) || []
+				);
+			}
+
+			router.refresh();
+			setIsOpen(false);
+			form.reset();
+			toast.success('Question template saved successfully');
+			onSave?.();
+		} catch (error) {
+			console.error('Error saving template:', error);
+			toast.error('Failed to save question template');
+		} finally {
+			setIsSaving(false);
+		}
+	};
+
+	const handleOpenChange = (open: boolean) => {
+		setIsOpen(open);
+		form.reset();
+
+		if (open) {
+			setEditingQuestion(undefined);
+
+			if (template) {
+				form.setValue('name', template?.name || '');
+				form.setValue('description', template?.description || '');
+				form.setValue('is_draft', template?.is_draft || false);
+			}
+
+			if (!template_questions && template?.id && form.getValues('questions').length === 0) {
+				fetchTemplateQuestions();
+			}
+		}
+	};
+
+	return (
+		<>
+			<AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
+				<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+
+				<AlertDialogContent className="flex h-screen max-w-full flex-col overflow-y-auto p-0">
+					<AlertDialogHeader className="mx-auto mb-8 w-full max-w-2xl pt-16">
+						<AlertDialogTitle>{template ? 'Edit' : 'Create'} Question Template</AlertDialogTitle>
+						<AlertDialogDescription>{template ? 'Edit' : 'Create'} a new question template to be used in the appraisal process</AlertDialogDescription>
+					</AlertDialogHeader>
+
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(handleSave)} className="mx-auto flex w-full max-w-2xl flex-col gap-10">
+							<FormField
+								control={form.control}
+								name="name"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Template Name</FormLabel>
+										<FormControl>
+											<Input {...field} placeholder="Enter template name" />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="description"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Description</FormLabel>
+										<FormControl>
+											<Textarea {...field} placeholder="Enter template description" />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<div className="space-y-8">
+								{[
+									{ id: 'growth_and_development', title: 'Growth and Development' },
+									{ id: 'company_values', title: 'Company Values' },
+									{ id: 'competencies', title: 'Competencies' },
+									{ id: 'private_manager_assessment', title: 'Private Manager Assessment' }
+								].map(group => (
+									<div key={group.id} className="space-y-4">
+										<div className="sticky top-0 !-mb-2 flex items-center justify-between rounded-md bg-background p-2 backdrop-blur-lg">
+											<FormLabel className="text-lg font-semibold">{group.title}</FormLabel>
+											<Button
+												variant="outline"
+												type="button"
+												onClick={() => {
+													setSelectedGroup(group.id as QuestionFormValues['group']);
+													setIsQuestionDialogOpen(true);
+												}}>
+												<Plus className="mr-2" size={12} />
+												Add Question
+											</Button>
+										</div>
+
+										{isLoadingQuestions ? (
+											<div className="flex h-36 w-full flex-col items-center justify-center gap-4 rounded-md border border-dashed">
+												<LoadingSpinner />
+												<p className="text-xs text-muted-foreground">Loading questions...</p>
+											</div>
+										) : (
+											<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+												<SortableContext
+													items={form
+														.getValues('questions')
+														.filter(q => q.group === group.id)
+														.map(q => q.id)}
+													strategy={verticalListSortingStrategy}>
+													<div className="space-y-4">
+														{form
+															.getValues('questions')
+															.filter(q => q.group === group.id)
+															.map((question, index) => (
+																<QuestionItem
+																	key={question.id}
+																	question={question}
+																	onEdit={() => {
+																		setEditingQuestion(question);
+																		setSelectedGroup(question.group);
+																		setIsQuestionDialogOpen(true);
+																	}}
+																	onRemove={() => {
+																		const questions = form.getValues('questions');
+																		const updatedQuestions = questions.filter(q => q.id !== question.id);
+																		form.setValue('questions', updatedQuestions);
+																		form.reset({ ...form.getValues(), questions: updatedQuestions });
+																	}}
+																/>
+															))}
+													</div>
+												</SortableContext>
+											</DndContext>
+										)}
+
+										{form.getValues('questions').filter(q => q.group === group.id).length === 0 && !isLoadingQuestions && (
+											<div className="flex h-36 w-full flex-col items-center justify-center gap-4 rounded-md border border-dashed">
+												<p className="text-xs text-muted-foreground">No questions added yet</p>
+											</div>
+										)}
+									</div>
+								))}
+							</div>
+
+							<div className="sticky bottom-0 flex justify-end gap-4 border-t p-4 backdrop-blur-xl">
+								{template && (
+									<DeleteTemplateDialog
+										templateId={template.id}
+										org={org}
+										onSuccess={() => {
+											setIsOpen(false);
+											onSave?.();
+										}}
+									/>
+								)}
+
+								<Button type="button" variant="outline" className="ml-auto" onClick={() => setIsOpen(false)}>
+									Cancel
+								</Button>
+								<Button type="submit" disabled={isSaving}>
+									{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+									{template ? 'Save Changes' : 'Create Template'}
+								</Button>
+							</div>
+						</form>
+					</Form>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			<QuestionSetupDialog open={isQuestionDialogOpen} onOpenChange={setIsQuestionDialogOpen} question={editingQuestion} onSave={handleAddQuestion} teams={teams} group={selectedGroup} />
+		</>
+	);
+};

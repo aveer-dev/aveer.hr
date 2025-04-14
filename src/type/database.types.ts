@@ -106,7 +106,7 @@ export type Database = {
             foreignKeyName: "appraisal_answers_appraisal_fkey"
             columns: ["appraisal"]
             isOneToOne: false
-            referencedRelation: "appraisal_history"
+            referencedRelation: "appraisal_cycles"
             referencedColumns: ["id"]
           },
           {
@@ -146,35 +146,64 @@ export type Database = {
           },
         ]
       }
-      appraisal_history: {
+      appraisal_cycles: {
         Row: {
           created_at: string
+          created_by: string
+          description: string | null
           end_date: string
           entity: number | null
-          group: string
           id: number
+          manager_review_due_date: string
+          name: string
           org: string
+          question_template: number
+          self_review_due_date: string
           start_date: string
         }
         Insert: {
           created_at?: string
+          created_by?: string
+          description?: string | null
           end_date: string
           entity?: number | null
-          group: string
           id?: number
+          manager_review_due_date: string
+          name: string
           org: string
+          question_template: number
+          self_review_due_date: string
           start_date?: string
         }
         Update: {
           created_at?: string
+          created_by?: string
+          description?: string | null
           end_date?: string
           entity?: number | null
-          group?: string
           id?: number
+          manager_review_due_date?: string
+          name?: string
           org?: string
+          question_template?: number
+          self_review_due_date?: string
           start_date?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "appraisal_cycles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_cycles_question_template_fkey"
+            columns: ["question_template"]
+            isOneToOne: false
+            referencedRelation: "question_templates"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appraisal_history_entity_fkey"
             columns: ["entity"]
@@ -2121,6 +2150,54 @@ export type Database = {
           },
         ]
       }
+      question_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          description: string | null
+          id: number
+          is_draft: boolean
+          name: string
+          org: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          id?: number
+          is_draft?: boolean
+          name: string
+          org: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          id?: number
+          is_draft?: boolean
+          name?: string
+          org?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_templates_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
       reminders: {
         Row: {
           contract: number
@@ -2282,6 +2359,69 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
+          },
+        ]
+      }
+      template_questions: {
+        Row: {
+          created_at: string | null
+          group: Database["public"]["Enums"]["question_group"]
+          id: number
+          manager_question: string | null
+          options: string[] | null
+          order_index: number
+          org: string
+          question: string
+          required: boolean | null
+          team_ids: number[] | null
+          template_id: number
+          type: Database["public"]["Enums"]["question_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          group?: Database["public"]["Enums"]["question_group"]
+          id?: number
+          manager_question?: string | null
+          options?: string[] | null
+          order_index: number
+          org: string
+          question: string
+          required?: boolean | null
+          team_ids?: number[] | null
+          template_id: number
+          type: Database["public"]["Enums"]["question_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          group?: Database["public"]["Enums"]["question_group"]
+          id?: number
+          manager_question?: string | null
+          options?: string[] | null
+          order_index?: number
+          org?: string
+          question?: string
+          required?: boolean | null
+          team_ids?: number[] | null
+          template_id?: number
+          type?: Database["public"]["Enums"]["question_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_questions_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "template_questions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "question_templates"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2511,6 +2651,12 @@ export type Database = {
         | "cancelled"
       leave_type_enum: "paid" | "sick" | "maternity" | "paternity" | "unpaid"
       policy_types: "time_off" | "role_application" | "boarding"
+      question_group:
+        | "growth_and_development"
+        | "company_values"
+        | "competencies"
+        | "private_manager_assessment"
+      question_type: "textarea" | "yesno" | "scale" | "multiselect"
       role_status: "open" | "close"
       third_party_auth_platforms: "google" | "deel"
       user_type: "admin" | "employee"
@@ -2652,6 +2798,13 @@ export const Constants = {
       leave_status_enum: ["pending", "denied", "approved", "more", "cancelled"],
       leave_type_enum: ["paid", "sick", "maternity", "paternity", "unpaid"],
       policy_types: ["time_off", "role_application", "boarding"],
+      question_group: [
+        "growth_and_development",
+        "company_values",
+        "competencies",
+        "private_manager_assessment",
+      ],
+      question_type: ["textarea", "yesno", "scale", "multiselect"],
       role_status: ["open", "close"],
       third_party_auth_platforms: ["google", "deel"],
       user_type: ["admin", "employee"],
