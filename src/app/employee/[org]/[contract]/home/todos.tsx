@@ -25,7 +25,7 @@ export const Todos = async ({ profile, contract, org, team }: { profileId?: stri
 			<section className={cn(contract.status !== 'signed' && 'pointer-events-none opacity-50 blur-sm', 'w-full')}>
 				<h2 className="mb-4 text-sm font-normal text-support">Todos</h2>
 
-				<ul className="space-y-2 rounded-md pb-4 text-sm text-primary/90">
+				<ul className="max-h-[300px] space-y-2 overflow-y-auto rounded-md pb-4 text-sm text-primary/90">
 					{todos.map((item, index) => {
 						if (!item || typeof item == 'string') return;
 						return (

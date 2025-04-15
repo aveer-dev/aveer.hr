@@ -26,25 +26,28 @@ export const Applicants = async ({ org, contract, manager }: props) => {
 
 				{typeof applicants !== 'string' && applicants.length > 0 && (
 					<ul className="space-y-10">
-						{applicants.map(applicant => (
-							<li key={applicant.id}>
-								<ApplicantDetails userRole={manager || applicant.role.direct_report == contract.id ? 'manager' : 'employee'} contractId={contract.id} data={applicant as any} className="w-full text-left">
-									<Card className="flex w-full items-center justify-between border-none p-3 transition-all duration-500 group-hover:bg-accent/80 group-focus:bg-accent/80 group-focus-visible:bg-accent/80">
-										<div className="space-y-2">
-											<div className="flex items-center gap-2">
-												<h2 className="text-xs">
-													{applicant?.first_name} {applicant?.last_name}
-												</h2>
-												<ApplicantBadge stage={applicant.stage} />
-											</div>
-											<p className="text-xs text-muted-foreground">{applicant.role.job_title}</p>
-										</div>
+						{applicants.map(
+							applicant =>
+								applicant && (
+									<li key={applicant.id}>
+										<ApplicantDetails userRole={manager || applicant.role.direct_report == contract.id ? 'manager' : 'employee'} contractId={contract.id} data={applicant as any} className="w-full text-left">
+											<Card className="flex w-full items-center justify-between border-none p-3 transition-all duration-500 group-hover:bg-accent/80 group-focus:bg-accent/80 group-focus-visible:bg-accent/80">
+												<div className="space-y-2">
+													<div className="flex items-center gap-2">
+														<h2 className="text-xs">
+															{applicant?.first_name} {applicant?.last_name}
+														</h2>
+														<ApplicantBadge stage={applicant.stage} />
+													</div>
+													<p className="text-xs text-muted-foreground">{applicant.role.job_title}</p>
+												</div>
 
-										<ChevronRight size={12} />
-									</Card>
-								</ApplicantDetails>
-							</li>
-						))}
+												<ChevronRight size={12} />
+											</Card>
+										</ApplicantDetails>
+									</li>
+								)
+						)}
 					</ul>
 				)}
 
