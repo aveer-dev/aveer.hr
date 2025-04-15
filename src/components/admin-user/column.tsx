@@ -95,8 +95,11 @@ export const adminUserColumn: ColumnDef<Tables<'profiles_roles'> & { profile: Ta
 		}
 	},
 	{
-		accessorKey: 'role',
-		header: 'Role'
+		id: 'role',
+		header: 'Role',
+		cell: ({ row }) => {
+			return <div className="">{row.original.role === 'roles_manager' ? 'Roles Manager' : 'Admin'}</div>;
+		}
 	},
 	{
 		id: 'createdAt',

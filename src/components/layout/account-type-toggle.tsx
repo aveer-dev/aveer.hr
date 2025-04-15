@@ -31,17 +31,21 @@ export const AccountTypeToggle = ({ orgId }: { orgId?: string }) => {
 
 	const getOrgs = useCallback(
 		async (profile: string) => {
-			const { data, error } = await supabase.from('profiles_roles').select('organisation:organisations!profiles_roles_organisation_fkey(id, name, subdomain)').match({ profile, disable: false });
+			const { data, error } = await supabase.from('profiles_roles').select('organisation:organisations!profiles_roles_organisation_fkey(id, name, subdomain), role').match({ profile, disable: false });
 			if (error) return toast.error('Unable to fetch organisations', { description: error.message });
 
 			const links: LINK = {
 				type: 'admin',
 				links: data.map(org => ({
 					id: `${org.organisation?.subdomain}`,
-					link: process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? `http://${org.organisation?.subdomain}.${process.env.NEXT_PUBLIC_DOMAIN}/` : `/${org.organisation?.subdomain}`,
+					link:
+						process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true'
+							? `http://${org.organisation?.subdomain}.${process.env.NEXT_PUBLIC_DOMAIN}/${org.role == 'roles_manager' ? 'open-roles' : ''}`
+							: `/${org.organisation?.subdomain}/${org.role == 'roles_manager' ? 'open-roles' : ''}`,
 					label: org.organisation?.name as string
 				}))
 			};
+
 			setOrgs(() => links);
 			if (orgId !== 'employee') setSubLinks(links);
 		},

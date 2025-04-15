@@ -1,11 +1,10 @@
 import { CircleHelp } from 'lucide-react';
-import { NavMenu } from '@/components/ui/nav-menu';
 import { LogoutButton } from './logout-button';
 import { AccountTypeToggle } from './account-type-toggle';
 import { createClient } from '@/utils/supabase/server';
 import { NavLink } from '@/components/ui/link';
-import { Inbox } from './inbox/messages';
 import { PushNotificationBanner } from './push-notification-banner';
+import { AppNav } from './app-nav';
 
 export const Header = async ({ params }: { params?: Promise<{ [key: string]: string }> }) => {
 	const supabase = await createClient();
@@ -55,13 +54,7 @@ export const Header = async ({ params }: { params?: Promise<{ [key: string]: str
 				</div>
 			</div>
 
-			{orgId && orgId !== 'employee' && orgId !== 'app' && data?.user && (
-				<div className="no-scrollbar flex items-center justify-between overflow-x-auto px-6 pt-4">
-					<NavMenu orgId={orgId} />
-
-					<Inbox org={orgId} sender={data.user.id} />
-				</div>
-			)}
+			{orgId && orgId !== 'employee' && orgId !== 'app' && data?.user && <AppNav orgId={orgId} userId={data.user.id} />}
 		</header>
 	);
 };
