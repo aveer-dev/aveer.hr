@@ -2488,7 +2488,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin"
+      app_role: "admin" | "roles_manager"
       boarding_state: "initial" | "pending" | "approved"
       boarding_type: "on" | "off"
       calendar_platform: "google"

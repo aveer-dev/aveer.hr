@@ -6,6 +6,7 @@ import { Undo2 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { redirect } from 'next/navigation';
+import { RoleManagerWrapper } from './role-manager-wrapper';
 
 export const OrgWrapper = async ({ params, children }: { params: Promise<{ [key: string]: string }>; children: ReactNode }) => {
 	const org = (await params).org;
@@ -52,6 +53,11 @@ export const OrgWrapper = async ({ params, children }: { params: Promise<{ [key:
 				</div>
 			</Error404Wrapper>
 		);
+
+	if (adminUser && adminUser.length) {
+		if (adminUser[0].role == 'roles_manager') return <RoleManagerWrapper orgId={org}>{children}</RoleManagerWrapper>;
+		if (adminUser[0].role == 'admin') return children;
+	}
 
 	return children;
 };

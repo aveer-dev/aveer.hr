@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { addAdminPerson } from './admin-actions';
 
 const formSchema = z.object({
-	role: z.enum(['admin']),
+	role: z.enum(['admin', 'roles_manager']),
 	profile: z.string().min(2, { message: 'Select an employee' })
 });
 
@@ -86,6 +86,28 @@ export const AddAdmin = ({ org, employees }: { org: string; employees?: Tables<'
 												</SelectContent>
 											</Select>
 
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="role"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Role</FormLabel>
+											<Select onValueChange={field.onChange} defaultValue={field.value}>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Select role" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													<SelectItem value="admin">Admin</SelectItem>
+													<SelectItem value="roles_manager">Roles Manager</SelectItem>
+												</SelectContent>
+											</Select>
 											<FormMessage />
 										</FormItem>
 									)}
