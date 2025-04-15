@@ -5,6 +5,12 @@ import { createClient } from '@/utils/supabase/server';
 import { TablesInsert, TablesUpdate } from '@/type/database.types';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
 
+interface Answer {
+	question_id: number;
+	answer: any;
+	[key: string]: any;
+}
+
 export async function createQuestionTemplate(data: TablesInsert<'question_templates'>) {
 	const supabase = await createClient();
 	const { data: template, error } = await supabase.from('question_templates').insert(data).select().single();
@@ -190,3 +196,77 @@ export async function deleteQuestionTemplate(id: number, org: string) {
 
 	if (templateError) throw templateError;
 }
+
+export const autoSaveAnswer = async ({ answerId, questionId, value, org, appraisalCycleId, contractId, managerContractId }: { answerId?: number; questionId: number; value: any; org: string; appraisalCycleId: number; contractId: number; managerContractId: number | null }) => {
+	const supabase = await createClient();
+
+	if (answerId) {
+		const { data: existingAnswer } = await supabase.from('appraisal_answers').select('answers').eq('id', answerId).single();
+
+		if (existingAnswer) {
+			const answers = (existingAnswer.answers as unknown as Answer[]).map(a => (a.question_id === questionId ? { ...a, answer: value } : a));
+
+			const { data, error } = await supabase.from('appraisal_answers').update({ answers }).eq('id', answerId).select();
+
+			if (error) throw error;
+			return data;
+		}
+	} else {
+		const { data, error } = await supabase
+			.from('appraisal_answers')
+			.insert({
+				appraisal: appraisalCycleId,
+				contract: contractId,
+				manager_contract: managerContractId,
+				org,
+				answers: [{ question_id: questionId, answer: value }],
+				group: 'employee'
+			})
+			.select();
+
+		if (error) throw error;
+		return data;
+	}
+};
+
+export const submitAppraisal = async ({
+	answerId,
+	appraisalCycleId,
+	contractId,
+	managerContractId,
+	org,
+	answers
+}: {
+	answerId?: number;
+	appraisalCycleId: number;
+	contractId: number;
+	managerContractId: number | null;
+	org: string;
+	answers: { question_id: number; answer: any }[];
+}) => {
+	const supabase = await createClient();
+
+	if (answerId) {
+		const { error } = await supabase
+			.from('appraisal_answers')
+			.update({
+				submission_date: new Date().toISOString(),
+				answers
+			})
+			.eq('id', answerId);
+
+		if (error) throw error;
+	} else {
+		const { error } = await supabase.from('appraisal_answers').insert({
+			appraisal: appraisalCycleId,
+			contract: contractId,
+			manager_contract: managerContractId,
+			org,
+			answers,
+			submission_date: new Date().toISOString(),
+			group: 'employee'
+		});
+
+		if (error) throw error;
+	}
+};
