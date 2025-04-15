@@ -25,7 +25,7 @@ export const Timeoff = async ({ org, contract, reviewType, manager }: props) => 
 
 			<Suspense>
 				<Separator className="mb-4 mt-2" />
-				{leaveRequests && <DataTable data={leaveRequests.map(item => ({ ...item, reviewType: !manager && reviewType !== 'admin' && item.contract.direct_report == contract.id ? 'manager' : reviewType, activeUserContract: contract.id }))} columns={columns} />}
+				{leaveRequests && <DataTable data={leaveRequests.map(item => ({ ...item, reviewType: !manager && reviewType !== 'admin' && item?.contract.direct_report == contract.id ? 'manager' : reviewType, activeUserContract: contract.id })) as any} columns={columns} />}
 			</Suspense>
 		</section>
 	);

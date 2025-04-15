@@ -26,29 +26,32 @@ export const BoardingsReview = async ({ org, contract, manager }: props) => {
 
 				{typeof boardingRequests !== 'string' && boardingRequests && boardingRequests.length > 0 && (
 					<ul className="space-y-10">
-						{boardingRequests.map(boarding => (
-							<li key={boarding.id}>
-								<BoardingReview data={boarding as any} contractId={contract.id} className="w-full text-left" reviewType={manager || boarding.contract.direct_report == contract.id ? 'manager' : 'employee'}>
-									<Button variant={'outline'} className="flex h-fit w-full items-center justify-between px-3 py-4 text-left">
-										<div className="space-y-2">
-											<div className="flex items-center gap-2">
-												<h2 className="text-xs">
-													{boarding?.contract?.profile?.first_name} {boarding?.contract?.profile?.last_name}
-												</h2>
+						{boardingRequests.map(
+							boarding =>
+								boarding && (
+									<li key={boarding.id}>
+										<BoardingReview data={boarding as any} contractId={contract.id} className="w-full text-left" reviewType={manager || boarding.contract.direct_report == contract.id ? 'manager' : 'employee'}>
+											<Button variant={'outline'} className="flex h-fit w-full items-center justify-between px-3 py-4 text-left">
+												<div className="space-y-2">
+													<div className="flex items-center gap-2">
+														<h2 className="text-xs">
+															{boarding?.contract?.profile?.first_name} {boarding?.contract?.profile?.last_name}
+														</h2>
 
-												<Badge className="h-5" variant={boarding.state == 'approved' ? 'secondary-success' : boarding.state == 'pending' ? 'secondary-warn' : 'outline'}>
-													{boarding.state}
-												</Badge>
-											</div>
+														<Badge className="h-5" variant={boarding.state == 'approved' ? 'secondary-success' : boarding.state == 'pending' ? 'secondary-warn' : 'outline'}>
+															{boarding.state}
+														</Badge>
+													</div>
 
-											<p className="text-xs text-muted-foreground">{boarding.contract.job_title}</p>
-										</div>
+													<p className="text-xs text-muted-foreground">{boarding.contract.job_title}</p>
+												</div>
 
-										<ChevronRight size={12} />
-									</Button>
-								</BoardingReview>
-							</li>
-						))}
+												<ChevronRight size={12} />
+											</Button>
+										</BoardingReview>
+									</li>
+								)
+						)}
 					</ul>
 				)}
 
