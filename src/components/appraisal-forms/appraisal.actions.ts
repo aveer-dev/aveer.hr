@@ -201,72 +201,65 @@ export const autoSaveAnswer = async ({ answerId, questionId, value, org, apprais
 	const supabase = await createClient();
 
 	if (answerId) {
+		// Update existing answer
 		const { data: existingAnswer } = await supabase.from('appraisal_answers').select('answers').eq('id', answerId).single();
 
 		if (existingAnswer) {
-			const answers = (existingAnswer.answers as unknown as Answer[]).map(a => (a.question_id === questionId ? { ...a, answer: value } : a));
+			const existingAnswers = existingAnswer.answers as unknown as Answer[];
+			const answerIndex = existingAnswers.findIndex(a => a.question_id === questionId);
+
+			let answers: Answer[];
+			// Question not found in existing answers, append new answer
+			if (answerIndex === -1) answers = [...existingAnswers, { question_id: questionId, answer: value }];
+			// Update existing answer
+			else answers = existingAnswers.map(a => (a.question_id === questionId ? { ...a, answer: value } : a));
 
 			const { data, error } = await supabase.from('appraisal_answers').update({ answers }).eq('id', answerId).select();
-
 			if (error) throw error;
 			return data;
 		}
 	} else {
-		const { data, error } = await supabase
-			.from('appraisal_answers')
-			.insert({
-				appraisal: appraisalCycleId,
-				contract: contractId,
-				manager_contract: managerContractId,
-				org,
-				answers: [{ question_id: questionId, answer: value }],
-				group: 'employee'
-			})
-			.select();
+		// Create new answer
+		const { data: existingAnswers } = await supabase.from('appraisal_answers').select('*').eq('appraisal_cycle_id', appraisalCycleId).eq('contract_id', contractId).eq('org', org).single();
 
-		if (error) throw error;
-		return data;
+		if (existingAnswers) {
+			// Update existing record with new answer
+			const answers = [...(existingAnswers.answers as unknown as Answer[]), { question_id: questionId, answer: value }];
+			const { data, error } = await supabase.from('appraisal_answers').update({ answers }).eq('id', existingAnswers.id).select();
+			if (error) throw error;
+			return data;
+		} else {
+			// Create new record
+			const { data, error } = await supabase
+				.from('appraisal_answers')
+				.insert({
+					appraisal_cycle_id: appraisalCycleId,
+					contract_id: contractId,
+					manager_contract_id: managerContractId,
+					org,
+					answers: [{ question_id: questionId, answer: value }],
+					status: 'draft'
+				})
+				.select();
+			if (error) throw error;
+			return data;
+		}
 	}
 };
 
-export const submitAppraisal = async ({
-	answerId,
-	appraisalCycleId,
-	contractId,
-	managerContractId,
-	org,
-	answers
-}: {
-	answerId?: number;
-	appraisalCycleId: number;
-	contractId: number;
-	managerContractId: number | null;
-	org: string;
-	answers: { question_id: number; answer: any }[];
-}) => {
+export const submitAppraisal = async ({ answerId, answers }: { answerId?: number; answers: { question_id: number; answer: any }[] }) => {
 	const supabase = await createClient();
 
-	if (answerId) {
-		const { error } = await supabase
-			.from('appraisal_answers')
-			.update({
-				submission_date: new Date().toISOString(),
-				answers
-			})
-			.eq('id', answerId);
+	if (!answerId) throw 'Anwer id required';
 
-		if (error) throw error;
-	} else {
-		const { error } = await supabase.from('appraisal_answers').insert({
-			appraisal: appraisalCycleId,
-			contract: contractId,
-			manager_contract: managerContractId,
-			org,
+	const { error } = await supabase
+		.from('appraisal_answers')
+		.update({
+			employee_submission_date: new Date().toISOString(),
 			answers,
-			submission_date: new Date().toISOString(),
-			group: 'employee'
-		});
+			status: 'submitted'
+		})
+		.eq('id', answerId);
 
-		if (error) throw error;
-	}
+	if (error) throw error;
 };

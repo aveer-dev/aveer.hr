@@ -36,96 +36,62 @@ export type Database = {
     Tables: {
       appraisal_answers: {
         Row: {
-          answers: Json[]
-          appraisal: number
-          contract: number
-          contract_note: string | null
-          contract_score: number
-          created_at: string
-          entity: number | null
-          group: string
+          answers: Json
+          appraisal_cycle_id: number | null
+          contract_id: number | null
+          created_at: string | null
+          employee_submission_date: string | null
           id: number
-          manager_answers: Json[] | null
-          manager_contract: number | null
-          manager_note: string | null
-          manager_score: number | null
+          manager_contract_id: number | null
           manager_submission_date: string | null
           org: string | null
-          org_note: string | null
-          org_profile: string | null
-          org_score: number | null
-          org_submission_date: string | null
-          submission_date: string | null
+          status: Database["public"]["Enums"]["appraisal_status"] | null
+          updated_at: string | null
         }
         Insert: {
-          answers?: Json[]
-          appraisal: number
-          contract: number
-          contract_note?: string | null
-          contract_score?: number
-          created_at?: string
-          entity?: number | null
-          group: string
-          id?: number
-          manager_answers?: Json[] | null
-          manager_contract?: number | null
-          manager_note?: string | null
-          manager_score?: number | null
+          answers?: Json
+          appraisal_cycle_id?: number | null
+          contract_id?: number | null
+          created_at?: string | null
+          employee_submission_date?: string | null
+          id?: never
+          manager_contract_id?: number | null
           manager_submission_date?: string | null
           org?: string | null
-          org_note?: string | null
-          org_profile?: string | null
-          org_score?: number | null
-          org_submission_date?: string | null
-          submission_date?: string | null
+          status?: Database["public"]["Enums"]["appraisal_status"] | null
+          updated_at?: string | null
         }
         Update: {
-          answers?: Json[]
-          appraisal?: number
-          contract?: number
-          contract_note?: string | null
-          contract_score?: number
-          created_at?: string
-          entity?: number | null
-          group?: string
-          id?: number
-          manager_answers?: Json[] | null
-          manager_contract?: number | null
-          manager_note?: string | null
-          manager_score?: number | null
+          answers?: Json
+          appraisal_cycle_id?: number | null
+          contract_id?: number | null
+          created_at?: string | null
+          employee_submission_date?: string | null
+          id?: never
+          manager_contract_id?: number | null
           manager_submission_date?: string | null
           org?: string | null
-          org_note?: string | null
-          org_profile?: string | null
-          org_score?: number | null
-          org_submission_date?: string | null
-          submission_date?: string | null
+          status?: Database["public"]["Enums"]["appraisal_status"] | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "appraisal_answers_appraisal_fkey"
-            columns: ["appraisal"]
+            foreignKeyName: "appraisal_answers_appraisal_cycle_id_fkey"
+            columns: ["appraisal_cycle_id"]
             isOneToOne: false
             referencedRelation: "appraisal_cycles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "appraisal_answers_contract_fkey"
-            columns: ["contract"]
+            foreignKeyName: "appraisal_answers_contract_id_fkey"
+            columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "appraisal_answers_entity_fkey"
-            columns: ["entity"]
-            isOneToOne: false
-            referencedRelation: "legal_entities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "appraisal_answers_manager_contract_fkey"
-            columns: ["manager_contract"]
+            foreignKeyName: "appraisal_answers_manager_contract_id_fkey"
+            columns: ["manager_contract_id"]
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id"]
@@ -136,13 +102,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
-          },
-          {
-            foreignKeyName: "appraisal_answers_org_profile_fkey"
-            columns: ["org_profile"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -2629,6 +2588,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "roles_manager"
+      appraisal_status: "draft" | "submitted" | "manager_reviewed"
       boarding_state: "initial" | "pending" | "approved"
       boarding_type: "on" | "off"
       calendar_platform: "google"
@@ -2779,7 +2739,8 @@ export const Constants = {
   },
   public: {
     Enums: {
-      app_role: ["admin"],
+      app_role: ["admin", "roles_manager"],
+      appraisal_status: ["draft", "submitted", "manager_reviewed"],
       boarding_state: ["initial", "pending", "approved"],
       boarding_type: ["on", "off"],
       calendar_platform: ["google"],

@@ -39,7 +39,7 @@ export const DeleteAppraisalCycle = ({ org, cycle }: Props) => {
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant="destructive" size="icon" className="h-8 w-8">
+				<Button variant="secondary_destructive" size="icon" className="h-8 w-8">
 					{isDeleting ? <LoadingSpinner className="text-destructive-foreground" /> : <Trash2 size={12} />}
 				</Button>
 			</AlertDialogTrigger>

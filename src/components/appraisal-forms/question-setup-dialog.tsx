@@ -52,7 +52,6 @@ interface QuestionSetupDialogProps {
 
 export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, teams, group }: QuestionSetupDialogProps) => {
 	const [isTypePopoverOpen, setIsTypePopoverOpen] = useState(false);
-	const [isTeamPopoverOpen, setIsTeamPopoverOpen] = useState(false);
 
 	const form = useForm<QuestionFormValues>({
 		resolver: zodResolver(questionSchema),
@@ -62,7 +61,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 			managerQuestion: question?.managerQuestion || '',
 			type: question?.type || 'textarea',
 			options: question?.options || [],
-			required: question?.required || false,
+			required: question?.required || true,
 			teams: question?.teams || [],
 			group: group
 		}

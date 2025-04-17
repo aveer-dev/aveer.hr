@@ -43,8 +43,8 @@ export const AppraisalReviewDialog = async ({ org, contract, appraisalCycle, ans
 
 					<div className="space-y-8">
 						{questions.map(question => {
-							const employeeAnswer: any = answer?.answers.find((a: any) => a.question_id === question.id);
-							const managerAnswer: any = answer?.answers.find((a: any) => a.question_id === question.id);
+							const employeeAnswer: any = (answer?.answers as any[])?.find((a: any) => a.question_id === question.id);
+							const managerAnswer: any = (answer?.answers as any[])?.find((a: any) => a.question_id === question.id);
 
 							return (
 								<div key={question.id} className="space-y-4">

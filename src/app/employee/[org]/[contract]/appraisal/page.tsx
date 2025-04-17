@@ -24,13 +24,8 @@ export default async function AppraisalPage(props: { params: Promise<{ [key: str
 	if (contract.status !== 'signed') redirect('./home');
 
 	return (
-		<div className="container mx-auto py-8">
+		<div className="container mx-auto px-0 py-8">
 			<div className="space-y-6">
-				<div>
-					<h1 className="text-2xl font-semibold">Performance Appraisals</h1>
-					<p className="text-sm text-muted-foreground">Complete your self-review and view feedback from your manager</p>
-				</div>
-
 				<EmployeeAppraisalList org={params.org} contract={contract} />
 			</div>
 		</div>
