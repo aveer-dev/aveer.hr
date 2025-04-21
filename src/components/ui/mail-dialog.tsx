@@ -10,8 +10,8 @@ import { Input } from './input';
 import { ReactNode, useEffect, useState } from 'react';
 import { Badge } from './badge';
 import { createClient } from '@/utils/supabase/client';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Info } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from './scroll-area';
 
 interface props {
 	message?: string;
@@ -31,6 +31,7 @@ const supabase = createClient();
 
 export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, recipients, onClose, name, title, description, children, replyTo }: props) => {
 	const [copyEmail, setCopyEmail] = useState('');
+	const [showMoreRecipients, setShowMoreRecipients] = useState(false);
 
 	useEffect(() => {
 		const getEmail = async () => {
@@ -77,56 +78,69 @@ export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, reci
 	return (
 		<AlertDialog open={isOpen} onOpenChange={state => toggleDialog && toggleDialog(state)}>
 			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-			<AlertDialogContent>
-				<form action={sendMessage} className="grid gap-8">
-					<AlertDialogHeader>
-						<AlertDialogTitle>{title || 'Send a message'}</AlertDialogTitle>
-						<AlertDialogDescription>{description || `Fill form below to send mail to`}</AlertDialogDescription>
-						<div className="flex flex-wrap gap-2">
-							{recipients.map(recipient => (
-								<Badge className="w-fit" variant={'secondary'} key={recipient}>
-									{recipient}
-								</Badge>
-							))}
-						</div>
-					</AlertDialogHeader>
+			<AlertDialogContent className="h-screen w-screen max-w-none overflow-y-auto">
+				<div className="flex h-full w-full items-center justify-center">
+					<form action={sendMessage} className="grid w-full max-w-lg gap-8">
+						<AlertDialogHeader>
+							<AlertDialogTitle>{title || 'Send a message'}</AlertDialogTitle>
+							<AlertDialogDescription>{description || `Fill form below to send mail to`}</AlertDialogDescription>
 
-					<section className="grid gap-4">
-						<div className="grid gap-2">
-							<Label htmlFor="subject" className="flex gap-1">
-								Cc
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<button>
-												<Info className="text-label" size={12} />
-											</button>
-										</TooltipTrigger>
-										<TooltipContent>
-											<p>Comma separated emails</p>
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
-							</Label>
-							<Input defaultValue={copyEmail} name="cc" id="cc" />
-						</div>
+							<div className="flex flex-wrap gap-2">
+								{recipients.slice(0, 4).map(recipient => (
+									<Badge className="w-fit" variant={'secondary'} key={recipient}>
+										{recipient}
+									</Badge>
+								))}
+								{recipients.length > 4 && (
+									<Popover open={showMoreRecipients} modal={true} onOpenChange={setShowMoreRecipients}>
+										<PopoverTrigger asChild>
+											<Badge className="w-fit cursor-pointer" variant={'secondary'}>
+												+{recipients.length - 4} more
+											</Badge>
+										</PopoverTrigger>
 
-						<div className="grid gap-2">
-							<Label htmlFor="subject">Subject</Label>
-							<Input required defaultValue={subject} name="subject" placeholder="Mail subject" id="subject" />
-						</div>
+										<PopoverContent className="w-48 overflow-y-auto p-2">
+											<ScrollArea className="h-72">
+												<div className="flex flex-col gap-2">
+													{recipients.slice(4).map(recipient => (
+														<Badge className="w-fit" variant={'secondary'} key={recipient}>
+															{recipient}
+														</Badge>
+													))}
+												</div>
+											</ScrollArea>
+										</PopoverContent>
+									</Popover>
+								)}
+							</div>
+						</AlertDialogHeader>
 
-						<div className="grid gap-2">
-							<Label htmlFor="message">Message</Label>
-							<Textarea required id="message" name="message" defaultValue={message} className="min-h-52 resize-none" />
-						</div>
-					</section>
+						<section className="grid gap-6">
+							<div className="grid gap-2">
+								<Label htmlFor="cc" className="flex gap-1">
+									Cc
+								</Label>
+								<Input defaultValue={copyEmail} name="cc" id="cc" />
+								<p className="text-xs font-light text-muted-foreground">Separate emails with commas</p>
+							</div>
 
-					<AlertDialogFooter className="mt-2">
-						<AlertDialogCancel onClick={() => onClose && onClose()}>Cancel</AlertDialogCancel>
-						<SendButton />
-					</AlertDialogFooter>
-				</form>
+							<div className="grid gap-2">
+								<Label htmlFor="subject">Subject</Label>
+								<Input required defaultValue={subject} name="subject" placeholder="Mail subject" id="subject" />
+							</div>
+
+							<div className="grid gap-2">
+								<Label htmlFor="message">Message</Label>
+								<Textarea required id="message" name="message" defaultValue={message} className="min-h-52 resize-none" />
+							</div>
+						</section>
+
+						<AlertDialogFooter className="mt-2">
+							<AlertDialogCancel onClick={() => onClose && onClose()}>Cancel</AlertDialogCancel>
+							<SendButton />
+						</AlertDialogFooter>
+					</form>
+				</div>
 			</AlertDialogContent>
 		</AlertDialog>
 	);
