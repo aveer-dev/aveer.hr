@@ -21,9 +21,9 @@ export const AppraisalReviewSelector = ({
 	contract: Tables<'contracts'>;
 	contractAnswer?: Tables<'appraisal_answers'>;
 	isSelfReviewDueDatePassed: boolean;
-	handleReviewTypeSelect: (type: 'self' | 'manager', employee: Tables<'contracts'>, answer: Tables<'appraisal_answers'> | null) => void;
+	handleReviewTypeSelect: (type: 'self' | 'manager' | 'summary', employee: Tables<'contracts'>, answer: Tables<'appraisal_answers'> | null) => void;
 	manager?: Tables<'managers'> | null;
-	activeReviewType: 'self' | 'manager';
+	activeReviewType: 'self' | 'manager' | 'summary';
 	teamMembersAnswers?: Tables<'appraisal_answers'>[];
 }) => {
 	const ReviewButtons = ({ employee, answer }: { employee: Tables<'contracts'>; answer: Tables<'appraisal_answers'> | null }) => {
@@ -41,7 +41,6 @@ export const AppraisalReviewSelector = ({
 					variant={activeReviewType === 'self' && employee.id === selectedEmployee.id ? 'secondary' : 'ghost'}
 					onClick={() => {
 						handleReviewTypeSelect('self', employee, answer);
-						console.log(answer);
 					}}
 					disabled={!canViewEmployeeReview && !canEditEmployeeReview}>
 					{isMyContract ? 'Self Review' : 'Employee Review'}
@@ -55,7 +54,6 @@ export const AppraisalReviewSelector = ({
 					variant={activeReviewType === 'manager' && employee.id === selectedEmployee.id ? 'secondary' : 'ghost'}
 					onClick={() => {
 						handleReviewTypeSelect('manager', employee, answer);
-						console.log(answer);
 					}}
 					disabled={!canEditManagerReview && !canViewManagerReview}>
 					Manager Review
@@ -63,13 +61,26 @@ export const AppraisalReviewSelector = ({
 						{canEditManagerReview ? 'Edit' : canViewManagerReview ? 'View' : 'Not Submitted'}
 					</Badge>
 				</Button>
+
+				<Button
+					className={cn('gap-2 pl-0 transition-all duration-500 hover:pl-3 focus:pl-3', activeReviewType === 'manager' && employee.id === selectedEmployee.id && 'pl-3')}
+					variant={activeReviewType === 'summary' && employee.id === selectedEmployee.id ? 'secondary' : 'ghost'}
+					onClick={() => {
+						handleReviewTypeSelect('summary', employee, answer);
+					}}
+					disabled={!canViewManagerReview || !canViewEmployeeReview}>
+					Summary
+					<Badge variant="outline" className="ml-auto">
+						{!canViewManagerReview || !canViewEmployeeReview ? 'Pending reviews' : 'View'}
+					</Badge>
+				</Button>
 			</>
 		);
 	};
 
 	return (
-		<div className="fixed left-4 z-50 flex h-full w-full max-w-[16rem] flex-col items-center justify-center bg-background/50 [mask-image:linear-gradient(transparent_5%,rgb(0,0,0)_260px,transparent_100%)]">
-			<div className="no-scrollbar relative h-full w-full space-y-10 overflow-y-auto px-1 pb-[250px] pt-[200px]">
+		<div className="sticky left-4 z-50 flex h-full w-full max-w-[16rem] flex-col items-center justify-center bg-background/50 [mask-image:linear-gradient(transparent_5%,rgb(0,0,0)_260px,transparent_100%)]">
+			<div className="no-scrollbar relative h-full w-full space-y-10 overflow-y-auto px-1 pb-[400px] pt-[200px]">
 				{/* Self Review Group */}
 				<Collapsible className="!mt-0" defaultOpen>
 					<CollapsibleTrigger className="flex items-center gap-4">

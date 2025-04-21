@@ -197,7 +197,7 @@ export async function deleteQuestionTemplate(id: number, org: string) {
 	if (templateError) throw templateError;
 }
 
-export const autoSaveAnswer = async ({ answerId, questionId, value, org, appraisalCycleId, contractId, answerType }: { answerId?: number; questionId: number; value: any; org: string; appraisalCycleId: number; contractId: number; answerType: 'self' | 'manager' }) => {
+export const autoSaveAnswer = async ({ answerId, questionId, value, org, appraisalCycleId, contractId, answerType }: { answerId?: number; questionId: number; value: any; org: string; appraisalCycleId: number; contractId: number; answerType: 'self' | 'manager' | 'summary' }) => {
 	const supabase = await createClient();
 
 	if (answerId) {
@@ -226,7 +226,6 @@ export const autoSaveAnswer = async ({ answerId, questionId, value, org, apprais
 		// Create new answer
 		const { data: existingAnswers } = await supabase.from('appraisal_answers').select('*').eq('appraisal_cycle_id', appraisalCycleId).eq('contract_id', contractId).eq('org', org).single();
 
-		console.log('🚀 ~ existingAnswers:', existingAnswers);
 		if (existingAnswers) {
 			// Update existing record with new answer
 			const answers = [...(existingAnswers[answerType == 'manager' ? 'manager_answers' : 'answers'] as unknown as Answer[]), { question_id: questionId, answer: value }];
