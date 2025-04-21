@@ -1,33 +1,23 @@
 'use client';
 
 import { Tables } from '@/type/database.types';
-import { AlertDialog, AlertDialogContent } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getTemplateQuestions, autoSaveAnswer, submitAppraisal } from '../appraisal-forms/appraisal.actions';
-import { useDebounce } from '@/hooks/use-debounce';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getTemplateQuestions } from '../appraisal-forms/appraisal.actions';
 import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '../ui/textarea';
-import { AlertCircle, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
-
+import { Loader2 } from 'lucide-react';
+import { AppraisalReviewSelector } from './appraisal-review-selector';
+import { EmployeeAppraisalForm } from './employee-appraisal-form';
 interface Props {
 	org: string;
 	contract: Tables<'contracts'>;
 	appraisalCycle: Tables<'appraisal_cycles'>;
-	answer?: Tables<'appraisal_answers'>;
-}
-
-interface Answer {
-	question_id: number;
-	answer: any;
-	[key: string]: any;
+	contractAnswer?: Tables<'appraisal_answers'>;
+	isManager: boolean;
+	manager?: Tables<'managers'> | null;
+	teamMembers?: Tables<'contracts'>[] | null;
+	teamMembersAnswers?: Tables<'appraisal_answers'>[];
 }
 
 type QuestionGroup = 'growth_and_development' | 'company_values' | 'competencies' | 'private_manager_assessment';
@@ -39,10 +29,7 @@ interface GroupedQuestions {
 	private_manager_assessment: Tables<'template_questions'>[];
 }
 
-type AnswersState = Record<number, any>;
-
-export const AppraisalFormDialog = ({ org, contract, appraisalCycle, answer }: Props) => {
-	const router = useRouter();
+export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAnswer, isManager, manager, teamMembers, teamMembersAnswers }: Props) => {
 	const [open, setOpen] = useState(false);
 	const [groupedQuestions, setGroupedQuestions] = useState<GroupedQuestions>({
 		growth_and_development: [],
@@ -50,63 +37,16 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, answer }: P
 		competencies: [],
 		private_manager_assessment: []
 	});
-	const [answers, setAnswers] = useState<AnswersState>(() => {
-		if (!answer?.answers) return {};
-		return (answer.answers as unknown as Answer[]).reduce((acc, curr) => {
-			const value = curr.answer;
-			if (Array.isArray(value)) {
-				return { ...acc, [curr.question_id]: value };
-			}
-			if (typeof value === 'number') {
-				return { ...acc, [curr.question_id]: value };
-			}
-			return { ...acc, [curr.question_id]: value || '' };
-		}, {});
-	});
-	const [currentGroup, setCurrentGroup] = useState<QuestionGroup>('growth_and_development');
-	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [answer, setAnswer] = useState<Tables<'appraisal_answers'> | null>(contractAnswer ?? null);
 	const [activeTab, setActiveTab] = useState<QuestionGroup>('growth_and_development');
 	const [isLoading, setIsLoading] = useState(true);
-	const [savingStates, setSavingStates] = useState<Record<number, boolean>>({});
 	const isSelfReviewDueDatePassed = new Date(appraisalCycle.self_review_due_date) < new Date();
+	const [selectedReviewType, setSelectedReviewType] = useState<'self' | 'manager'>('self');
+	const [selectedEmployee, setSelectedEmployee] = useState<Tables<'contracts'>>(contract);
 
-	const currentQuestions = groupedQuestions[currentGroup];
-	const currentQuestion = currentQuestions[currentQuestionIndex];
+	const currentQuestions = groupedQuestions['growth_and_development'];
 
-	// Get all question groups in order
-	const questionGroups = Object.keys(groupedQuestions) as QuestionGroup[];
-	const currentGroupIndex = questionGroups.indexOf(currentGroup);
-	const isLastGroup = currentGroupIndex === questionGroups.length - 1;
-	const isFirstQuestionInGroup = currentQuestionIndex === 0;
-	const isLastQuestionInGroup = currentQuestionIndex === currentQuestions.length - 1;
-
-	const autoSaveAnswerDebounced = useDebounce(async (questionId: number, value: any) => {
-		try {
-			setSavingStates(prev => ({ ...prev, [questionId]: true }));
-			const savePromise = autoSaveAnswer({
-				answerId: answer?.id,
-				questionId,
-				value,
-				org,
-				appraisalCycleId: appraisalCycle.id,
-				contractId: contract.id,
-				managerContractId: contract.direct_report
-			});
-
-			toast.promise(savePromise, {
-				loading: 'Saving answer...',
-				success: 'Answer saved successfully',
-				error: 'Failed to save answer'
-			});
-
-			await savePromise;
-		} catch (error) {
-			console.error('Failed to auto-save answer:', error);
-		} finally {
-			setSavingStates(prev => ({ ...prev, [questionId]: false }));
-		}
-	}, 1000);
+	const isSelectedEmplyeesManager = selectedEmployee.direct_report == contract.id || (isManager && selectedEmployee.team == manager?.team);
 
 	useEffect(() => {
 		const fetchQuestions = async () => {
@@ -140,96 +80,10 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, answer }: P
 		fetchQuestions();
 	}, [appraisalCycle.question_template, org]);
 
-	const handleAnswerChange = (questionId: number, value: any) => {
-		if (isSelfReviewDueDatePassed) {
-			toast.error('Cannot update answers after self review due date has passed');
-			return;
-		}
-		setAnswers(prev => ({
-			...prev,
-			[questionId]: value
-		}));
-		autoSaveAnswerDebounced(questionId, value);
-	};
-
-	const getUnansweredRequiredQuestions = () => {
-		const unanswered: { group: QuestionGroup; question: Tables<'template_questions'> }[] = [];
-
-		Object.entries(groupedQuestions).forEach(([group, questions]) => {
-			questions.forEach((question: Tables<'template_questions'>) => {
-				if (question.required && !answers[question.id]) {
-					unanswered.push({ group: group as QuestionGroup, question });
-				}
-			});
-		});
-
-		return unanswered;
-	};
-
-	const handleSubmit = async () => {
-		if (isSelfReviewDueDatePassed) {
-			toast.error('Cannot submit appraisal after self review due date has passed');
-			return;
-		}
-
-		const unansweredQuestions = getUnansweredRequiredQuestions();
-		if (unansweredQuestions.length > 0) {
-			toast.error('Your yet to answer some required questions.');
-			return;
-		}
-
-		try {
-			setIsSubmitting(true);
-			const submitPromise = submitAppraisal({
-				answerId: answer?.id,
-				answers: Object.entries(answers).map(([questionId, answer]) => ({
-					question_id: Number(questionId),
-					answer
-				}))
-			});
-
-			toast.promise(submitPromise, {
-				loading: 'Submitting appraisal...',
-				success: 'Appraisal submitted successfully',
-				error: 'Failed to submit appraisal'
-			});
-
-			await submitPromise;
-			router.refresh();
-			setOpen(false);
-		} catch (error) {
-			console.error('Failed to submit appraisal:', error);
-		} finally {
-			setIsSubmitting(false);
-		}
-	};
-
-	const handleNext = () => {
-		if (isLastQuestionInGroup) {
-			if (!isLastGroup) {
-				// Move to next group
-				const nextGroup = questionGroups[currentGroupIndex + 1];
-				setCurrentGroup(nextGroup);
-				setCurrentQuestionIndex(0);
-				setActiveTab(nextGroup);
-			}
-		} else {
-			setCurrentQuestionIndex(prev => prev + 1);
-		}
-	};
-
-	const handlePrevious = () => {
-		if (isFirstQuestionInGroup) {
-			if (currentGroupIndex > 0) {
-				// Move to previous group
-				const prevGroup = questionGroups[currentGroupIndex - 1];
-				setCurrentGroup(prevGroup);
-				setCurrentQuestionIndex(groupedQuestions[prevGroup].length - 1);
-				setActiveTab(prevGroup);
-			}
-		} else {
-			setCurrentQuestionIndex(prev => prev - 1);
-		}
+	const handleReviewTypeSelect = (type: 'self' | 'manager', employee: Tables<'contracts'>, answer: Tables<'appraisal_answers'> | null) => {
+		setSelectedReviewType(type);
+		setSelectedEmployee(employee);
+		setAnswer(answer);
 	};
 
 	if (isLoading) {
@@ -249,34 +103,48 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, answer }: P
 		);
 	}
 
-	const groupLabels: Record<QuestionGroup, string> = {
-		growth_and_development: 'Growth & Development',
-		company_values: 'Company Values',
-		competencies: 'Competencies',
-		private_manager_assessment: 'Manager Assessment'
-	};
-
-	const getGroupProgress = (group: QuestionGroup) => {
-		const groupQuestions = groupedQuestions[group];
-		const answeredCount = groupQuestions.filter((q: Tables<'template_questions'>) => answers[q.id] !== undefined && answers[q.id] !== '').length;
-		return (answeredCount / groupQuestions.length) * 100;
-	};
-
-	const getGroupStatus = (group: QuestionGroup) => {
-		const progress = getGroupProgress(group);
-		if (progress === 100) return 'Completed';
-		if (progress > 0) return 'In Progress';
-		return 'Not Started';
-	};
-
 	return (
 		<AlertDialog open={open} onOpenChange={setOpen}>
 			<Button className={cn(new Date(appraisalCycle.end_date) < new Date() && !answer && 'hidden')} onClick={() => setOpen(true)}>
 				{(new Date(appraisalCycle.end_date) < new Date() && answer) || answer?.employee_submission_date ? 'Review Appraisal' : answer?.status === 'draft' ? 'Continue Appraisal' : 'Start Appraisal'}
 			</Button>
 
-			<AlertDialogContent className="max-w-3xl">
-				<div className="space-y-6">
+			<AlertDialogContent className="flex max-w-full flex-col items-center overflow-y-auto p-0">
+				<AlertDialogHeader className="sr-only">
+					<AlertDialogTitle>{appraisalCycle.name}</AlertDialogTitle>
+					<AlertDialogDescription>{appraisalCycle.description}</AlertDialogDescription>
+				</AlertDialogHeader>
+
+				{/* {MemoizedAppraisalReviewSelector} */}
+				<AppraisalReviewSelector
+					selectedEmployee={selectedEmployee}
+					teamMembers={teamMembers}
+					contract={contract}
+					contractAnswer={contractAnswer}
+					isSelfReviewDueDatePassed={isSelfReviewDueDatePassed}
+					handleReviewTypeSelect={handleReviewTypeSelect}
+					manager={manager}
+					activeReviewType={selectedReviewType}
+					teamMembersAnswers={teamMembersAnswers}
+				/>
+
+				{/* Appraisal Form */}
+				<EmployeeAppraisalForm
+					setOpen={setOpen}
+					org={org}
+					appraisalCycle={appraisalCycle}
+					activeTab={activeTab}
+					setActiveTab={setActiveTab}
+					answer={answer}
+					selectedReviewType={selectedReviewType}
+					isManager={isManager}
+					selectedEmployee={selectedEmployee}
+					contract={contract}
+					isSelectedEmplyeesManager={isSelectedEmplyeesManager}
+					groupedQuestions={groupedQuestions}
+				/>
+
+				{/* <div className="mx-auto flex w-full max-w-2xl flex-col gap-10 space-y-6">
 					<div className="flex items-center justify-between">
 						<h2 className="text-lg font-semibold">{appraisalCycle.name}</h2>
 						<div className="flex items-center gap-2">
@@ -326,59 +194,10 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, answer }: P
 						{questionGroups.map(group => (
 							<TabsContent className="space-y-4" key={group} value={group}>
 								<h3 className="text-base font-medium">
-									{currentQuestion.question} {currentQuestion.required && <span className="text-red-500">*</span>}
+									{selectedReviewType === 'self' ? currentQuestion.question : currentQuestion.manager_question} {currentQuestion.required && <span className="text-red-500">*</span>}
 								</h3>
 
-								{currentQuestion.type === 'textarea' && (
-									<div className="relative">
-										<Textarea disabled={isSelfReviewDueDatePassed} className="min-h-[100px] w-full rounded-md border p-2" value={answers[currentQuestion.id] || ''} onChange={e => handleAnswerChange(currentQuestion.id, e.target.value)} />
-										{savingStates[currentQuestion.id] && (
-											<div className="absolute right-2 top-2">
-												<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-											</div>
-										)}
-									</div>
-								)}
-
-								{currentQuestion.type === 'yesno' && (
-									<div className="flex items-center gap-2">
-										<Button disabled={isSelfReviewDueDatePassed} variant={answers[currentQuestion.id] === 'yes' ? 'secondary_success' : 'outline'} onClick={() => handleAnswerChange(currentQuestion.id, 'yes')}>
-											Yes
-										</Button>
-										<Button disabled={isSelfReviewDueDatePassed} variant={answers[currentQuestion.id] === 'no' ? 'secondary_success' : 'outline'} onClick={() => handleAnswerChange(currentQuestion.id, 'no')}>
-											No
-										</Button>
-									</div>
-								)}
-
-								{currentQuestion.type === 'scale' && (
-									<div className="flex items-center gap-2">
-										{[1, 2, 3, 4, 5].map(num => (
-											<Button disabled={isSelfReviewDueDatePassed} key={num} variant={answers[currentQuestion.id] === num ? 'default' : 'outline'} onClick={() => handleAnswerChange(currentQuestion.id, num)}>
-												{num}
-											</Button>
-										))}
-									</div>
-								)}
-
-								{currentQuestion.type === 'multiselect' && (
-									<div className="flex flex-wrap gap-2">
-										{currentQuestion.options?.map((option: string) => (
-											<Button
-												key={option}
-												variant={(answers[currentQuestion.id] as string[])?.includes(option) ? 'default' : 'outline'}
-												onClick={() => {
-													if (isSelfReviewDueDatePassed) return;
-													const currentAnswers = (answers[currentQuestion.id] as string[]) || [];
-													const newAnswers = currentAnswers.includes(option) ? currentAnswers.filter(a => a !== option) : [...currentAnswers, option];
-													handleAnswerChange(currentQuestion.id, newAnswers);
-												}}
-												disabled={isSelfReviewDueDatePassed}>
-												{option}
-											</Button>
-										))}
-									</div>
-								)}
+								<QuestionInput question={currentQuestion} />
 							</TabsContent>
 						))}
 					</Tabs>
@@ -404,7 +223,7 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, answer }: P
 							</>
 						)}
 					</div>
-				</div>
+				</div> */}
 			</AlertDialogContent>
 		</AlertDialog>
 	);

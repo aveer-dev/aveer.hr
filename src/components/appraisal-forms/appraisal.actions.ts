@@ -1,7 +1,7 @@
 'use server';
 
-import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
+import { Tables, Database } from '@/type/database.types';
 import { TablesInsert, TablesUpdate } from '@/type/database.types';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
 
@@ -197,15 +197,15 @@ export async function deleteQuestionTemplate(id: number, org: string) {
 	if (templateError) throw templateError;
 }
 
-export const autoSaveAnswer = async ({ answerId, questionId, value, org, appraisalCycleId, contractId, managerContractId }: { answerId?: number; questionId: number; value: any; org: string; appraisalCycleId: number; contractId: number; managerContractId: number | null }) => {
+export const autoSaveAnswer = async ({ answerId, questionId, value, org, appraisalCycleId, contractId, answerType }: { answerId?: number; questionId: number; value: any; org: string; appraisalCycleId: number; contractId: number; answerType: 'self' | 'manager' }) => {
 	const supabase = await createClient();
 
 	if (answerId) {
 		// Update existing answer
-		const { data: existingAnswer } = await supabase.from('appraisal_answers').select('answers').eq('id', answerId).single();
+		const { data: existingAnswer } = await supabase.from('appraisal_answers').select('answers, manager_answers').eq('id', answerId).single();
 
 		if (existingAnswer) {
-			const existingAnswers = existingAnswer.answers as unknown as Answer[];
+			const existingAnswers = existingAnswer[answerType == 'manager' ? 'manager_answers' : 'answers'] as unknown as Answer[];
 			const answerIndex = existingAnswers.findIndex(a => a.question_id === questionId);
 
 			let answers: Answer[];
@@ -214,7 +214,11 @@ export const autoSaveAnswer = async ({ answerId, questionId, value, org, apprais
 			// Update existing answer
 			else answers = existingAnswers.map(a => (a.question_id === questionId ? { ...a, answer: value } : a));
 
-			const { data, error } = await supabase.from('appraisal_answers').update({ answers }).eq('id', answerId).select();
+			const { data, error } = await supabase
+				.from('appraisal_answers')
+				.update(answerType == 'manager' ? { manager_answers: answers } : { answers })
+				.eq('id', answerId)
+				.select();
 			if (error) throw error;
 			return data;
 		}
@@ -222,44 +226,66 @@ export const autoSaveAnswer = async ({ answerId, questionId, value, org, apprais
 		// Create new answer
 		const { data: existingAnswers } = await supabase.from('appraisal_answers').select('*').eq('appraisal_cycle_id', appraisalCycleId).eq('contract_id', contractId).eq('org', org).single();
 
+		console.log('🚀 ~ existingAnswers:', existingAnswers);
 		if (existingAnswers) {
 			// Update existing record with new answer
-			const answers = [...(existingAnswers.answers as unknown as Answer[]), { question_id: questionId, answer: value }];
-			const { data, error } = await supabase.from('appraisal_answers').update({ answers }).eq('id', existingAnswers.id).select();
+			const answers = [...(existingAnswers[answerType == 'manager' ? 'manager_answers' : 'answers'] as unknown as Answer[]), { question_id: questionId, answer: value }];
+			const { data, error } = await supabase
+				.from('appraisal_answers')
+				.update(answerType == 'manager' ? { manager_answers: answers } : { answers })
+				.eq('id', existingAnswers.id)
+				.select();
 			if (error) throw error;
 			return data;
 		} else {
 			// Create new record
-			const { data, error } = await supabase
-				.from('appraisal_answers')
-				.insert({
-					appraisal_cycle_id: appraisalCycleId,
-					contract_id: contractId,
-					manager_contract_id: managerContractId,
-					org,
-					answers: [{ question_id: questionId, answer: value }],
-					status: 'draft'
-				})
-				.select();
+			const payload: TablesInsert<'appraisal_answers'> = {
+				appraisal_cycle_id: appraisalCycleId,
+				contract_id: contractId,
+				org,
+				status: 'draft'
+			};
+			answerType == 'manager' ? (payload.manager_answers = [{ question_id: questionId, answer: value }]) : (payload.answers = [{ question_id: questionId, answer: value }]);
+
+			const { data, error } = await supabase.from('appraisal_answers').insert(payload).select();
 			if (error) throw error;
 			return data;
 		}
 	}
 };
 
-export const submitAppraisal = async ({ answerId, answers }: { answerId?: number; answers: { question_id: number; answer: any }[] }) => {
+export const submitAppraisal = async ({
+	answerId,
+	answers,
+	manager_answers,
+	employee_submission_date,
+	manager_submission_date,
+	status
+}: {
+	answerId?: number;
+	answers?: { question_id: number; answer: any }[];
+	manager_answers?: { question_id: number; answer: any }[];
+	employee_submission_date?: string;
+	manager_submission_date?: string;
+	status?: Database['public']['Enums']['appraisal_status'];
+}) => {
 	const supabase = await createClient();
 
-	if (!answerId) throw 'Anwer id required';
+	if (!answerId) throw 'Answer id required';
 
-	const { error } = await supabase
-		.from('appraisal_answers')
-		.update({
-			employee_submission_date: new Date().toISOString(),
-			answers,
-			status: 'submitted'
-		})
-		.eq('id', answerId);
+	const updateData: any = { status };
+
+	if (answers) {
+		updateData.answers = answers;
+		updateData.employee_submission_date = employee_submission_date;
+	}
+
+	if (manager_answers) {
+		updateData.manager_answers = manager_answers;
+		updateData.manager_submission_date = manager_submission_date;
+	}
+
+	const { error } = await supabase.from('appraisal_answers').update(updateData).eq('id', answerId);
 
 	if (error) throw error;
 };

@@ -42,6 +42,7 @@ export type Database = {
           created_at: string | null
           employee_submission_date: string | null
           id: number
+          manager_answers: Json[]
           manager_contract_id: number | null
           manager_submission_date: string | null
           org: string | null
@@ -55,6 +56,7 @@ export type Database = {
           created_at?: string | null
           employee_submission_date?: string | null
           id?: never
+          manager_answers?: Json[]
           manager_contract_id?: number | null
           manager_submission_date?: string | null
           org?: string | null
@@ -68,6 +70,7 @@ export type Database = {
           created_at?: string | null
           employee_submission_date?: string | null
           id?: never
+          manager_answers?: Json[]
           manager_contract_id?: number | null
           manager_submission_date?: string | null
           org?: string | null

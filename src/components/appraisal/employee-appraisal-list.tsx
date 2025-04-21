@@ -8,7 +8,7 @@ import { AppraisalFormDialog } from './appraisal-form-dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Info } from 'lucide-react';
 import { Separator } from '../ui/separator';
-
+import { getTeamAppraisalAnswers } from './appraisal.actions';
 interface Props {
 	org: string;
 	contract: Tables<'contracts'>;
@@ -34,15 +34,25 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 	}
 
 	// Get appraisal answers for all cycles
-	const { data: appraisalAnswers } = await supabase
-		.from('appraisal_answers')
-		.select('*')
-		.eq('org', org)
-		.eq('contract_id', contract.id)
-		.in(
-			'appraisal_cycle_id',
-			appraisalCycles.map(cycle => cycle.id)
-		);
+	const [{ data: teamMembers }, { data: manager }, { data: appraisalAnswers }] = await Promise.all([
+		supabase
+			.from('contracts')
+			.select('*, profile:profiles!contracts_profile_fkey(first_name, last_name)')
+			.eq('org', org)
+			.eq('team', (contract?.team as any)?.id || contract?.team),
+		supabase.from('managers').select('*').eq('org', org).eq('person', contract.id).single(),
+		supabase
+			.from('appraisal_answers')
+			.select('*')
+			.eq('org', org)
+			.eq('contract_id', contract.id)
+			.in(
+				'appraisal_cycle_id',
+				appraisalCycles.map(cycle => cycle.id)
+			)
+	]);
+
+	const teamMembersAnswers = await getTeamAppraisalAnswers({ org, contractIds: teamMembers?.map(member => member.id) || [], appraisalCycleId: appraisalCycles[0].id });
 
 	return (
 		<div className="space-y-12">
@@ -97,7 +107,7 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 														</Tooltip>
 													</TooltipProvider>
 
-													<AppraisalFormDialog org={org} contract={contract} appraisalCycle={cycle} answer={answer} />
+													<AppraisalFormDialog teamMembersAnswers={teamMembersAnswers} org={org} contract={contract} appraisalCycle={cycle} contractAnswer={answer} isManager={!!manager} teamMembers={teamMembers} manager={manager} />
 												</div>
 											)}
 										</div>
@@ -164,7 +174,7 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 														</Tooltip>
 													</TooltipProvider>
 
-													<AppraisalFormDialog org={org} contract={contract} appraisalCycle={cycle} answer={answer} />
+													<AppraisalFormDialog teamMembersAnswers={teamMembersAnswers} org={org} contract={contract} appraisalCycle={cycle} contractAnswer={answer} isManager={!!manager} teamMembers={teamMembers} manager={manager} />
 												</div>
 											)}
 										</div>
