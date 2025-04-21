@@ -226,11 +226,25 @@ export const EmployeeAppraisalForm = ({ groupedQuestions, setOpen, org, appraisa
 		if (currentQuestionIndex === filteredQuestions.length - 1) {
 			if (!isLastGroup) {
 				// Move to next group
-				setCurrentGroupIndex(currentGroupIndex + 1);
-				const nextGroup = questionGroups[currentGroupIndex + 1];
-				setCurrentGroup(nextGroup);
-				setCurrentQuestionIndex(0);
-				setActiveTab(nextGroup);
+				const nextGroupIndex = currentGroupIndex + 1;
+				const nextGroup = questionGroups[nextGroupIndex];
+
+				// Skip private_manager_assessment if not a manager
+				if (nextGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager) {
+					// If this is the last group they can access, show submit button
+					if (nextGroupIndex + 1 >= questionGroups.length) {
+						return;
+					}
+					setCurrentGroupIndex(nextGroupIndex + 1);
+					setCurrentGroup(questionGroups[nextGroupIndex + 1]);
+					setCurrentQuestionIndex(0);
+					setActiveTab(questionGroups[nextGroupIndex + 1]);
+				} else {
+					setCurrentGroupIndex(nextGroupIndex);
+					setCurrentGroup(nextGroup);
+					setCurrentQuestionIndex(0);
+					setActiveTab(nextGroup);
+				}
 			}
 		} else {
 			setCurrentQuestionIndex(prev => prev + 1);
@@ -242,12 +256,25 @@ export const EmployeeAppraisalForm = ({ groupedQuestions, setOpen, org, appraisa
 		if (currentQuestionIndex === 0) {
 			if (currentGroupIndex > 0) {
 				// Move to previous group
-				setCurrentGroupIndex(currentGroupIndex - 1);
-				const prevGroup = questionGroups[currentGroupIndex - 1];
-				setCurrentGroup(prevGroup);
-				const prevGroupQuestions = groupedQuestions[prevGroup].filter(shouldShowQuestion);
-				setCurrentQuestionIndex(prevGroupQuestions.length - 1);
-				setActiveTab(prevGroup);
+				const prevGroupIndex = currentGroupIndex - 1;
+				const prevGroup = questionGroups[prevGroupIndex];
+
+				// Skip private_manager_assessment if not a manager
+				if (prevGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager) {
+					if (prevGroupIndex - 1 >= 0) {
+						setCurrentGroupIndex(prevGroupIndex - 1);
+						setCurrentGroup(questionGroups[prevGroupIndex - 1]);
+						const prevGroupQuestions = groupedQuestions[questionGroups[prevGroupIndex - 1]].filter(shouldShowQuestion);
+						setCurrentQuestionIndex(prevGroupQuestions.length - 1);
+						setActiveTab(questionGroups[prevGroupIndex - 1]);
+					}
+				} else {
+					setCurrentGroupIndex(prevGroupIndex);
+					setCurrentGroup(prevGroup);
+					const prevGroupQuestions = groupedQuestions[prevGroup].filter(shouldShowQuestion);
+					setCurrentQuestionIndex(prevGroupQuestions.length - 1);
+					setActiveTab(prevGroup);
+				}
 			}
 		} else {
 			setCurrentQuestionIndex(prev => prev - 1);
@@ -311,6 +338,12 @@ export const EmployeeAppraisalForm = ({ groupedQuestions, setOpen, org, appraisa
 
 		loadAnswers();
 	}, [answer, selectedReviewType, selectedEmployee]);
+
+	const isLastAccessibleGroup = () => {
+		if (isLastGroup) return true;
+		const nextGroupIndex = currentGroupIndex + 1;
+		return nextGroupIndex < questionGroups.length && questionGroups[nextGroupIndex] === 'private_manager_assessment' && !isSelectedEmplyeesManager;
+	};
 
 	return (
 		<div className="mx-auto flex w-full max-w-2xl flex-col">
@@ -545,7 +578,7 @@ export const EmployeeAppraisalForm = ({ groupedQuestions, setOpen, org, appraisa
 							{currentQuestionIndex === 0 && currentGroupIndex > 0 ? `Previous: ${groupLabels[questionGroups[currentGroupIndex - 1]]}` : 'Previous question'}
 						</Button>
 
-						{currentQuestionIndex === filteredQuestions.length - 1 && isLastGroup ? (
+						{currentQuestionIndex === filteredQuestions.length - 1 && isLastAccessibleGroup() ? (
 							<Button onClick={handleSubmit}>{isSubmitting ? 'Submitting...' : 'Submit Appraisal'}</Button>
 						) : (
 							<Button onClick={handleNext}>{currentQuestionIndex === filteredQuestions.length - 1 ? `Next: ${groupLabels[questionGroups[currentGroupIndex + 1]]}` : 'Next question'}</Button>
