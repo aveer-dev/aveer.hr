@@ -58,7 +58,11 @@ const handleSubdomainRouting = (request: NextRequest, domain: string, path: stri
 	// Handle employee subdomain redirects
 	if (request.nextUrl.pathname.includes('/employee')) {
 		const employeePath = request.nextUrl.pathname.split('/employee')[1];
-		return NextResponse.redirect(`${request.nextUrl.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}${employeePath}${request.nextUrl.searchParams.toString() ? `?${request.nextUrl.searchParams.toString()}` : ''}`);
+		const redirectUrl = new URL(employeePath, `${request.nextUrl.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}`);
+		if (request.nextUrl.searchParams.toString()) {
+			redirectUrl.search = request.nextUrl.searchParams.toString();
+		}
+		return NextResponse.redirect(redirectUrl);
 	}
 
 	// Handle app subdomain redirects
