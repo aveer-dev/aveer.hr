@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, X, Text, SquareCheckBig, ChevronsUpDown, Check } from 'lucide-react';
+import { Plus, X, Text, SquareCheckBig, ChevronsUpDown, Check, Info } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,7 @@ import { Tables } from '@/type/database.types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { MultiTeamSelect } from '@/components/ui/multi-team-select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const questionSchema = z.object({
 	id: z.string(),
@@ -59,7 +60,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 			id: question?.id || Math.random().toString(36).substr(2, 9),
 			question: question?.question || '',
 			managerQuestion: question?.managerQuestion || '',
-			type: question?.type || 'textarea',
+			type: question?.type || group === 'competencies' || group === 'private_manager_assessment' ? 'scale' : 'textarea',
 			options: question?.options || [],
 			required: question?.required || true,
 			teams: question?.teams || [],
@@ -84,7 +85,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 				id: Math.random().toString(36).substr(2, 9),
 				question: '',
 				managerQuestion: '',
-				type: 'textarea',
+				type: group === 'competencies' || group === 'private_manager_assessment' ? 'scale' : 'textarea',
 				options: [],
 				required: false,
 				teams: [],
@@ -99,7 +100,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 				id: Math.random().toString(36).substr(2, 9),
 				question: '',
 				managerQuestion: '',
-				type: 'textarea',
+				type: group === 'competencies' || group === 'private_manager_assessment' ? 'scale' : 'textarea',
 				options: [],
 				required: false,
 				teams: [],
@@ -115,7 +116,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 				id: Math.random().toString(36).substr(2, 9),
 				question: '',
 				managerQuestion: '',
-				type: 'textarea',
+				type: group === 'competencies' || group === 'private_manager_assessment' ? 'scale' : 'textarea',
 				options: [],
 				required: false,
 				teams: [],
@@ -129,7 +130,15 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			<AlertDialogContent className="flex h-screen max-w-full flex-col overflow-y-auto p-0">
 				<AlertDialogHeader className="mx-auto w-full max-w-2xl pt-16">
-					<AlertDialogTitle>{question ? 'Edit Question' : 'Add Question'}</AlertDialogTitle>
+					<AlertDialogTitle className="flex items-center justify-between gap-2">
+						{question ? 'Edit Question' : 'Add Question'}
+						<Badge variant="secondary" className="text-xs">
+							{group
+								.split('_')
+								.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+								.join(' ')}
+						</Badge>
+					</AlertDialogTitle>
 					<AlertDialogDescription>Configure your question settings</AlertDialogDescription>
 				</AlertDialogHeader>
 
@@ -167,46 +176,71 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 							<FormField
 								control={form.control}
 								name="type"
-								render={({ field }) => (
-									<FormItem className="flex flex-col">
-										<Popover open={isTypePopoverOpen} onOpenChange={setIsTypePopoverOpen}>
-											<PopoverTrigger asChild>
-												<FormControl>
-													<Button variant="outline" className="w-fit justify-between">
-														{inputTypes.find(t => t.type === field.value)?.label}
-														<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-													</Button>
-												</FormControl>
-											</PopoverTrigger>
+								render={({ field }) => {
+									const isScaleOnlyGroup = group === 'competencies' || group === 'private_manager_assessment';
 
-											<PopoverContent align="start" className="w-[200px] p-0">
-												<Command>
-													<CommandList>
-														<CommandGroup>
-															{inputTypes.map(inputType => (
-																<CommandItem
-																	key={inputType.type}
-																	onSelect={() => {
-																		field.onChange(inputType.type);
-																		if (inputType.type !== 'multiselect') {
-																			form.setValue('options', []);
-																		} else if (!form.getValues('options')?.length) {
-																			form.setValue('options', ['Option 1']);
-																		}
-																		setIsTypePopoverOpen(false);
-																	}}>
-																	<Check className={cn('mr-2 h-4 w-4', field.value === inputType.type ? 'opacity-100' : 'opacity-0')} />
-																	{inputType.label}
-																</CommandItem>
-															))}
-														</CommandGroup>
-													</CommandList>
-												</Command>
-											</PopoverContent>
-										</Popover>
-										<FormMessage />
-									</FormItem>
-								)}
+									return (
+										<FormItem className="flex items-center gap-2">
+											<Popover open={isTypePopoverOpen} onOpenChange={setIsTypePopoverOpen}>
+												<PopoverTrigger asChild>
+													<FormControl>
+														<Button variant="outline" className="w-fit justify-between" disabled={isScaleOnlyGroup}>
+															{inputTypes.find(t => t.type === field.value)?.label}
+															{!isScaleOnlyGroup && <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
+														</Button>
+													</FormControl>
+												</PopoverTrigger>
+
+												<PopoverContent align="start" className="w-[200px] p-0">
+													<Command>
+														<CommandList>
+															<CommandGroup>
+																{inputTypes.map(inputType => (
+																	<CommandItem
+																		key={inputType.type}
+																		onSelect={() => {
+																			field.onChange(inputType.type);
+																			if (inputType.type !== 'multiselect') {
+																				form.setValue('options', []);
+																			} else if (!form.getValues('options')?.length) {
+																				form.setValue('options', ['Option 1']);
+																			}
+																			setIsTypePopoverOpen(false);
+																		}}>
+																		<Check className={cn('mr-2 h-4 w-4', field.value === inputType.type ? 'opacity-100' : 'opacity-0')} />
+																		{inputType.label}
+																	</CommandItem>
+																))}
+															</CommandGroup>
+														</CommandList>
+													</Command>
+												</PopoverContent>
+											</Popover>
+
+											{isScaleOnlyGroup && (
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger className="!mt-0">
+															<Info size={12} className="text-muted-foreground" />
+														</TooltipTrigger>
+
+														<TooltipContent>
+															<p className="text-xs">
+																Scale type is required for{' '}
+																{group
+																	.split('_')
+																	.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+																	.join(' ')}{' '}
+																questions
+															</p>
+														</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+											)}
+											<FormMessage />
+										</FormItem>
+									);
+								}}
 							/>
 
 							<FormField

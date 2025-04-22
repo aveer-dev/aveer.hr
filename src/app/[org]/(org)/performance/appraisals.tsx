@@ -1,45 +1,25 @@
-import { AppraisalsDialog } from '@/components/appraisal/appraisals-dialog';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
-import { Tables } from '@/type/database.types';
+import { Skeleton } from '@/components/ui/skeleton';
 import { createClient } from '@/utils/supabase/server';
-import { format } from 'date-fns';
 
-export const AppraisalsPage = async ({ org }: { org: string }) => {
+import { AppraisalQuestionsTemplates } from '@/components/appraisal-forms/appraisal-questions-templates';
+import { Button } from '@/components/ui/button';
+import { QuestionTemplateDialog } from '@/components/appraisal-forms/question-template-dialog';
+import { AppraisalCycleDialog } from '@/components/appraisal-forms/appraisal-cycle-dialog';
+import { AppraisalCyclesList } from '@/components/appraisal-forms/appraisal-cycles-list';
+import { Suspense } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PlusIcon } from 'lucide-react';
+
+export const AppraisalsPage = async ({ params }: { params: Promise<{ [key: string]: string }> }) => {
+	const org = (await params)?.org;
+
 	const supabase = await createClient();
 
-	const { data: appraisals, error } = await supabase.from('appraisal_history').select().match({ org });
+	const { data: teams, error } = await supabase.from('teams').select('*').match({ org });
 
 	if (error) {
-		return (
-			<div className="flex min-h-48 items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">
-				<p>No appraisals yet, keep the ball rolling 🙂‍↕️.</p>
-			</div>
-		);
+		return <div>Error loading teams</div>;
 	}
-
-	if (appraisals.length == 0) {
-		return (
-			<section className="mx-auto max-w-4xl">
-				<div className="mb-6 flex items-center gap-4">
-					<h1 className="text-xl font-bold">Appraisal</h1>
-				</div>
-
-				<div className="flex min-h-48 items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">
-					<p>No appraisals yet, keep the ball rolling 🙂‍↕️.</p>
-				</div>
-			</section>
-		);
-	}
-
-	// get user admin profile id for appraisal approval
-	const {
-		data: { user }
-	} = await supabase.auth.getUser();
-
-	const { data: contracts, error: contractsEror } = await supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*), level:employee_levels!contracts_level_fkey(*)').match({ org, status: 'signed' });
 
 	return (
 		<section>
@@ -47,68 +27,53 @@ export const AppraisalsPage = async ({ org }: { org: string }) => {
 				<h1 className="text-xl font-bold">Appraisal</h1>
 			</div>
 
-			{appraisals.map((appraisal, index) => (
-				<Accordion key={appraisal.id} type="single" collapsible className="w-full space-y-8">
-					<AccordionItem value={`appraisal-${index}`}>
-						<AccordionTrigger>
-							<div className={cn('flex items-center gap-3')}>Appraisal {index + 1}</div>
+			<Tabs defaultValue="cycles" className="w-full">
+				<div className="flex items-center justify-between">
+					<TabsList className="flex w-fit">
+						<TabsTrigger value="cycles">Appraisal Cycles</TabsTrigger>
+						<TabsTrigger value="templates">Question Templates</TabsTrigger>
+					</TabsList>
 
-							<span className="ml-auto mr-3 text-xs text-muted-foreground">
-								{format(appraisal.created_at, 'MMM')} {format(appraisal.created_at, 'y')}
-							</span>
-						</AccordionTrigger>
+					<div className="flex gap-2">
+						<TabsContent value="cycles" className="m-0">
+							<AppraisalCycleDialog org={org}>
+								<Button>
+									<PlusIcon size={12} className="mr-2" />
+									Add Appraisal Cycle
+								</Button>
+							</AppraisalCycleDialog>
+						</TabsContent>
 
-						<AccordionContent>
-							<ul key={appraisal.id}>{contracts?.map(contract => <Contract userId={user?.id} org={org} appraisal={appraisal.id} key={contract.id} contract={contract as any} />)}</ul>
-						</AccordionContent>
-					</AccordionItem>
-				</Accordion>
-			))}
+						<TabsContent value="templates" className="m-0">
+							<QuestionTemplateDialog teams={teams} org={org}>
+								<Button>
+									<PlusIcon size={12} className="mr-2" />
+									Create Question Template
+								</Button>
+							</QuestionTemplateDialog>
+						</TabsContent>
+					</div>
+				</div>
+
+				<TabsContent value="cycles" className="mt-4">
+					<Suspense
+						fallback={
+							<div className="space-y-4">
+								<Skeleton className="h-24 w-full" />
+								<Skeleton className="h-24 w-full" />
+								<Skeleton className="h-24 w-full" />
+							</div>
+						}>
+						<AppraisalCyclesList org={org} />
+					</Suspense>
+				</TabsContent>
+
+				<TabsContent value="templates" className="mt-4">
+					<Suspense fallback={<Skeleton className="h-24 w-full" />}>
+						<AppraisalQuestionsTemplates teams={teams} org={org} />
+					</Suspense>
+				</TabsContent>
+			</Tabs>
 		</section>
-	);
-};
-
-const Contract = async ({ contract, appraisal, org, userId }: { userId?: string; org: string; appraisal: number; contract: Tables<'contracts'> & { profile: Tables<'profiles'>; level: Tables<'employee_levels'> } }) => {
-	const supabase = await createClient();
-	const { data, error } = await supabase.from('appraisal_answers').select().match({ contract: contract.id, org: contract.org, appraisal });
-
-	return (
-		<li className="flex items-center justify-between border-t px-1 py-6">
-			<div className="space-y-2">
-				<div className="flex items-center gap-2">
-					<h4 className="text-xs">
-						{contract.profile?.first_name} {contract.profile?.last_name}
-					</h4>
-					{(contract.level || contract.level_name) && (
-						<Badge variant={'outline'} className="h-5 text-[10px]">
-							{contract.level?.level || contract.level_name}
-						</Badge>
-					)}
-				</div>
-
-				<p className="text-xs text-muted-foreground">{contract.job_title}</p>
-			</div>
-
-			<div className="flex items-center gap-4 text-center text-xs text-muted-foreground *:space-y-2">
-				<div>
-					<div>Result</div>
-					<div>{(!!data && data[0]?.org_submission_date && data[0].org_score) || '-'}</div>
-				</div>
-				<Separator orientation="vertical" className="h-3" />
-				<div>
-					<div>Employee</div>
-					<div>{(!!data && data[0]?.submission_date && data[0].contract_score) || '-'}</div>
-				</div>
-				<Separator orientation="vertical" className="h-3" />
-				<div>
-					<div>Manager</div>
-					<div>{(!!data && data[0]?.manager_submission_date && data[0].manager_score) || '-'}</div>
-				</div>
-
-				<Separator orientation="vertical" className="h-3" />
-
-				<AppraisalsDialog adminId={userId} role={'admin'} org={org} contract={contract} />
-			</div>
-		</li>
 	);
 };

@@ -64,9 +64,6 @@ export default async function SettingsPage(props: { params: Promise<{ [key: stri
 						<TabsTrigger value="goals" className="h-6">
 							OKRs
 						</TabsTrigger>
-						<TabsTrigger value="appraisal" className="h-6">
-							Appraisal
-						</TabsTrigger>
 						<TabsTrigger value="users" className="h-6">
 							Admin users
 						</TabsTrigger>
@@ -140,10 +137,6 @@ export default async function SettingsPage(props: { params: Promise<{ [key: stri
 							<OKRs org={params.org} />
 						</InputsContainer>
 					</FormSection>
-				</TabsContent>
-
-				<TabsContent value="appraisal" className="relative">
-					<Appraisal teams={teamsResponse.data ? teamsResponse.data : []} org={params.org} />
 				</TabsContent>
 
 				<TabsContent value="users" className="relative">

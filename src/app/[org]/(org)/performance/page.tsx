@@ -20,7 +20,7 @@ export default async function PerformancePage(props: { params: Promise<{ [key: s
 			</Suspense>
 
 			<Suspense fallback={<Skeleton className="h-80 w-full" />}>
-				<AppraisalsPage org={params.org} />
+				<AppraisalsPage params={props.params} />
 			</Suspense>
 		</div>
 	);

@@ -94,7 +94,7 @@ const QuestionItem = ({ question, onEdit, onRemove }: QuestionItemProps) => {
 						<div className="space-y-4">
 							<div className="text-sm font-light leading-6">
 								{question.question}
-								{question.required && <span className="text-sm text-muted-foreground">*</span>}
+								{question.required && <span className="text-sm text-destructive">*</span>}
 								<Badge variant="secondary" className="ml-2 whitespace-nowrap text-xs">
 									self review
 								</Badge>
@@ -106,7 +106,7 @@ const QuestionItem = ({ question, onEdit, onRemove }: QuestionItemProps) => {
 						<div className="flex items-center gap-2">
 							<div className="text-sm font-light leading-6">
 								{question.managerQuestion}
-								{question.required && <span className="text-sm text-muted-foreground">*</span>}
+								{question.required && <span className="text-sm text-destructive">*</span>}
 								<Badge variant="secondary" className="ml-2 whitespace-nowrap text-xs">
 									manager review
 								</Badge>
