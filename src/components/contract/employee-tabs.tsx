@@ -7,7 +7,6 @@ import { Timeoff } from './time-off';
 import { Applicants } from './applicants';
 import { Boardings } from './boarding';
 import { BoardingsReview } from './boarding-review';
-import { EmployeeAppraisals } from './contract-appraisals';
 import { isPast } from 'date-fns';
 import { Tables } from '@/type/database.types';
 import { cn } from '@/lib/utils';
@@ -24,7 +23,6 @@ export const EmployeeTabs = ({ data, orgSettings, signatureType, manager, org }:
 						{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && signatureType !== 'manager' && <TabsTrigger value="team">Team</TabsTrigger>}
 						{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="requests">Requests</TabsTrigger>}
 						<TabsTrigger value="contract">Contract</TabsTrigger>
-						<TabsTrigger value="appraisal">Appraisal</TabsTrigger>
 						<TabsTrigger value="onboarding">Boarding</TabsTrigger>
 					</TabsList>
 				</div>
@@ -53,10 +51,6 @@ export const EmployeeTabs = ({ data, orgSettings, signatureType, manager, org }:
 			)}
 
 			<TabsContent value="team">{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <Teams orgSettings={null} currentUser={signatureType as any} name={data.team.name} contractId={data.id} org={org} team={data.team.id} />}</TabsContent>
-
-			<TabsContent value="appraisal">
-				<EmployeeAppraisals formType={'employee'} role={signatureType == 'profile' ? 'employee' : 'admin'} org={org} contract={data} group={'employee'} />
-			</TabsContent>
 
 			<TabsContent value="contract">
 				<section className="grid gap-14">
