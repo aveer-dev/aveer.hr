@@ -55,36 +55,16 @@ const handleSubdomainRouting = (request: NextRequest, domain: string, path: stri
 		return NextResponse.rewrite(new URL('/firebase-messaging-sw.js', request.url));
 	}
 
-	// If we're already on the employee subdomain, just rewrite the path
-	if (subdomain === 'employee') {
-		return NextResponse.rewrite(new URL(path, request.url));
-	}
-
-	// If we're already on the app subdomain, just rewrite the path
-	if (subdomain === 'app') {
-		return NextResponse.rewrite(new URL(path, request.url));
-	}
-
 	// Handle employee subdomain redirects
 	if (request.nextUrl.pathname.includes('/employee')) {
 		const employeePath = request.nextUrl.pathname.split('/employee')[1];
-		const baseUrl = `${request.nextUrl.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}`;
-		const redirectUrl = new URL(employeePath.startsWith('/') ? employeePath : `/${employeePath}`, baseUrl);
-		if (request.nextUrl.searchParams.toString()) {
-			redirectUrl.search = request.nextUrl.searchParams.toString();
-		}
-		return NextResponse.redirect(redirectUrl);
+		return NextResponse.redirect(`${request.nextUrl.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}${employeePath}${request.nextUrl.searchParams.toString() ? `?${request.nextUrl.searchParams.toString()}` : ''}`);
 	}
 
 	// Handle app subdomain redirects
 	if (request.nextUrl.pathname.includes('/app')) {
 		const appPath = request.nextUrl.pathname.split('/app')[1];
-		const baseUrl = `${request.nextUrl.protocol}//app.${process.env.NEXT_PUBLIC_DOMAIN}`;
-		const redirectUrl = new URL(appPath.startsWith('/') ? appPath : `/${appPath}`, baseUrl);
-		if (request.nextUrl.searchParams.toString()) {
-			redirectUrl.search = request.nextUrl.searchParams.toString();
-		}
-		return NextResponse.redirect(redirectUrl);
+		return NextResponse.redirect(`${request.nextUrl.protocol}//app.${process.env.NEXT_PUBLIC_DOMAIN}${appPath}${request.nextUrl.searchParams.toString() ? `?${request.nextUrl.searchParams.toString()}` : ''}`);
 	}
 
 	// Redirect auth pages to app subdomain
@@ -92,9 +72,14 @@ const handleSubdomainRouting = (request: NextRequest, domain: string, path: stri
 		return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/app/login`, request.url));
 	}
 
+	// Handle employee subdomain rewrites
+	if (subdomain === 'employee') {
+		return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
+	}
+
 	// Handle organization subdomain rewrites
-	if (subdomain && subdomain !== 'employee' && subdomain !== 'app') {
-		return NextResponse.rewrite(new URL(path, request.url));
+	if (subdomain && subdomain !== 'employee') {
+		return NextResponse.rewrite(new URL(path.split('/')[1] === subdomain ? path : `/${subdomain}${path}`, request.url));
 	}
 
 	return null;
