@@ -2,121 +2,87 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { cookieOptions } from './cookieoptions';
 
-/**
- * List of public paths that don't require authentication
- */
-const PUBLIC_PATHS = ['/', '/privacy-policy', 'login', 'signup', 'auth', 'password', 'job', 'shared-doc'] as const;
+export async function updateSession(request: NextRequest) {
+	let supabaseResponse = NextResponse.next({
+		request
+	});
 
-/**
- * Checks if a path is public and doesn't require authentication
- * @param pathname - The path to check
- * @returns boolean indicating if the path is public
- */
-const isPublicPath = (pathname: string): boolean => {
-	return PUBLIC_PATHS.some(path => pathname.includes(path));
-};
-
-/**
- * Creates a Supabase client with cookie handling
- * @param request - The incoming request
- * @param response - The response to modify
- * @returns Supabase client instance
- */
-const createSupabaseClient = (request: NextRequest, response: NextResponse) => {
-	return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+	const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
 		cookies: {
-			getAll: () => request.cookies.getAll(),
-			setAll: cookiesToSet => {
-				cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-				cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+			getAll() {
+				return request.cookies.getAll();
+			},
+			setAll(cookiesToSet) {
+				cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
+				supabaseResponse = NextResponse.next({
+					request
+				});
+				cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options));
 			}
 		},
-		cookieOptions: process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN === 'true' ? cookieOptions : {}
+		cookieOptions: process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? cookieOptions : {}
 	});
-};
 
-/**
- * Handles subdomain routing and redirects
- * @param request - The incoming request
- * @param domain - The current domain
- * @param path - The current path
- * @returns NextResponse for subdomain handling or null if no subdomain handling needed
- */
-const handleSubdomainRouting = (request: NextRequest, domain: string, path: string): NextResponse | null => {
-	const subdomain = domain.endsWith(`.${process.env.NEXT_PUBLIC_DOMAIN}`) ? domain.replace(`.${process.env.NEXT_PUBLIC_DOMAIN}`, '') : null;
+	// refreshing the auth token
+	const user = await supabase.auth.getUser();
 
-	// Skip subdomain handling for localhost or if disabled
-	if (domain?.includes('localhost') || process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN !== 'true') {
-		return null;
-	}
+	// get the domain string
+	let hostname = request.headers.get('host');
+	const domain = decodeURIComponent(hostname as string);
 
-	// Handle Firebase service worker
-	if (subdomain && path.includes('firebase-messaging-sw')) {
-		return NextResponse.rewrite(new URL('/firebase-messaging-sw.js', request.url));
-	}
-
-	// Handle employee subdomain redirects
-	if (request.nextUrl.pathname.includes('/employee')) {
-		const employeePath = request.nextUrl.pathname.split('/employee')[1];
-		return NextResponse.redirect(`${request.nextUrl.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}${employeePath}${request.nextUrl.searchParams.toString() ? `?${request.nextUrl.searchParams.toString()}` : ''}`);
-	}
-
-	// Handle app subdomain redirects
-	if (request.nextUrl.pathname.includes('/app')) {
-		const appPath = request.nextUrl.pathname.split('/app')[1];
-		return NextResponse.redirect(`${request.nextUrl.protocol}//app.${process.env.NEXT_PUBLIC_DOMAIN}${appPath}${request.nextUrl.searchParams.toString() ? `?${request.nextUrl.searchParams.toString()}` : ''}`);
-	}
-
-	// Redirect auth pages to app subdomain
-	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) {
-		return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/app/login`, request.url));
-	}
-
-	// Handle employee subdomain rewrites
-	if (subdomain === 'employee') {
-		return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
-	}
-
-	// Handle organization subdomain rewrites
-	if (subdomain && subdomain !== 'employee') {
-		return NextResponse.rewrite(new URL(path.split('/')[1] === subdomain ? path : `/${subdomain}${path}`, request.url));
-	}
-
-	return null;
-};
-
-/**
- * Middleware function to handle authentication, session management, and subdomain routing
- * @param request - The incoming request
- * @returns NextResponse with appropriate redirects or rewrites
- */
-export async function updateSession(request: NextRequest) {
-	// Security check for CVE-2025-29927
-	const middlewareSubrequest = request.headers.get('x-middleware-subrequest');
-	if (middlewareSubrequest && !middlewareSubrequest.startsWith('_next/')) {
-		return new NextResponse('Unauthorized', { status: 401 });
-	}
-
-	const response = NextResponse.next({ request });
-	const supabase = createSupabaseClient(request, response);
-
-	// Refresh auth token
-	const {
-		data: { user }
-	} = await supabase.auth.getUser();
-	const domain = decodeURIComponent(request.headers.get('host') || '');
-	const path = `${request.nextUrl.pathname}${request.nextUrl.searchParams.toString() ? `?${request.nextUrl.searchParams.toString()}` : ''}`;
-
-	// Handle authentication
-	if (!user && !isPublicPath(request.nextUrl.pathname)) {
+	// validate access, logout if needed
+	if (
+		!user.data.user &&
+		request.nextUrl.pathname !== '/' &&
+		request.nextUrl.pathname !== '/privacy-policy' &&
+		!request.nextUrl.pathname.includes('login') &&
+		!request.nextUrl.pathname.includes('signup') &&
+		!request.nextUrl.pathname.includes('auth') &&
+		!request.nextUrl.pathname.includes('password') &&
+		!request.nextUrl.pathname.includes('job') &&
+		!request.nextUrl.pathname.includes('shared-doc')
+	) {
 		return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}${domain?.includes('localhost') ? '/app' : ''}/login`, request.url));
 	}
 
-	// Handle subdomain routing
-	const subdomainResponse = handleSubdomainRouting(request, domain, path);
-	if (subdomainResponse) {
-		return subdomainResponse;
+	// start ----- handleSubdomainMapping(request);
+	const url = request.nextUrl;
+
+	// if on localhost or user disable/unset subdomain, cancel mapping
+	if (domain?.includes('localhost') || process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'false' || !process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN) return;
+
+	// get subdomain and path url for remaping other routes
+	const subdomain = domain.endsWith(`.${process.env.NEXT_PUBLIC_DOMAIN}`) ? domain.replace(`.${process.env.NEXT_PUBLIC_DOMAIN}`, '') : null;
+	const searchParams = request.nextUrl.searchParams.toString();
+	const path = `${url.pathname}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
+
+	// for firebase sw
+	if (subdomain && path.includes('firebase-messaging-sw')) return NextResponse.rewrite(new URL(`/firebase-messaging-sw.js`, request.url));
+
+	// if user nevigates to employee page, redirect to employee subdomain
+	if (url.pathname.includes('/employee')) {
+		const searchParams = request.nextUrl.searchParams.toString();
+		const path = `${url.pathname.split('/employee')[1]}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
+		return NextResponse.redirect(`${url.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}${path}`);
 	}
 
-	return response;
+	// if user nevigates to /app page, redirect to app subdomain
+	if (url.pathname.includes('/app')) {
+		const searchParams = request.nextUrl.searchParams.toString();
+		const path = `${url.pathname.split('/app')[1]}${searchParams.length > 0 ? `?${searchParams}` : ''}`;
+		return NextResponse.redirect(`${url.protocol}//app.${process.env.NEXT_PUBLIC_DOMAIN}${path}`);
+	}
+
+	if (subdomain && subdomain !== 'app' && (path.includes('login') || path.includes('signup') || path.includes('password'))) return NextResponse.redirect(new URL(`${process.env.NEXT_PUBLIC_URL}/app/login`, request.url));
+
+	// for employee subdomains, rewrite to employee pages
+	if (subdomain && subdomain === 'employee') return NextResponse.rewrite(new URL(`/employee${path}`, request.url));
+
+	// for other pages, rewrite to org pages
+	if (subdomain && subdomain !== 'employee') {
+		if (path.split('/')[1] == subdomain) return NextResponse.rewrite(new URL(`${path}`, request.url));
+		return NextResponse.rewrite(new URL(`/${subdomain}${path}`, request.url));
+	}
+
+	return supabaseResponse;
 }
