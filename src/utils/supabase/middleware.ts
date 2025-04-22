@@ -58,38 +58,13 @@ const handleSubdomainRouting = (request: NextRequest, domain: string, path: stri
 	// Handle employee subdomain redirects
 	if (request.nextUrl.pathname.includes('/employee')) {
 		const employeePath = request.nextUrl.pathname.split('/employee')[1];
-		// Check if we're already on the employee subdomain
-		if (domain.startsWith('employee.')) {
-			return null; // Don't redirect if we're already on the employee subdomain
-		}
-		const baseUrl = `${request.nextUrl.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}`;
-		const redirectUrl = new URL(employeePath.startsWith('/') ? employeePath : `/${employeePath}`, baseUrl);
-		if (request.nextUrl.searchParams.toString()) {
-			redirectUrl.search = request.nextUrl.searchParams.toString();
-		}
-		return NextResponse.redirect(redirectUrl);
+		return NextResponse.redirect(`${request.nextUrl.protocol}//employee.${process.env.NEXT_PUBLIC_DOMAIN}${employeePath}${request.nextUrl.searchParams.toString() ? `?${request.nextUrl.searchParams.toString()}` : ''}`);
 	}
 
 	// Handle app subdomain redirects
 	if (request.nextUrl.pathname.includes('/app')) {
 		const appPath = request.nextUrl.pathname.split('/app')[1];
-		const baseUrl = `${request.nextUrl.protocol}//app.${process.env.NEXT_PUBLIC_DOMAIN}`;
-		const redirectUrl = new URL(appPath.startsWith('/') ? appPath : `/${appPath}`, baseUrl);
-		if (request.nextUrl.searchParams.toString()) {
-			redirectUrl.search = request.nextUrl.searchParams.toString();
-		}
-		return NextResponse.redirect(redirectUrl);
-	}
-
-	// Handle organization subdomain redirects
-	if (request.nextUrl.pathname.startsWith('/') && !request.nextUrl.pathname.startsWith('/app') && !request.nextUrl.pathname.startsWith('/employee')) {
-		const orgPath = request.nextUrl.pathname;
-		const baseUrl = `${request.nextUrl.protocol}//${domain}`;
-		const redirectUrl = new URL(orgPath.startsWith('/') ? orgPath : `/${orgPath}`, baseUrl);
-		if (request.nextUrl.searchParams.toString()) {
-			redirectUrl.search = request.nextUrl.searchParams.toString();
-		}
-		return NextResponse.redirect(redirectUrl);
+		return NextResponse.redirect(`${request.nextUrl.protocol}//app.${process.env.NEXT_PUBLIC_DOMAIN}${appPath}${request.nextUrl.searchParams.toString() ? `?${request.nextUrl.searchParams.toString()}` : ''}`);
 	}
 
 	// Redirect auth pages to app subdomain
