@@ -196,8 +196,14 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 		Object.entries(groupedQuestions).forEach(([group, questions]) => {
 			questions.forEach((question: Tables<'template_questions'>) => {
-				if (question.required && !answers[question.id]) {
-					unanswered.push({ group: group as QuestionGroup, question });
+				if (question.required && (selectedReviewType === 'self' ? !answers[question.id] : !managerAnswers[question.id])) {
+					if (question.group === 'private_manager_assessment') {
+						if (isSelectedEmplyeesManager && selectedReviewType === 'manager') {
+							unanswered.push({ group: group as QuestionGroup, question });
+						}
+					} else {
+						unanswered.push({ group: group as QuestionGroup, question });
+					}
 				}
 			});
 		});
