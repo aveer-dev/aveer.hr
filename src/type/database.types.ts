@@ -40,11 +40,15 @@ export type Database = {
           appraisal_cycle_id: number | null
           contract_id: number | null
           created_at: string | null
+          employee_goal_score: Json[] | null
           employee_submission_date: string | null
+          goals: Json[] | null
           id: number
           manager_answers: Json[]
           manager_contract_id: number | null
+          manager_goal_score: Json[] | null
           manager_submission_date: string | null
+          objectives: Json[] | null
           org: string | null
           status: Database["public"]["Enums"]["appraisal_status"] | null
           updated_at: string | null
@@ -54,11 +58,15 @@ export type Database = {
           appraisal_cycle_id?: number | null
           contract_id?: number | null
           created_at?: string | null
+          employee_goal_score?: Json[] | null
           employee_submission_date?: string | null
+          goals?: Json[] | null
           id?: never
           manager_answers?: Json[]
           manager_contract_id?: number | null
+          manager_goal_score?: Json[] | null
           manager_submission_date?: string | null
+          objectives?: Json[] | null
           org?: string | null
           status?: Database["public"]["Enums"]["appraisal_status"] | null
           updated_at?: string | null
@@ -68,11 +76,15 @@ export type Database = {
           appraisal_cycle_id?: number | null
           contract_id?: number | null
           created_at?: string | null
+          employee_goal_score?: Json[] | null
           employee_submission_date?: string | null
+          goals?: Json[] | null
           id?: never
           manager_answers?: Json[]
           manager_contract_id?: number | null
+          manager_goal_score?: Json[] | null
           manager_submission_date?: string | null
+          objectives?: Json[] | null
           org?: string | null
           status?: Database["public"]["Enums"]["appraisal_status"] | null
           updated_at?: string | null
@@ -88,13 +100,6 @@ export type Database = {
           {
             foreignKeyName: "appraisal_answers_contract_id_fkey"
             columns: ["contract_id"]
-            isOneToOne: false
-            referencedRelation: "contracts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "appraisal_answers_manager_contract_id_fkey"
-            columns: ["manager_contract_id"]
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id"]
@@ -2619,6 +2624,8 @@ export type Database = {
         | "company_values"
         | "competencies"
         | "private_manager_assessment"
+        | "goal_scoring"
+        | "objectives"
       question_type: "textarea" | "yesno" | "scale" | "multiselect"
       role_status: "open" | "close"
       third_party_auth_platforms: "google" | "deel"
@@ -2767,6 +2774,8 @@ export const Constants = {
         "company_values",
         "competencies",
         "private_manager_assessment",
+        "goal_scoring",
+        "objectives",
       ],
       question_type: ["textarea", "yesno", "scale", "multiselect"],
       role_status: ["open", "close"],

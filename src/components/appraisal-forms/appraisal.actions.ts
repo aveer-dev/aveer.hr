@@ -4,6 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { Tables, Database } from '@/type/database.types';
 import { TablesInsert, TablesUpdate } from '@/type/database.types';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
+import { GOAL_SCORE, Objective } from '../appraisal/appraisal.types';
 
 interface Answer {
 	question_id: number;
@@ -253,38 +254,73 @@ export const autoSaveAnswer = async ({ answerId, questionId, value, org, apprais
 	}
 };
 
-export const submitAppraisal = async ({
-	answerId,
-	answers,
-	manager_answers,
-	employee_submission_date,
-	manager_submission_date,
-	status
-}: {
-	answerId?: number;
-	answers?: { question_id: number; answer: any }[];
-	manager_answers?: { question_id: number; answer: any }[];
-	employee_submission_date?: string;
-	manager_submission_date?: string;
-	status?: Database['public']['Enums']['appraisal_status'];
-}) => {
+export const submitAppraisal = async ({ answerId, employee_submission_date, manager_submission_date, status }: { answerId?: number; employee_submission_date?: string; manager_submission_date?: string; status?: Database['public']['Enums']['appraisal_status'] }) => {
 	const supabase = await createClient();
 
 	if (!answerId) throw 'Answer id required';
 
-	const updateData: any = { status };
-
-	if (answers) {
-		updateData.answers = answers;
-		updateData.employee_submission_date = employee_submission_date;
-	}
-
-	if (manager_answers) {
-		updateData.manager_answers = manager_answers;
-		updateData.manager_submission_date = manager_submission_date;
-	}
+	const updateData: TablesUpdate<'appraisal_answers'> = {};
+	if (status) updateData.status = status;
+	if (employee_submission_date) updateData.employee_submission_date = employee_submission_date;
+	if (manager_submission_date) updateData.manager_submission_date = manager_submission_date;
 
 	const { error } = await supabase.from('appraisal_answers').update(updateData).eq('id', answerId);
 
+	if (error) throw error;
+};
+
+export const autoSaveObjectives = async ({
+	answerId,
+	objectives,
+	org,
+	appraisalCycleId,
+	contractId,
+	managerObjectivesScore,
+	objectivesScore
+}: {
+	managerObjectivesScore?: GOAL_SCORE[];
+	objectivesScore?: GOAL_SCORE[];
+	answerId?: number;
+	objectives?: Objective[];
+	org: string;
+	appraisalCycleId: number;
+	contractId: number;
+}) => {
+	const supabase = await createClient();
+
+	const payload: TablesUpdate<'appraisal_answers'> = {};
+	if (objectives) payload.objectives = objectives as any;
+	if (objectivesScore) payload.employee_goal_score = objectivesScore as any;
+	if (managerObjectivesScore) payload.manager_goal_score = managerObjectivesScore as any;
+
+	if (answerId) {
+		// Update existing answer
+		const { error } = await supabase.from('appraisal_answers').update(payload).eq('id', answerId);
+
+		if (error) throw error;
+		return;
+	}
+
+	// Create new answer
+	const { data: existingAnswers } = await supabase.from('appraisal_answers').select('*').eq('appraisal_cycle_id', appraisalCycleId).eq('contract_id', contractId).eq('org', org).single();
+
+	if (existingAnswers) {
+		// Update existing record with objectives
+		const { error } = await supabase.from('appraisal_answers').update(payload).eq('id', existingAnswers.id);
+
+		if (error) throw error;
+		return;
+	}
+
+	// Create new record
+	const insertPayload: TablesInsert<'appraisal_answers'> = {
+		...payload,
+		appraisal_cycle_id: appraisalCycleId,
+		contract_id: contractId,
+		org,
+		status: 'draft'
+	};
+
+	const { error } = await supabase.from('appraisal_answers').insert(insertPayload);
 	if (error) throw error;
 };

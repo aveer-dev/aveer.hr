@@ -9,7 +9,9 @@ import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { AppraisalReviewSelector } from './appraisal-review-selector';
 import { EmployeeAppraisalForm } from './employee-appraisal-form';
-
+import { useRouter } from 'next/navigation';
+import { getTeamAppraisalAnswers } from './appraisal.actions';
+import { PageLoader } from '../ui/page-loader';
 interface Props {
 	org: string;
 	contract: Tables<'contracts'>;
@@ -19,58 +21,51 @@ interface Props {
 	manager?: Tables<'managers'> | null;
 	teamMembers?: Tables<'contracts'>[] | null;
 	teamMembersAnswers?: Tables<'appraisal_answers'>[];
+	teams?: Tables<'teams'>[] | null;
 }
 
-type QuestionGroup = 'growth_and_development' | 'company_values' | 'competencies' | 'private_manager_assessment';
+type QuestionGroup = 'growth_and_development' | 'company_values' | 'competencies' | 'private_manager_assessment' | 'objectives' | 'goal_scoring';
 
 interface GroupedQuestions {
 	growth_and_development: Tables<'template_questions'>[];
 	company_values: Tables<'template_questions'>[];
 	competencies: Tables<'template_questions'>[];
 	private_manager_assessment: Tables<'template_questions'>[];
+	objectives: Tables<'template_questions'>[];
+	goal_scoring: Tables<'template_questions'>[];
 }
 
-export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAnswer, isManager, manager, teamMembers, teamMembersAnswers }: Props) => {
+export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAnswer, isManager, manager, teamMembers, teams }: Props) => {
+	const router = useRouter();
 	const [open, setOpen] = useState(false);
+	const [allQuestions, setAllQuestions] = useState<Tables<'template_questions'>[]>([]);
 	const [groupedQuestions, setGroupedQuestions] = useState<GroupedQuestions>({
 		growth_and_development: [],
 		company_values: [],
 		competencies: [],
-		private_manager_assessment: []
+		private_manager_assessment: [],
+		objectives: [],
+		goal_scoring: []
 	});
 	const [answer, setAnswer] = useState<Tables<'appraisal_answers'> | null>(contractAnswer ?? null);
-	const [activeTab, setActiveTab] = useState<QuestionGroup>('growth_and_development');
+	const [activeTab, setActiveTab] = useState<QuestionGroup>('objectives');
 	const [isLoading, setIsLoading] = useState(true);
+	const [isTeamAnswersLoading, setIsTeamAnswersLoading] = useState(true);
 	const isSelfReviewDueDatePassed = new Date(appraisalCycle.self_review_due_date) < new Date();
 	const [selectedReviewType, setSelectedReviewType] = useState<'self' | 'manager' | 'summary'>('self');
 	const [selectedEmployee, setSelectedEmployee] = useState<Tables<'contracts'>>(contract);
-
-	const currentQuestions = groupedQuestions['growth_and_development'];
+	const [teamMembersAnswers, setTeamMembersAnswers] = useState<Tables<'appraisal_answers'>[]>([]);
 
 	const isSelectedEmplyeesManager = selectedEmployee.direct_report == contract.id || (isManager && selectedEmployee.team == manager?.team);
 
 	useEffect(() => {
 		const fetchQuestions = async () => {
+			if (!open) return;
+
 			try {
 				setIsLoading(true);
 				const fetchedQuestions = await getTemplateQuestions({ org, templateId: appraisalCycle.question_template });
-
-				// Group questions by their group type
-				const grouped: GroupedQuestions = {
-					growth_and_development: [],
-					company_values: [],
-					competencies: [],
-					private_manager_assessment: []
-				};
-
-				fetchedQuestions.forEach(question => {
-					const group = question.group as QuestionGroup;
-					if (group in grouped) {
-						grouped[group].push(question);
-					}
-				});
-
-				setGroupedQuestions(grouped);
+				setAllQuestions(fetchedQuestions);
 			} catch (error) {
 				console.error('Failed to fetch questions:', error);
 			} finally {
@@ -79,7 +74,41 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 		};
 
 		fetchQuestions();
-	}, [appraisalCycle.question_template, org]);
+	}, [open, appraisalCycle.question_template, org]);
+
+	useEffect(() => {
+		const fetchTeamAnswers = async () => {
+			if (!open) return;
+			setIsTeamAnswersLoading(true);
+
+			try {
+				const teamMembersAnswers = await getTeamAppraisalAnswers({ org, contractIds: teamMembers?.map(member => member.id) || [], appraisalCycleId: appraisalCycle.id });
+				setTeamMembersAnswers(teamMembersAnswers);
+			} catch (error) {
+				console.error('Failed to fetch team answers:', error);
+			} finally {
+				setIsTeamAnswersLoading(false);
+			}
+		};
+
+		fetchTeamAnswers();
+	}, [appraisalCycle.id, org, teamMembers, open]);
+
+	// Group questions whenever selectedEmployee changes
+	useEffect(() => {
+		let grouped: any = {};
+
+		allQuestions.forEach(question => {
+			const group = question.group as QuestionGroup;
+
+			if (group && (question.team_ids?.length == 0 || question.team_ids?.includes((selectedEmployee.team as any)?.id || selectedEmployee.team))) {
+				if (!grouped[group]) grouped[group] = [];
+				grouped[group].push(question);
+			}
+		});
+
+		setGroupedQuestions({ objectives: [], goal_scoring: [], ...grouped });
+	}, [allQuestions, selectedEmployee]);
 
 	const handleReviewTypeSelect = (type: 'self' | 'manager' | 'summary', employee: Tables<'contracts'>, answer: Tables<'appraisal_answers'> | null) => {
 		setSelectedReviewType(type);
@@ -87,25 +116,13 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 		setAnswer(answer);
 	};
 
-	if (isLoading) {
-		return (
-			<Button disabled className="flex items-center gap-2">
-				<Loader2 className="h-4 w-4 animate-spin" />
-				Loading...
-			</Button>
-		);
-	}
-
-	if (!currentQuestions?.length) {
-		return (
-			<Button disabled={new Date(appraisalCycle.end_date) < new Date() && !answer} onClick={() => setOpen(true)}>
-				{new Date(appraisalCycle.end_date) < new Date() && !answer ? 'Appraisal Ended' : answer?.employee_submission_date ? 'Review Appraisal' : 'Continue Appraisal'}
-			</Button>
-		);
-	}
-
 	return (
-		<AlertDialog open={open} onOpenChange={setOpen}>
+		<AlertDialog
+			open={open}
+			onOpenChange={state => {
+				if (!state) router.refresh();
+				setOpen(state);
+			}}>
 			<Button className={cn(new Date(appraisalCycle.end_date) < new Date() && !answer && 'hidden')} onClick={() => setOpen(true)}>
 				{(new Date(appraisalCycle.end_date) < new Date() && answer) || answer?.employee_submission_date ? 'Review Appraisal' : answer?.status === 'draft' ? 'Continue Appraisal' : 'Start Appraisal'}
 			</Button>
@@ -116,7 +133,9 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 					<AlertDialogDescription>{appraisalCycle.description}</AlertDialogDescription>
 				</AlertDialogHeader>
 
-				<div className="flex h-full w-full flex-col items-center md:flex-row">
+				{(isLoading || isTeamAnswersLoading) && <PageLoader isLoading={isLoading || isTeamAnswersLoading} />}
+
+				<div className="flex h-full w-full flex-col md:flex-row">
 					<div className="sticky top-0 h-screen w-full overflow-y-auto md:w-64 md:flex-shrink-0">
 						<AppraisalReviewSelector
 							selectedEmployee={selectedEmployee}
@@ -132,7 +151,7 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 					</div>
 
 					{/* Appraisal Form */}
-					<div className="flex-1 overflow-y-auto p-1 md:-ml-[16rem]">
+					<div className="flex-1 overflow-y-auto p-1 md:-ml-[16rem] md:py-24">
 						<EmployeeAppraisalForm
 							setOpen={setOpen}
 							org={org}
@@ -146,6 +165,7 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 							contract={contract}
 							isSelectedEmplyeesManager={isSelectedEmplyeesManager}
 							groupedQuestions={groupedQuestions}
+							teams={teams}
 						/>
 					</div>
 				</div>

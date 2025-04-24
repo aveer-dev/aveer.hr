@@ -73,11 +73,11 @@ export const AppraisalDetails = async ({ org, id }: { org: string; id: string })
 				</TabsList>
 
 				<TabsContent value="overview">
-					<AppraisalOverview contracts={contracts} org={org} id={id} appraisal={appraisal} answers={answers} />
+					<AppraisalOverview contracts={contracts} appraisal={appraisal} answers={answers} />
 				</TabsContent>
 
 				<TabsContent value="summary">
-					<AppraisalSummary contracts={contracts as any} answers={answers} questions={questions} org={org} id={id} />
+					<AppraisalSummary contracts={contracts as any} answers={answers} questions={questions} />
 				</TabsContent>
 			</Tabs>
 		</div>

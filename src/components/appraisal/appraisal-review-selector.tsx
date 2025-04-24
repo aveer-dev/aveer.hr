@@ -39,9 +39,7 @@ export const AppraisalReviewSelector = ({
 				<Button
 					className={cn('gap-2 pl-0 transition-all duration-500 hover:pl-3 focus:pl-3', activeReviewType === 'self' && employee.id === selectedEmployee.id && 'pl-3')}
 					variant={activeReviewType === 'self' && employee.id === selectedEmployee.id ? 'secondary' : 'ghost'}
-					onClick={() => {
-						handleReviewTypeSelect('self', employee, answer);
-					}}
+					onClick={() => handleReviewTypeSelect('self', employee, answer)}
 					disabled={!canViewEmployeeReview && !canEditEmployeeReview}>
 					{isMyContract ? 'Self Review' : 'Employee Review'}
 					<Badge variant="outline" className="ml-auto">
@@ -52,9 +50,7 @@ export const AppraisalReviewSelector = ({
 				<Button
 					className={cn('gap-2 pl-0 transition-all duration-500 hover:pl-3 focus:pl-3', activeReviewType === 'manager' && employee.id === selectedEmployee.id && 'pl-3')}
 					variant={activeReviewType === 'manager' && employee.id === selectedEmployee.id ? 'secondary' : 'ghost'}
-					onClick={() => {
-						handleReviewTypeSelect('manager', employee, answer);
-					}}
+					onClick={() => handleReviewTypeSelect('manager', employee, answer)}
 					disabled={!canEditManagerReview && !canViewManagerReview}>
 					Manager Review
 					<Badge variant="outline" className="ml-auto">
@@ -62,18 +58,16 @@ export const AppraisalReviewSelector = ({
 					</Badge>
 				</Button>
 
-				<Button
+				{/* <Button
 					className={cn('gap-2 pl-0 transition-all duration-500 hover:pl-3 focus:pl-3', activeReviewType === 'manager' && employee.id === selectedEmployee.id && 'pl-3')}
 					variant={activeReviewType === 'summary' && employee.id === selectedEmployee.id ? 'secondary' : 'ghost'}
-					onClick={() => {
-						handleReviewTypeSelect('summary', employee, answer);
-					}}
+					onClick={() => handleReviewTypeSelect('summary', employee, answer)}
 					disabled={!canViewManagerReview || !canViewEmployeeReview}>
 					Summary
 					<Badge variant="outline" className="ml-auto">
 						{!canViewManagerReview || !canViewEmployeeReview ? 'Pending reviews' : 'View'}
 					</Badge>
-				</Button>
+				</Button> */}
 			</>
 		);
 	};

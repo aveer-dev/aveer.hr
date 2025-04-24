@@ -34,12 +34,15 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 	}
 
 	// Get appraisal answers for all cycles
-	const [{ data: teamMembers }, { data: manager }, { data: appraisalAnswers }] = await Promise.all([
+	const [{ data: teamMembers }, { data: manager }, { data: appraisalAnswers }, { data: teams }] = await Promise.all([
 		supabase
 			.from('contracts')
 			.select('*, profile:profiles!contracts_profile_fkey(first_name, last_name)')
-			.eq('org', org)
-			.eq('team', (contract?.team as any)?.id || contract?.team),
+			.match({
+				org,
+				team: (contract?.team as any)?.id || contract?.team,
+				status: 'signed'
+			}),
 		supabase.from('managers').select('*').eq('org', org).eq('person', contract.id).single(),
 		supabase
 			.from('appraisal_answers')
@@ -49,10 +52,9 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 			.in(
 				'appraisal_cycle_id',
 				appraisalCycles.map(cycle => cycle.id)
-			)
+			),
+		supabase.from('teams').select('*').match({ org })
 	]);
-
-	const teamMembersAnswers = await getTeamAppraisalAnswers({ org, contractIds: teamMembers?.map(member => member.id) || [], appraisalCycleId: appraisalCycles[0].id });
 
 	return (
 		<div className="space-y-12">
@@ -91,25 +93,23 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 												<p>Manager Review Due: {format(new Date(cycle.manager_review_due_date), 'MMM d, yyyy')}</p>
 											</div>
 
-											{isManagerReviewed ? (
-												<AppraisalReviewDialog org={org} contract={contract} appraisalCycle={cycle} answer={answer} />
-											) : (
-												<div className="flex items-center gap-2">
-													<TooltipProvider>
-														<Tooltip>
-															<TooltipTrigger asChild>
-																<Info size={14} className="text-muted-foreground" />
-															</TooltipTrigger>
+											{/* <AppraisalReviewDialog org={org} contract={contract} appraisalCycle={cycle} answer={answer} /> */}
 
-															<TooltipContent>
-																<p className="max-w-40">You can update your answers until the self review due date.</p>
-															</TooltipContent>
-														</Tooltip>
-													</TooltipProvider>
+											<div className="flex items-center gap-2">
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Info size={14} className="text-muted-foreground" />
+														</TooltipTrigger>
 
-													<AppraisalFormDialog teamMembersAnswers={teamMembersAnswers} org={org} contract={contract} appraisalCycle={cycle} contractAnswer={answer} isManager={!!manager} teamMembers={teamMembers} manager={manager} />
-												</div>
-											)}
+														<TooltipContent>
+															<p className="max-w-40">You can update your answers until the self review due date.</p>
+														</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+
+												<AppraisalFormDialog teams={teams} org={org} contract={contract} appraisalCycle={cycle} contractAnswer={answer} isManager={!!manager} teamMembers={teamMembers} manager={manager} />
+											</div>
 										</div>
 									</CardContent>
 								</Card>
@@ -174,7 +174,7 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 														</Tooltip>
 													</TooltipProvider>
 
-													<AppraisalFormDialog teamMembersAnswers={teamMembersAnswers} org={org} contract={contract} appraisalCycle={cycle} contractAnswer={answer} isManager={!!manager} teamMembers={teamMembers} manager={manager} />
+													<AppraisalFormDialog teams={teams} org={org} contract={contract} appraisalCycle={cycle} contractAnswer={answer} isManager={!!manager} teamMembers={teamMembers} manager={manager} />
 												</div>
 											)}
 										</div>
