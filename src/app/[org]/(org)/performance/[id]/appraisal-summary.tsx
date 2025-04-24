@@ -1,14 +1,28 @@
-import { Tables } from '@/type/database.types';
-import { ManagerAssessmentAggregate } from './manager-assessment-aggregate';
-import { QuestionGroupAssessment } from './question-group-assessment';
+// import { Tables } from '@/types/database.types';
+// import { ManagerAssessmentAggregate } from './manager-assessment-aggregate';
+// import { QuestionGroupAssessment } from './question-group-assessment';
+// import { ContractWithProfile } from '@/types/contract';
+// import { AppraisalAnswerWithQuestion } from '@/types/appraisal';
+// import { TemplateQuestionWithGroup } from '@/types/template';
 
-export const AppraisalSummary = async ({ contracts, questions, answers }: { contracts: (Tables<'contracts'> & { profile: Tables<'profiles'> })[]; questions: Tables<'template_questions'>[]; answers: Tables<'appraisal_answers'>[] }) => {
+interface Props {
+	// contracts: ContractWithProfile[];
+	// answers: Tables<'appraisal_answers'>[];
+	// questions: Tables<'template_questions'>[];
+	onClose: () => void;
+}
+
+// export function AppraisalSummary({ contracts, answers, questions }: Props) {
+export function AppraisalSummary({ onClose }: Props) {
 	return (
-		<div className="mt-6 space-y-14">
-			<ManagerAssessmentAggregate employees={contracts} answers={answers} questions={questions} />
+		<div className="space-y-10">
+			{/* <ManagerAssessmentAggregate employees={contracts} answers={answers} questions={questions} />
+
 			<QuestionGroupAssessment employees={contracts} answers={answers} questions={questions} group="growth_and_development" />
+
 			<QuestionGroupAssessment employees={contracts} answers={answers} questions={questions} group="company_values" />
-			<QuestionGroupAssessment employees={contracts} answers={answers} questions={questions} group="competencies" />
+
+			<QuestionGroupAssessment employees={contracts} answers={answers} questions={questions} group="competencies" /> */}
 		</div>
 	);
-};
+}

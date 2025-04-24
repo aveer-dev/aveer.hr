@@ -2,12 +2,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Tables } from '@/type/database.types';
-import { createClient } from '@/utils/supabase/server';
 import { format } from 'date-fns';
 
-export const AppraisalOverview = async ({ contracts, org, id, appraisal, answers }: { contracts: Tables<'contracts'>[]; org: string; id: string; appraisal: Tables<'appraisal_cycles'>; answers: Tables<'appraisal_answers'>[] }) => {
-	const supabase = await createClient();
-
+export const AppraisalOverview = async ({ contracts, appraisal, answers }: { contracts: Tables<'contracts'>[]; appraisal: Tables<'appraisal_cycles'>; answers: Tables<'appraisal_answers'>[] }) => {
 	// Calculate progress for each employee
 	const employeeProgress = contracts?.map(contract => {
 		const employeeAnswer = answers?.find(a => a.contract_id === contract.id);

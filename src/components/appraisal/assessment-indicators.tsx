@@ -4,14 +4,13 @@ import { Button } from '../ui/button';
 export function ScaleIndicator({ value, max = 5 }: { value: number; max?: number }) {
 	return (
 		<div className="flex items-center gap-1">
-			<div className="flex h-2 w-full gap-0.5">
+			<div className="flex w-full gap-0.5">
 				{Array.from({ length: max }).map((_, i) => (
-					<div key={i} className={cn('h-full flex-1 rounded-sm', i < value ? 'bg-primary' : 'bg-secondary')} />
+					<Button key={i} variant={i == value ? 'secondary_success' : 'outline'} className="disabled:opacity-100" disabled size="icon">
+						{i + 1}
+					</Button>
 				))}
 			</div>
-			<span className="text-sm text-muted-foreground">
-				{value}/{max}
-			</span>
 		</div>
 	);
 }
@@ -19,10 +18,10 @@ export function ScaleIndicator({ value, max = 5 }: { value: number; max?: number
 export function YesNoIndicator({ value }: { value: 'yes' | 'no' }) {
 	return (
 		<div className="flex items-center gap-2">
-			<Button variant={value === 'yes' ? 'secondary_success' : 'outline'} disabled size="icon">
+			<Button variant={value === 'yes' ? 'secondary_success' : 'outline'} className="disabled:opacity-100" disabled size="icon">
 				Yes
 			</Button>
-			<Button variant={value === 'no' ? 'secondary_success' : 'outline'} disabled size="icon">
+			<Button variant={value === 'no' ? 'secondary_success' : 'outline'} className="disabled:opacity-100" disabled size="icon">
 				No
 			</Button>
 		</div>
@@ -34,7 +33,11 @@ export function AnswerDisplay({ question, answer }: { question: any; answer: any
 
 	switch (question.type) {
 		case 'textarea':
-			return <p className="whitespace-pre-wrap text-sm text-muted-foreground">{answer}</p>;
+			return (
+				<p className="whitespace-pre-wrap text-sm font-medium">
+					<span className="font-light text-muted-foreground">Answer:</span> {answer}
+				</p>
+			);
 		case 'yesno':
 			return <YesNoIndicator value={answer as 'yes' | 'no'} />;
 		case 'scale':
