@@ -296,7 +296,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 		if (!nextGroup) return;
 
-		if ((nextGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (!isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
+		if ((nextGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (nextGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
 			setActiveTab(questionGroups[nextGroupIndex + 1] as QuestionGroup);
 			return;
 		}
@@ -311,7 +311,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 		const previousGroup = questionGroups[questionGroups.indexOf(activeTab as QuestionGroup) - 1];
 		if (!previousGroup) return;
 
-		if ((previousGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (!isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
+		if ((previousGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (previousGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
 			setActiveTab(questionGroups[questionGroups.indexOf(previousGroup) - 1] as QuestionGroup);
 			return;
 		}
@@ -325,7 +325,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 		if (!previousGroup) return '';
 
-		if ((previousGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (!isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
+		if ((previousGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (previousGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
 			previousGroup = questionGroups[previousGroupIndex - 1];
 			return `: ${groupLabels[previousGroup as QuestionGroup]}`;
 		}
@@ -338,7 +338,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 		if (!nextGroup) return '';
 
-		if ((nextGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (!isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
+		if ((nextGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (nextGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
 			nextGroup = questionGroups[nextGroupIndex + 1];
 			return `: ${groupLabels[nextGroup as QuestionGroup]}`;
 		}
@@ -1207,7 +1207,10 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 							<ChevronLeft size={14} /> Previous{getPreviousGroupLabel(activeTab as QuestionGroup)}
 						</Button>
 
-						{questionGroups.indexOf(activeTab as QuestionGroup) === questionGroups.length - 1 && (selectedReviewType === 'self' ? !isSelfReviewDueDatePassed && selectedEmployee.id === contract.id : isSelectedEmplyeesManager && !isManagerReviewDueDatePassed) ? (
+						{(questionGroups.indexOf(activeTab as QuestionGroup) === questionGroups.length - 1 && (selectedReviewType === 'self' ? !isSelfReviewDueDatePassed && selectedEmployee.id === contract.id : isSelectedEmplyeesManager && !isManagerReviewDueDatePassed)) ||
+						(questionGroups.indexOf(activeTab as QuestionGroup) + 1 == questionGroups.length - 1 &&
+							questionGroups[questionGroups.indexOf(activeTab as QuestionGroup) + 1] === 'private_manager_assessment' &&
+							(selectedReviewType === 'self' ? !isSelfReviewDueDatePassed : !isManagerReviewDueDatePassed && !isSelectedEmplyeesManager)) ? (
 							<Button onClick={handleSubmit} className="gap-4">
 								{isSubmitting ? 'Submitting...' : 'Submit Appraisal'} <Send size={14} />
 							</Button>
