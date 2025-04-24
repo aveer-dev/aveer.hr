@@ -7,8 +7,9 @@ import { DeleteFile, DeleteLink } from '@/components/file-management/delete-file
 import { FileUpload } from '@/components/file-management/file-upload-zone';
 import { cn } from '@/lib/utils';
 import { Tables } from '@/type/database.types';
-import { ReactNode } from 'react';
+import { Fragment, ReactNode } from 'react';
 import Link from 'next/link';
+import { Separator } from '../ui/separator';
 
 interface props {
 	path: string;
@@ -17,7 +18,7 @@ interface props {
 
 const Item = ({ children, name, className, description }: { children?: ReactNode; name: string; className?: string; description?: ReactNode }) => {
 	return (
-		<li className={cn('flex min-h-12 items-center gap-3 rounded-md border-b px-4 py-2 transition-all focus-within:bg-foreground/[0.02] hover:bg-foreground/[0.02] focus:bg-foreground/[0.02] focus-visible:bg-foreground/[0.02]', className)}>
+		<li className={cn('flex min-h-12 items-center gap-3 rounded-md px-4 py-2 transition-all focus-within:bg-foreground/[0.05] hover:bg-foreground/[0.05] focus:bg-foreground/[0.05] focus-visible:bg-foreground/[0.05]', className)}>
 			<File size={14} className="text-muted-foreground" />
 			<div>
 				<h4 className="max-w-64 truncate text-xs font-light sm:max-w-96">{name}</h4>
@@ -35,27 +36,31 @@ export const FileItems = async ({ path, readonly }: props) => {
 
 	return files.data && files.data.length > 0 ? (
 		<ul className="h-72 space-y-1 overflow-y-auto rounded-md bg-muted/70 px-2 pb-10 pt-4">
-			{files.data?.map(file => (
-				<Item name={file.name} key={file.id}>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="secondary" className="ml-auto h-8 w-8" size={'icon'}>
-								<EllipsisVertical size={12} />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent className="w-fit" align="end">
-							<DropdownMenuItem asChild>
-								<DownloadFile path={`${path}/${file.name}`} />
-							</DropdownMenuItem>
-
-							{!readonly && (
+			{files.data?.map((file, index) => (
+				<Fragment key={file.id}>
+					<Item name={file.name} key={file.id}>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="secondary" className="ml-auto h-8 w-8" size={'icon'}>
+									<EllipsisVertical size={12} />
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent className="w-fit" align="end">
 								<DropdownMenuItem asChild>
-									<DeleteFile path={`${path}/${file.name}`} />
+									<DownloadFile path={`${path}/${file.name}`} />
 								</DropdownMenuItem>
-							)}
-						</DropdownMenuContent>
-					</DropdownMenu>
-				</Item>
+
+								{!readonly && (
+									<DropdownMenuItem asChild>
+										<DeleteFile path={`${path}/${file.name}`} />
+									</DropdownMenuItem>
+								)}
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</Item>
+
+					{index !== files.data.length - 1 && <Separator className="my-2" />}
+				</Fragment>
 			))}
 		</ul>
 	) : (
@@ -74,23 +79,27 @@ export const FileItems = async ({ path, readonly }: props) => {
 
 export const FileLinks = ({ links, org }: { links?: Tables<'links'>[]; org?: string }) => {
 	return links && links.length > 0 ? (
-		<ul className="h-72 space-y-1 overflow-y-auto rounded-md bg-muted/70 px-2 pb-10 pt-4">
-			{links?.map(file => (
-				<Link href={file.link} key={file.id} legacyBehavior passHref target="_blank" referrerPolicy="no-referrer">
-					<Item
-						name={file.name}
-						className="cursor-pointer"
-						description={
-							<div className="flex items-center gap-2">
-								<Link2 size={10} /> <span className="max-w-64 truncate sm:max-w-96">{file.link}</span>
+		<ul className="h-72 space-y-2 overflow-y-auto rounded-md bg-muted/70 px-2 pb-10 pt-4">
+			{links?.map((file, index) => (
+				<Fragment key={file.id}>
+					<Link href={file.link} key={file.id} passHref target="_blank" className="block" referrerPolicy="no-referrer">
+						<Item
+							name={file.name}
+							className="cursor-pointer"
+							description={
+								<span className="flex items-center gap-2">
+									<Link2 size={10} /> <span className="max-w-64 truncate sm:max-w-96">{file.link}</span>
+								</span>
+							}>
+							<div className="ml-auto flex items-center gap-3">
+								{org && <DeleteLink org={org} id={file.id} />}
+								<ArrowUpRight size={12} className="mt-1" />
 							</div>
-						}>
-						<div className="ml-auto flex items-center gap-3">
-							{org && <DeleteLink org={org} id={file.id} />}
-							<ArrowUpRight size={12} className="mt-1" />
-						</div>
-					</Item>
-				</Link>
+						</Item>
+					</Link>
+
+					{index !== links.length - 1 && <Separator className="my-2" />}
+				</Fragment>
 			))}
 		</ul>
 	) : (
