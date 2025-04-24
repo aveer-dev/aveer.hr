@@ -12,19 +12,7 @@ alter type "public"."question_group" rename to "question_group__old_version_to_b
 
 create type "public"."question_group" as enum ('growth_and_development', 'company_values', 'competencies', 'private_manager_assessment', 'goal_scoring', 'objectives');
 
-alter table "public"."profiles_roles" alter column role type "public"."app_role" using role::text::"public"."app_role";
 
-alter table "public"."roles" alter column name type "public"."app_role" using name::text::"public"."app_role";
-
-alter table "public"."template_questions" alter column group type "public"."question_group" using group::text::"public"."question_group";
-
-alter table "public"."roles" alter column "name" set default 'admin'::app_role;
-
-alter table "public"."template_questions" alter column "group" set default 'growth_and_development'::question_group;
-
-drop type "public"."app_role__old_version_to_be_dropped";
-
-drop type "public"."question_group__old_version_to_be_dropped";
 
 alter table "public"."appraisal_answers" add column "employee_goal_score" jsonb[];
 

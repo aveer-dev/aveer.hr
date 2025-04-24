@@ -1,46 +1,22 @@
 'use client';
 
 import { Tables } from '@/type/database.types';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
 import { AnswerDisplay } from '@/components/appraisal/assessment-indicators';
-import { FileIcon, Link2Icon } from 'lucide-react';
+import { FileIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { getGoalFileUrl } from '@/components/appraisal/appraisal.actions';
+import { Answer, GOAL_SCORE, Objective } from '@/components/appraisal/appraisal.types';
+import { toast } from 'sonner';
+import { LoadingSpinner } from '@/components/ui/loader';
 
 type ContractWithProfile = Tables<'contracts'> & {
 	profile: Pick<Tables<'profiles'>, 'first_name' | 'last_name'>;
 };
-
-interface Goal {
-	id: string;
-	title: string;
-	description: string;
-	status: string;
-}
-
-interface Objective {
-	id: string;
-	title: string;
-	description: string;
-	goals: Goal[];
-}
-
-interface GoalScore {
-	goal_id: string;
-	score: number;
-	comment: string;
-	file_name?: string;
-	file_path?: string;
-}
-
-interface Answer {
-	question_id: number;
-	answer: any;
-}
 
 interface Props {
 	employees: ContractWithProfile[];
@@ -59,8 +35,9 @@ export function EmployeeAppraisalViewer({ employees, answers, questions, apprais
 	const selfAnswers = Array.isArray(employeeAnswer?.answers) ? (employeeAnswer.answers as unknown as Answer[]) : [];
 	const managerAnswers = Array.isArray(employeeAnswer?.manager_answers) ? (employeeAnswer.manager_answers as unknown as Answer[]) : [];
 	const objectives = Array.isArray(employeeAnswer?.objectives) ? (employeeAnswer.objectives as unknown as Objective[]) : [];
-	const employeeGoalScores = Array.isArray(employeeAnswer?.employee_goal_score) ? (employeeAnswer.employee_goal_score as unknown as GoalScore[]) : [];
-	const managerGoalScores = Array.isArray(employeeAnswer?.manager_goal_score) ? (employeeAnswer.manager_goal_score as unknown as GoalScore[]) : [];
+	const employeeGoalScores = Array.isArray(employeeAnswer?.employee_goal_score) ? (employeeAnswer.employee_goal_score as unknown as GOAL_SCORE[]) : [];
+	const managerGoalScores = Array.isArray(employeeAnswer?.manager_goal_score) ? (employeeAnswer.manager_goal_score as unknown as GOAL_SCORE[]) : [];
+	const [isLoadingFile, setIsLoadingFile] = useState(false);
 
 	// Group questions by their type
 	const groupedQuestions = questions.reduce(
@@ -74,12 +51,26 @@ export function EmployeeAppraisalViewer({ employees, answers, questions, apprais
 		{} as Record<string, Tables<'template_questions'>[]>
 	);
 
+	const handleFileClick = useCallback(async (filePath: string) => {
+		try {
+			setIsLoadingFile(true);
+			const url = await getGoalFileUrl({ filePath });
+			window.open(url, '_blank');
+		} catch (error) {
+			toast.error('Error getting file URL:', { description: (error as Error).message });
+		} finally {
+			setIsLoadingFile(false);
+		}
+	}, []);
+
 	if (!currentEmployee) {
 		return <div>No employees found</div>;
 	}
 
-	const renderGoalScore = (goalId: string, scores: GoalScore[], title: string) => {
+	const renderGoalScore = (goalId: string, scores: GOAL_SCORE[], title: string) => {
 		const score = scores.find(s => s.goal_id === goalId);
+		console.log(score);
+
 		if (!score) return null;
 
 		return (
@@ -89,12 +80,10 @@ export function EmployeeAppraisalViewer({ employees, answers, questions, apprais
 				<div className="space-y-2 rounded-lg border bg-accent/50 p-4">
 					<div className="flex items-center justify-between">
 						<span className="text-sm font-medium">Score: {score.score}/5</span>
-						{score.file_path && (
-							<Button variant="ghost" size="sm" className="h-6 gap-1" asChild>
-								<a href={score.file_path} target="_blank" rel="noopener noreferrer">
-									<FileIcon size={12} />
-									{score.file_name}
-								</a>
+						{score.filePath && score.fileName && (
+							<Button variant="ghost" size="sm" className="h-6 gap-1" onClick={() => handleFileClick(score.filePath!)}>
+								{isLoadingFile ? <LoadingSpinner /> : <FileIcon size={12} />}
+								<span className="text-xs">{score.fileName}</span>
 							</Button>
 						)}
 					</div>
@@ -168,11 +157,6 @@ export function EmployeeAppraisalViewer({ employees, answers, questions, apprais
 
 												<div className="flex items-center gap-2">
 													<h4 className="text-sm font-medium">{goal.title}</h4>
-													{goal.status && (
-														<Badge variant="outline" className="text-[10px]">
-															{goal.status}
-														</Badge>
-													)}
 												</div>
 												<p className="mt-2 text-xs text-muted-foreground">{goal.description}</p>
 											</div>

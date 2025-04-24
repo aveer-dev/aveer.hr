@@ -588,7 +588,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 										<p className="mt-2 text-xs text-muted-foreground empty:hidden">{objective.description}</p>
 									</div>
 
-									<h3 className="mb-1 text-xs font-light text-muted-foreground">goals:</h3>
+									{!!objective.goals.length && <h3 className="mb-1 text-xs font-light text-muted-foreground">goals:</h3>}
 									{objective.goals.length > 0 && (
 										<div className="space-y-2">
 											{objective.goals.map(goal => (
