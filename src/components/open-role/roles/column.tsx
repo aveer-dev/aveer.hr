@@ -112,9 +112,9 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 						<DropdownMenuItem onClick={event => event.stopPropagation()} className="h-7 p-0 text-xs font-light">
 							<DropdownListItem href={`./open-roles/${row.original.id}`}>Open</DropdownListItem>
 						</DropdownMenuItem>
-						<DropdownMenuItem onClick={event => event.stopPropagation()} className="h-7 p-0 text-xs font-light">
+						{/* <DropdownMenuItem onClick={event => event.stopPropagation()} className="h-7 p-0 text-xs font-light">
 							<DropdownListItem href={`./open-roles/${row.original.id}/applicants`}>Applicants</DropdownListItem>
-						</DropdownMenuItem>
+						</DropdownMenuItem> */}
 						<DropdownMenuItem onClick={event => event.stopPropagation()} className="h-7 p-0 text-xs font-light">
 							<DropdownListItem href={`./open-roles/${row.original.id}/edit`}>Edit</DropdownListItem>
 						</DropdownMenuItem>

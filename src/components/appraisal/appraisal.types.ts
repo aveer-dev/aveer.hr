@@ -22,6 +22,7 @@ export interface Objective {
 	title: string;
 	description: string;
 	goals: Goal[];
+	weight?: number;
 }
 
 export interface Goal {

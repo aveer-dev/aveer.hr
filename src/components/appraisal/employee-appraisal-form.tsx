@@ -19,6 +19,7 @@ import { GoalFileUpload } from './goal-file-upload';
 import { Badge } from '../ui/badge';
 import { LoadingSpinner } from '../ui/loader';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
+import { Switch } from '../ui/switch';
 type QuestionGroup = 'growth_and_development' | 'company_values' | 'competencies' | 'private_manager_assessment' | 'objectives' | 'goal_scoring';
 
 interface Props {
@@ -52,6 +53,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	const [editingGoal, setEditingGoal] = useState<{ objectiveId: string; goal: Goal } | null>(null);
 	const [deletingObjective, setDeletingObjective] = useState<string | null>(null);
 	const [deletingGoal, setDeletingGoal] = useState<string | null>(null);
+	const [enableWeights, setEnableWeights] = useState<boolean>(false);
 
 	const shouldShowQuestion = (question: Tables<'template_questions'>) => {
 		// For private_manager_assessment, only show to managers
@@ -230,6 +232,21 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 			return;
 		}
 
+		// Check weights if enabled
+		if (enableWeights) {
+			const totalWeight = objectives.reduce((sum, obj) => sum + (obj.weight || 0), 0);
+			if (totalWeight !== 100) {
+				toast.error('Total objective weights must equal 100%');
+				return;
+			}
+
+			const objectivesWithoutWeight = objectives.filter(obj => !obj.weight);
+			if (objectivesWithoutWeight.length > 0) {
+				toast.error('All objectives must have a weight when weights are enabled');
+				return;
+			}
+		}
+
 		// Check if all goals have been scored in the goal scoring tab
 		if (selectedReviewType === 'self') {
 			const unscoredGoals = objectives.some(obj => obj.goals.some(goal => !objectivesScore.find(score => score.goal_id === goal.id)));
@@ -403,6 +420,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 		setAnswers(_answers);
 		setManagerAnswers(_managerAnswers);
 		setObjectives((answer.objectives as unknown as Objective[]) || []);
+		setEnableWeights((answer.objectives as unknown as Objective[])?.some(obj => obj?.weight) || false);
 
 		const initialGoalScores: GOAL_SCORE[] = [];
 		(answer.objectives as unknown as Objective[])?.forEach(obj => {
@@ -638,13 +656,67 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 				{activeTab === 'goal_scoring' && (
 					<TabsContent className="min-h-36 space-y-4" value="goal_scoring">
 						<div className="space-y-6">
-							<h3 className="text-base font-medium">Score {isSelectedEmplyeesManager ? `${(selectedEmployee.profile as any)?.first_name}'s` : 'Your'} Goals</h3>
+							<div className="flex items-center justify-between">
+								<h3 className="text-base font-medium">Score {isSelectedEmplyeesManager ? `${(selectedEmployee.profile as any)?.first_name}'s` : 'Your'} Goals</h3>
+								<div className="flex items-center gap-2">
+									<Label htmlFor="enable-weights">Objective Weights</Label>
+									<Switch
+										id="enable-weights"
+										checked={enableWeights}
+										className="scale-75"
+										onCheckedChange={checked => {
+											setEnableWeights(checked);
+											if (!checked) {
+												// Reset weights when disabling
+												const newObjectives = objectives.map(obj => ({ ...obj, weight: undefined }));
+												updateObjectives(newObjectives);
+											}
+										}}
+										disabled={selectedEmployee.id !== contract.id || isSelfReviewDueDatePassed}
+									/>
+								</div>
+							</div>
+
+							{enableWeights && (
+								<div className="rounded-lg border bg-muted p-3">
+									<p className="text-xs text-muted-foreground">
+										Total Weight: {objectives.reduce((sum, obj) => sum + (obj.weight || 0), 0)}%{objectives.reduce((sum, obj) => sum + (obj.weight || 0), 0) !== 100 && <span className="ml-2 text-destructive">(Must equal 100%)</span>}
+									</p>
+								</div>
+							)}
 
 							{objectives.map(objective => (
 								<div key={objective.id} className="rounded-lg border p-4">
-									<h3 className="mb-1 text-xs font-light text-muted-foreground">objective:</h3>
-									<h4 className="text-sm font-medium">{objective.title || 'Untitled Objective'}</h4>
-									<p className="mb-6 mt-2 text-xs text-muted-foreground empty:hidden">{objective.description}</p>
+									<div className="flex justify-between gap-6">
+										<div>
+											<h3 className="mb-1 text-xs font-light text-muted-foreground">objective:</h3>
+											<h4 className="text-sm font-medium">{objective.title || 'Untitled Objective'}</h4>
+										</div>
+
+										{enableWeights && (
+											<div className="flex h-fit items-center gap-2">
+												<Label htmlFor={`weight-${objective.id}`} className="text-xs">
+													Weight:
+												</Label>
+												<Input
+													id={`weight-${objective.id}`}
+													type="number"
+													min="0"
+													max="100"
+													className="h-6 w-12 p-1 text-xs"
+													value={objective.weight || ''}
+													onChange={e => {
+														const weight = parseInt(e.target.value) || 0;
+														const newObjectives = objectives.map(obj => (obj.id === objective.id ? { ...obj, weight } : obj));
+														updateObjectives(newObjectives);
+													}}
+													disabled={selectedEmployee.id !== contract.id || isSelfReviewDueDatePassed}
+												/>
+												<span className="text-xs text-muted-foreground">%</span>
+											</div>
+										)}
+									</div>
+									<p className="mb-6 mt-3 text-xs text-muted-foreground empty:hidden">{objective.description}</p>
 
 									<div>
 										<h3 className="mb-1 text-xs font-light text-muted-foreground">goals:</h3>
