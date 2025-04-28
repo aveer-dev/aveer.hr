@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { QuestionTemplateDialog } from './question-template-dialog';
 import { Tables } from '@/type/database.types';
-
+import { EmployeeHoverCard } from '../ui/employee-hover-card';
 interface AppraisalQuestionsListProps {
 	org: string;
 	teams: Tables<'teams'>[];
@@ -12,7 +12,7 @@ interface AppraisalQuestionsListProps {
 
 export const AppraisalQuestionsTemplates = async ({ org, teams }: AppraisalQuestionsListProps) => {
 	const supabase = await createClient();
-	const { data, error } = await supabase.from('question_templates').select('*, created_by(first_name, last_name)').match({ org });
+	const { data, error } = await supabase.from('question_templates').select('*, created_by(id, first_name, last_name)').match({ org });
 
 	if (error) {
 		return (
@@ -43,7 +43,7 @@ export const AppraisalQuestionsTemplates = async ({ org, teams }: AppraisalQuest
 
 						<CardContent className="p-3 pt-0">
 							<div className="text-xs text-muted-foreground">
-								Created by: {template.created_by.first_name} {template.created_by.last_name}
+								Created by: <EmployeeHoverCard employeeId={template.created_by.id} org={org} triggerClassName="text-muted-foreground" contentClassName="text-xs" />
 							</div>
 						</CardContent>
 					</Card>

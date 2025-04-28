@@ -134,7 +134,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 
 	return (
 		<Sheet open={isOpen} onOpenChange={setIsOpen}>
-			<SheetTrigger asChild>{children || <Button variant="default">Create Appraisal Cycle</Button>}</SheetTrigger>
+			<SheetTrigger asChild>{children ? children : <Button variant="default">Create Appraisal Cycle</Button>}</SheetTrigger>
 
 			<SheetContent className="w-full overflow-auto pb-24 sm:max-w-md">
 				<SheetHeader className="mb-6">
