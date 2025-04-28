@@ -7,33 +7,15 @@ import { format } from 'date-fns';
 import { BackButton } from '@/components/ui/back-button';
 import { AppraisalScoreSummary } from './appraisal-score-summary';
 import { EmployeeAppraisalViewer } from './employee-appraisal-viewer';
-import { Tables } from '@/type/database.types';
-
-type ContractWithProfile = Tables<'contracts'> & {
-	profile: Pick<Tables<'profiles'>, 'first_name' | 'last_name'>;
-};
+import { ContractRepository, TeamRepository } from '@/dal';
 
 export const AppraisalDetails = async ({ org, id }: { org: string; id: string }) => {
 	const supabase = await createClient();
 
-	const [{ data: contracts, error: contractsError }, { data: appraisal, error: appraisalError }] = await Promise.all([
-		supabase
-			.from('contracts')
-			.select(
-				`
-			*,
-			profile:profiles!contracts_profile_fkey (
-				first_name,
-				last_name
-			)
-		    `
-			)
-			.match({ org, status: 'signed' })
-			.returns<ContractWithProfile[]>(),
-		supabase.from('appraisal_cycles').select('*').eq('id', parseInt(id)).single()
-	]);
+	const contractsRepo = new ContractRepository();
+	const [contracts, { data: appraisal, error: appraisalError }] = await Promise.all([contractsRepo.getAllByOrgWithProfile(org, 'signed'), supabase.from('appraisal_cycles').select('*').eq('id', parseInt(id)).single()]);
 
-	if (contractsError) {
+	if (!contracts) {
 		return <div>Error loading employee data</div>;
 	}
 
@@ -41,14 +23,16 @@ export const AppraisalDetails = async ({ org, id }: { org: string; id: string })
 		return <div>Error loading appraisal</div>;
 	}
 
-	const [{ data: answers, error: answersError }, { data: questions, error: questionsError }] = await Promise.all([
+	const teamsRepo = new TeamRepository();
+	const [{ data: answers, error: answersError }, { data: questions, error: questionsError }, teams] = await Promise.all([
 		supabase
 			.from('appraisal_answers')
 			.select('*')
 			.eq('org', org)
 			.in('contract_id', contracts?.map(c => c.id) || [])
 			.eq('appraisal_cycle_id', parseInt(id)),
-		supabase.from('template_questions').select('*').match({ org, template_id: appraisal.question_template })
+		supabase.from('template_questions').select('*').match({ org, template_id: appraisal.question_template }),
+		teamsRepo.getAllByOrg(org)
 	]);
 
 	if (answersError) {
@@ -61,6 +45,10 @@ export const AppraisalDetails = async ({ org, id }: { org: string; id: string })
 
 	if (!contracts) {
 		return <div>No contracts found</div>;
+	}
+
+	if (!teams) {
+		return <div>No teams found</div>;
 	}
 
 	return (
@@ -90,7 +78,7 @@ export const AppraisalDetails = async ({ org, id }: { org: string; id: string })
 				</TabsContent>
 
 				<TabsContent value="scores">
-					<AppraisalScoreSummary contracts={contracts as any} answers={answers as any} />
+					<AppraisalScoreSummary teams={teams} contracts={contracts as any} answers={answers as any} />
 				</TabsContent>
 
 				<TabsContent value="details">

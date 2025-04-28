@@ -17,9 +17,13 @@ export class ContractRepository implements IContractRepository {
 		return profileData;
 	}
 
-	async getAllByOrg(org: string): Promise<Tables<'contracts'>[]> {
+	async getAllByOrg(org: string, status?: Tables<'contracts'>['status']): Promise<Tables<'contracts'>[]> {
 		const supabase = await createClient();
-		const { data: orgData, error: orgError } = await supabase.from('contracts').select('*').eq('org', org);
+
+		const request = supabase.from('contracts').select('*').eq('org', org);
+		if (status) request.eq('status', status);
+
+		const { data: orgData, error: orgError } = await request;
 		if (orgError || !orgData) return [];
 		return orgData;
 	}
@@ -66,9 +70,9 @@ export class ContractRepository implements IContractRepository {
 		return relData as unknown as ContractWithRelations;
 	}
 
-	async getAllByOrgWithRelations(org: string): Promise<ContractWithRelations[]> {
+	async getAllByOrgWithRelations(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithRelations[]> {
 		const supabase = await createClient();
-		const { data: relAllData, error: relAllError } = await supabase
+		const request = supabase
 			.from('contracts')
 			.select(
 				`*,
@@ -83,8 +87,10 @@ export class ContractRepository implements IContractRepository {
 			`
 			)
 			.eq('org', org);
-		if (relAllError || !relAllData) return [];
-		return relAllData as unknown as ContractWithRelations[];
+		if (status) request.eq('status', status);
+		const { data, error } = await request;
+		if (error || !data) return [];
+		return data as unknown as ContractWithRelations[];
 	}
 
 	async getByIdWithProfile(org: string, id: number | string): Promise<ContractWithProfile | null> {
@@ -94,9 +100,11 @@ export class ContractRepository implements IContractRepository {
 		return data as unknown as ContractWithProfile;
 	}
 
-	async getAllByOrgWithProfile(org: string): Promise<ContractWithProfile[]> {
+	async getAllByOrgWithProfile(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithProfile[]> {
 		const supabase = await createClient();
-		const { data, error } = await supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*))').eq('org', org);
+		const request = supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*))').eq('org', org);
+		if (status) request.eq('status', status);
+		const { data, error } = await request;
 		if (error || !data) return [];
 		return data as unknown as ContractWithProfile[];
 	}
@@ -108,9 +116,11 @@ export class ContractRepository implements IContractRepository {
 		return data as unknown as ContractWithTeam;
 	}
 
-	async getAllByOrgWithTeam(org: string): Promise<ContractWithTeam[]> {
+	async getAllByOrgWithTeam(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithTeam[]> {
 		const supabase = await createClient();
-		const { data, error } = await supabase.from('contracts').select('*, team:teams!contracts_team_fkey(id, name)').eq('org', org);
+		const request = supabase.from('contracts').select('*, team:teams!contracts_team_fkey(id, name)').eq('org', org);
+		if (status) request.eq('status', status);
+		const { data, error } = await request;
 		if (error || !data) return [];
 		return data as unknown as ContractWithTeam[];
 	}
@@ -132,9 +142,11 @@ export class ContractRepository implements IContractRepository {
 		return data as unknown as ContractWithProfileAndTeam[];
 	}
 
-	async getAllByOrgWithProfileAndTeam(org: string): Promise<ContractWithProfileAndTeam[]> {
+	async getAllByOrgWithProfileAndTeam(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithProfileAndTeam[]> {
 		const supabase = await createClient();
-		const { data, error } = await supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)), team:teams!contracts_team_fkey(id, name)').eq('org', org);
+		const request = supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)), team:teams!contracts_team_fkey(id, name)').eq('org', org);
+		if (status) request.eq('status', status);
+		const { data, error } = await request;
 		if (error || !data) return [];
 		return data as unknown as ContractWithProfileAndTeam[];
 	}

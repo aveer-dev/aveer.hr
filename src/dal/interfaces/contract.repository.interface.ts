@@ -1,4 +1,4 @@
-import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
+import { Database, Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 
 export type ContractWithRelations = Tables<'contracts'> & {
 	org?: Tables<'organisations'>;
@@ -27,21 +27,22 @@ export type ContractWithProfileAndTeam = Tables<'contracts'> & {
 export interface IContractRepository {
 	getById(org: string, id: number | string): Promise<Tables<'contracts'> | null>;
 	getByProfile(profileId: string): Promise<Tables<'contracts'>[]>;
-	getAllByOrg(org: string): Promise<Tables<'contracts'>[]>;
+	getAllByOrg(org: string, status?: Tables<'contracts'>['status']): Promise<Tables<'contracts'>[]>;
 	create(payload: TablesInsert<'contracts'>): Promise<Tables<'contracts'> | null>;
 	update(org: string, id: number | string, payload: TablesUpdate<'contracts'>): Promise<Tables<'contracts'> | null>;
 	delete(org: string, id: number | string): Promise<boolean>;
 
 	getByIdWithRelations(org: string, id: number | string): Promise<ContractWithRelations | null>;
-	getAllByOrgWithRelations(org: string): Promise<ContractWithRelations[]>;
+	getAllByOrgWithRelations(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithRelations[]>;
 
 	getByIdWithProfile(org: string, id: number | string): Promise<ContractWithProfile | null>;
-	getAllByOrgWithProfile(org: string): Promise<ContractWithProfile[]>;
+	getAllByOrgWithProfile(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithProfile[]>;
 
 	getByIdWithTeam(org: string, id: number | string): Promise<ContractWithTeam | null>;
-	getAllByOrgWithTeam(org: string): Promise<ContractWithTeam[]>;
+	getAllByOrgWithTeam(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithTeam[]>;
 
 	getByIdWithProfileAndTeam(org: string, id: number | string): Promise<ContractWithProfileAndTeam | null>;
+	getAllByOrgWithProfileAndTeam(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithProfileAndTeam[]>;
+
 	getByProfileWithProfileAndTeam(id: number | string, org: string): Promise<ContractWithProfileAndTeam[] | null>;
-	getAllByOrgWithProfileAndTeam(org: string): Promise<ContractWithProfileAndTeam[]>;
 }
