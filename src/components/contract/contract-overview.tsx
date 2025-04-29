@@ -1,5 +1,5 @@
 import { ArrowUpRight, Info } from 'lucide-react';
-import { Tables, TablesInsert } from '@/type/database.types';
+import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getChartData, LeaveRequestDialog, LeaveRequests } from './leave';
@@ -9,7 +9,6 @@ import { FileItems, FileLinks } from '@/components/file-management/file-items';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ROLE } from '@/type/contract.types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AddFile } from '../file-management/add-file-link';
 import { LeaveStat } from './leave/leave-stat';
 import { buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
@@ -28,17 +27,6 @@ export const ContractOverview = async ({ data, reviewType, orgSettings }: props)
 
 	const files = await supabase.from('links').select().match({ org: data.org.subdomain });
 	const getLinks = (path: string) => files.data?.filter(file => file.path == path);
-
-	const addLink = async (payload: TablesInsert<'links'>) => {
-		'use server';
-
-		const supabase = await createClient();
-
-		const { error } = await supabase.from('links').upsert({ ...payload, org: data.org.subdomain });
-		if (error) return error.code == '23505' ? `Link with name '${payload.name}' already exists` : error.message;
-
-		return true;
-	};
 
 	const { data: leaveRequests } = await supabase
 		.from('time_off')
@@ -101,41 +89,6 @@ export const ContractOverview = async ({ data, reviewType, orgSettings }: props)
 						<h2 className="flex items-center justify-between text-xl font-bold">Files</h2>
 					</div>
 
-					<section className="relative mt-8">
-						<div className="mb-6 flex items-center gap-2">
-							<h2 className="text-sm font-light text-muted-foreground">Organisation files</h2>
-
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild className="text-muted-foreground">
-										<button>
-											<Info size={12} />
-										</button>
-									</TooltipTrigger>
-
-									<TooltipContent>
-										<p className="max-w-36 text-left text-muted-foreground">Files added here will be visible to every employee</p>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-						</div>
-
-						<Tabs defaultValue="files" className="w-full">
-							<TabsList className="flex w-fit">
-								<TabsTrigger value="files">Files</TabsTrigger>
-								<TabsTrigger value="links">Links</TabsTrigger>
-							</TabsList>
-
-							<TabsContent value="files">
-								<FileItems readonly path={`${data.org.id}/org-${data.org.id}`} />
-							</TabsContent>
-
-							<TabsContent value="links">
-								<FileLinks links={getLinks(`${data.org.id}/org-${data.org.id}`)} />
-							</TabsContent>
-						</Tabs>
-					</section>
-
 					<section className="relative mt-16">
 						<div className="mb-6 flex items-center gap-2">
 							<h2 className="text-sm font-light text-muted-foreground">Your files</h2>
@@ -171,8 +124,6 @@ export const ContractOverview = async ({ data, reviewType, orgSettings }: props)
 								<FileLinks org={data.org.subdomain} links={getLinks(`${data.org.id}/${data.profile?.id}`)} />
 							</TabsContent>
 						</Tabs>
-
-						<AddFile path={`${data.org.id}/${data.profile?.id}`} addLink={addLink} />
 					</section>
 				</div>
 			</div>
