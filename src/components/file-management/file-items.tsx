@@ -8,8 +8,9 @@ import { FileUpload } from '@/components/file-management/file-upload-zone';
 import { cn } from '@/lib/utils';
 import { Tables } from '@/type/database.types';
 import { Fragment, ReactNode } from 'react';
-import Link from 'next/link';
 import { Separator } from '../ui/separator';
+import { ViewFile } from './view-file';
+import { NavLink } from '../ui/link';
 
 interface props {
 	path: string;
@@ -47,6 +48,10 @@ export const FileItems = async ({ path, readonly }: props) => {
 							</DropdownMenuTrigger>
 							<DropdownMenuContent className="w-fit" align="end">
 								<DropdownMenuItem asChild>
+									<ViewFile path={`${path}/${file.name}`} />
+								</DropdownMenuItem>
+
+								<DropdownMenuItem asChild>
 									<DownloadFile path={`${path}/${file.name}`} />
 								</DropdownMenuItem>
 
@@ -80,27 +85,35 @@ export const FileItems = async ({ path, readonly }: props) => {
 export const FileLinks = ({ links, org }: { links?: Tables<'links'>[]; org?: string }) => {
 	return links && links.length > 0 ? (
 		<ul className="h-72 space-y-2 overflow-y-auto rounded-md bg-muted/70 px-2 pb-10 pt-4">
-			{links?.map((file, index) => (
-				<Fragment key={file.id}>
-					<Link href={file.link} key={file.id} passHref target="_blank" className="block" referrerPolicy="no-referrer">
-						<Item
-							name={file.name}
-							className="cursor-pointer"
-							description={
-								<span className="flex items-center gap-2">
-									<Link2 size={10} /> <span className="max-w-64 truncate sm:max-w-96">{file.link}</span>
-								</span>
-							}>
-							<div className="ml-auto flex items-center gap-3">
-								{org && <DeleteLink org={org} id={file.id} />}
-								<ArrowUpRight size={12} className="mt-1" />
-							</div>
-						</Item>
-					</Link>
+			{links?.map((file, index) => {
+				let link = '';
+				const document = file.document as unknown as Tables<'documents'>;
 
-					{index !== links.length - 1 && <Separator className="my-2" />}
-				</Fragment>
-			))}
+				if (document) link = document.private === true ? `/documents/${document.id}` : `https://${org}.aveer.hr/shared-doc/${document.link_id}`;
+				else link = file.link;
+
+				return (
+					<Fragment key={file.id}>
+						<NavLink org={document?.org ?? undefined} href={link} key={file.id} passHref target="_blank" className="block">
+							<Item
+								name={document ? document.name : file.name}
+								className="cursor-pointer"
+								description={
+									<span className="flex items-center gap-2">
+										<Link2 size={10} /> <span className="max-w-64 truncate sm:max-w-96">{link}</span>
+									</span>
+								}>
+								<div className="ml-auto flex items-center gap-3">
+									{org && <DeleteLink org={org} id={file.id} />}
+									<ArrowUpRight size={12} className="mt-1" />
+								</div>
+							</Item>
+						</NavLink>
+
+						{index !== links.length - 1 && <Separator className="my-2" />}
+					</Fragment>
+				);
+			})}
 		</ul>
 	) : (
 		<div className={cn('flex h-32 flex-col items-center justify-center gap-2 rounded-md bg-muted/70')}>

@@ -8,16 +8,19 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AddFile } from '../file-management/add-file-link';
 import { TablesInsert } from '@/type/database.types';
+import { DocumentRepository } from '@/dal/repositories/document.repository';
 
 interface props {
 	org: string;
 	orgId: number;
+	userProfileId: string;
 }
 
-export const Files = async ({ org, orgId }: props) => {
+export const Files = async ({ org, orgId, userProfileId }: props) => {
 	const supabase = await createClient();
 
-	const [files] = await Promise.all([await supabase.from('links').select().match({ org })]);
+	const documentsRepo = new DocumentRepository();
+	const [files, documents] = await Promise.all([await supabase.from('links').select('*, document(*)').match({ org }), documentsRepo.getUserAccessibleDocuments(org, userProfileId)]);
 
 	const getLinks = (path: string) => files.data?.filter(file => file.path == path);
 
@@ -72,7 +75,7 @@ export const Files = async ({ org, orgId }: props) => {
 					</TabsContent>
 				</Tabs>
 
-				<AddFile path={`${orgId}/org-${orgId}`} addLink={addLink} />
+				<AddFile documents={documents} path={`${orgId}/org-${orgId}`} addLink={addLink} />
 			</section>
 		</Suspense>
 	);

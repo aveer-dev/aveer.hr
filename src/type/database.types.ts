@@ -1347,6 +1347,7 @@ export type Database = {
       links: {
         Row: {
           created_at: string
+          document: number | null
           entity: number | null
           id: number
           link: string
@@ -1357,6 +1358,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          document?: number | null
           entity?: number | null
           id?: number
           link: string
@@ -1367,6 +1369,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          document?: number | null
           entity?: number | null
           id?: number
           link?: string
@@ -1376,6 +1379,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "links_document_fkey"
+            columns: ["document"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "links_entity_fkey"
             columns: ["entity"]

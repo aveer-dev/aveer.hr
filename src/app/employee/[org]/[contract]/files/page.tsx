@@ -7,6 +7,7 @@ import { FileDropZone } from '@/components/file-management/file-upload-zone';
 import { AddFile } from '@/components/file-management/add-file-link';
 import { TablesInsert } from '@/type/database.types';
 import { redirect } from 'next/navigation';
+import { DocumentRepository } from '@/dal/repositories/document.repository';
 
 export default async function ProfilePage(props: { params: Promise<{ [key: string]: string }> }) {
 	const params = await props.params;
@@ -31,7 +32,8 @@ export default async function ProfilePage(props: { params: Promise<{ [key: strin
 
 	if (data.status !== 'signed') redirect('./home');
 
-	const files = await supabase.from('links').select().match({ org: params.org });
+	const documentsRepo = new DocumentRepository();
+	const [files, documents] = await Promise.all([supabase.from('links').select().match({ org: params.org }), documentsRepo.getUserAccessibleDocuments(params.org, data.profile?.id.toString() ?? '')]);
 	const getLinks = (path: string) => files.data?.filter(file => file.path == path);
 
 	const addLink = async (payload: TablesInsert<'links'>) => {
@@ -118,7 +120,7 @@ export default async function ProfilePage(props: { params: Promise<{ [key: strin
 					</TabsContent>
 				</Tabs>
 
-				<AddFile path={`${data.org.id}/${data.profile?.id}`} addLink={addLink} />
+				<AddFile path={`${data.org.id}/${data.profile?.id}`} addLink={addLink} documents={documents} />
 			</section>
 		</div>
 	);
