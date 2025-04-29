@@ -12,7 +12,7 @@ export default function CreateOrgPage() {
 		if (error || !data) return error.message;
 
 		await supabase.from('profiles_roles').insert({ organisation: data.subdomain, role: 'admin' });
-		return redirect(`/${data.subdomain}`);
+		return redirect(`/`);
 	};
 
 	return (
