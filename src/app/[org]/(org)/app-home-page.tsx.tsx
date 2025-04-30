@@ -57,7 +57,7 @@ export default async function AppHomePage() {
 		<div className="flex h-[50vh] flex-col items-center justify-center gap-4 text-center">
 			<div className="grid gap-3">
 				<p className="font-medium">Hi {user?.user_metadata.first_name}, welcome onboard.</p>
-				<p className="text-xs text-muted-foreground">Get started or continue with your account the options?</p>
+				<p className="text-xs text-muted-foreground">Get started or continue with your account.</p>
 			</div>
 
 			<div className="mx-auto mt-6 flex items-center gap-4">

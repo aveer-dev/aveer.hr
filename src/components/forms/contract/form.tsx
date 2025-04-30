@@ -205,7 +205,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			custom_fields: values.customFields,
 			team: values.team ? Number(values.team) : null,
 			is_manager: isManager,
-			policy: Number(values.policy),
+			policy: values.policy ? Number(values.policy) : null,
 			direct_report: values.direct_report ? Number(values.direct_report) : null,
 			enable_location: values?.enable_location,
 			enable_voluntary_data: values?.enable_voluntary_data,
@@ -263,6 +263,8 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 		if (!indefiniteEndDate) contract.end_date = values.end_date as any;
 
 		const responseMessage = contractData ? await updateContract(JSON.stringify(contract)) : await inviteUser(JSON.stringify(contract), JSON.stringify(profile), isManager);
+
+		console.log(responseMessage);
 
 		toggleSubmitState(false);
 		if (responseMessage == 'update') return toast.success('Contract details updated successfully');
@@ -523,6 +525,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 														Manage roles <ArrowUpRight size={12} />
 													</Link>
 												</FormLabel>
+
 												<Select
 													onValueChange={(value: string) => {
 														field.onChange(value);
@@ -612,7 +615,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 						{formType == 'role' && (
 							<FormSection>
 								<FormSectionDescription>
-									<h2 className="font-semibold">Job requirements</h2>
+									<h2 className="font-semibold">Role requirements</h2>
 									<p className="mt-3 w-full text-xs font-thin text-support md:max-w-72">What are the things, skills or characteristics you expect from your new hire.</p>
 								</FormSectionDescription>
 
@@ -1030,3 +1033,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 		</>
 	);
 };
+
+//   (EXISTS ( SELECT 1
+//    FROM profiles_roles
+//   WHERE ((profiles_roles.profile = auth.uid()) AND (profiles_roles.organisation = contracts.org) AND (profiles_roles.role = 'admin'::app_role))))
