@@ -34,7 +34,7 @@ const AppraisalCycleCardDialog = ({ org, cycle, badge }: AppraisalCycleCardDialo
 				</div>
 			</CardHeader>
 			<CardContent className="p-4 pt-0">
-				<div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+				<div className="flex items-end justify-between gap-2 text-xs text-muted-foreground">
 					<span>
 						Created by: <EmployeeHoverCard employeeId={cycle.created_by.id} org={org} triggerClassName="text-muted-foreground" contentClassName="text-xs" />
 					</span>

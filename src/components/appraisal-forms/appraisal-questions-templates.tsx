@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { QuestionTemplateDialog } from './question-template-dialog';
 import { Tables } from '@/type/database.types';
 import { EmployeeHoverCard } from '../ui/employee-hover-card';
+import { format } from 'date-fns';
 interface AppraisalQuestionsListProps {
 	org: string;
 	teams: Tables<'teams'>[];
@@ -41,10 +42,11 @@ export const AppraisalQuestionsTemplates = async ({ org, teams }: AppraisalQuest
 							{template.description && <CardDescription className="text-xs">{template.description}</CardDescription>}
 						</CardHeader>
 
-						<CardContent className="p-3 pt-0">
+						<CardContent className="flex justify-between gap-2 p-3">
 							<div className="text-xs text-muted-foreground">
 								Created by: <EmployeeHoverCard employeeId={template.created_by.id} org={org} triggerClassName="text-muted-foreground" contentClassName="text-xs" />
 							</div>
+							<div className="text-xs text-muted-foreground">Last updated: {format(template.updated_at || new Date(), 'MMM d, yyyy')}</div>
 						</CardContent>
 					</Card>
 				</QuestionTemplateDialog>

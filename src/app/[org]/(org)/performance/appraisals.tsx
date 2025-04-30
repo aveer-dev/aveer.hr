@@ -27,11 +27,11 @@ export const AppraisalsPage = async ({ params }: { params: Promise<{ [key: strin
 				<h1 className="text-xl font-bold">Appraisal</h1>
 			</div>
 
-			<Tabs defaultValue="cycles" className="w-full">
+			<Tabs defaultValue="templates" className="w-full">
 				<div className="flex items-center justify-between">
 					<TabsList className="flex w-fit">
-						<TabsTrigger value="cycles">Appraisal Cycles</TabsTrigger>
 						<TabsTrigger value="templates">Question Templates</TabsTrigger>
+						<TabsTrigger value="cycles">Appraisal Cycles</TabsTrigger>
 					</TabsList>
 
 					<div className="flex gap-2">

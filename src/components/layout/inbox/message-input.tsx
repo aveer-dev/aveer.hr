@@ -19,6 +19,7 @@ import { LoadingSpinner } from '@/components/ui/loader';
 import { DrawerClose } from '@/components/ui/drawer';
 import { DeleteMessageDialog } from './delete-message-dialog';
 import Document from '@tiptap/extension-document';
+import { Placeholder } from '@/components/tiptap/extensions';
 
 export const MessageInput = ({ org, sender, message, onMessageSent }: { org: string; sender?: string; onMessageSent: () => void; message?: Tables<'inbox'> }) => {
 	const menuContainerRef = useRef(null);
@@ -32,9 +33,17 @@ export const MessageInput = ({ org, sender, message, onMessageSent }: { org: str
 	const editable = message ? sender == (message?.sender_profile as any).id : true;
 
 	const editor = useEditor({
-		extensions: [Document, ...ExtensionKit],
+		extensions: [
+			Document,
+			...ExtensionKit,
+			Placeholder.configure({
+				includeChildren: true,
+				showOnlyCurrent: false,
+				placeholder: () => 'Start writing here'
+			})
+		],
 		immediatelyRender: false,
-		content: message?.message ? JSON.parse(message.message) : null,
+		content: message?.message ? JSON.parse(message.message) : 'Start writing here...',
 		editorProps: {
 			attributes: {
 				class: 'h-[60vh] w-full resize-none bg-transparent text-sm font-light leading-6 outline-none'

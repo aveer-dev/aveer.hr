@@ -3,7 +3,7 @@
 import '@/styles/index.css';
 
 import { ContentItemMenu, LinkMenu, TextMenuBubble } from '@/components/tiptap/components/menus';
-import { Details, DetailsContent, DetailsSummary, SignatureFigure, SignatureImage, SlashCommand, Table, TableCell, TableHeader, TableRow, UniqueID } from '@/components/tiptap/extensions';
+import { Details, DetailsContent, DetailsSummary, Placeholder, SignatureFigure, SignatureImage, SlashCommand, Table, TableCell, TableHeader, TableRow, UniqueID } from '@/components/tiptap/extensions';
 import ExtensionKit from '@/components/tiptap/extensions/extension-kit';
 import { TableOfContentsNode } from '@/components/tiptap/extensions/TableOfContentsNode';
 import { Tables } from '@/type/database.types';
@@ -133,7 +133,12 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 				types: ['paragraph', 'signatureFigure', 'heading', 'blockquote', 'codeBlock', 'table', 'signatureUpload', 'imageBlock']
 			}),
 			SignatureImage,
-			CustomMention.configure({ suggestion })
+			CustomMention.configure({ suggestion }),
+			Placeholder.configure({
+				includeChildren: true,
+				showOnlyCurrent: false,
+				placeholder: () => 'Start writing here'
+			})
 		],
 		immediatelyRender: false,
 		shouldRerenderOnTransaction: false,

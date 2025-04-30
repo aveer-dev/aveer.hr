@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Textarea } from '../ui/textarea';
 import { DeleteAppraisalCycle } from './delete-appraisal-cycle';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
 interface props {
 	org: string;
@@ -141,6 +142,14 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 					<SheetTitle>Appraisal Cycle Settings</SheetTitle>
 					<SheetDescription>Configure your organization&apos;s appraisal cycle settings</SheetDescription>
 				</SheetHeader>
+
+				{questionTemplates.length === 0 && (
+					<Alert className="my-8 p-2" variant="warn">
+						<Info size={14} className="!left-2 !top-2" />
+						<AlertTitle>Info</AlertTitle>
+						<AlertDescription>You need to create at least one question template for your appraisal before creating an appraisal cycle.</AlertDescription>
+					</Alert>
+				)}
 
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">

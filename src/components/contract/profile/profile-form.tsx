@@ -150,9 +150,7 @@ export const ProfileForm = ({ data }: props) => {
 												<SelectContent>
 													<SelectItem value="male">Male</SelectItem>
 													<SelectItem value="female">Female</SelectItem>
-													<SelectItem value="gay">Gay</SelectItem>
-													<SelectItem value="lesbian">Lesbian</SelectItem>
-													<SelectItem value="Queer">Queer</SelectItem>
+													<SelectItem value="lgbtq">LGBTQ+</SelectItem>
 												</SelectContent>
 											</Select>
 											<FormMessage />
