@@ -22,16 +22,29 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { MultiTeamSelect } from '@/components/ui/multi-team-select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-const questionSchema = z.object({
-	id: z.string(),
-	question: z.string().min(1, 'Question is required'),
-	managerQuestion: z.string().min(1, 'Manager question is required'),
-	type: z.enum(['textarea', 'yesno', 'scale', 'multiselect']),
-	options: z.array(z.string()).optional(),
-	required: z.boolean(),
-	teams: z.array(z.string()),
-	group: z.enum(['growth_and_development', 'company_values', 'competencies', 'private_manager_assessment'])
-});
+const questionSchema = z
+	.object({
+		id: z.string(),
+		question: z.string(),
+		managerQuestion: z.string().min(1, 'Manager question is required'),
+		type: z.enum(['textarea', 'yesno', 'scale', 'multiselect']),
+		options: z.array(z.string()).optional(),
+		required: z.boolean(),
+		teams: z.array(z.string()),
+		group: z.enum(['growth_and_development', 'company_values', 'competencies', 'private_manager_assessment'])
+	})
+	.refine(
+		data => {
+			if (data.group !== 'private_manager_assessment') {
+				return data.question.length > 0;
+			}
+			return true;
+		},
+		{
+			message: 'Question is required',
+			path: ['question']
+		}
+	);
 
 type QuestionFormValues = z.infer<typeof questionSchema>;
 
@@ -144,19 +157,21 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 
 				<Form {...form}>
 					<form className="mx-auto flex w-full max-w-2xl flex-col space-y-6 py-4">
-						<FormField
-							control={form.control}
-							name="question"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Self Review Question</FormLabel>
-									<FormControl>
-										<Input {...field} placeholder="Enter question for self review" />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+						{group !== 'private_manager_assessment' && (
+							<FormField
+								control={form.control}
+								name="question"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Self Review Question</FormLabel>
+										<FormControl>
+											<Input {...field} placeholder="Enter question for self review" />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						)}
 
 						<FormField
 							control={form.control}
@@ -184,7 +199,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 											<Popover open={isTypePopoverOpen} onOpenChange={setIsTypePopoverOpen}>
 												<PopoverTrigger asChild>
 													<FormControl>
-														<Button variant="outline" className="w-fit justify-between" disabled={isScaleOnlyGroup}>
+														<Button variant="outline" type="button" className="w-fit justify-between" disabled={isScaleOnlyGroup}>
 															{inputTypes.find(t => t.type === field.value)?.label}
 															{!isScaleOnlyGroup && <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
 														</Button>
@@ -292,6 +307,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 													/>
 													<Button
 														variant="ghost"
+														type="button"
 														size="icon"
 														onClick={() => {
 															const newOptions = [...(field.value || [])];
@@ -302,7 +318,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 													</Button>
 												</div>
 											))}
-											<Button variant="outline" onClick={() => field.onChange([...(field.value || []), 'New Option'])} className="w-full">
+											<Button variant="outline" type="button" onClick={() => field.onChange([...(field.value || []), 'New Option'])} className="w-full">
 												<Plus className="mr-2 h-4 w-4" />
 												Add Option
 											</Button>
@@ -313,7 +329,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 							/>
 						)}
 
-						<QuestionPreview question={form.watch('question')} managerQuestion={form.watch('managerQuestion')} type={form.watch('type')} options={form.watch('options')} />
+						{/* <QuestionPreview question={form.watch('question')} managerQuestion={form.watch('managerQuestion')} type={form.watch('type')} options={form.watch('options')} /> */}
 
 						<Separator className="!mt-8" />
 
@@ -355,10 +371,10 @@ const QuestionPreview = ({ question, managerQuestion, type, options }: { questio
 			case 'yesno':
 				return (
 					<div className="flex gap-4">
-						<Button variant="outline" className="pointer-events-none flex-1">
+						<Button variant="outline" type="button" className="pointer-events-none flex-1">
 							Yes
 						</Button>
-						<Button disabled variant="outline" className="pointer-events-none flex-1">
+						<Button variant="outline" type="button" className="pointer-events-none flex-1">
 							No
 						</Button>
 					</div>
@@ -368,7 +384,7 @@ const QuestionPreview = ({ question, managerQuestion, type, options }: { questio
 					<div className="flex justify-between">
 						{[1, 2, 3, 4, 5].map(value => (
 							<div key={value} className="flex flex-col items-center gap-1">
-								<Button variant="outline" size="sm" className="pointer-events-none h-8 w-8 rounded-full">
+								<Button variant="outline" type="button" size="sm" className="pointer-events-none h-8 w-8 rounded-full">
 									{value}
 								</Button>
 							</div>
@@ -380,7 +396,7 @@ const QuestionPreview = ({ question, managerQuestion, type, options }: { questio
 					<div className="space-y-2">
 						{options?.map((option, i) => (
 							<div key={i} className="flex items-center gap-2">
-								<Button variant="outline" className="pointer-events-none w-full justify-start">
+								<Button variant="outline" type="button" className="pointer-events-none w-full justify-start">
 									{option}
 								</Button>
 							</div>

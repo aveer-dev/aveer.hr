@@ -23,7 +23,7 @@ export const EmployeeHoverCard = ({ employeeId, org, triggerClassName, contentCl
 				{data[0].profile.first_name} {data[0].profile.last_name}
 			</HoverCardTrigger>
 
-			<HoverCardContent className={cn('p-4', contentClassName)} side="bottom" align="start">
+			<HoverCardContent className={cn('p-3', contentClassName)} side="bottom" align="start" onClick={event => event.preventDefault()}>
 				<div className="flex flex-col gap-0.5">
 					<p className="text-xs font-medium">
 						{data[0].profile.first_name} {data[0].profile.last_name}
@@ -31,28 +31,32 @@ export const EmployeeHoverCard = ({ employeeId, org, triggerClassName, contentCl
 					<p className="text-xs text-muted-foreground">{data[0].profile.email}</p>
 				</div>
 
-				<Separator className="my-2" />
+				{data[0].job_title && <Separator className="my-2" />}
 
 				{data &&
-					data.map(employee => (
-						<>
-							<ul className="flex flex-col gap-2" key={employee.id}>
-								<li className="flex items-center gap-2">
-									<div className="text-xs font-medium">Role</div>
-									<div className="text-xs text-muted-foreground">{employee.job_title}</div>
-								</li>
+					data.map(employee => {
+						if (!employee.job_title) return null;
 
-								{employee.team && (
+						return (
+							<>
+								<ul className="flex flex-col gap-2" key={employee.id}>
 									<li className="flex items-center gap-2">
-										<div className="text-xs font-medium">Team</div>
-										<div className="text-xs text-muted-foreground">{employee.team?.name}</div>
+										<div className="text-xs font-medium">Role</div>
+										<div className="text-xs text-muted-foreground">{employee.job_title}</div>
 									</li>
-								)}
-							</ul>
 
-							{employee !== data[data.length - 1] && <Separator className="my-2" />}
-						</>
-					))}
+									{employee.team && (
+										<li className="flex items-center gap-2">
+											<div className="text-xs font-medium">Team</div>
+											<div className="text-xs text-muted-foreground">{employee.team?.name}</div>
+										</li>
+									)}
+								</ul>
+
+								{employee !== data[data.length - 1] && <Separator className="my-2" />}
+							</>
+						);
+					})}
 			</HoverCardContent>
 		</HoverCard>
 	);

@@ -13,9 +13,8 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Badge } from '../ui/badge';
 import { Tables } from '@/type/database.types';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { QuestionSetupDialog } from './question-setup-dialog';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -25,16 +24,29 @@ import { Label } from '../ui/label';
 import { LoadingSpinner } from '../ui/loader';
 import { DeleteTemplateDialog } from './delete-template-dialog';
 
-const questionSchema = z.object({
-	id: z.string(),
-	question: z.string().min(1, 'Question is required'),
-	managerQuestion: z.string().min(1, 'Manager question is required'),
-	type: z.enum(['textarea', 'yesno', 'scale', 'multiselect']),
-	options: z.array(z.string()).optional(),
-	required: z.boolean(),
-	teams: z.array(z.string()),
-	group: z.enum(['growth_and_development', 'company_values', 'competencies', 'private_manager_assessment'])
-});
+const questionSchema = z
+	.object({
+		id: z.string(),
+		question: z.string(),
+		managerQuestion: z.string().min(1, 'Manager question is required'),
+		type: z.enum(['textarea', 'yesno', 'scale', 'multiselect']),
+		options: z.array(z.string()).optional(),
+		required: z.boolean(),
+		teams: z.array(z.string()),
+		group: z.enum(['growth_and_development', 'company_values', 'competencies', 'private_manager_assessment'])
+	})
+	.refine(
+		data => {
+			if (data.group !== 'private_manager_assessment') {
+				return data.question.length > 0;
+			}
+			return true;
+		},
+		{
+			message: 'Question is required',
+			path: ['question']
+		}
+	);
 
 const templateSchema = z.object({
 	name: z.string().min(1, 'Template name is required'),
@@ -91,40 +103,44 @@ const QuestionItem = ({ question, onEdit, onRemove }: QuestionItemProps) => {
 			<div className="flex w-full items-center gap-6 rounded-lg border p-4">
 				<div className="flex-1 space-y-4">
 					<div className="space-y-4">
-						<div className="space-y-4">
-							<div className="text-sm font-light leading-6">
-								{question.question}
-								{question.required && <span className="text-sm text-destructive">*</span>}
-								<Badge variant="secondary" className="ml-2 whitespace-nowrap text-xs">
-									self review
-								</Badge>
+						{question.question && (
+							<div className="space-y-4">
+								<div className="text-sm font-light leading-6">
+									<div className="mb-2 text-xs font-light text-muted-foreground">Self review question</div>
+									{question.question}
+									{question.required && <span className="text-sm text-destructive">*</span>}
+								</div>
 							</div>
-						</div>
+						)}
 
-						<Separator />
+						{question.managerQuestion && question.question && <Separator />}
 
-						<div className="flex items-center gap-2">
-							<div className="text-sm font-light leading-6">
-								{question.managerQuestion}
-								{question.required && <span className="text-sm text-destructive">*</span>}
-								<Badge variant="secondary" className="ml-2 whitespace-nowrap text-xs">
-									manager review
-								</Badge>
+						{question.managerQuestion && (
+							<div className="flex items-center gap-2">
+								<div className="text-sm font-light leading-6">
+									<div className="mb-2 text-xs font-light text-muted-foreground">Manager review question</div>
+									{question.managerQuestion}
+									{question.required && <span className="text-sm text-destructive">*</span>}
+								</div>
 							</div>
-						</div>
+						)}
 					</div>
 
 					{question.type === 'multiselect' && question.options && question.options.length > 0 && (
-						<div className="space-y-2">
-							<Label>Options</Label>
+						<>
+							<Separator />
+
 							<div className="space-y-2">
-								{question.options.map((option, i) => (
-									<div key={i} className="flex items-center gap-2">
-										<Input value={option} readOnly />
-									</div>
-								))}
+								<Label>Options</Label>
+								<div className="space-y-2">
+									{question.options.map((option, i) => (
+										<div key={i} className="flex items-center gap-2">
+											<Input value={option} readOnly />
+										</div>
+									))}
+								</div>
 							</div>
-						</div>
+						</>
 					)}
 				</div>
 			</div>
