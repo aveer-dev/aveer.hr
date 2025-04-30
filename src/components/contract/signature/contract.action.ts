@@ -18,7 +18,7 @@ export const employeeSignContract = async (_prev: any, payload: FormData): Promi
 		.match({ org, id });
 
 	if (contractError) return contractError.message;
-	return redirect(`./contract`);
+	return redirect(`./`);
 };
 
 export const signContractAction = async (_prev: any, payload: FormData): Promise<string> => {

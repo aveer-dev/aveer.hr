@@ -3,13 +3,14 @@ import { AppraisalOverview } from './appraisal-overview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-// import { AppraisalSummary } from './appraisal-summary';
 import { BackButton } from '@/components/ui/back-button';
 import { AppraisalScoreSummary } from './appraisal-score-summary';
 import { EmployeeAppraisalViewer } from './employee-appraisal-viewer';
 import { ContractRepository, TeamRepository } from '@/dal';
 
-export const AppraisalDetails = async ({ org, id }: { org: string; id: string }) => {
+export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: string]: string }> }) => {
+	const { org, id } = await params;
+
 	const supabase = await createClient();
 
 	const contractsRepo = new ContractRepository();
@@ -66,29 +67,33 @@ export const AppraisalDetails = async ({ org, id }: { org: string; id: string })
 				</Badge>
 			</div>
 
-			<Tabs defaultValue="overview" className="w-full">
-				<TabsList className="grid w-fit grid-cols-3">
-					<TabsTrigger value="overview">Overview</TabsTrigger>
-					<TabsTrigger value="scores">Scores</TabsTrigger>
-					<TabsTrigger value="details">Details</TabsTrigger>
-				</TabsList>
+			{answers.length === 0 && <div className="flex min-h-72 w-full items-center justify-center rounded-md border bg-muted p-4 text-sm text-muted-foreground">No answers yet for this appraisal cycle.</div>}
 
-				<TabsContent value="overview">
-					<AppraisalOverview contracts={contracts as any} appraisal={appraisal as any} answers={answers as any} />
-				</TabsContent>
+			{answers.length > 0 && (
+				<Tabs defaultValue="overview" className="w-full">
+					<TabsList className="grid w-fit grid-cols-3">
+						<TabsTrigger value="overview">Overview</TabsTrigger>
+						<TabsTrigger value="scores">Scores</TabsTrigger>
+						<TabsTrigger value="details">Details</TabsTrigger>
+					</TabsList>
 
-				<TabsContent value="scores">
-					<AppraisalScoreSummary teams={teams} contracts={contracts as any} answers={answers as any} />
-				</TabsContent>
+					<TabsContent value="overview">
+						<AppraisalOverview contracts={contracts as any} appraisal={appraisal as any} answers={answers as any} />
+					</TabsContent>
 
-				<TabsContent value="details">
-					<EmployeeAppraisalViewer employees={contracts as any} answers={answers as any} questions={questions as any} appraisalCycle={appraisal as any} />
-				</TabsContent>
+					<TabsContent value="scores">
+						<AppraisalScoreSummary teams={teams} contracts={contracts as any} answers={answers as any} />
+					</TabsContent>
 
-				{/* <TabsContent value="summary">
+					<TabsContent value="details">
+						<EmployeeAppraisalViewer employees={contracts as any} answers={answers as any} questions={questions as any} appraisalCycle={appraisal as any} />
+					</TabsContent>
+
+					{/* <TabsContent value="summary">
 					<AppraisalSummary contracts={contracts} answers={answers} questions={questions} />
-				</TabsContent> */}
-			</Tabs>
+					</TabsContent> */}
+				</Tabs>
+			)}
 		</div>
 	);
 };
