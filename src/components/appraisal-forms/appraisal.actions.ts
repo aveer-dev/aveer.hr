@@ -295,10 +295,10 @@ export const autoSaveObjectives = async ({
 
 	if (answerId) {
 		// Update existing answer
-		const { error } = await supabase.from('appraisal_answers').update(payload).eq('id', answerId);
+		const { error, data } = await supabase.from('appraisal_answers').update(payload).eq('id', answerId).select();
 
 		if (error) throw error;
-		return;
+		return data;
 	}
 
 	// Create new answer
@@ -306,10 +306,10 @@ export const autoSaveObjectives = async ({
 
 	if (existingAnswers) {
 		// Update existing record with objectives
-		const { error } = await supabase.from('appraisal_answers').update(payload).eq('id', existingAnswers.id);
+		const { error, data } = await supabase.from('appraisal_answers').update(payload).eq('id', existingAnswers.id).select();
 
 		if (error) throw error;
-		return;
+		return data;
 	}
 
 	// Create new record
@@ -321,6 +321,7 @@ export const autoSaveObjectives = async ({
 		status: 'draft'
 	};
 
-	const { error } = await supabase.from('appraisal_answers').insert(insertPayload);
+	const { error, data } = await supabase.from('appraisal_answers').insert(insertPayload).select();
 	if (error) throw error;
+	return data;
 };

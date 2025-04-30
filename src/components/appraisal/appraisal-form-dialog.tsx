@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { getTemplateQuestions } from '../appraisal-forms/appraisal.actions';
 import { cn } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
 import { AppraisalReviewSelector } from './appraisal-review-selector';
 import { EmployeeAppraisalForm } from './employee-appraisal-form';
 import { useRouter } from 'next/navigation';
@@ -110,6 +109,12 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 		setGroupedQuestions({ objectives: [], goal_scoring: [], ...grouped });
 	}, [allQuestions, selectedEmployee]);
 
+	useEffect(() => {
+		if ((contractAnswer && answer?.contract_id !== contractAnswer.contract_id) || (contractAnswer && !answer)) {
+			setAnswer(contractAnswer);
+		}
+	}, [contractAnswer, answer]);
+
 	const handleReviewTypeSelect = (type: 'self' | 'manager' | 'summary', employee: Tables<'contracts'>, answer: Tables<'appraisal_answers'> | null) => {
 		setSelectedReviewType(type);
 		setSelectedEmployee(employee);
@@ -120,11 +125,11 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 		<AlertDialog
 			open={open}
 			onOpenChange={state => {
-				if (!state) router.refresh();
+				router.refresh();
 				setOpen(state);
 			}}>
-			<Button className={cn(new Date(appraisalCycle.end_date) < new Date() && !answer && 'hidden')} onClick={() => setOpen(true)}>
-				{(new Date(appraisalCycle.end_date) < new Date() && answer) || answer?.employee_submission_date ? 'Review Appraisal' : answer?.status === 'draft' ? 'Continue Appraisal' : 'Start Appraisal'}
+			<Button className={cn(new Date(appraisalCycle.end_date) < new Date() && !contractAnswer && 'hidden')} onClick={() => setOpen(true)}>
+				{(new Date(appraisalCycle.end_date) < new Date() && contractAnswer) || contractAnswer?.employee_submission_date ? 'Review Appraisal' : contractAnswer?.status === 'draft' ? 'Continue Appraisal' : 'Start Appraisal'}
 			</Button>
 
 			<AlertDialogContent className="flex h-screen max-w-full flex-col items-center overflow-y-auto p-1">
@@ -153,7 +158,10 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 					{/* Appraisal Form */}
 					<div className="flex-1 overflow-y-auto p-1 md:-ml-[16rem] md:py-24">
 						<EmployeeAppraisalForm
-							setOpen={setOpen}
+							setOpen={state => {
+								router.refresh();
+								setOpen(state);
+							}}
 							org={org}
 							appraisalCycle={appraisalCycle}
 							activeTab={activeTab}

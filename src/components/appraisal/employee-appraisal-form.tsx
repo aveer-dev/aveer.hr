@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { Tables } from '@/type/database.types';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { autoSaveAnswer, autoSaveObjectives, submitAppraisal } from '../appraisal-forms/appraisal.actions';
 import { useRouter } from 'next/navigation';
 import { Textarea } from '../ui/textarea';
@@ -38,10 +38,31 @@ interface Props {
 	teams?: Tables<'teams'>[] | null;
 }
 
+const isAppraisalSubmitted = (reviewType: 'self' | 'manager', answer?: Tables<'appraisal_answers'> | null): boolean => {
+	if (!answer) return false;
+	return reviewType === 'self' ? !!answer.employee_submission_date : !!answer.manager_submission_date;
+};
+
+const canUpdateAppraisal = (reviewType: 'self' | 'manager', isManager: boolean, isSelectedEmplyeesManager: boolean, selectedEmployee: Tables<'contracts'>, contract: Tables<'contracts'>, dueDatePassed: boolean, answer?: Tables<'appraisal_answers'> | null): boolean => {
+	// First check if already submitted
+	if (isAppraisalSubmitted(reviewType, answer)) return false;
+
+	// Then check due date
+	if (dueDatePassed) return false;
+
+	// Check permissions based on review type
+	if (reviewType === 'self') {
+		return selectedEmployee.id === contract.id;
+	} else {
+		// manager review
+		return isManager && isSelectedEmplyeesManager;
+	}
+};
+
 export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, appraisalCycle, activeTab, setActiveTab, answer, selectedReviewType, isManager, selectedEmployee, contract, isSelectedEmplyeesManager }: Props) => {
 	const router = useRouter();
 	const questionGroups = Object.keys(groupedQuestions) as QuestionGroup[];
-	const [currentGroup, setCurrentGroup] = useState<QuestionGroup>(questionGroups[0]);
+	// const [currentGroup, setCurrentGroup] = useState<QuestionGroup>(questionGroups[0]);
 	const [managerAnswers, setManagerAnswers] = useState<AnswersState>({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [answers, setAnswers] = useState<AnswersState>({});
@@ -54,6 +75,17 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	const [deletingObjective, setDeletingObjective] = useState<string | null>(null);
 	const [deletingGoal, setDeletingGoal] = useState<string | null>(null);
 	const [enableWeights, setEnableWeights] = useState<boolean>(false);
+	const [localAnswerId, setLocalAnswerId] = useState<number | undefined>(answer?.id);
+
+	const canUpdateSelfReview = useMemo(
+		() => canUpdateAppraisal('self', isManager, isSelectedEmplyeesManager, selectedEmployee, contract, new Date(appraisalCycle.self_review_due_date) < new Date(), answer),
+		[isManager, isSelectedEmplyeesManager, selectedEmployee, contract, appraisalCycle.self_review_due_date, answer]
+	);
+
+	const canUpdateManagerReview = useMemo(
+		() => canUpdateAppraisal('manager', isManager, isSelectedEmplyeesManager, selectedEmployee, contract, new Date(appraisalCycle.manager_review_due_date) < new Date(), answer),
+		[isManager, isSelectedEmplyeesManager, selectedEmployee, contract, appraisalCycle.manager_review_due_date, answer]
+	);
 
 	const shouldShowQuestion = (question: Tables<'template_questions'>) => {
 		// For private_manager_assessment, only show to managers
@@ -71,7 +103,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 			setSavingStates(prev => ({ ...prev, [questionId]: true }));
 
 			const payload: Parameters<typeof autoSaveAnswer>[0] = {
-				answerId: answer?.id,
+				answerId: localAnswerId,
 				questionId,
 				value,
 				org,
@@ -88,7 +120,10 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 				error: 'Failed to save answer'
 			});
 
-			await savePromise;
+			const result = await savePromise;
+			if (result && Array.isArray(result) && result.length > 0 && !localAnswerId) {
+				setLocalAnswerId(result[0].id);
+			}
 		} catch (error) {
 			console.error('Failed to auto-save answer:', error);
 		} finally {
@@ -99,7 +134,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	const autoSaveObjectivesDebounced = useDebounce(async (objectives: Objective[]) => {
 		try {
 			const savePromise = autoSaveObjectives({
-				answerId: answer?.id,
+				answerId: localAnswerId,
 				objectives,
 				org,
 				appraisalCycleId: appraisalCycle.id,
@@ -112,7 +147,10 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 				error: 'Failed to save objectives'
 			});
 
-			await savePromise;
+			const result = await savePromise;
+			if (result && Array.isArray(result) && result.length > 0 && !localAnswerId) {
+				setLocalAnswerId(result[0].id);
+			}
 		} catch (error) {
 			console.error('Failed to auto-save objectives:', error);
 		}
@@ -121,7 +159,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	const autoSaveObjectivesScoreDebounced = useDebounce(async (objectivesScore: GOAL_SCORE[]) => {
 		try {
 			const payload: Parameters<typeof autoSaveObjectives>[0] = {
-				answerId: answer?.id,
+				answerId: localAnswerId,
 				org,
 				appraisalCycleId: appraisalCycle.id,
 				contractId: selectedEmployee.id
@@ -151,19 +189,59 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	}, 1000);
 
 	const updateObjectives = (newObjectives: Objective[]) => {
+		if (!canUpdateSelfReview) {
+			toast.error(isAppraisalSubmitted('self', answer) ? 'Cannot update objectives after submission' : isSelfReviewDueDatePassed ? 'Cannot update objectives after due date' : 'You do not have permission to update objectives');
+			return;
+		}
+
 		setObjectives(newObjectives);
 		autoSaveObjectivesDebounced(newObjectives);
 	};
 
+	const handleGoalScoreUpdate = (goalId: string, score: number, comment: string) => {
+		const reviewType = selectedReviewType === 'summary' ? 'self' : selectedReviewType;
+		const canUpdate = reviewType === 'self' ? canUpdateSelfReview : canUpdateManagerReview;
+
+		if (!canUpdate) {
+			toast.error(isAppraisalSubmitted(reviewType, answer) ? 'Cannot update scores after submission' : reviewType === 'self' ? 'Cannot update scores after self review due date' : 'Cannot update scores after manager review due date');
+			return;
+		}
+
+		if (reviewType === 'self') {
+			updateObjectivesScore(prev => {
+				const newScores = prev.map(prevScore =>
+					prevScore.goal_id === goalId
+						? {
+								...prevScore,
+								score,
+								comment
+							}
+						: prevScore
+				);
+				autoSaveObjectivesScoreDebounced(newScores);
+				return newScores;
+			});
+		} else {
+			updateManagerObjectivesScore(prev => {
+				const newScores = prev.map(prevScore =>
+					prevScore.goal_id === goalId
+						? {
+								...prevScore,
+								score,
+								comment
+							}
+						: prevScore
+				);
+				autoSaveObjectivesScoreDebounced(newScores);
+				return newScores;
+			});
+		}
+	};
+
 	const handleAnswerChange = (questionId: number, value: any) => {
 		if (selectedReviewType === 'manager') {
-			if (isManagerReviewDueDatePassed) {
-				toast.error('Cannot update answers after manager review due date has passed');
-				return;
-			}
-
-			if (!isManager) {
-				toast.error('This section is only available for your team managers');
+			if (!canUpdateManagerReview) {
+				toast.error(isAppraisalSubmitted('manager', answer) ? 'Cannot update answers after submission' : isManagerReviewDueDatePassed ? 'Cannot update answers after manager review due date has passed' : 'You do not have permission to update this review');
 				return;
 			}
 
@@ -176,15 +254,11 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 			return;
 		}
 
-		if (isManager && selectedReviewType && selectedEmployee.id !== contract.id) {
-			toast.error('This section is only available for your team members');
+		if (!canUpdateSelfReview) {
+			toast.error(isAppraisalSubmitted('self', answer) ? 'Cannot update answers after submission' : isSelfReviewDueDatePassed ? 'Cannot update answers after self review due date has passed' : 'You do not have permission to update this review');
 			return;
 		}
 
-		if (isSelfReviewDueDatePassed) {
-			toast.error('Cannot update answers after self review due date has passed');
-			return;
-		}
 		setAnswers(prev => ({
 			...prev,
 			[questionId]: value
@@ -214,14 +288,27 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	};
 
 	const handleSubmit = async () => {
-		if (isSelfReviewDueDatePassed && selectedReviewType === 'self') {
-			toast.error('Cannot submit appraisal after self review due date has passed');
+		const canUpdate = selectedReviewType === 'self' ? canUpdateSelfReview : canUpdateManagerReview;
+
+		if (!localAnswerId) {
+			toast.error('Unable to submit appraisal. Please try adding some answers first.');
+			return;
+		}
+
+		if (!canUpdate) {
+			toast.error(
+				isAppraisalSubmitted(selectedReviewType === 'summary' ? 'self' : selectedReviewType, answer)
+					? 'Cannot submit appraisal after it has been submitted'
+					: selectedReviewType === 'self'
+						? 'Cannot submit appraisal after self review due date has passed'
+						: 'Cannot submit appraisal after manager review due date has passed'
+			);
 			return;
 		}
 
 		const unansweredQuestions = getUnansweredRequiredQuestions();
 		if (unansweredQuestions.length > 0) {
-			toast.error('Your yet to answer some required questions.');
+			toast.error('You are yet to answer some required questions.');
 			return;
 		}
 
@@ -247,19 +334,17 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 			}
 		}
 
-		// Check if all goals have been scored in the goal scoring tab
-		if (selectedReviewType === 'self') {
-			const unscoredGoals = objectives.some(obj => obj.goals.some(goal => !objectivesScore.find(score => score.goal_id === goal.id)));
-			if (unscoredGoals) {
-				toast.error('Please score all goals before submitting.');
-				return;
-			}
-		} else {
-			const unscoredGoals = objectives.some(obj => obj.goals.some(goal => !managerObjectivesScore.find(score => score.goal_id === goal.id)));
-			if (unscoredGoals) {
-				toast.error('Please score all goals before submitting.');
-				return;
-			}
+		// Check if all goals have been scored
+		const unscoredGoals = objectives.some(obj =>
+			obj.goals.some(goal => {
+				const scores = selectedReviewType === 'self' ? objectivesScore : managerObjectivesScore;
+				return !scores.find(score => score.goal_id === goal.id && score.score !== 0);
+			})
+		);
+
+		if (unscoredGoals) {
+			toast.error('Please score all goals before submitting.');
+			return;
 		}
 
 		try {
@@ -267,7 +352,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 			if (selectedReviewType === 'manager') {
 				const submitPromise = submitAppraisal({
-					answerId: answer?.id,
+					answerId: localAnswerId,
 					manager_submission_date: new Date().toISOString()
 				});
 
@@ -280,7 +365,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 				await submitPromise;
 			} else {
 				const submitPromise = submitAppraisal({
-					answerId: answer?.id,
+					answerId: localAnswerId,
 					employee_submission_date: new Date().toISOString(),
 					status: 'submitted'
 				});
@@ -497,13 +582,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 				</Alert>
 			)}
 
-			<Tabs
-				value={activeTab}
-				onValueChange={value => {
-					setActiveTab(value as QuestionGroup);
-					setCurrentGroup(value as QuestionGroup);
-				}}
-				className="w-full space-y-10">
+			<Tabs value={activeTab} onValueChange={value => setActiveTab(value as QuestionGroup)} className="w-full space-y-10">
 				<TabsList className="mb-10 flex h-[unset] w-fit p-2">
 					{questionGroups
 						.filter(group => {
@@ -567,7 +646,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 								)}
 							</div>
 
-							{objectives.map((objective, index) => (
+							{objectives.map(objective => (
 								<div key={objective.id} className="rounded-lg border p-4">
 									<div className="mb-8">
 										<div className="flex justify-between gap-4">
@@ -743,26 +822,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																				variant={goalScore?.score === index + 1 ? 'default' : 'outline'}
 																				className="disabled:opacity-100"
 																				size="icon"
-																				onClick={() => {
-																					if (!(selectedEmployee.id === contract.id && !isSelfReviewDueDatePassed)) return;
-
-																					updateObjectivesScore(prev => {
-																						const newObjectivesScore =
-																							objectivesScore.length > 0
-																								? prev.map(score =>
-																										score.goal_id === goal.id
-																											? {
-																													...score,
-																													score: index + 1
-																												}
-																											: score
-																									)
-																								: [{ goal_id: goal.id, score: index + 1, comment: '' }];
-
-																						autoSaveObjectivesScoreDebounced(newObjectivesScore);
-																						return newObjectivesScore;
-																					});
-																				}}>
+																				onClick={() => handleGoalScoreUpdate(goal.id, index + 1, '')}>
 																				{index + 1}
 																			</Button>
 																			<div className="text-xs font-light text-muted-foreground">{score}</div>
@@ -775,30 +835,14 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																		placeholder="Add a comment about your score..."
 																		disabled={selectedEmployee.id !== contract.id || isSelfReviewDueDatePassed}
 																		value={goalScore?.comment || ''}
-																		onChange={e => {
-																			if (!(selectedEmployee.id === contract.id && !isSelfReviewDueDatePassed)) return;
-
-																			updateObjectivesScore(prev => {
-																				const newObjectivesScore = prev.map(score =>
-																					score.goal_id === goal.id
-																						? {
-																								...score,
-																								comment: e.target.value
-																							}
-																						: score
-																				);
-
-																				autoSaveObjectivesScoreDebounced(newObjectivesScore);
-																				return newObjectivesScore;
-																			});
-																		}}
+																		onChange={e => handleGoalScoreUpdate(goal.id, goalScore?.score || 0, e.target.value)}
 																		className="col-span-2 min-h-[60px] w-full bg-background disabled:cursor-default disabled:opacity-100"
 																	/>
 
 																	<GoalFileUpload
 																		updateGoalFile={file =>
 																			updateObjectivesScore(prev => {
-																				const newObjectivesScore = prev.map(score =>
+																				const newScores = prev.map(score =>
 																					score.goal_id === goal.id
 																						? {
 																								...score,
@@ -808,8 +852,8 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																						: score
 																				);
 
-																				autoSaveObjectivesScoreDebounced(newObjectivesScore);
-																				return newObjectivesScore;
+																				autoSaveObjectivesScoreDebounced(newScores);
+																				return newScores;
 																			})
 																		}
 																		org={org}
@@ -833,22 +877,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																				className="disabled:opacity-100"
 																				disabled={!isSelectedEmplyeesManager || isManagerReviewDueDatePassed}
 																				size="icon"
-																				onClick={() => {
-																					if (!(selectedEmployee.id !== contract.id && !isManagerReviewDueDatePassed && isSelectedEmplyeesManager)) return;
-																					updateManagerObjectivesScore(prev => {
-																						const newManagerObjectivesScore = prev.map(score =>
-																							score.goal_id === goal.id
-																								? {
-																										...score,
-																										score: index + 1
-																									}
-																								: score
-																						);
-
-																						autoSaveObjectivesScoreDebounced(newManagerObjectivesScore);
-																						return newManagerObjectivesScore;
-																					});
-																				}}>
+																				onClick={() => handleGoalScoreUpdate(goal.id, index + 1, '')}>
 																				{index + 1}
 																			</Button>
 																			<div className="text-xs font-light text-muted-foreground">{score}</div>
@@ -861,29 +890,14 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																		placeholder="Add your feedback on this goal..."
 																		disabled={!isSelectedEmplyeesManager}
 																		value={managerGoalScore?.comment || ''}
-																		onChange={e => {
-																			if (!(isManager && selectedEmployee.id !== contract.id && !isManagerReviewDueDatePassed && isSelectedEmplyeesManager)) return;
-																			updateManagerObjectivesScore(prev => {
-																				const newManagerObjectivesScore = prev.map(score =>
-																					score.goal_id === goal.id
-																						? {
-																								...score,
-																								comment: e.target.value
-																							}
-																						: score
-																				);
-
-																				autoSaveObjectivesScoreDebounced(newManagerObjectivesScore);
-																				return newManagerObjectivesScore;
-																			});
-																		}}
+																		onChange={e => handleGoalScoreUpdate(goal.id, managerGoalScore?.score || 0, e.target.value)}
 																		className="col-span-2 min-h-[60px] w-full bg-background disabled:cursor-default disabled:opacity-100"
 																	/>
 
 																	<GoalFileUpload
 																		updateGoalFile={file =>
 																			updateManagerObjectivesScore(prev => {
-																				const newManagerObjectivesScore = prev.map(score =>
+																				const newScores = prev.map(score =>
 																					score.goal_id === goal.id
 																						? {
 																								...score,
@@ -893,8 +907,8 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																						: score
 																				);
 
-																				autoSaveObjectivesScoreDebounced(newManagerObjectivesScore);
-																				return newManagerObjectivesScore;
+																				autoSaveObjectivesScoreDebounced(newScores);
+																				return newScores;
 																			})
 																		}
 																		org={org}
@@ -906,44 +920,6 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																</div>
 															</>
 														)}
-
-														{/* {selectedReviewType === 'summary' && (
-														<div className="space-y-4">
-															<div className="flex items-center gap-4">
-																<div className="flex items-center gap-2">
-																	<p className="text-sm font-medium">Employee Score:</p>
-																	{goalScore?.score && (
-																		<div className="flex items-center gap-2">
-																			{[1, 2, 3, 4, 5].map(score => (
-																				<div key={score} className={cn('h-6 w-6 rounded-full border text-center text-xs leading-6', goalScore?.score === score ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-																					{score}
-																				</div>
-																			))}
-																		</div>
-																	)}
-																</div>
-
-																{goalScore?.comment && <p className="text-sm text-muted-foreground">{goalScore?.comment}</p>}
-															</div>
-
-															{managerGoalScore?.score !== undefined && (
-																<div className="flex items-center gap-4">
-																	<div className="flex items-center gap-2">
-																		<p className="text-sm font-medium">Manager Score:</p>
-																		<div className="flex items-center gap-2">
-																			{[1, 2, 3, 4, 5].map(score => (
-																				<div key={score} className={cn('h-6 w-6 rounded-full border text-center text-xs leading-6', managerGoalScore?.score === score ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-																					{score}
-																				</div>
-																			))}
-																		</div>
-																	</div>
-
-																	{managerGoalScore?.comment && <p className="text-sm text-muted-foreground">{managerGoalScore?.comment}</p>}
-																</div>
-															)}
-														</div>
-													)} */}
 													</div>
 												);
 											})}
@@ -1194,82 +1170,6 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 							</TabsContent>
 						);
 					})}
-
-				{/* {selectedReviewType === 'summary' && (
-					<>
-						<TabsContent value="self_scoring" className="min-h-36 space-y-4">
-							<div className="space-y-6">
-								<h3 className="text-base font-medium">Self Scoring</h3>
-								{objectives.map(objective => (
-									<div key={objective.id} className="rounded-lg border p-4">
-										<h4 className="mb-4 font-medium">{objective.title || 'Untitled Objective'}</h4>
-										{objective.goals.map(goal => (
-											<div key={goal.id} className="mb-4 rounded-md bg-muted p-3">
-												<div className="mb-2">
-													<h5 className="text-sm font-medium">{goal.title || 'Untitled Goal'}</h5>
-													<p className="text-xs text-muted-foreground">{goal.description || 'No description'}</p>
-												</div>
-												<div className="space-y-4">
-													<div className="flex items-center gap-4">
-														<div className="flex items-center gap-2">
-															<p className="text-sm font-medium">Score:</p>
-															{m?.score && (
-																<div className="flex items-center gap-2">
-																	{[1, 2, 3, 4, 5].map(score => (
-																		<div key={score} className={cn('h-6 w-6 rounded-full border text-center text-xs leading-6', goal.score === score ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-																			{score}
-																		</div>
-																	))}
-																</div>
-															)}
-														</div>
-														{goal.comment && <p className="text-sm text-muted-foreground">{goal.comment}</p>}
-													</div>
-												</div>
-											</div>
-										))}
-									</div>
-								))}
-							</div>
-						</TabsContent>
-
-						<TabsContent value="manager_scoring" className="min-h-36 space-y-4">
-							<div className="space-y-6">
-								<h3 className="text-base font-medium">Manager Scoring</h3>
-								{objectives.map(objective => (
-									<div key={objective.id} className="rounded-lg border p-4">
-										<h4 className="mb-4 font-medium">{objective.title || 'Untitled Objective'}</h4>
-										{objective.goals.map(goal => (
-											<div key={goal.id} className="mb-4 rounded-md bg-muted p-3">
-												<div className="mb-2">
-													<h5 className="text-sm font-medium">{goal.title || 'Untitled Goal'}</h5>
-													<p className="text-xs text-muted-foreground">{goal.description || 'No description'}</p>
-												</div>
-												<div className="space-y-4">
-													<div className="flex items-center gap-4">
-														<div className="flex items-center gap-2">
-															<p className="text-sm font-medium">Score:</p>
-															{goal.managerScore && (
-																<div className="flex items-center gap-2">
-																	{[1, 2, 3, 4, 5].map(score => (
-																		<div key={score} className={cn('h-6 w-6 rounded-full border text-center text-xs leading-6', goal.managerScore === score ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-																			{score}
-																		</div>
-																	))}
-																</div>
-															)}
-														</div>
-														{goal.managerComment && <p className="text-sm text-muted-foreground">{goal.managerComment}</p>}
-													</div>
-												</div>
-											</div>
-										))}
-									</div>
-								))}
-							</div>
-						</TabsContent>
-					</>
-				)} */}
 			</Tabs>
 
 			<Separator className="!my-10" />
