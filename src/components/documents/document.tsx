@@ -143,12 +143,7 @@ export const Document = ({ doc: initialDoc, currentUserId, employees, parentCont
 
 				// Initialize IndexedDB provider for offline persistence
 				const newProvider = new IndexeddbPersistence(`document-${doc.id}`, ydoc.current);
-				await new Promise<void>(resolve => {
-					newProvider.once('synced', () => {
-						console.log('Content synced with IndexedDB');
-						resolve();
-					});
-				});
+				await new Promise<void>(resolve => newProvider.once('synced', () => resolve()));
 				setProvider(newProvider);
 
 				// Initialize WebRTC provider for real-time collaboration

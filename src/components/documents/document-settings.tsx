@@ -49,7 +49,7 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 	const onSubmit = async (data: z.infer<typeof FormSchema>) => {
 		setUpdateState(true);
 
-		const { error } = await updateDocument({ private: data.private, shared_with: sharedWith as any, id: doc.id, org: (doc.org as any).subdomain });
+		const { error } = await updateDocument({ private: data.private, shared_with: sharedWith as any, id: doc.id, org: (doc.org as any)?.subdomain || doc.org });
 		setUpdateState(false);
 		if (error) return toast.error(error.message);
 
@@ -57,6 +57,11 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 		const currentUserRemoved = !sharedWith.find(person => person.profile == currentUserId);
 		if (currentUserRemoved) router.push('./');
 		router.refresh();
+	};
+
+	const onTogglePrivate = (value: boolean) => {
+		form.setValue('private', value);
+		onSubmit(form.getValues());
 	};
 
 	useEffect(() => {
@@ -100,7 +105,7 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 									</div>
 
 									<FormControl>
-										<Switch className="scale-75" checked={field.value} onCheckedChange={field.onChange} />
+										<Switch className="scale-75" checked={field.value} onCheckedChange={onTogglePrivate} />
 									</FormControl>
 								</FormItem>
 							)}
@@ -183,7 +188,7 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 						Close
 					</AlertDialogCancel>
 
-					<Button className="w-full gap-3" type="submit" disabled={isUpdating} onClick={() => console.log(form.getValues(), form.formState)}>
+					<Button className="w-full gap-3" type="submit" disabled={isUpdating}>
 						{isUpdating && <LoadingSpinner />} Updat{isUpdating ? 'ing' : 'e'}
 					</Button>
 				</AlertDialogFooter>

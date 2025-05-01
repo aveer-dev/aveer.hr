@@ -5,7 +5,7 @@ import { useDocumentActions } from '@/hooks/use-document-actions';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useState } from 'react';
 import Link from 'next/link';
-import { BookDashed, Copy, LockKeyhole, LockKeyholeOpen, Trash2 } from 'lucide-react';
+import { BookDashed, Copy, FileText, LockKeyhole, LockKeyholeOpen, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Tables } from '@/type/database.types';
@@ -57,6 +57,13 @@ export const DocumentItem = ({ document, createDocument, currentUserId }: Docume
 			</ContextMenuTrigger>
 
 			<ContextMenuContent className="w-44 *:gap-3">
+				<Link href={`./documents/${document.id}`} passHref>
+					<ContextMenuItem className="w-44 gap-3">
+						<FileText size={14} />
+						Open
+					</ContextMenuItem>
+				</Link>
+
 				<DocumentDupDialog document={document} currentUserId={currentUserId} redirectPath={`./documents`}>
 					<ContextMenuItem onSelect={event => event.preventDefault()}>
 						<Copy size={14} />
