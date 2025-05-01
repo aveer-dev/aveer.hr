@@ -1,56 +1,25 @@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { BookCopy, BookDashed, Download, EllipsisVertical, LockKeyhole, LockKeyholeOpen, Trash2 } from 'lucide-react';
-import { deleteDocument, updateDocument } from './document.actions';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { BookCopy, EllipsisVertical, LockKeyhole, LockKeyholeOpen, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { DocumentDupDialog } from './document-dup-dialog';
 import { Tables } from '@/type/database.types';
-import { Switch } from '@/components/ui/switch';
+import { useDocumentActions } from '@/hooks/use-document-actions';
 
-export const DocumentOptions = ({ currentUserId, document }: { currentUserId: string; document: Tables<'documents'> }) => {
-	const router = useRouter();
+interface DocumentOptionsProps {
+	currentUserId: string;
+	document: Tables<'documents'>;
+	onStateChange?: (updates: Partial<Tables<'documents'>>) => void;
+}
+
+export const DocumentOptions = ({ currentUserId, document, onStateChange }: DocumentOptionsProps) => {
 	const [isOptionOpen, toggleOptionState] = useState(false);
-	const [isDeleting, setDeleteState] = useState(false);
-	const [isLocking, setLockState] = useState(false);
-	const [isTemplating, setTemplateState] = useState(false);
-
-	const onDeleteDocument = async (event: Event) => {
-		event.preventDefault();
-
-		setDeleteState(true);
-		const { error } = await deleteDocument({ org: (document.org as any).subdomain, id: document.id });
-		setDeleteState(false);
-
-		if (error) return toast.error(error.message);
-		router.replace('./');
-	};
-
-	const onLockDocument = async (event: Event) => {
-		event.preventDefault();
-		setLockState(true);
-
-		const { error } = await updateDocument({ org: (document.org as any).subdomain, id: document.id, locked: !document.locked });
-		setLockState(false);
-
-		if (error) return toast.error(error.message);
-		toast.success(`Document ${!document.locked ? 'locked' : 'unlocked'} successfully`);
-		router.refresh();
-		toggleOptionState(false);
-	};
-
-	// const onTemplateSwitch = async () => {
-	// 	setTemplateState(true);
-	// 	const { error } = await updateDocument({ org: document.org, id: document.id, template: !document.template });
-	// 	setTemplateState(false);
-
-	// 	if (error) return toast.error(error.message);
-	// 	toast.success(`Document ${!document.locked ? 'is now a template document' : 'is now a normal document'}`);
-	// 	router.refresh();
-	// 	toggleOptionState(false);
-	// };
+	const { isDeleting, isLocking, handleDeleteDocument, handleLockDocument } = useDocumentActions({
+		document,
+		onActionComplete: () => toggleOptionState(false),
+		onStateChange
+	});
 
 	return (
 		<DropdownMenu open={isOptionOpen} onOpenChange={toggleOptionState}>
@@ -61,7 +30,7 @@ export const DocumentOptions = ({ currentUserId, document }: { currentUserId: st
 			</DropdownMenuTrigger>
 
 			<DropdownMenuContent className="w-44 *:gap-3" align="end">
-				<DropdownMenuItem disabled={document.signed_lock} onSelect={onLockDocument}>
+				<DropdownMenuItem disabled={document.signed_lock} onSelect={handleLockDocument}>
 					{isLocking ? <LoadingSpinner /> : document.locked ? <LockKeyholeOpen size={12} /> : <LockKeyhole size={12} />} {document.locked ? 'Unlock' : 'Lock'}
 				</DropdownMenuItem>
 
@@ -71,7 +40,7 @@ export const DocumentOptions = ({ currentUserId, document }: { currentUserId: st
 					</DropdownMenuItem>
 				</DocumentDupDialog>
 
-				<DropdownMenuItem disabled={document.signed_lock} onSelect={onDeleteDocument}>
+				<DropdownMenuItem disabled={document.signed_lock} onSelect={handleDeleteDocument}>
 					{isDeleting ? <LoadingSpinner /> : <Trash2 size={12} />} Delete
 				</DropdownMenuItem>
 

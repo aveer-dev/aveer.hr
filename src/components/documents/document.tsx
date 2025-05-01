@@ -17,7 +17,7 @@ import { Document as TiptapDocument } from '@/components/tiptap/extensions/Docum
 import { CustomMention, suggestion } from '@/components/tiptap/extensions/Mention';
 import { DocumentSettingsDialog } from './document-settings-dialog';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { ChevronDown, ChevronLeft, Cloud, CloudOff, CloudUpload, Globe, GlobeLock, Info, LockKeyhole, UnlockKeyhole } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Cloud, CloudOff, CloudUpload, Globe, GlobeLock, Info, LockKeyhole, Trash2, UnlockKeyhole, Copy } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useDebounce } from 'use-debounce';
 import { sendToSignatories, updateDocument } from './document.actions';
@@ -37,14 +37,20 @@ import Collaboration from '@tiptap/extension-collaboration';
 import { DocumentMetadata, DocumentState, SignatoryInfo } from './types';
 import debounce from 'lodash/debounce';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
-import { WebsocketProvider } from 'y-websocket';
+import { WebrtcProvider } from 'y-webrtc';
 import { generateHslaColors } from '@/lib/utils/colors';
+import * as awarenessProtocol from 'y-protocols/awareness';
 
 interface PROPS {
 	doc: Tables<'documents'>;
 	currentUserId?: string;
 	employees?: Tables<'contracts'>[] | null;
 	parentContainerId?: string;
+}
+
+interface AwarenessState {
+	user?: User;
+	[key: string]: any;
 }
 
 interface User {
@@ -57,6 +63,21 @@ export const Document = ({ doc: initialDoc, currentUserId, employees, parentCont
 	const router = useRouter();
 	const pathname = usePathname();
 	const menuContainerRef = useRef(null);
+
+	const updateDocMetadata = useCallback((prev: DocumentMetadata, updates: Partial<Tables<'documents'>>) => {
+		return {
+			...prev,
+			...updates,
+			// Maintain the DocumentMetadata structure
+			org: {
+				subdomain: typeof updates.org === 'string' ? updates.org : prev.org.subdomain
+			},
+			shared_with: prev.shared_with,
+			signed_lock: updates.signed_lock ?? prev.signed_lock,
+			private: updates.private ?? prev.private,
+			signatures: prev.signatures
+		} as DocumentMetadata;
+	}, []);
 
 	const handleBack = useCallback(() => {
 		// Force a refresh of the previous page
@@ -97,7 +118,7 @@ export const Document = ({ doc: initialDoc, currentUserId, employees, parentCont
 	// Initialize Y.js document
 	const ydoc = useRef<Y.Doc | null>(null);
 	const [provider, setProvider] = useState<IndexeddbPersistence | null>(null);
-	const [wsProvider, setWsProvider] = useState<WebsocketProvider | null>(null);
+	const [webrtcProvider, setWebrtcProvider] = useState<WebrtcProvider | null>(null);
 	const [activeUsers, setActiveUsers] = useState<User[]>([]);
 
 	// Get current user info
@@ -130,24 +151,30 @@ export const Document = ({ doc: initialDoc, currentUserId, employees, parentCont
 				});
 				setProvider(newProvider);
 
-				// Initialize WebSocket provider for real-time collaboration
-				const websocketProvider = new WebsocketProvider('wss://your-websocket-server.com', `document-${doc.id}`, ydoc.current, {
-					params: {
-						userId: currentUserId || 'anonymous'
-					}
+				// Initialize WebRTC provider for real-time collaboration
+				const rtcProvider = new WebrtcProvider(`document-${doc.id}`, ydoc.current, {
+					awareness: new awarenessProtocol.Awareness(ydoc.current)
 				});
 
 				// Handle awareness updates
-				websocketProvider.awareness.setLocalStateField('user', currentUser);
+				rtcProvider.awareness.setLocalState({
+					user: currentUser
+				});
 
-				websocketProvider.awareness.on('change', () => {
-					const states = Array.from(websocketProvider.awareness.getStates().values());
-					const users = states.filter(state => state.user).map(state => state.user as User);
+				rtcProvider.awareness.on('change', () => {
+					const states = Array.from(rtcProvider.awareness.getStates().values());
+					const users = states
+						.filter((state: unknown): state is AwarenessState => {
+							const awarenessState = state as AwarenessState;
+							return awarenessState?.user !== undefined;
+						})
+						.map(state => state.user as User)
+						.filter((user): user is User => user !== undefined);
 
 					setActiveUsers(users);
 				});
 
-				setWsProvider(websocketProvider);
+				setWebrtcProvider(rtcProvider);
 			} catch (error) {
 				console.error('Failed to initialize collaboration:', error);
 			}
@@ -159,11 +186,11 @@ export const Document = ({ doc: initialDoc, currentUserId, employees, parentCont
 
 		return () => {
 			provider?.destroy();
-			wsProvider?.destroy();
+			webrtcProvider?.destroy();
 			ydoc.current?.destroy();
 			ydoc.current = null;
 		};
-	}, [doc.id, provider, currentUser, currentUserId, wsProvider]);
+	}, [doc.id, provider, currentUser, currentUserId, webrtcProvider]);
 
 	const updateDocumentState = useCallback((updates: Partial<DocumentState>) => {
 		setDocumentState(prev => ({
@@ -275,7 +302,7 @@ export const Document = ({ doc: initialDoc, currentUserId, employees, parentCont
 							field: 'content'
 						}),
 						CollaborationCursor.configure({
-							provider: wsProvider?.awareness,
+							provider: webrtcProvider?.awareness,
 							user: currentUser
 								? {
 										name: currentUser.name,
@@ -523,12 +550,11 @@ export const Document = ({ doc: initialDoc, currentUserId, employees, parentCont
 								currentUserId={currentUserId}
 							/>
 							<DocumentOptions
-								document={{
-									...initialDoc,
-									html: editor.getHTML(),
-									org: doc.org.subdomain
-								}}
 								currentUserId={currentUserId}
+								document={doc as unknown as Tables<'documents'>}
+								onStateChange={updates => {
+									setDoc(prev => updateDocMetadata(prev, updates));
+								}}
 							/>
 						</div>
 					)}

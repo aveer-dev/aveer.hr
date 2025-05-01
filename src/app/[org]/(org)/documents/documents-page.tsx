@@ -38,5 +38,5 @@ export const DocumentsPage = async ({ params }: { params: Promise<{ [key: string
 
 	const documents = data.filter(document => document.shared_with?.filter((person: any) => person.profile == user.id) || document.owner == user.id);
 
-	return <DocumentsList documents={documents} createDocument={createDocument} />;
+	return <DocumentsList documents={documents} createDocument={createDocument} currentUserId={user.id} />;
 };

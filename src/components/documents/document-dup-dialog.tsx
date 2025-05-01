@@ -9,8 +9,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loader';
 
-export const DocumentDupDialog = ({ children, onClose, document, currentUserId }: { document: Tables<'documents'>; children: ReactNode; onClose: (state: boolean) => void; currentUserId: string }) => {
-	const [documentName, setDocumentName] = useState('');
+export const DocumentDupDialog = ({ children, onClose, document, currentUserId, redirectPath }: { document: Tables<'documents'>; children: ReactNode; onClose?: (state: boolean) => void; currentUserId: string; redirectPath?: string }) => {
+	const [documentName, setDocumentName] = useState(`${document.name} (Copy)`);
 	const [copyConfigs, setCopyConfigsState] = useState(true);
 	const [isLoading, setLoadState] = useState(false);
 
@@ -20,11 +20,15 @@ export const DocumentDupDialog = ({ children, onClose, document, currentUserId }
 
 		const payload: TablesInsert<'documents'> = copyConfigs ? { ...document, name: documentName, owner: currentUserId } : { name: documentName, html: document.html, org: document.org, shared_with: [document.shared_with] };
 		if (payload.id) delete payload.id;
+		if (payload.link_id) delete payload.link_id;
+		if (payload.owner) delete payload.owner;
+		if (typeof payload.org !== 'string') payload.org = (payload.org as { subdomain: string }).subdomain;
+
 		const { error, data } = await createDocument(payload);
 		setLoadState(false);
 
 		if (error) return toast.error(error.message);
-		window.open(`./${data.id}`, '_blank');
+		window.open(`${redirectPath ?? '.'}/${data.id}`, '_blank');
 	};
 
 	return (
@@ -54,6 +58,7 @@ export const DocumentDupDialog = ({ children, onClose, document, currentUserId }
 
 				<AlertDialogFooter className="mt-6 sm:justify-start">
 					<AlertDialogCancel className="w-full">Close</AlertDialogCancel>
+
 					<Button className="w-full gap-3" onClick={makeCopy} disabled={isLoading}>
 						{isLoading && <LoadingSpinner />} Make copy
 					</Button>
