@@ -20,7 +20,7 @@ export const DocumentSettingsDialog = ({ doc, currentUserId, employees }: props)
 			</AlertDialogTrigger>
 
 			<AlertDialogContent>
-				<AlertDialogHeader>
+				<AlertDialogHeader className="mb-4">
 					<AlertDialogTitle>Share &quot;{doc.name}&quot;</AlertDialogTitle>
 					<AlertDialogDescription>Configure document settings</AlertDialogDescription>
 				</AlertDialogHeader>

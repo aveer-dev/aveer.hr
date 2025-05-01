@@ -3,8 +3,10 @@ import { redirect } from 'next/navigation';
 import { format } from 'date-fns';
 import { DocumentsList } from '@/components/documents/documents-list';
 
-export const DocumentsPage = async ({ org }: { org: string }) => {
+export const DocumentsPage = async ({ params }: { params: Promise<{ [key: string]: string }> }) => {
 	const supabase = await createClient();
+
+	const org = (await params).org;
 
 	const [
 		{ data, error },

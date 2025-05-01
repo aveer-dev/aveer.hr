@@ -2,9 +2,7 @@ import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DocumentsPage } from './documents-page';
 
-export default async function ContractsPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
-	const org = (await props.params).org;
-
+export default function ContractsPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
 	return (
 		<section className="@container">
 			<div className="mb-8 flex items-center justify-between border-b pb-4">
@@ -21,7 +19,7 @@ export default async function ContractsPage(props: { params: Promise<{ [key: str
 						<Skeleton className="h-72 w-full" />
 					</div>
 				}>
-				<DocumentsPage org={org} />
+				<DocumentsPage params={props.params} />
 			</Suspense>
 		</section>
 	);

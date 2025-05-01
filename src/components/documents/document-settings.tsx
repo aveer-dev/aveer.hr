@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { DocumentAccessor } from './accessor-item';
 import { searchPeople } from '@/utils/employee-search';
 import { Input } from '@/components/ui/input';
+import { SHARED_WITH, DOCUMENT_ACCESS_TYPE } from './types';
 
 const FormSchema = z.object({
 	private: z.boolean().default(true).optional(),
@@ -33,7 +34,8 @@ interface props {
 export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 	const [employeeSearchResult, setEmployeeSearchResult] = useState<Tables<'contracts'>[]>([]);
 	const [isUpdating, setUpdateState] = useState(false);
-	const [sharedWith, updateSharedWith] = useState<{ contract?: number; profile: string; access: 'editor' | 'viewer' }[]>((doc.shared_with as any) || []);
+	const [sharedWith, updateSharedWith] = useState<SHARED_WITH[]>((doc.shared_with as any) || []);
+	const [searchQuery, setSearchQuery] = useState('');
 	const router = useRouter();
 
 	const form = useForm<z.infer<typeof FormSchema>>({
@@ -47,7 +49,7 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 	const onSubmit = async (data: z.infer<typeof FormSchema>) => {
 		setUpdateState(true);
 
-		const { error } = await updateDocument({ private: data.private, shared_with: sharedWith, id: doc.id, org: (doc.org as any).subdomain });
+		const { error } = await updateDocument({ private: data.private, shared_with: sharedWith as any, id: doc.id, org: (doc.org as any).subdomain });
 		setUpdateState(false);
 		if (error) return toast.error(error.message);
 
@@ -67,7 +69,7 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 		updateSharedWith([...sharedWith]);
 	};
 
-	const onUpdatePersonAccess = (index: number, access: 'editor' | 'viewer') => {
+	const onUpdatePersonAccess = (index: number, access: DOCUMENT_ACCESS_TYPE) => {
 		sharedWith[index].access = access;
 		updateSharedWith([...sharedWith]);
 	};
@@ -93,7 +95,7 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 							render={({ field }) => (
 								<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
 									<div className="space-y-0.5">
-										<FormLabel className="text-sm font-normal">Restricted</FormLabel>
+										<FormLabel className="text-sm font-normal text-primary">Restricted</FormLabel>
 										<FormDescription>{field.value ? 'Only people with access can open' : 'Anyone on the internet with the link can access'}</FormDescription>
 									</div>
 
@@ -114,11 +116,13 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 						)}
 
 						<div className="space-y-3">
-							<Label>People with access</Label>
+							<Label>Add employees</Label>
 							<Command className="rounded-lg border md:min-w-[450px]" shouldFilter={false}>
 								<CommandInput
 									placeholder="Type an admin name to add"
+									value={searchQuery}
 									onValueChange={value => {
+										setSearchQuery(value);
 										const result = searchPeople(employees as any[], value, ['first_name', 'last_name'], true);
 										if (result) setEmployeeSearchResult(result as any[]);
 									}}
@@ -132,20 +136,32 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 											</CommandItem>
 										)}
 
-										{employeeSearchResult.map(employee => (
-											<CommandItem key={employee.id + 'search'} className="flex gap-2" onSelect={onSelectEmployee.bind(this, employee)}>
-												<span>
-													{(employee.profile as any)?.first_name} {(employee.profile as any)?.last_name}
-												</span>
-												•<span className="capitalize">{employee.role}</span>
-											</CommandItem>
-										))}
+										{employeeSearchResult.map(employee => {
+											const isShared = sharedWith.find(person => person.profile == ((employee.profile as any)?.id || employee.profile));
+											if (isShared) return null;
+
+											return (
+												<CommandItem
+													key={employee.id + 'search'}
+													className="flex gap-2"
+													onSelect={() => {
+														onSelectEmployee(employee);
+														setSearchQuery('');
+													}}>
+													<span>
+														{(employee.profile as any)?.first_name} {(employee.profile as any)?.last_name}
+													</span>
+													•<span className="capitalize">{employee.role}</span>
+												</CommandItem>
+											);
+										})}
 									</CommandGroup>
 								</CommandList>
 							</Command>
 						</div>
 
-						<ul className="max-h-40 space-y-2 overflow-y-auto">
+						<Label>People with access</Label>
+						<ul className="!mt-2.5 max-h-40 space-y-2 overflow-y-auto">
 							{sharedWith
 								.sort(a => (a.profile == doc.owner ? -1 : 1))
 								.map((user, index) => (
@@ -153,7 +169,7 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 										ownerProfileId={doc.owner}
 										onRemove={() => onRemovePerson(index)}
 										onUpdateAccess={onUpdatePersonAccess.bind(this, index)}
-										access={user.access}
+										user={user}
 										accessor={employees?.find(employee => (employee.profile as any).id == user.profile) as Tables<'contracts'>}
 										key={index}
 									/>
