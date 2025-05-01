@@ -9,16 +9,16 @@ import { TableOfContentsNode } from '@/components/tiptap/extensions/TableOfConte
 import { Tables } from '@/type/database.types';
 import TableOfContents from '@tiptap-pro/extension-table-of-contents';
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { TableColumnMenu, TableRowMenu } from '@/components/tiptap/extensions/Table/menus';
 import { Column, Columns } from '@/components/tiptap/extensions/MultiColumn';
 import { ColumnsMenu } from '@/components/tiptap/extensions/MultiColumn/menus';
 import { Document as TiptapDocument } from '@/components/tiptap/extensions/Document';
 import { CustomMention, suggestion } from '@/components/tiptap/extensions/Mention';
 import { DocumentSettingsDialog } from './document-settings-dialog';
-import { Button } from '@/components/ui/button';
-import { ChevronDown, Globe, Info, LockKeyhole, Save } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { ChevronDown, ChevronLeft, Cloud, CloudOff, CloudUpload, Globe, GlobeLock, Info, LockKeyhole, UnlockKeyhole } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useDebounce } from 'use-debounce';
 import { sendToSignatories, updateDocument } from './document.actions';
 import { toast } from 'sonner';
@@ -26,12 +26,19 @@ import { DocumentOptions } from './document-options';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
-import { LoadingSpinner } from '@/components/ui/loader';
 import { cn } from '@/lib/utils';
 import { AddSignatoryDialog } from './add-signatory-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { DocumentDupForSignature } from './document-dup-signature-dialog';
 import ImageBlockMenu from '../tiptap/extensions/ImageBlock/components/ImageBlockMenu';
+import * as Y from 'yjs';
+import { IndexeddbPersistence } from 'y-indexeddb';
+import Collaboration from '@tiptap/extension-collaboration';
+import { DocumentMetadata, DocumentState, SignatoryInfo } from './types';
+import debounce from 'lodash/debounce';
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
+import { WebsocketProvider } from 'y-websocket';
+import { generateHslaColors } from '@/lib/utils/colors';
 
 interface PROPS {
 	doc: Tables<'documents'>;
@@ -40,75 +47,244 @@ interface PROPS {
 	parentContainerId?: string;
 }
 
-export const Document = ({ doc, currentUserId, employees, parentContainerId }: PROPS) => {
+interface User {
+	name: string;
+	color: string;
+	id: string;
+}
+
+export const Document = ({ doc: initialDoc, currentUserId, employees, parentContainerId }: PROPS) => {
 	const router = useRouter();
+	const pathname = usePathname();
 	const menuContainerRef = useRef(null);
-	const [name, updateName] = useState(doc?.name);
+
+	const handleBack = useCallback(() => {
+		// Force a refresh of the previous page
+		const documentsPath = pathname.split('/').slice(0, -1).join('/');
+		router.push(documentsPath);
+		router.refresh();
+	}, [router, pathname]);
+
+	const [name, updateName] = useState(initialDoc?.name);
 	const [documentName] = useDebounce(name, 1000);
-	const [documentHTML, setDocumentHTML] = useState<string>('');
-	const [docHTML] = useDebounce(documentHTML, 1000);
-	const [isSaving, setSavingState] = useState(false);
+	const [doc, setDoc] = useState<DocumentMetadata>({
+		...initialDoc,
+		org: initialDoc.org as any,
+		shared_with: (initialDoc?.shared_with as any) || [],
+		signatures: (initialDoc.signatures as any) || [],
+		version: initialDoc.version as string
+	});
+
+	const [documentState, setDocumentState] = useState<DocumentState>({
+		isSaving: false,
+		isSaved: true,
+		lastSavedVersion: (initialDoc.version as string) || null,
+		error: null
+	});
+
+	const [signatories, updateSignatories] = useState<SignatoryInfo[]>(
+		Array.isArray(initialDoc.signatures)
+			? (initialDoc.signatures as any[]).map(sig => ({
+					id: sig.id,
+					contract: sig.contract,
+					profile: sig.profile
+				}))
+			: []
+	);
 	const [isSending, setSendingState] = useState(false);
-	const [isSaved, setSavedState] = useState(false);
-	const [signatories, updateSignatories] = useState<{ id: string; contract?: number; profile?: string }[]>((doc?.signatures as any) || []);
+	const [contentChanged, setContentChanged] = useState(false);
 
+	// Initialize Y.js document
+	const ydoc = useRef<Y.Doc | null>(null);
+	const [provider, setProvider] = useState<IndexeddbPersistence | null>(null);
+	const [wsProvider, setWsProvider] = useState<WebsocketProvider | null>(null);
+	const [activeUsers, setActiveUsers] = useState<User[]>([]);
+
+	// Get current user info
+	const currentUser = useMemo(() => {
+		const employee = employees?.find(emp => (emp.profile as any).id === currentUserId);
+		if (!employee) return null;
+
+		return {
+			name: `${(employee.profile as any).first_name} ${(employee.profile as any).last_name}`,
+			id: currentUserId as string,
+			color: generateHslaColors(currentUserId as string)
+		};
+	}, [currentUserId, employees]);
+
+	// Initialize collaboration only on client side
 	useEffect(() => {
-		const onUpdateDocument = async () => {
-			if (!currentUserId || doc.locked) return;
+		if (typeof window === 'undefined' || ydoc.current) return;
 
-			if (!doc.locked && !doc.signed_lock) {
-				setSavingState(true);
-				setSavedState(false);
+		const initCollaboration = async () => {
+			try {
+				ydoc.current = new Y.Doc();
+
+				// Initialize IndexedDB provider for offline persistence
+				const newProvider = new IndexeddbPersistence(`document-${doc.id}`, ydoc.current);
+				await new Promise<void>(resolve => {
+					newProvider.once('synced', () => {
+						console.log('Content synced with IndexedDB');
+						resolve();
+					});
+				});
+				setProvider(newProvider);
+
+				// Initialize WebSocket provider for real-time collaboration
+				const websocketProvider = new WebsocketProvider('wss://your-websocket-server.com', `document-${doc.id}`, ydoc.current, {
+					params: {
+						userId: currentUserId || 'anonymous'
+					}
+				});
+
+				// Handle awareness updates
+				websocketProvider.awareness.setLocalStateField('user', currentUser);
+
+				websocketProvider.awareness.on('change', () => {
+					const states = Array.from(websocketProvider.awareness.getStates().values());
+					const users = states.filter(state => state.user).map(state => state.user as User);
+
+					setActiveUsers(users);
+				});
+
+				setWsProvider(websocketProvider);
+			} catch (error) {
+				console.error('Failed to initialize collaboration:', error);
 			}
-
-			const { error, data } = await updateDocument({ name: documentName, id: doc?.id, org: (doc?.org as any).subdomain, html: docHTML });
-			setSavingState(false);
-			if (error) {
-				setSavedState(false);
-				return toast.error(error.message);
-			}
-
-			// eslint-disable-next-line react-hooks/exhaustive-deps
-			if (data) doc = data;
-			if (!doc.locked && !doc.signed_lock) setSavedState(true);
 		};
 
-		if (docHTML) onUpdateDocument();
-	}, [doc?.id, doc?.org, documentName, docHTML]);
+		if (currentUser) {
+			initCollaboration();
+		}
 
-	const onUpdateSignatures = (editor: Editor) => {
-		const { content } = editor.state.doc.content;
-		const signatures = content.filter(node => node.type.name === 'signatureFigure' || node.type.name === 'signatureUpload' || node.type.name === 'signatureImage');
+		return () => {
+			provider?.destroy();
+			wsProvider?.destroy();
+			ydoc.current?.destroy();
+			ydoc.current = null;
+		};
+	}, [doc.id, provider, currentUser, currentUserId, wsProvider]);
 
-		// Create a map of existing signatories for efficient lookup
-		const existingSignatoriesMap = new Map(signatories.map(signatory => [signatory.id, signatory]));
+	const updateDocumentState = useCallback((updates: Partial<DocumentState>) => {
+		setDocumentState(prev => ({
+			...prev,
+			...updates
+		}));
+	}, []);
 
-		// Build updated signatories array
-		const updatedSignatories = signatures.map(signature => {
-			const id = signature.attrs['id'];
-			const existingSignatory = existingSignatoriesMap.get(id);
+	const getEmployee = useCallback(
+		(employeeId?: number) => {
+			const employee = employeeId ? employees?.find(employee => employee.id == employeeId) : employees?.find(employee => (employee.profile as any).id == currentUserId);
+			return employee as Tables<'contracts'>;
+		},
+		[employees, currentUserId]
+	);
 
-			// If signatory exists, preserve its data, otherwise create new entry
-			return (
-				existingSignatory || {
-					id
+	const saveDocument = useCallback(
+		async (content: string) => {
+			if (!currentUserId || doc.locked || doc.signed_lock || !contentChanged) return;
+
+			updateDocumentState({ isSaving: true, isSaved: false });
+
+			try {
+				const result = await updateDocument({
+					name: documentName,
+					id: doc?.id,
+					org: doc.org.subdomain,
+					html: content,
+					version: documentState.lastSavedVersion
+				});
+
+				if (result.error) throw result.error;
+
+				if (result.data) {
+					const updatedDoc: DocumentMetadata = {
+						...result.data,
+						org: result.data.org as any,
+						shared_with: (result.data.shared_with as any[]) || [],
+						signatures: (result.data.signatures as any[]) || [],
+						version: result.data.version as string
+					};
+
+					// Update signatories separately to maintain type safety
+					const newSignatories = Array.isArray(result.data.signatures)
+						? (result.data.signatures as any[]).map(sig => ({
+								id: sig.id,
+								contract: sig.contract,
+								profile: sig.profile
+							}))
+						: [];
+
+					updateSignatories(newSignatories);
+					setDoc(updatedDoc);
+
+					updateDocumentState({
+						isSaving: false,
+						isSaved: true,
+						lastSavedVersion: updatedDoc.version,
+						error: null
+					});
+
+					setContentChanged(false);
 				}
-			);
-		});
+			} catch (error: any) {
+				updateDocumentState({
+					isSaving: false,
+					isSaved: false,
+					error: error.message
+				});
 
-		updateSignatories(updatedSignatories);
-	};
+				toast.error(error.message);
+			}
+		},
+		[currentUserId, doc, contentChanged, updateDocumentState, documentName, documentState.lastSavedVersion]
+	);
 
-	const getEmployee = (employeeId?: number) => {
-		const employee = employeeId ? employees?.find(employee => employee.id == employeeId) : employees?.find(employee => (employee.profile as any).id == currentUserId);
-		return employee as Tables<'contracts'>;
-	};
+	const debouncedSaveCallback = useMemo(
+		() =>
+			debounce((content: string) => {
+				if (contentChanged) {
+					saveDocument(content);
+				}
+			}, 1000),
+		[contentChanged, saveDocument]
+	);
+
+	// Cleanup debounce on unmount
+	useEffect(() => {
+		return () => {
+			debouncedSaveCallback.cancel();
+		};
+	}, [debouncedSaveCallback]);
 
 	const editor = useEditor({
 		extensions: [
 			TiptapDocument,
-			SignatureFigure.configure({ profile: getEmployee()?.profile, uploadPath: `${getEmployee()?.org}/${getEmployee()?.id}`, onSignDocuemnt: updateDocument, document: doc, signatories }),
+			SignatureFigure.configure({
+				profile: getEmployee()?.profile,
+				uploadPath: `${getEmployee()?.org}/${getEmployee()?.id}`,
+				onSignDocuemnt: updateDocument,
+				document: doc,
+				signatories
+			}),
 			...ExtensionKit,
+			...(ydoc.current
+				? [
+						Collaboration.configure({
+							document: ydoc.current,
+							field: 'content'
+						}),
+						CollaborationCursor.configure({
+							provider: wsProvider?.awareness,
+							user: currentUser
+								? {
+										name: currentUser.name,
+										color: currentUser.color
+									}
+								: undefined
+						})
+					]
+				: []),
 			SlashCommand,
 			TableOfContents.configure({
 				anchorTypes: ['heading', 'customAnchorType']
@@ -156,10 +332,73 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 			onUpdateSignatures(editor);
 			if (doc.locked || doc.signed_lock) return;
 
-			setDocumentHTML(editor.getHTML());
+			// Only mark as changed if content actually changed
+			const newContent = editor.getHTML();
+			if (newContent !== doc.html) {
+				setContentChanged(true);
+				debouncedSaveCallback(newContent);
+			}
 		},
 		editable: !doc?.locked
 	});
+
+	// Update editor content when doc changes
+	useEffect(() => {
+		if (editor && doc.html && !contentChanged) {
+			editor.commands.setContent(doc.html);
+		}
+	}, [editor, doc.html, contentChanged]);
+
+	// Handle offline/online status
+	useEffect(() => {
+		const handleOnline = () => {
+			if (editor && !documentState.isSaved && contentChanged) {
+				saveDocument(editor.getHTML());
+			}
+		};
+
+		window.addEventListener('online', handleOnline);
+		return () => window.removeEventListener('online', handleOnline);
+	}, [editor, documentState.isSaved, saveDocument, contentChanged]);
+
+	// Save document when component unmounts if there are unsaved changes
+	useEffect(() => {
+		return () => {
+			if (editor && !documentState.isSaved && contentChanged) {
+				// Cancel any pending debounced saves
+				debouncedSaveCallback.cancel();
+				// Save immediately
+				saveDocument(editor.getHTML());
+			}
+		};
+	}, [editor, documentState.isSaved, saveDocument, contentChanged, debouncedSaveCallback]);
+
+	// Handle document name changes
+	useEffect(() => {
+		if (documentName !== doc.name && !doc.locked && !doc.signed_lock) {
+			setContentChanged(true);
+			if (editor) {
+				debouncedSaveCallback(editor.getHTML());
+			}
+		}
+	}, [documentName, doc.name, doc.locked, doc.signed_lock, editor, debouncedSaveCallback]);
+
+	const onUpdateSignatures = (editor: Editor) => {
+		const { content } = editor.state.doc.content;
+		const signatures = content.filter(node => node.type.name === 'signatureFigure' || node.type.name === 'signatureUpload' || node.type.name === 'signatureImage');
+
+		// Create a map of existing signatories for efficient lookup
+		const existingSignatoriesMap = new Map(signatures.map(signatory => [signatory.attrs?.id, signatory]));
+
+		// Build updated signatories array
+		const updatedSignatories = signatures.map(signature => ({
+			id: signature.attrs?.id,
+			contract: signature.attrs?.contract,
+			profile: signature.attrs?.profile
+		})) as SignatoryInfo[];
+
+		updateSignatories(updatedSignatories);
+	};
 
 	const userPermittedAction = useCallback(() => {
 		if (currentUserId == doc.owner) return 'owner';
@@ -190,22 +429,32 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 
 	return (
 		<section className="relative mx-auto max-w-5xl space-y-4">
+			{/* Show active users */}
+			{activeUsers.length > 0 && (
+				<div className="fixed right-4 top-20 flex -space-x-2 overflow-hidden">
+					{activeUsers.map(user => (
+						<div key={user.id} className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100" style={{ backgroundColor: user.color }} title={user.name}>
+							{user.name.charAt(0)}
+						</div>
+					))}
+				</div>
+			)}
+
 			<div className="relative space-y-6">
 				<div className="mx-8 mb-8 flex items-center justify-between border-b pb-6">
 					<div className="flex w-full items-center gap-3 text-sm font-light text-muted-foreground">
-						{/* An issue with document being cached and current state not being saved before navigation */}
-						{/* {currentUserId && (
-							<Link href={'../documents'} className={cn(buttonVariants({ variant: 'secondary' }), 'rounded-full')} onClick={() => router.back()}>
+						{currentUserId && (
+							<button onClick={handleBack} disabled={documentState.isSaving || contentChanged} className={cn(buttonVariants({ variant: 'secondary' }), 'rounded-full')}>
 								<ChevronLeft size={14} />
-							</Link>
-						)} */}
+							</button>
+						)}
 
 						{currentUserId && (
 							<Input
 								value={name}
 								readOnly={doc.locked || doc.signed_lock || userPermittedAction() == 'viewer'}
 								onChange={event => updateName(event.target.value)}
-								className={cn('w-full px-0.5 py-2 pl-2 text-sm font-medium text-primary outline-none')}
+								className={cn('w-full max-w-[600px] px-0.5 py-2 pl-2 text-sm font-medium text-primary outline-none')}
 								placeholder="Enter document's name"
 							/>
 						)}
@@ -214,59 +463,73 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 
 					{doc && (!doc.locked || !doc.signed_lock || userPermittedAction() !== 'viewer') && currentUserId && (
 						<div className="flex items-center gap-3">
-							{doc?.locked && (
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button variant={'ghost'}>
-												<LockKeyhole size={14} />
-											</Button>
-										</TooltipTrigger>
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button variant={'ghost'} disabled className="disabled:pointer-events-auto disabled:opacity-100">
+											{documentState.isSaving && <CloudUpload className="animate-bounce" size={14} />}
+											{documentState.isSaved && <Cloud size={14} />}
+											{!documentState.isSaved && !documentState.isSaving && <CloudOff size={14} />}
+										</Button>
+									</TooltipTrigger>
 
-										<TooltipContent>
-											<p className="max-w-40">Document is locked and cannot be edited by anyone.</p>
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
-							)}
+									<TooltipContent>
+										<p className="max-w-40">
+											{documentState.isSaving && 'Saving changes...'}
+											{documentState.isSaved && 'All changes saved'}
+											{!documentState.isSaved && !documentState.isSaving && 'Changes not saved'}
+										</p>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
 
-							{doc?.private && (
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button variant={'ghost'}>{!doc.private && <Globe size={14} />}</Button>
-										</TooltipTrigger>
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button variant={'ghost'} disabled className="disabled:pointer-events-auto disabled:opacity-100">
+											{doc?.locked && <LockKeyhole size={14} />}
+											{!doc?.locked && <UnlockKeyhole size={14} />}
+										</Button>
+									</TooltipTrigger>
 
-										<TooltipContent>
-											<p className="max-w-40">Document is visible to anyone on the internet with document link.</p>
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
-							)}
+									<TooltipContent>
+										<p className="max-w-40">Document is {doc?.locked ? 'locked and cannot be edited by anyone' : 'unlocked and can be edited by anyone with edit access'}.</p>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
 
-							{isSaving && (
-								<span className="flex items-center gap-1 font-light text-muted-foreground">
-									<LoadingSpinner className="w-3" /> saving...
-								</span>
-							)}
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button variant={'ghost'} disabled className="disabled:pointer-events-auto disabled:opacity-100">
+											{!doc.private && <Globe size={14} />}
+											{doc.private && <GlobeLock size={14} />}
+										</Button>
+									</TooltipTrigger>
 
-							{isSaved && (
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<Button variant={'ghost'}>
-												<Save size={14} />
-											</Button>
-										</TooltipTrigger>
-										<TooltipContent>
-											<p className="max-w-40">Document is saved to cloud.</p>
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
-							)}
+									<TooltipContent>
+										<p className="max-w-40">Document is {doc.private ? 'private, only visible to you and people with access' : 'visible to anyone on the internet or with document link.'}</p>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
 
-							<DocumentSettingsDialog employees={employees} doc={{ ...doc, name }} currentUserId={currentUserId} />
-							<DocumentOptions document={{ ...doc, html: editor.getHTML() }} currentUserId={currentUserId} />
+							<DocumentSettingsDialog
+								employees={employees}
+								doc={{
+									...initialDoc,
+									name,
+									org: doc.org.subdomain
+								}}
+								currentUserId={currentUserId}
+							/>
+							<DocumentOptions
+								document={{
+									...initialDoc,
+									html: editor.getHTML(),
+									org: doc.org.subdomain
+								}}
+								currentUserId={currentUserId}
+							/>
 						</div>
 					)}
 				</div>
@@ -353,7 +616,13 @@ export const Document = ({ doc, currentUserId, employees, parentContainerId }: P
 
 									<DropdownMenuContent align="end" className="w-44">
 										<DropdownMenuGroup>
-											<DocumentDupForSignature document={doc} emails={signatories.map(signatory => (employees?.find(employee => employee.id == signatory.contract)?.profile as any)?.email)} signatures={signatories}>
+											<DocumentDupForSignature
+												document={{
+													...initialDoc,
+													org: doc.org.subdomain
+												}}
+												emails={signatories.map(signatory => (employees?.find(employee => employee.id == signatory.contract)?.profile as any)?.email)}
+												signatures={signatories}>
 												<DropdownMenuItem onSelect={event => event.preventDefault()}>Duplicate and Send</DropdownMenuItem>
 											</DocumentDupForSignature>
 										</DropdownMenuGroup>

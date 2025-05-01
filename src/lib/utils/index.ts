@@ -1,10 +1,4 @@
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import { differenceInSeconds } from 'date-fns';
-
-export function cn(...inputs: ClassValue[]) {
-	return twMerge(clsx(inputs));
-}
 
 export const currencyFormat = ({ currency, value }: { currency?: string; value: number }) => {
 	return new Intl.NumberFormat(
@@ -63,5 +57,9 @@ export { generateRecurrence, weekday, frequency, type Frequency, type Weekday } 
 export { parseRecurrenceRule } from './parseRecurrenceString';
 export { searchTeams } from './team-search';
 export { getAllTimezones, getCurrentTimezone } from './timezone';
+export * from './colors';
+
+// Re-export any other existing utility functions
 export { parseRecurrence } from './revertRecurrenceString';
 export * from './calculate-appraisal-score';
+export * from './cn';

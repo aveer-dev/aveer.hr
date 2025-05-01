@@ -55,7 +55,7 @@ export const DocumentOptions = ({ currentUserId, document }: { currentUserId: st
 	return (
 		<DropdownMenu open={isOptionOpen} onOpenChange={toggleOptionState}>
 			<DropdownMenuTrigger asChild className="[&[data-state=open]]:bg-accent">
-				<Button variant="ghost">
+				<Button variant="secondary">
 					<EllipsisVertical size={14} />
 				</Button>
 			</DropdownMenuTrigger>

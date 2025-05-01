@@ -4,6 +4,7 @@ import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 import { sendEmail } from '@/api/email';
 import { SignatureRequestEmail } from '@/components/emails/signature-request';
+import { revalidatePath } from 'next/cache';
 
 export const updateDocument = async (payload: TablesUpdate<'documents'>) => {
 	const supabase = await createClient();
@@ -13,6 +14,10 @@ export const updateDocument = async (payload: TablesUpdate<'documents'>) => {
 		.update({ ...payload, updated_at: new Date().toISOString() })
 		.match({ org: payload.org, id: payload.id })
 		.select('*, org(subdomain, name)');
+
+	// Revalidate the documents list page and the current document page
+	revalidatePath('/documents');
+	revalidatePath(`/documents/${payload.id}`);
 
 	return { data: response.data ? response.data[0] : null, error: response.error };
 };

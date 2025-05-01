@@ -954,6 +954,7 @@ export type Database = {
           signed_lock: boolean
           template: boolean
           updated_at: string
+          version: string | null
         }
         Insert: {
           contract_variables?: string[]
@@ -975,6 +976,7 @@ export type Database = {
           signed_lock?: boolean
           template?: boolean
           updated_at?: string
+          version?: string | null
         }
         Update: {
           contract_variables?: string[]
@@ -996,6 +998,7 @@ export type Database = {
           signed_lock?: boolean
           template?: boolean
           updated_at?: string
+          version?: string | null
         }
         Relationships: [
           {

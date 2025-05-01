@@ -14,7 +14,7 @@ export const DocumentSettingsDialog = ({ doc, currentUserId, employees }: props)
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
-				<Button variant={'ghost'}>
+				<Button variant={'secondary'}>
 					<Share2 size={14} />
 				</Button>
 			</AlertDialogTrigger>
