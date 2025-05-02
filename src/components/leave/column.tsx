@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/components//ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { differenceInBusinessDays, format } from 'date-fns';
+import { differenceInBusinessDays, format, parseISO } from 'date-fns';
 import { Tables } from '@/type/database.types';
 import { Badge } from '@/components/ui/badge';
 import { LeaveReview } from './leave-review';
@@ -62,7 +62,7 @@ export const columns: LEAVE_COLUMN[] = [
 		header: 'Duration',
 		cell: ({ row }) => (
 			<div>
-				<span>{format(row.original.from, 'PP')}</span> - <span>{format(row.original.to, 'PP')}</span>
+				<span>{format(parseISO(row.original.from), 'PP')}</span> - <span>{format(parseISO(row.original.to), 'PP')}</span>
 			</div>
 		),
 		enableHiding: true

@@ -7,8 +7,10 @@ import { ROLE } from '@/type/contract.types';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
-export const LeavePage = async ({ contract, org }: { contract: string; org: string }) => {
+export const LeavePage = async ({ params }: { params: Promise<{ [key: string]: string }> }) => {
 	const supabase = await createClient();
+
+	const { contract, org } = await params;
 
 	const { data, error } = await supabase
 		.from('contracts')

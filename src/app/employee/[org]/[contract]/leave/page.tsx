@@ -2,9 +2,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Suspense } from 'react';
 import { LeavePage } from './leave-page';
 
-export default async function TimeoffPage(props: { params: Promise<{ [key: string]: string }> }) {
-	const params = await props.params;
-
+export default function TimeoffPage(props: { params: Promise<{ [key: string]: string }> }) {
 	return (
 		<Suspense
 			fallback={
@@ -13,7 +11,7 @@ export default async function TimeoffPage(props: { params: Promise<{ [key: strin
 					<Skeleton className="h-80 w-full" />
 				</div>
 			}>
-			<LeavePage contract={params.contract} org={params.org} />
+			<LeavePage {...props} />
 		</Suspense>
 	);
 }

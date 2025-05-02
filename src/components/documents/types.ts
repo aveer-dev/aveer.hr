@@ -1,12 +1,12 @@
 import { Tables } from '@/type/database.types';
 
+export type DOCUMENT_ACCESS_TYPE = 'editor' | 'viewer' | 'owner';
+
 export interface SHARED_WITH {
-	access: 'editor' | 'viewer';
+	access: DOCUMENT_ACCESS_TYPE;
 	profile: string;
 	contract?: number | undefined;
 }
-
-export type DOCUMENT_ACCESS_TYPE = 'editor' | 'viewer';
 
 export interface DocumentState {
 	isSaving: boolean;

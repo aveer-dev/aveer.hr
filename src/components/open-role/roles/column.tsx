@@ -32,7 +32,7 @@ const BadgeSwitch = ({ row }: any) => {
 	return (
 		<Badge className="w-fit gap-2 py-1 font-light" variant="secondary">
 			<span className="w-9">{state}</span>
-			<Switch checked={state == 'open'} className="scale-50" onClick={event => event.stopPropagation()} onCheckedChange={onCheckChange} />
+			<Switch checked={state == 'open'} className="scale-50" onSelect={event => event.stopPropagation()} onCheckedChange={onCheckChange} />
 		</Badge>
 	);
 };
@@ -71,7 +71,7 @@ export const columns: ColumnDef<Tables<'open_roles'>>[] = [
 		}
 	},
 	{
-		id: 'status',
+		id: 'status-badge',
 		header: 'Status',
 		cell: ({ row }) => <BadgeSwitch row={row} />
 	},

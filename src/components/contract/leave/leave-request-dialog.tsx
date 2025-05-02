@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Calendar } from '@/components/ui/calendar';
 import { HardHat, MinusCircle, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { addBusinessDays, addDays, differenceInBusinessDays, format, isSameDay, isWeekend } from 'date-fns';
+import { addBusinessDays, addDays, differenceInBusinessDays, format, isSameDay, isWeekend, parseISO } from 'date-fns';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -62,10 +62,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 		return date;
 	};
 
-	const [date, setDate] = useState<DateRange | undefined>({
-		from: data?.from ? new Date(data?.from) : getNextBusinessDay(new Date()),
-		to: data?.to ? new Date(data?.to) : getNextBusinessDay(addDays(new Date(), 5))
-	});
+	const [date, setDate] = useState<DateRange | undefined>();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -152,8 +149,8 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 		const result: Date[] = [];
 
 		for (const item of usedLeaveDays!) {
-			const startDate = new Date(item.from);
-			const endDate = new Date(item.to);
+			const startDate = parseISO(item.from);
+			const endDate = parseISO(item.to);
 
 			for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) result.push(new Date(date));
 		}

@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { Undo2 } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ProgressiveBlur } from '@/components/ui/progressive-blur';
 
 export default async function RootLayout(props: { children: React.ReactNode; params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
 	const params = await props.params;
@@ -99,7 +100,9 @@ export default async function RootLayout(props: { children: React.ReactNode; par
 					{children}
 				</section>
 
-				<nav className="fixed bottom-0 left-1 right-1 z-10 flex w-full items-center justify-center gap-3 bg-gradient-to-t from-background to-transparent pb-6 pt-4 shadow-md backdrop-blur-sm sm:pb-12">
+				<nav className="fixed bottom-0 left-1 right-1 z-10 flex w-full items-center justify-center gap-3 pb-6 pt-4 sm:pb-12">
+					<ProgressiveBlur className="pointer-events-none absolute bottom-0 left-0 -z-10 h-32 w-full" blurIntensity={6} />
+
 					{data.length > 1 && <ContractsPopover contracts={data} contractId={params.contract} />}
 
 					<NavMenu contract={contract as any} />

@@ -9,13 +9,14 @@ import { cn } from '@/lib/utils';
 import { ROLE } from '@/type/contract.types';
 import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/client';
-import { differenceInBusinessDays, format } from 'date-fns';
+import { differenceInBusinessDays, format, parseISO } from 'date-fns';
 import { Check, Edit, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { HTMLAttributes, ReactNode, useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { LeaveRequestDialog } from '../contract/leave/leave-request-dialog';
 import { emailEmployee } from './leave.actions';
+import { LeaveCancelButton } from './leave-cancel-button';
 
 interface props {
 	children: ReactNode | string;
@@ -248,8 +249,8 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 							<h2 className="text-xs text-muted-foreground">Duration </h2>
 							<div className="text-xs leading-6">
 								<p>
-									<span className="text-muted-foreground">From:</span> {format(data.from, 'ccc')}, {format(data.from, 'PP')} - <span className="text-muted-foreground">To:</span> {format(data.to, 'ccc')}, {format(data.to, 'PP')}{' '}
-									<span className="text-muted-foreground">({differenceInBusinessDays(data.to, data.from) + 1} days)</span>
+									<span className="text-muted-foreground">From:</span> {format(parseISO(data.from), 'ccc')}, {format(parseISO(data.from), 'PP')} - <span className="text-muted-foreground">To:</span> {format(parseISO(data.to), 'ccc')},{' '}
+									{format(parseISO(data.to), 'PP')} <span className="text-muted-foreground">({differenceInBusinessDays(parseISO(data.to), parseISO(data.from)) + 1} days)</span>
 								</p>
 							</div>
 						</li>
@@ -276,6 +277,8 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 								<p className="text-xs leading-6">{data?.hand_over_note}</p>
 							</li>
 						)}
+
+						{((reviewType == 'employee' && data.status == 'pending') || reviewType == 'admin') && <LeaveCancelButton data={data} />}
 					</ul>
 
 					{data.levels && data.levels.length > 0 && (

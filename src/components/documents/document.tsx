@@ -34,7 +34,7 @@ import ImageBlockMenu from '../tiptap/extensions/ImageBlock/components/ImageBloc
 import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import Collaboration from '@tiptap/extension-collaboration';
-import { DocumentMetadata, DocumentState, SignatoryInfo } from './types';
+import { DocumentMetadata, DocumentState, SHARED_WITH, SignatoryInfo } from './types';
 import debounce from 'lodash/debounce';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { WebrtcProvider } from 'y-webrtc';
@@ -202,9 +202,15 @@ export const Document = ({ doc: initialDoc, currentUserId, employees, parentCont
 		[employees, currentUserId]
 	);
 
+	const userPermittedAction = useCallback(() => {
+		if (currentUserId == doc.owner) return 'owner';
+		const userAccess = (doc.shared_with as unknown as { contract: number; profile: string; access: 'editor' | 'viewer' | 'owner' }[]).find(person => person.profile == currentUserId);
+		return userAccess?.access;
+	}, [currentUserId, doc.owner, doc.shared_with]);
+
 	const saveDocument = useCallback(
 		async (content: string) => {
-			if (!currentUserId || doc.locked || doc.signed_lock || !contentChanged) return;
+			if (!currentUserId || doc.locked || doc.signed_lock || !contentChanged || userPermittedAction() == undefined || userPermittedAction() == 'viewer') return;
 
 			updateDocumentState({ isSaving: true, isSaved: false });
 
@@ -259,7 +265,7 @@ export const Document = ({ doc: initialDoc, currentUserId, employees, parentCont
 				toast.error(error.message);
 			}
 		},
-		[currentUserId, doc, contentChanged, updateDocumentState, documentName, documentState.lastSavedVersion]
+		[currentUserId, doc.locked, doc.signed_lock, doc?.id, doc.org.subdomain, contentChanged, userPermittedAction, updateDocumentState, documentName, documentState.lastSavedVersion]
 	);
 
 	const debouncedSaveCallback = useMemo(
@@ -361,7 +367,7 @@ export const Document = ({ doc: initialDoc, currentUserId, employees, parentCont
 				debouncedSaveCallback(newContent);
 			}
 		},
-		editable: !doc?.locked
+		editable: !doc?.locked || userPermittedAction() == 'editor' || userPermittedAction() == 'owner'
 	});
 
 	// Update editor content when doc changes
@@ -421,12 +427,6 @@ export const Document = ({ doc: initialDoc, currentUserId, employees, parentCont
 
 		updateSignatories(updatedSignatories);
 	};
-
-	const userPermittedAction = useCallback(() => {
-		if (currentUserId == doc.owner) return 'owner';
-		const userAccess = (doc.shared_with as unknown as { contract: number; profile: string; access: 'editor' | 'viewer' | 'owner' }[]).find(person => person.profile == currentUserId);
-		return userAccess?.access;
-	}, [currentUserId, doc.owner, doc.shared_with]);
 
 	useEffect(() => {
 		if (editor) editor.setEditable(!doc?.locked && !doc.signed_lock && (userPermittedAction() == 'editor' || userPermittedAction() == 'owner'));

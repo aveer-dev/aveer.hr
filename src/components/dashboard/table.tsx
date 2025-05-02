@@ -166,7 +166,7 @@ const TableContent = ({ row, org, link }: { row: Row<any>; org?: string; link?: 
 			<TableRow data-state={row.getIsSelected() && 'selected'}>
 				{row.getVisibleCells().map(cell => (
 					<TableCell key={cell.id} className={cn(link && 'p-0', 'whitespace-nowrap')}>
-						{link ? (
+						{link && cell.column.id !== 'status-badge' ? (
 							<NavLink org={org} scroll={true} className="block p-4" href={`${link}/${row.original.id}`}>
 								{flexRender(cell.column.columnDef.cell, cell.getContext())}
 							</NavLink>
