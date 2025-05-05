@@ -15,31 +15,31 @@ import { CustomMention, suggestion } from '@/components/tiptap/extensions/Mentio
 import { useTiptapCloudCollab } from './useTiptapCloudCollab';
 
 export const useEditorSetup = ({ doc, currentUser, userPermittedAction, saveDocument, debouncedSaveCallback, contentChanged, documentName, setContentChanged, appId, collabToken }: any) => {
-	const { ydoc, awareness, color } = useTiptapCloudCollab({
-		docId: String(doc.id),
-		appId,
-		token: collabToken,
-		name: currentUser?.name || 'Anonymous'
-	});
+	// const { ydoc, awareness, color } = useTiptapCloudCollab({
+	// 	docId: String(doc.id),
+	// 	appId,
+	// 	token: collabToken,
+	// 	name: currentUser?.name || 'Anonymous'
+	// });
 
 	const editor = useEditor({
 		extensions: [
 			TiptapDocument,
 			...ExtensionKit,
-			Collaboration.configure({
-				document: ydoc,
-				field: 'content'
-			}),
-			CollaborationCursor.configure({
-				provider: awareness,
-				user: currentUser
-					? {
-							name: currentUser.name,
-							color: color,
-							avatar: currentUser.avatar
-						}
-					: undefined
-			}),
+			// Collaboration.configure({
+			// 	document: ydoc,
+			// 	field: 'content'
+			// }),
+			// CollaborationCursor.configure({
+			// 	provider: awareness,
+			// 	user: currentUser
+			// 		? {
+			// 				name: currentUser.name,
+			// 				color: color,
+			// 				avatar: currentUser.avatar
+			// 			}
+			// 		: undefined
+			// }),
 			SlashCommand,
 			TableOfContents.configure({
 				anchorTypes: ['heading', 'customAnchorType']
@@ -95,8 +95,8 @@ export const useEditorSetup = ({ doc, currentUser, userPermittedAction, saveDocu
 
 	// Update editor content when doc changes
 	useEffect(() => {
-		if (editor && doc.html && !contentChanged) {
-			editor.commands.setContent(doc.html);
+		if (editor && doc.html && !contentChanged && editor.getHTML() !== doc.html) {
+			editor.commands.setContent(doc.html, true);
 		}
 	}, [editor, doc.html, contentChanged]);
 
