@@ -940,7 +940,7 @@ export type Database = {
           entity: number | null
           html: string
           id: number
-          json: string | null
+          json: Json | null
           link_id: string
           locked: boolean
           name: string
@@ -962,7 +962,7 @@ export type Database = {
           entity?: number | null
           html?: string
           id?: number
-          json?: string | null
+          json?: Json | null
           link_id?: string
           locked?: boolean
           name?: string
@@ -984,7 +984,7 @@ export type Database = {
           entity?: number | null
           html?: string
           id?: number
-          json?: string | null
+          json?: Json | null
           link_id?: string
           locked?: boolean
           name?: string
@@ -2597,6 +2597,13 @@ export type Database = {
         Args: {
           p_profile_id: string
           p_contract_id: number
+        }
+        Returns: boolean
+      }
+      check_contract_exists_with_org: {
+        Args: {
+          p_profile_id: string
+          p_org: string
         }
         Returns: boolean
       }

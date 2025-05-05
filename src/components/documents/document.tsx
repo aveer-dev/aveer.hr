@@ -55,7 +55,7 @@ export const Document = ({ doc: initialDoc, currentUserId, employees }: PROPS) =
 	}, [currentUserId, doc.owner, doc.shared_with]);
 
 	const saveDocument = useCallback(
-		async (content: string) => {
+		async (content: { html: string; json: string }) => {
 			if (!currentUserId || doc.locked || doc.signed_lock || !contentChanged || userPermittedAction() == undefined || userPermittedAction() == 'viewer') return;
 			updateDocumentState({ isSaving: true, isSaved: false });
 			try {
@@ -63,7 +63,8 @@ export const Document = ({ doc: initialDoc, currentUserId, employees }: PROPS) =
 					name: documentName,
 					id: doc?.id,
 					org: doc.org.subdomain,
-					html: content,
+					html: content.html,
+					json: content.json,
 					version: documentState.lastSavedVersion
 				});
 				if (result.error) throw result.error;
@@ -94,7 +95,7 @@ export const Document = ({ doc: initialDoc, currentUserId, employees }: PROPS) =
 
 	const debouncedSaveCallback = useMemo(
 		() =>
-			debounce((content: string) => {
+			debounce((content: { html: string; json: string }) => {
 				if (contentChanged) {
 					saveDocument(content);
 				}

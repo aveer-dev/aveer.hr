@@ -1,7 +1,7 @@
 // This hook will manage Tiptap editor setup, extensions, and onUpdate logic
 
-import { useEditor, Editor } from '@tiptap/react';
-import { useEffect } from 'react';
+import { useEditor } from '@tiptap/react';
+import { useEffect, useRef } from 'react';
 import { Document as TiptapDocument } from '@/components/tiptap/extensions/Document';
 import ExtensionKit from '@/components/tiptap/extensions/extension-kit';
 import Collaboration from '@tiptap/extension-collaboration';
@@ -21,6 +21,8 @@ export const useEditorSetup = ({ doc, currentUser, userPermittedAction, saveDocu
 	// 	token: collabToken,
 	// 	name: currentUser?.name || 'Anonymous'
 	// });
+
+	const initialDocId = useRef<string | number | null>(null);
 
 	const editor = useEditor({
 		extensions: [
@@ -85,20 +87,31 @@ export const useEditorSetup = ({ doc, currentUser, userPermittedAction, saveDocu
 		onUpdate({ editor }) {
 			if (doc.locked || doc.signed_lock) return;
 			const newContent = editor.getHTML();
+			const newJson = editor.getJSON();
 			if (newContent !== doc.html) {
 				setContentChanged(true);
-				debouncedSaveCallback(newContent);
+				debouncedSaveCallback({ html: newContent, json: newJson });
 			}
 		},
 		editable: !doc?.locked || userPermittedAction() === 'editor' || userPermittedAction() === 'owner'
 	});
 
-	// Update editor content when doc changes
+	// Only set content on initial mount or document switch
 	useEffect(() => {
-		if (editor && doc.html && !contentChanged && editor.getHTML() !== doc.html) {
-			editor.commands.setContent(doc.html, true);
+		if (editor && !contentChanged && doc.id !== initialDocId.current) {
+			if (doc.json) {
+				try {
+					editor.commands.setContent(doc.json, true);
+				} catch (e) {
+					// fallback to html if json is invalid
+					editor.commands.setContent(doc.html, true);
+				}
+			} else if (doc.html) {
+				editor.commands.setContent(doc.html, true);
+			}
+			initialDocId.current = doc.id;
 		}
-	}, [editor, doc.html, contentChanged]);
+	}, [editor, doc.html, doc.json, contentChanged, doc.id]);
 
 	// Handle offline/online status
 	useEffect(() => {
