@@ -8,9 +8,10 @@ interface props {
 	employees?: Tables<'contracts'>[] | null;
 	doc: Tables<'documents'>;
 	currentUserId: string;
+	onStateChange?: (updates: Partial<Tables<'documents'>>) => void;
 }
 
-export const DocumentSettingsDialog = ({ doc, currentUserId, employees }: props) => {
+export const DocumentSettingsDialog = ({ doc, currentUserId, employees, onStateChange }: props) => {
 	return (
 		<AlertDialog>
 			<AlertDialogTrigger asChild>
@@ -25,7 +26,7 @@ export const DocumentSettingsDialog = ({ doc, currentUserId, employees }: props)
 					<AlertDialogDescription>Configure document settings</AlertDialogDescription>
 				</AlertDialogHeader>
 
-				<DocumentSettings employees={employees} doc={doc} currentUserId={currentUserId} />
+				<DocumentSettings employees={employees} doc={doc} currentUserId={currentUserId} onStateChange={onStateChange} />
 			</AlertDialogContent>
 		</AlertDialog>
 	);

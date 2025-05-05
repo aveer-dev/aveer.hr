@@ -1,5 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
-import { Document } from '../../../../../components/documents/document';
+import { Document } from '@/components/documents/document';
+// import { Document } from '@/components/documents/Document/index';
+
 import { getEmployees } from '@/utils/form-data-init';
 
 export const TemplatePageComponant = async ({ org, docId }: { org: string; docId: string }) => {

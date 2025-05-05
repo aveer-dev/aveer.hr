@@ -16,6 +16,7 @@
 		"@dnd-kit/sortable": "^8.0.0",
 		"@dnd-kit/utilities": "^3.2.2",
 		"@googleapis/calendar": "^9.7.9",
+		"@hocuspocus/provider": "^2.15.2",
 		"@hookform/resolvers": "^3.9.0",
 		"@number-flow/react": "^0.4.3",
 		"@radix-ui/react-accordion": "^1.2.0",

@@ -15,6 +15,7 @@ interface DocumentOptionsProps {
 
 export const DocumentOptions = ({ currentUserId, document, onStateChange }: DocumentOptionsProps) => {
 	const [isOptionOpen, toggleOptionState] = useState(false);
+
 	const { isDeleting, isLocking, handleDeleteDocument, handleLockDocument } = useDocumentActions({
 		document,
 		onActionComplete: () => toggleOptionState(false),

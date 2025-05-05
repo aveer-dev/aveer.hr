@@ -29,9 +29,10 @@ interface props {
 	employees?: Tables<'contracts'>[] | null;
 	doc: Tables<'documents'>;
 	currentUserId: string;
+	onStateChange?: (updates: Partial<Tables<'documents'>>) => void;
 }
 
-export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
+export const DocumentSettings = ({ doc, currentUserId, employees, onStateChange }: props) => {
 	const [employeeSearchResult, setEmployeeSearchResult] = useState<Tables<'contracts'>[]>([]);
 	const [isUpdating, setUpdateState] = useState(false);
 	const [sharedWith, updateSharedWith] = useState<SHARED_WITH[]>((doc.shared_with as any) || []);
@@ -48,11 +49,10 @@ export const DocumentSettings = ({ doc, currentUserId, employees }: props) => {
 
 	const onSubmit = async (data: z.infer<typeof FormSchema>) => {
 		setUpdateState(true);
-
 		const { error } = await updateDocument({ private: data.private, shared_with: sharedWith as any, id: doc.id, org: (doc.org as any)?.subdomain || doc.org });
 		setUpdateState(false);
 		if (error) return toast.error(error.message);
-
+		onStateChange?.({ private: data.private, shared_with: sharedWith as any });
 		toast.success('Document settings updated successfully');
 		const currentUserRemoved = !sharedWith.find(person => person.profile == currentUserId);
 		if (currentUserRemoved) router.push('./');

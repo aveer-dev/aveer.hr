@@ -233,7 +233,9 @@ export const SlashCommand = Extension.create({
 								const { view } = props.editor;
 								view.dom.parentElement?.removeEventListener('scroll', scrollHandler);
 							}
-							component.destroy();
+							if (component && typeof component.destroy === 'function') {
+								component.destroy();
+							}
 						}
 					};
 				}
