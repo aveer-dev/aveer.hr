@@ -148,7 +148,7 @@ export const FileUpload = ({ path, className, variant, children, button }: props
 					<span>Upload document</span>
 				</DropdownMenuItem>
 			) : (
-				<Button variant={variant} className={cn(className)}>
+				<Button variant={variant} onClick={openFilePicker} className={cn(className)}>
 					{children ? (
 						children
 					) : (

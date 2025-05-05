@@ -34,6 +34,7 @@ export default async function ProfilePage(props: { params: Promise<{ [key: strin
 
 	const documentsRepo = new DocumentRepository();
 	const [files, documents] = await Promise.all([supabase.from('links').select().match({ org: params.org }), documentsRepo.getUserAccessibleDocuments(params.org, data.profile?.id.toString() ?? '')]);
+
 	const getLinks = (path: string) => files.data?.filter(file => file.path == path);
 
 	const addLink = async (payload: TablesInsert<'links'>) => {

@@ -19,7 +19,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/comp
 interface props {
 	addLink: (payload: TablesInsert<'links'>) => Promise<string | true>;
 	path: string;
-	documents: Tables<'documents'>[];
+	documents?: Tables<'documents'>[];
 }
 
 export const AddFile = ({ addLink, path, documents }: props) => {
@@ -46,7 +46,7 @@ export const AddFile = ({ addLink, path, documents }: props) => {
 		event.preventDefault();
 		toggleAddLinkState(true);
 
-		const document = documents.find(document => document.id.toString() === selectedDocument);
+		const document = documents?.find(document => document.id.toString() === selectedDocument);
 
 		if (!document) return toast.error('Document not found');
 
@@ -88,57 +88,61 @@ export const AddFile = ({ addLink, path, documents }: props) => {
 						<AlertDialogDescription>Add file name and link below</AlertDialogDescription>
 					</AlertDialogHeader>
 
-					<Tabs defaultValue="aveer-document" className="w-[400px]">
-						<TabsList className="grid w-fit grid-cols-2">
-							<TabsTrigger value="aveer-document">Aveer Document</TabsTrigger>
-							<TabsTrigger value="external">External</TabsTrigger>
-						</TabsList>
+					<Tabs defaultValue={documents && documents.length > 0 ? 'aveer-document' : 'external'} className="w-[400px]">
+						{documents && documents.length > 0 && (
+							<TabsList className="grid w-fit grid-cols-2">
+								<TabsTrigger value="aveer-document">Aveer Document</TabsTrigger>
+								<TabsTrigger value="external">External</TabsTrigger>
+							</TabsList>
+						)}
 
-						<TabsContent value="aveer-document">
-							<form onSubmit={onSubmitDocumentForm} className="mt-5 space-y-6">
-								<div className="space-y-2">
-									<Label htmlFor="name" className="flex items-center gap-2">
-										Select document
-										<TooltipProvider>
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<Info size={12} />
-												</TooltipTrigger>
+						{documents && documents.length > 0 && (
+							<TabsContent value="aveer-document">
+								<form onSubmit={onSubmitDocumentForm} className="mt-5 space-y-6">
+									<div className="space-y-2">
+										<Label htmlFor="name" className="flex items-center gap-2">
+											Select document
+											<TooltipProvider>
+												<Tooltip>
+													<TooltipTrigger asChild>
+														<Info size={12} />
+													</TooltipTrigger>
 
-												<TooltipContent>
-													<p className="max-w-56">Aveer documents selected here will remain visible to only people with access to the document</p>
-												</TooltipContent>
-											</Tooltip>
-										</TooltipProvider>
-									</Label>
+													<TooltipContent>
+														<p className="max-w-56">Aveer documents selected here will remain visible to only people with access to the document</p>
+													</TooltipContent>
+												</Tooltip>
+											</TooltipProvider>
+										</Label>
 
-									<Select value={selectedDocument} onValueChange={setSelectedDocument}>
-										<SelectTrigger className="w-full">
-											<SelectValue placeholder="Select document" />
-										</SelectTrigger>
+										<Select value={selectedDocument} onValueChange={setSelectedDocument}>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="Select document" />
+											</SelectTrigger>
 
-										<SelectContent>
-											<SelectGroup>
-												<SelectLabel>Documents on Aveer</SelectLabel>
-												{documents.map(document => (
-													<SelectItem key={document.id} value={document.id.toString()}>
-														{document.name}
-													</SelectItem>
-												))}
-											</SelectGroup>
-										</SelectContent>
-									</Select>
-								</div>
+											<SelectContent>
+												<SelectGroup>
+													<SelectLabel>Documents on Aveer</SelectLabel>
+													{documents?.map(document => (
+														<SelectItem key={document.id} value={document.id.toString()}>
+															{document.name}
+														</SelectItem>
+													))}
+												</SelectGroup>
+											</SelectContent>
+										</Select>
+									</div>
 
-								<AlertDialogFooter>
-									<AlertDialogCancel type="button">Cancel</AlertDialogCancel>
+									<AlertDialogFooter>
+										<AlertDialogCancel type="button">Cancel</AlertDialogCancel>
 
-									<Button className="gap-3" disabled={isAddingLink}>
-										{isAddingLink && <LoadingSpinner />}Add link
-									</Button>
-								</AlertDialogFooter>
-							</form>
-						</TabsContent>
+										<Button className="gap-3" disabled={isAddingLink}>
+											{isAddingLink && <LoadingSpinner />}Add link
+										</Button>
+									</AlertDialogFooter>
+								</form>
+							</TabsContent>
+						)}
 
 						<TabsContent value="external">
 							<form onSubmit={onSubmit} className="mt-5 space-y-6">

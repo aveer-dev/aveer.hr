@@ -1,5 +1,5 @@
 import { ArrowUpRight, Info } from 'lucide-react';
-import { Tables } from '@/type/database.types';
+import { Tables, TablesInsert } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getChartData, LeaveRequestDialog, LeaveRequests } from './leave';
@@ -13,6 +13,7 @@ import { LeaveStat } from './leave/leave-stat';
 import { buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { AddFile } from '../file-management/add-file-link';
 
 interface props {
 	data: Tables<'contracts'> & { profile: Tables<'profiles'>; org: Tables<'organisations'>; entity: Tables<'legal_entities'> & { incorporation_country: { currency_code: string } } };
@@ -35,6 +36,17 @@ export const ContractOverview = async ({ data, reviewType, orgSettings }: props)
 		)
 		.match({ org: orgSettings?.org, contract: data.id })
 		.or('status.eq.pending,status.eq.approved');
+
+	const addLink = async (payload: TablesInsert<'links'>) => {
+		'use server';
+
+		const supabase = await createClient();
+
+		const { error } = await supabase.from('links').upsert({ ...payload, org: data.org.subdomain });
+		if (error) return error.code == '23505' ? `Link with name '${payload.name}' already exists` : error.message;
+
+		return true;
+	};
 
 	return (
 		<section className="mt-4 w-full">
@@ -124,6 +136,8 @@ export const ContractOverview = async ({ data, reviewType, orgSettings }: props)
 								<FileLinks org={data.org.subdomain} links={getLinks(`${data.org.id}/${data.profile?.id}`)} />
 							</TabsContent>
 						</Tabs>
+
+						<AddFile path={`${data.org.id}/${data.profile?.id}`} addLink={addLink} />
 					</section>
 				</div>
 			</div>
