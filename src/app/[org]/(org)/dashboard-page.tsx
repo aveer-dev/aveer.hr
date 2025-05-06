@@ -8,13 +8,19 @@ import { DashboardCharts } from './chart.component';
 export const DashboardPage = async ({ org, searchParams }: { org: string; searchParams: { [key: string]: string | string[] | undefined } }) => {
 	const supabase = await createClient();
 
-	const [{ data, error, count }, { count: openRoles }] = await Promise.all([
+	const [{ data, error, count }, { count: openRoles }, { data: probation }] = await Promise.all([
 		supabase
 			.from('contracts')
-			.select('profile:profiles!contracts_profile_fkey(first_name, last_name, nationality:countries!profiles_nationality_fkey(name)), org, id, status, job_title, employment_type, start_date, team:teams!contracts_team_fkey(name, id)', { count: 'estimated' })
+			.select(
+				`
+                profile:profiles!contracts_profile_fkey(first_name, last_name, nationality:countries!profiles_nationality_fkey(name)),
+                org, id, status, job_title, employment_type, start_date`,
+				{ count: 'estimated' }
+			)
 			.match({ org })
 			.order('id'),
-		supabase.from('open_roles').select('*', { count: 'exact', head: true }).eq('org', org)
+		supabase.from('open_roles').select('*', { count: 'exact', head: true }).eq('org', org),
+		supabase.from('org_settings').select('probation').eq('org', org).single()
 	]);
 
 	if (data && !data.length) {
@@ -57,7 +63,7 @@ export const DashboardPage = async ({ org, searchParams }: { org: string; search
 
 			<DashboardCalendar org={org} />
 
-			<ClientTable org={org} data={data as unknown as PERSON[]} />
+			<ClientTable org={org} data={data as unknown as PERSON[]} probation={probation?.probation} />
 		</>
 	);
 };

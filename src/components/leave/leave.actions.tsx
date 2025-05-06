@@ -17,8 +17,8 @@ export const emailEmployee = async ({ from, to, contract, org, status, leaveType
 			org,
 			leaveType,
 			contract: contract,
-			from: format(from, 'PPPP'),
-			to: format(to, 'PPPP'),
+			from: format(parseISO(from), 'PPPP'),
+			to: format(parseISO(to), 'PPPP'),
 			status
 		})
 	});

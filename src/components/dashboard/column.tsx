@@ -51,7 +51,7 @@ export const columns: ColumnDef<PERSON>[] = [
 	{
 		id: 'status',
 		header: 'Status',
-		cell: ({ row }) => <ContractStatus state={row.original.status} start_date={row.original.start_date} end_date={row.original.end_date} />,
+		cell: ({ row }) => <ContractStatus state={row.original.status} probation_days={row.original.probation_days} start_date={row.original.start_date} end_date={row.original.end_date} />,
 		size: 80
 	},
 	{

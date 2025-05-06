@@ -10,4 +10,5 @@ export interface PERSON {
 	org?: string;
 	end_date?: string;
 	team?: { id: number; name: string };
+	probation_days?: number | null;
 }

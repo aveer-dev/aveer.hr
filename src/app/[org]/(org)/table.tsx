@@ -12,8 +12,8 @@ import { FirstContractDialog } from './first-contract-dialog';
 import { NavLink } from '@/components/ui/link';
 import { cn } from '@/lib/utils';
 
-export const ClientTable = ({ org, data }: { org: string; data: PERSON[] }) => {
-	const [tableData, updateData] = useState<PERSON[]>(data);
+export const ClientTable = ({ org, data, probation }: { org: string; data: PERSON[]; probation?: number | null }) => {
+	const [tableData, updateData] = useState<PERSON[]>(data.map(person => ({ ...person, probation_days: probation })));
 	const [tableLoading, toggleTableLoadingState] = useState(false);
 	const [isFirstContractModalOpen, toggleFirstContractModal] = useState(false);
 	const router = useRouter();

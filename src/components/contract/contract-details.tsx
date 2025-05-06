@@ -202,7 +202,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				</div>
 
 				<div className="mt-4 flex items-center gap-3 text-xs font-light">
-					<ContractStatus state={data.status} start_date={data.start_date || ''} end_date={data?.end_date} />•
+					<ContractStatus state={data.status} start_date={data.start_date || ''} probation_days={orgSettings?.[0]?.probation} end_date={data?.end_date} />•
 					{data?.status == 'scheduled termination' && data?.end_date && (
 						<>
 							<Badge className="h-fit gap-3 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
