@@ -57,7 +57,7 @@ export const DashboardPage = async ({ org, searchParams }: { org: string; search
 		<>
 			<div className="mb-6 flex items-center gap-3">
 				<div className="text-sm font-medium text-muted-foreground">Metrics:</div>
-				<AttritionDialog org={org} contracts={[] as unknown as ContractWithProfileAndTeam[]} teams={teams} />
+				<AttritionDialog org={org} contracts={data as unknown as ContractWithProfileAndTeam[]} teams={teams} />
 			</div>
 
 			<DashboardCharts openRoles={openRoles} contracts={count} />
