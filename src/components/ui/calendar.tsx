@@ -46,8 +46,8 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
 			components={{
 				Chevron: ({ orientation }) => (orientation == 'left' ? <ChevronLeft size={12} /> : <ChevronRight size={12} />)
 			}}
-			{...props}
 			captionLayout="dropdown"
+			{...props}
 		/>
 	);
 }

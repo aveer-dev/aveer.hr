@@ -51,7 +51,7 @@ export const ContractStatus = ({ state, start_date, end_date, probation_days }: 
 				</TooltipProvider>
 			</Badge>
 
-			{!!probationDaysLeft && state == 'signed' && (
+			{!!probationDaysLeft && probationDaysLeft > 0 && state == 'signed' && (
 				<Badge variant="secondary-warn" className="ml-1 text-xs">
 					Probation: {probationDaysLeft} days left
 				</Badge>

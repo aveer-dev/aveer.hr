@@ -4,23 +4,19 @@ import { ClientTable } from './table';
 import { OnboardingForm } from './onboarding';
 import { DashboardCalendar } from '@/components/dashboard-calendar';
 import { DashboardCharts } from './chart.component';
+import { AttritionDialog } from '@/components/attrition/AttritionDialog';
+import { ContractWithProfileAndTeam } from '@/dal/interfaces/contract.repository.interface';
+import { TeamRepository } from '@/dal/repositories/team.repository';
 
 export const DashboardPage = async ({ org, searchParams }: { org: string; searchParams: { [key: string]: string | string[] | undefined } }) => {
 	const supabase = await createClient();
 
-	const [{ data, error, count }, { count: openRoles }, { data: probation }] = await Promise.all([
-		supabase
-			.from('contracts')
-			.select(
-				`
-                profile:profiles!contracts_profile_fkey(first_name, last_name, nationality:countries!profiles_nationality_fkey(name)),
-                org, id, status, job_title, employment_type, start_date`,
-				{ count: 'estimated' }
-			)
-			.match({ org })
-			.order('id'),
+	const teamsRepository = new TeamRepository();
+	const [{ data, error, count }, { count: openRoles }, { data: probation }, teams] = await Promise.all([
+		supabase.from('contracts').select(`*, team:teams!contracts_team_fkey(name, id), profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(name))`, { count: 'estimated' }).match({ org }).order('id'),
 		supabase.from('open_roles').select('*', { count: 'exact', head: true }).eq('org', org),
-		supabase.from('org_settings').select('probation').eq('org', org).single()
+		supabase.from('org_settings').select('probation').eq('org', org).single(),
+		teamsRepository.getAllByOrg(org)
 	]);
 
 	if (data && !data.length) {
@@ -59,6 +55,11 @@ export const DashboardPage = async ({ org, searchParams }: { org: string; search
 
 	return (
 		<>
+			<div className="mb-6 flex items-center gap-3">
+				<div className="text-sm font-medium text-muted-foreground">Metrics:</div>
+				<AttritionDialog org={org} contracts={[] as unknown as ContractWithProfileAndTeam[]} teams={teams} />
+			</div>
+
 			<DashboardCharts openRoles={openRoles} contracts={count} />
 
 			<DashboardCalendar org={org} />
