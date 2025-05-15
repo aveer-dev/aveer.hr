@@ -469,9 +469,10 @@ const QuestionPreview = ({ question, managerQuestion, type, options, scaleLabels
 					<div className="flex items-center gap-6">
 						{[1, 2, 3, 4, 5].map(value => {
 							const labelObj = scaleLabels?.[value - 1] || {};
-							const label = (labelObj as { label: string }).label || value;
+							const label = (labelObj as { label: string }).label;
 							const description = (labelObj as { description: string }).description;
-							return description ? (
+
+							return label ? (
 								<div className="flex flex-col items-center justify-center gap-2">
 									<Button variant="outline" className="pointer-events-none" type="button" size="icon">
 										{value}
@@ -480,21 +481,23 @@ const QuestionPreview = ({ question, managerQuestion, type, options, scaleLabels
 									<div className="flex items-center gap-2">
 										<div className="text-xs text-muted-foreground">{label}</div>
 
-										<TooltipProvider key={value}>
-											<Tooltip>
-												<TooltipTrigger>
-													<Info size={12} className="text-muted-foreground" />
-												</TooltipTrigger>
-												<TooltipContent>
-													<div className="max-w-64 text-xs">{description}</div>
-												</TooltipContent>
-											</Tooltip>
-										</TooltipProvider>
+										{description && (
+											<TooltipProvider key={value}>
+												<Tooltip>
+													<TooltipTrigger>
+														<Info size={12} className="text-muted-foreground" />
+													</TooltipTrigger>
+													<TooltipContent>
+														<div className="max-w-64 text-xs">{description}</div>
+													</TooltipContent>
+												</Tooltip>
+											</TooltipProvider>
+										)}
 									</div>
 								</div>
 							) : (
 								<Button key={value} variant="outline" type="button" size="icon" className="pointer-events-none">
-									{label}
+									{value}
 								</Button>
 							);
 						})}

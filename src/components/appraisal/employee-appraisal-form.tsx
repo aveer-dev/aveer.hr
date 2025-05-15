@@ -1100,9 +1100,10 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																const scaleLabels = Array.isArray(currentQuestion.scale_labels) ? currentQuestion.scale_labels : [];
 																const labelObj = scaleLabels[num - 1];
 																const isObj = labelObj && typeof labelObj === 'object' && !Array.isArray(labelObj);
-																const label = isObj && typeof labelObj.label === 'string' ? labelObj.label : num;
+																const label = isObj && typeof labelObj.label === 'string' && labelObj.label;
 																const description = isObj && typeof labelObj.description === 'string' ? labelObj.description : undefined;
-																return description ? (
+
+																return label ? (
 																	<div className="flex flex-col items-center justify-center gap-2">
 																		<Button
 																			disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
@@ -1132,16 +1133,18 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 																		<div className="flex items-center gap-2">
 																			<div className="text-xs text-muted-foreground">{label}</div>
-																			<TooltipProvider key={num}>
-																				<Tooltip>
-																					<TooltipTrigger>
-																						<Info size={12} className="text-muted-foreground" />
-																					</TooltipTrigger>
-																					<TooltipContent>
-																						<div className="max-w-64 text-xs">{description}</div>
-																					</TooltipContent>
-																				</Tooltip>
-																			</TooltipProvider>
+																			{description && (
+																				<TooltipProvider key={num}>
+																					<Tooltip>
+																						<TooltipTrigger>
+																							<Info size={12} className="text-muted-foreground" />
+																						</TooltipTrigger>
+																						<TooltipContent>
+																							<div className="max-w-64 text-xs">{description}</div>
+																						</TooltipContent>
+																					</Tooltip>
+																				</TooltipProvider>
+																			)}
 																		</div>
 																	</div>
 																) : (
@@ -1169,7 +1172,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																					: 'outline'
 																		}
 																		onClick={() => handleAnswerChange(currentQuestion.id, num)}>
-																		{label}
+																		{num}
 																	</Button>
 																);
 															})}

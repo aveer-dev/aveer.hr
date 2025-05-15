@@ -8,9 +8,10 @@ export function ScaleIndicator({ value, max = 5, scaleLabels }: { value: number;
 			<div className="flex w-full gap-6">
 				{Array.from({ length: max }).map((_, i) => {
 					const labelObj = scaleLabels?.[i];
-					const label = labelObj && typeof labelObj.label === 'string' ? labelObj.label : i + 1;
-					const description = labelObj && typeof labelObj.description === 'string' ? labelObj.description : undefined;
-					return description ? (
+					const label = labelObj?.label;
+					const description = labelObj?.description;
+
+					return label ? (
 						<div className="flex flex-col items-center justify-center gap-2">
 							<Button variant={i + 1 == value ? 'secondary_success' : 'outline'} className="disabled:opacity-100" disabled size="icon">
 								{i + 1}
@@ -19,21 +20,23 @@ export function ScaleIndicator({ value, max = 5, scaleLabels }: { value: number;
 							<div className="flex items-center gap-2">
 								<div className="text-xs text-muted-foreground">{label}</div>
 
-								<TooltipProvider key={value}>
-									<Tooltip>
-										<TooltipTrigger>
-											<Info size={12} className="text-muted-foreground" />
-										</TooltipTrigger>
-										<TooltipContent>
-											<div className="max-w-64 text-xs">{description}</div>
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
+								{description && (
+									<TooltipProvider key={value}>
+										<Tooltip>
+											<TooltipTrigger>
+												<Info size={12} className="text-muted-foreground" />
+											</TooltipTrigger>
+											<TooltipContent>
+												<div className="max-w-64 text-xs">{description}</div>
+											</TooltipContent>
+										</Tooltip>
+									</TooltipProvider>
+								)}
 							</div>
 						</div>
 					) : (
 						<Button key={i} variant={i + 1 == value ? 'secondary_success' : 'outline'} className="disabled:opacity-100" disabled size="icon">
-							{label}
+							{i + 1}
 						</Button>
 					);
 				})}
