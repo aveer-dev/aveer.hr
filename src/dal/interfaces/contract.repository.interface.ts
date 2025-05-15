@@ -36,7 +36,7 @@ export interface IContractRepository {
 	getAllByOrgWithRelations(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithRelations[]>;
 
 	getByIdWithProfile(org: string, id: number | string): Promise<ContractWithProfile | null>;
-	getAllByOrgWithProfile(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithProfile[]>;
+	getAllByOrgWithProfile({ org, status }: { org: string; status?: Tables<'contracts'>['status'] }): Promise<ContractWithProfile[]>;
 
 	getByIdWithTeam(org: string, id: number | string): Promise<ContractWithTeam | null>;
 	getAllByOrgWithTeam(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithTeam[]>;

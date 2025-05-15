@@ -35,6 +35,11 @@ const nextConfig = {
 				headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }]
 			}
 		];
+	},
+	experimental: {
+		serverActions: {
+			bodySizeLimit: '10mb'
+		}
 	}
 };
 

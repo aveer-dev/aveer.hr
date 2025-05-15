@@ -1,16 +1,14 @@
 import { NewDocumentButton } from './new-document-button';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 import { Tables } from '@/type/database.types';
-import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { DocumentItem } from './document-item';
-
 interface DocumentsListProps {
 	documents: Tables<'documents'>[];
-	createDocument: () => Promise<PostgrestSingleResponse<Tables<'documents'>>>;
 	currentUserId: string;
+	org: string;
 }
 
-export const DocumentsList = ({ documents, createDocument, currentUserId }: DocumentsListProps) => {
+export const DocumentsList = ({ documents, currentUserId, org }: DocumentsListProps) => {
 	return (
 		<AnimatedGroup
 			className="grid grid-cols-1 gap-x-12 gap-y-8 @sm:grid-cols-1 @sm:gap-y-12 @md:grid-cols-3 @md:gap-y-16 @[49rem]:grid-cols-5"
@@ -38,10 +36,10 @@ export const DocumentsList = ({ documents, createDocument, currentUserId }: Docu
 					}
 				}
 			}}>
-			<NewDocumentButton createDocument={createDocument} />
+			<NewDocumentButton org={org} />
 
 			{documents.map(doc => (
-				<DocumentItem key={doc.id + 'document'} document={doc} createDocument={createDocument} currentUserId={currentUserId} />
+				<DocumentItem key={doc.id + 'document'} document={doc} currentUserId={currentUserId} />
 			))}
 		</AnimatedGroup>
 	);

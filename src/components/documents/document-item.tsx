@@ -9,17 +9,15 @@ import { BookDashed, Copy, FileText, LockKeyhole, LockKeyholeOpen, Trash2 } from
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Tables } from '@/type/database.types';
-import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { format } from 'date-fns';
 import { DocumentDupDialog } from './document-dup-dialog';
 
 interface DocumentItemProps {
 	document: Tables<'documents'>;
-	createDocument: () => Promise<PostgrestSingleResponse<Tables<'documents'>>>;
 	currentUserId: string;
 }
 
-export const DocumentItem = ({ document, createDocument, currentUserId }: DocumentItemProps) => {
+export const DocumentItem = ({ document, currentUserId }: DocumentItemProps) => {
 	const [documentState, setDocumentState] = useState<Partial<Tables<'documents'>>>({});
 	const { isDeleting, isLocking, handleDeleteDocument, handleLockDocument } = useDocumentActions({
 		document,

@@ -14,7 +14,7 @@ export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: str
 	const supabase = await createClient();
 
 	const contractsRepo = new ContractRepository();
-	const [contracts, { data: appraisal, error: appraisalError }] = await Promise.all([contractsRepo.getAllByOrgWithProfile(org, 'signed'), supabase.from('appraisal_cycles').select('*').eq('id', parseInt(id)).single()]);
+	const [contracts, { data: appraisal, error: appraisalError }] = await Promise.all([contractsRepo.getAllByOrgWithProfile({ org, status: 'signed' }), supabase.from('appraisal_cycles').select('*').eq('id', parseInt(id)).single()]);
 
 	if (!contracts) {
 		return <div>Error loading employee data</div>;

@@ -27,6 +27,7 @@ const AlertDialogContent = React.forwardRef<React.ElementRef<typeof AlertDialogP
 				className
 			)}
 			{...props}
+			onCloseAutoFocus={() => (document.body.style.pointerEvents = '')}
 		/>
 	</AlertDialogPortal>
 ));

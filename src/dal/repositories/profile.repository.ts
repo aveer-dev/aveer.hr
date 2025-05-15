@@ -5,16 +5,17 @@ import { createClient } from '@/utils/supabase/server';
 export class ProfileRepository implements IProfileRepository {
 	private readonly profileSelect = '*, nationality:countries!profiles_nationality_fkey(*)';
 
-	async getById(id: string): Promise<ProfileWithRelations | null> {
+	async getById(id: string, select?: string) {
 		const supabase = await createClient();
-		const { data, error } = await supabase.from('profiles').select(this.profileSelect).eq('id', id).single();
+		const { data, error } = await supabase
+			.from('profiles')
+			.select(select || this.profileSelect)
+			.eq('id', id)
+			.single();
 
-		if (error) {
-			console.error('Error fetching profile by ID:', error);
-			return null;
-		}
+		if (error) return { data: data as unknown as ProfileWithRelations, error: null };
 
-		return data as unknown as ProfileWithRelations;
+		return { data: data as unknown as ProfileWithRelations, error: null };
 	}
 
 	async getByEmail(email: string): Promise<ProfileWithRelations | null> {

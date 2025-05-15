@@ -1,6 +1,7 @@
 import { IDocumentRepository } from '../interfaces/document.repository.interface';
 import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
+import { PostgrestError } from '@supabase/supabase-js';
 
 interface ShareEntry {
 	access: string;
@@ -50,10 +51,10 @@ export class DocumentRepository implements IDocumentRepository {
 		return data;
 	}
 
-	async delete(id: number): Promise<boolean> {
+	async delete(id: number): Promise<{ data: null; error: PostgrestError | null }> {
 		const supabase = await createClient();
 		const { error } = await supabase.from('documents').delete().eq('id', id);
-		return !error;
+		return { data: null, error };
 	}
 
 	async getUserAccessibleDocuments(org: string, userId: string): Promise<Tables<'documents'>[]> {
