@@ -31,7 +31,15 @@ const questionSchema = z
 		options: z.array(z.string()).optional(),
 		required: z.boolean(),
 		teams: z.array(z.string()),
-		group: z.enum(['growth_and_development', 'company_values', 'competencies', 'private_manager_assessment'])
+		group: z.enum(['growth_and_development', 'company_values', 'competencies', 'private_manager_assessment']),
+		scaleLabels: z
+			.array(
+				z.object({
+					label: z.string().optional(),
+					description: z.string().optional()
+				})
+			)
+			.optional()
 	})
 	.refine(
 		data => {
@@ -66,6 +74,7 @@ interface QuestionSetupDialogProps {
 
 export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, teams, group }: QuestionSetupDialogProps) => {
 	const [isTypePopoverOpen, setIsTypePopoverOpen] = useState(false);
+	const [showScaleLabels, setShowScaleLabels] = useState(question?.type === 'scale' && !!question?.scaleLabels && question?.scaleLabels.length > 0);
 
 	const form = useForm<QuestionFormValues>({
 		resolver: zodResolver(questionSchema),
@@ -77,7 +86,8 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 			options: question?.options || [],
 			required: question?.required || true,
 			teams: question?.teams || [],
-			group: group
+			group: group,
+			scaleLabels: question?.scaleLabels && question?.scaleLabels.length === 5 ? question.scaleLabels : Array(5).fill({ label: '', description: '' })
 		}
 	});
 
@@ -91,8 +101,10 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 				options: question.options || [],
 				required: question.required,
 				teams: question.teams,
-				group: group
+				group: group,
+				scaleLabels: question.scaleLabels && question.scaleLabels.length === 5 ? question.scaleLabels : Array(5).fill({ label: '', description: '' })
 			});
+			setShowScaleLabels(question.type === 'scale' && !!question.scaleLabels && question.scaleLabels.length > 0);
 		} else {
 			form.reset({
 				id: Math.random().toString(36).substr(2, 9),
@@ -102,8 +114,10 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 				options: [],
 				required: false,
 				teams: [],
-				group: group
+				group: group,
+				scaleLabels: Array(5).fill({ label: '', description: '' })
 			});
+			setShowScaleLabels(false);
 		}
 	}, [question, form, group]);
 
@@ -117,8 +131,10 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 				options: [],
 				required: false,
 				teams: [],
-				group: group
+				group: group,
+				scaleLabels: Array(5).fill({ label: '', description: '' })
 			});
+			setShowScaleLabels(false);
 		}
 	}, [open, form, group]);
 
@@ -133,8 +149,10 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 				options: [],
 				required: false,
 				teams: [],
-				group: group
+				group: group,
+				scaleLabels: Array(5).fill({ label: '', description: '' })
 			});
+			setShowScaleLabels(false);
 		}
 		onOpenChange(false);
 	};
@@ -152,7 +170,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 								.join(' ')}
 						</Badge>
 					</AlertDialogTitle>
-					<AlertDialogDescription>Configure your question settings</AlertDialogDescription>
+					<AlertDialogDescription>Add question details and settings below.</AlertDialogDescription>
 				</AlertDialogHeader>
 
 				<Form {...form}>
@@ -187,7 +205,9 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 							)}
 						/>
 
-						<div className="flex items-center justify-between">
+						<Separator />
+
+						<div className="">
 							<FormField
 								control={form.control}
 								name="type"
@@ -195,11 +215,13 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 									const isScaleOnlyGroup = group === 'competencies' || group === 'private_manager_assessment';
 
 									return (
-										<FormItem className="flex items-center gap-2">
+										<FormItem>
+											<FormLabel>Select question type</FormLabel>
+
 											<Popover open={isTypePopoverOpen} onOpenChange={setIsTypePopoverOpen}>
 												<PopoverTrigger asChild>
 													<FormControl>
-														<Button variant="outline" type="button" className="w-fit justify-between" disabled={isScaleOnlyGroup}>
+														<Button variant="outline" type="button" className="w-full justify-between" disabled={isScaleOnlyGroup}>
 															{inputTypes.find(t => t.type === field.value)?.label}
 															{!isScaleOnlyGroup && <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
 														</Button>
@@ -217,7 +239,15 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 																			field.onChange(inputType.type);
 																			if (inputType.type !== 'multiselect') {
 																				form.setValue('options', []);
-																			} else if (!form.getValues('options')?.length) {
+																			}
+																			if (inputType.type === 'scale') {
+																				setShowScaleLabels(false);
+																				form.setValue('scaleLabels', Array(5).fill({ label: '', description: '' }));
+																			}
+																			if (inputType.type !== 'scale') {
+																				setShowScaleLabels(false);
+																			}
+																			if (inputType.type === 'multiselect' && !form.getValues('options')?.length) {
 																				form.setValue('options', ['Option 1']);
 																			}
 																			setIsTypePopoverOpen(false);
@@ -262,7 +292,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 								control={form.control}
 								name="required"
 								render={({ field }) => (
-									<FormItem className="flex items-center gap-2">
+									<FormItem className="mt-2 flex items-center gap-2 space-y-0">
 										<FormLabel>Required</FormLabel>
 										<FormControl>
 											<Switch checked={field.value} onCheckedChange={field.onChange} className="scale-75" />
@@ -285,6 +315,58 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 								</FormItem>
 							)}
 						/>
+
+						{/* Scale Labels Config */}
+						{form.watch('type') === 'scale' && (
+							<>
+								<Separator />
+
+								<div className="space-y-2">
+									<div className="mb-3 flex items-center gap-2">
+										<Label htmlFor="show-scale-labels">Set custom scale labels & descriptions</Label>
+										<Switch
+											checked={showScaleLabels}
+											onCheckedChange={checked => {
+												setShowScaleLabels(checked);
+												if (!checked) {
+													form.setValue('scaleLabels', Array(5).fill({ label: '', description: '' }));
+												}
+											}}
+											id="show-scale-labels"
+											className="scale-75"
+										/>
+									</div>
+
+									{showScaleLabels && (
+										<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+											{[1, 2, 3, 4, 5].map((num, idx) => (
+												<div key={num} className="flex flex-col gap-2 rounded-md border bg-muted/30 p-3">
+													<Label>Scale {num}</Label>
+													<Input
+														placeholder={`Label for ${num}`}
+														value={(form.watch('scaleLabels') ?? [])[idx]?.label ?? ''}
+														onChange={e => {
+															const newLabels = [...(form.getValues('scaleLabels') || Array(5).fill({ label: '', description: '' }))];
+															newLabels[idx] = { ...newLabels[idx], label: e.target.value };
+															form.setValue('scaleLabels', newLabels);
+														}}
+													/>
+													<Textarea
+														placeholder={`Description for ${num}`}
+														value={(form.watch('scaleLabels') ?? [])[idx]?.description ?? ''}
+														onChange={e => {
+															const newLabels = [...(form.getValues('scaleLabels') || Array(5).fill({ label: '', description: '' }))];
+															newLabels[idx] = { ...newLabels[idx], description: e.target.value };
+															form.setValue('scaleLabels', newLabels);
+														}}
+													/>
+												</div>
+											))}
+										</div>
+									)}
+								</div>
+							</>
+						)}
 
 						{form.watch('type') === 'multiselect' && (
 							<FormField
@@ -329,7 +411,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 							/>
 						)}
 
-						{/* <QuestionPreview question={form.watch('question')} managerQuestion={form.watch('managerQuestion')} type={form.watch('type')} options={form.watch('options')} /> */}
+						<QuestionPreview question={form.watch('question')} scaleLabels={form.watch('scaleLabels')} managerQuestion={form.watch('managerQuestion')} type={form.watch('type')} options={form.watch('options')} />
 
 						<Separator className="!mt-8" />
 
@@ -346,12 +428,15 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 										options: [],
 										required: false,
 										teams: [],
-										group: group
+										group: group,
+										scaleLabels: Array(5).fill({ label: '', description: '' })
 									});
+									setShowScaleLabels(false);
 									onOpenChange(false);
 								}}>
-								Cancel
+								Close
 							</Button>
+
 							<Button type="button" onClick={form.handleSubmit(onSubmit)}>
 								{question ? 'Save Changes' : 'Add Question'}
 							</Button>
@@ -363,7 +448,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 	);
 };
 
-const QuestionPreview = ({ question, managerQuestion, type, options }: { question: string; managerQuestion: string; type: QuestionFormValues['type']; options?: string[] }) => {
+const QuestionPreview = ({ question, managerQuestion, type, options, scaleLabels }: { question: string; managerQuestion: string; type: QuestionFormValues['type']; options?: string[]; scaleLabels?: { label?: string; description?: string }[] }) => {
 	const renderInput = () => {
 		switch (type) {
 			case 'textarea':
@@ -381,14 +466,38 @@ const QuestionPreview = ({ question, managerQuestion, type, options }: { questio
 				);
 			case 'scale':
 				return (
-					<div className="flex justify-between">
-						{[1, 2, 3, 4, 5].map(value => (
-							<div key={value} className="flex flex-col items-center gap-1">
-								<Button variant="outline" type="button" size="sm" className="pointer-events-none h-8 w-8 rounded-full">
-									{value}
+					<div className="flex items-center gap-6">
+						{[1, 2, 3, 4, 5].map(value => {
+							const labelObj = scaleLabels?.[value - 1] || {};
+							const label = (labelObj as { label: string }).label || value;
+							const description = (labelObj as { description: string }).description;
+							return description ? (
+								<div className="flex flex-col items-center justify-center gap-2">
+									<Button variant="outline" className="pointer-events-none" type="button" size="icon">
+										{value}
+									</Button>
+
+									<div className="flex items-center gap-2">
+										<div className="text-xs text-muted-foreground">{label}</div>
+
+										<TooltipProvider key={value}>
+											<Tooltip>
+												<TooltipTrigger>
+													<Info size={12} className="text-muted-foreground" />
+												</TooltipTrigger>
+												<TooltipContent>
+													<div className="max-w-64 text-xs">{description}</div>
+												</TooltipContent>
+											</Tooltip>
+										</TooltipProvider>
+									</div>
+								</div>
+							) : (
+								<Button key={value} variant="outline" type="button" size="icon" className="pointer-events-none">
+									{label}
 								</Button>
-							</div>
-						))}
+							);
+						})}
 					</div>
 				);
 			case 'multiselect':

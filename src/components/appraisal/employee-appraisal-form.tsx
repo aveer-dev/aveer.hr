@@ -10,7 +10,7 @@ import { autoSaveAnswer, autoSaveObjectives, submitAppraisal } from '../appraisa
 import { useRouter } from 'next/navigation';
 import { Textarea } from '../ui/textarea';
 import { useDebounce } from '@/hooks/use-debounce';
-import { ChevronLeft, ChevronRight, Loader2, Send, Settings2, Trash2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Info, Loader2, Send, Settings2, Trash2, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PlusIcon } from 'lucide-react';
@@ -20,6 +20,7 @@ import { Badge } from '../ui/badge';
 import { LoadingSpinner } from '../ui/loader';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { Switch } from '../ui/switch';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../ui/tooltip';
 type QuestionGroup = 'growth_and_development' | 'company_values' | 'competencies' | 'private_manager_assessment' | 'objectives' | 'goal_scoring';
 
 interface Props {
@@ -1094,35 +1095,84 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 													)}
 
 													{currentQuestion.type === 'scale' && (
-														<div className="flex items-center gap-2">
-															{[1, 2, 3, 4, 5].map(num => (
-																<Button
-																	disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
-																	className={cn(
-																		'disabled:opacity-100',
-																		selectedReviewType === 'self'
-																			? answers[currentQuestion.id] === num && canViewSelfAnswer
-																				? 'border border-green-400'
-																				: ''
-																			: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
-																				? 'border border-green-400'
-																				: ''
-																	)}
-																	size="icon"
-																	key={num}
-																	variant={
-																		selectedReviewType === 'self'
-																			? answers[currentQuestion.id] === num && canViewSelfAnswer
-																				? 'secondary_success'
-																				: 'outline'
-																			: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
-																				? 'secondary_success'
-																				: 'outline'
-																	}
-																	onClick={() => handleAnswerChange(currentQuestion.id, num)}>
-																	{num}
-																</Button>
-															))}
+														<div className="flex items-center gap-8">
+															{[1, 2, 3, 4, 5].map(num => {
+																const scaleLabels = Array.isArray(currentQuestion.scale_labels) ? currentQuestion.scale_labels : [];
+																const labelObj = scaleLabels[num - 1];
+																const isObj = labelObj && typeof labelObj === 'object' && !Array.isArray(labelObj);
+																const label = isObj && typeof labelObj.label === 'string' ? labelObj.label : num;
+																const description = isObj && typeof labelObj.description === 'string' ? labelObj.description : undefined;
+																return description ? (
+																	<div className="flex flex-col items-center justify-center gap-2">
+																		<Button
+																			disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
+																			className={cn(
+																				'disabled:opacity-100',
+																				selectedReviewType === 'self'
+																					? answers[currentQuestion.id] === num && canViewSelfAnswer
+																						? 'border border-green-400'
+																						: ''
+																					: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
+																						? 'border border-green-400'
+																						: ''
+																			)}
+																			size="icon"
+																			variant={
+																				selectedReviewType === 'self'
+																					? answers[currentQuestion.id] === num && canViewSelfAnswer
+																						? 'secondary_success'
+																						: 'outline'
+																					: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
+																						? 'secondary_success'
+																						: 'outline'
+																			}
+																			onClick={() => handleAnswerChange(currentQuestion.id, num)}>
+																			{num}
+																		</Button>
+
+																		<div className="flex items-center gap-2">
+																			<div className="text-xs text-muted-foreground">{label}</div>
+																			<TooltipProvider key={num}>
+																				<Tooltip>
+																					<TooltipTrigger>
+																						<Info size={12} className="text-muted-foreground" />
+																					</TooltipTrigger>
+																					<TooltipContent>
+																						<div className="max-w-64 text-xs">{description}</div>
+																					</TooltipContent>
+																				</Tooltip>
+																			</TooltipProvider>
+																		</div>
+																	</div>
+																) : (
+																	<Button
+																		disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
+																		className={cn(
+																			'disabled:opacity-100',
+																			selectedReviewType === 'self'
+																				? answers[currentQuestion.id] === num && canViewSelfAnswer
+																					? 'border border-green-400'
+																					: ''
+																				: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
+																					? 'border border-green-400'
+																					: ''
+																		)}
+																		size="icon"
+																		key={num}
+																		variant={
+																			selectedReviewType === 'self'
+																				? answers[currentQuestion.id] === num && canViewSelfAnswer
+																					? 'secondary_success'
+																					: 'outline'
+																				: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
+																					? 'secondary_success'
+																					: 'outline'
+																		}
+																		onClick={() => handleAnswerChange(currentQuestion.id, num)}>
+																		{label}
+																	</Button>
+																);
+															})}
 														</div>
 													)}
 

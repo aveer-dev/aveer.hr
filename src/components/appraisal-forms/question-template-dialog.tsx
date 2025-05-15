@@ -33,7 +33,15 @@ const questionSchema = z
 		options: z.array(z.string()).optional(),
 		required: z.boolean(),
 		teams: z.array(z.string()),
-		group: z.enum(['growth_and_development', 'company_values', 'competencies', 'private_manager_assessment'])
+		group: z.enum(['growth_and_development', 'company_values', 'competencies', 'private_manager_assessment']),
+		scaleLabels: z
+			.array(
+				z.object({
+					label: z.string().optional(),
+					description: z.string().optional()
+				})
+			)
+			.optional()
 	})
 	.refine(
 		data => {
@@ -172,7 +180,8 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 					options: q.options || [],
 					required: q.required || false,
 					teams: q.team_ids?.map(id => id.toString()) || [],
-					group: (q.group as QuestionFormValues['group']) || 'growth_and_development'
+					group: (q.group as QuestionFormValues['group']) || 'growth_and_development',
+					scaleLabels: Array.isArray(q.scale_labels) ? (q.scale_labels.filter(item => item && typeof item === 'object' && !Array.isArray(item)) as { label?: string; description?: string }[]) : undefined
 				})) || []
 		}
 	});
@@ -225,6 +234,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 				required: q.required || false,
 				teams: q.team_ids?.map(id => id.toString()) || [],
 				group: (q.group as QuestionFormValues['group']) || 'growth_and_development',
+				scaleLabels: Array.isArray(q.scale_labels) ? (q.scale_labels.filter(item => item && typeof item === 'object' && !Array.isArray(item)) as { label?: string; description?: string }[]) : undefined,
 				org: org
 			}));
 			form.setValue('questions', mappedQuestions);
@@ -262,7 +272,8 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 						order_index: index,
 						template_id: template.id,
 						org: org,
-						group: q.group
+						group: q.group,
+						scale_labels: q.scaleLabels || null
 					})),
 					template_questions || []
 				);
@@ -287,7 +298,8 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 						order_index: index,
 						template_id: newTemplate.id,
 						org: org,
-						group: q.group
+						group: q.group,
+						scale_labels: q.scaleLabels || null
 					})) || []
 				);
 			}
@@ -448,8 +460,9 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 								)}
 
 								<Button type="button" variant="outline" className="ml-auto" onClick={() => setIsOpen(false)}>
-									Cancel
+									Close
 								</Button>
+
 								<Button type="submit" disabled={isSaving}>
 									{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 									{template ? 'Save Changes' : 'Create Template'}

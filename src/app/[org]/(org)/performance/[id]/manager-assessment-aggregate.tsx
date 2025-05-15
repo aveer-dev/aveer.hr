@@ -8,6 +8,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useState } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { AnswerDisplay } from '@/components/appraisal/assessment-indicators';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 
 type AppraisalAnswer = Tables<'appraisal_answers'>;
 type Contract = Tables<'contracts'>;
@@ -49,7 +51,7 @@ type YesNoQuestionDistribution = {
 	distribution: YesNoDistribution[];
 };
 
-function MultiScaleProgressBar({ distribution }: { distribution: ScaleDistribution[] }) {
+function MultiScaleProgressBar({ distribution, scaleLabels }: { distribution: ScaleDistribution[]; scaleLabels?: { label?: string; description?: string }[] }) {
 	return (
 		<div className="relative h-4 w-full overflow-hidden rounded-full bg-secondary">
 			{distribution.map(({ scale, percentage }) => (
@@ -63,11 +65,29 @@ function MultiScaleProgressBar({ distribution }: { distribution: ScaleDistributi
 				/>
 			))}
 			<div className="absolute inset-0 flex items-center justify-between px-2 text-xs text-white">
-				{distribution.map(({ scale, percentage }) => (
-					<span key={scale} className="font-medium">
-						{percentage > 0 && `${scale} (${percentage.toFixed(0)}%)`}
-					</span>
-				))}
+				{distribution.map(({ scale, percentage }) => {
+					const labelObj = scaleLabels?.[scale - 1];
+					const label = labelObj && typeof labelObj.label === 'string' ? labelObj.label : scale;
+					const description = labelObj && typeof labelObj.description === 'string' ? labelObj.description : undefined;
+					return percentage > 0 ? (
+						description ? (
+							<TooltipProvider key={scale}>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<span className="cursor-help font-medium underline">
+											{label} ({percentage.toFixed(0)}%)
+										</span>
+									</TooltipTrigger>
+									<TooltipContent>{description}</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
+						) : (
+							<span key={scale} className="font-medium">
+								{label} ({percentage.toFixed(0)}%)
+							</span>
+						)
+					) : null;
+				})}
 			</div>
 		</div>
 	);
@@ -261,11 +281,38 @@ export function ManagerAssessmentAggregate({ employees, answers, questions }: Ma
 								<div className="w-1/2 space-y-2">
 									{type === 'scale' ? (
 										<>
-											<MultiScaleProgressBar distribution={distribution as ScaleDistribution[]} />
-											<div className="flex justify-between text-xs text-muted-foreground">
-												<span>1 (Poor)</span>
-												<span>5 (Excellent)</span>
-											</div>
+											{(() => {
+												const scaleLabels = Array.isArray(question.scale_labels) ? (question.scale_labels.filter(item => item && typeof item === 'object' && !Array.isArray(item)) as { label?: string; description?: string }[]) : undefined;
+												return (
+													<>
+														<MultiScaleProgressBar distribution={distribution as ScaleDistribution[]} scaleLabels={scaleLabels} />
+														<div className="flex justify-between text-xs text-muted-foreground">
+															{[1, 2, 3, 4, 5].map(num => {
+																const labelObj = scaleLabels?.[num - 1];
+																const isObj = labelObj && typeof labelObj === 'object' && !Array.isArray(labelObj);
+																const label = isObj && typeof labelObj.label === 'string' ? labelObj.label : num;
+																const description = isObj && typeof labelObj.description === 'string' ? labelObj.description : undefined;
+																return description ? (
+																	<div className="flex items-center gap-2">
+																		<div className="text-xs">{num}</div>
+
+																		<TooltipProvider key={num}>
+																			<Tooltip>
+																				<TooltipTrigger>
+																					<Info size={12} />
+																				</TooltipTrigger>
+																				<TooltipContent>{description}</TooltipContent>
+																			</Tooltip>
+																		</TooltipProvider>
+																	</div>
+																) : (
+																	<span key={num}>{label}</span>
+																);
+															})}
+														</div>
+													</>
+												);
+											})()}
 										</>
 									) : (
 										<>

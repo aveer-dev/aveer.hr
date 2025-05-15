@@ -30,7 +30,7 @@ interface props {
 export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 	const [isUpdatingAppraisal, setAppraisalUpdateState] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
-	const [questionTemplates, setQuestionTemplates] = useState<Tables<'question_templates'>[]>([]);
+	const [questionTemplates, setQuestionTemplates] = useState<Tables<'question_templates'>[] | null>(null);
 	const router = useRouter();
 
 	const formSchema = z
@@ -143,7 +143,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 					<SheetDescription>Configure your organization&apos;s appraisal cycle settings</SheetDescription>
 				</SheetHeader>
 
-				{questionTemplates.length === 0 && (
+				{questionTemplates !== null && questionTemplates?.length === 0 && (
 					<Alert className="my-8 p-2" variant="warn">
 						<Info size={14} className="!left-2 !top-2" />
 						<AlertTitle>Info</AlertTitle>
@@ -311,12 +311,14 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 												<SelectValue placeholder="Select a question template" />
 											</SelectTrigger>
 										</FormControl>
+
 										<SelectContent>
-											{questionTemplates.map(template => (
-												<SelectItem key={template.id} value={template.id.toString()}>
-													{template.name}
-												</SelectItem>
-											))}
+											{questionTemplates !== null &&
+												questionTemplates.map(template => (
+													<SelectItem key={template.id} value={template.id.toString()}>
+														{template.name}
+													</SelectItem>
+												))}
 										</SelectContent>
 									</Select>
 									<FormMessage />

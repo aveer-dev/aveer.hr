@@ -1095,6 +1095,158 @@ export type Database = {
           },
         ]
       }
+      files: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          document: number | null
+          entity: number | null
+          file_type: Database["public"]["Enums"]["file_type"]
+          folder: number | null
+          id: number
+          name: string
+          org: string
+          owner_id: string
+          owner_type: Database["public"]["Enums"]["file_ownership_type"]
+          storage_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string
+          document?: number | null
+          entity?: number | null
+          file_type: Database["public"]["Enums"]["file_type"]
+          folder?: number | null
+          id?: number
+          name: string
+          org: string
+          owner_id: string
+          owner_type: Database["public"]["Enums"]["file_ownership_type"]
+          storage_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          document?: number | null
+          entity?: number | null
+          file_type?: Database["public"]["Enums"]["file_type"]
+          folder?: number | null
+          id?: number
+          name?: string
+          org?: string
+          owner_id?: string
+          owner_type?: Database["public"]["Enums"]["file_ownership_type"]
+          storage_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "files_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_document_fkey"
+            columns: ["document"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_folder_fkey"
+            columns: ["folder"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+        ]
+      }
+      folders: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          entity: number | null
+          id: number
+          name: string
+          org: string
+          owner_id: string
+          owner_type: Database["public"]["Enums"]["file_ownership_type"]
+          parent: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string
+          entity?: number | null
+          id?: number
+          name: string
+          org: string
+          owner_id: string
+          owner_type: Database["public"]["Enums"]["file_ownership_type"]
+          parent?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          entity?: number | null
+          id?: number
+          name?: string
+          org?: string
+          owner_id?: string
+          owner_type?: Database["public"]["Enums"]["file_ownership_type"]
+          parent?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folders_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folders_entity_fkey"
+            columns: ["entity"]
+            isOneToOne: false
+            referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folders_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "folders_parent_fkey"
+            columns: ["parent"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inbox: {
         Row: {
           created_at: string
@@ -2236,6 +2388,68 @@ export type Database = {
           },
         ]
       }
+      resource_access: {
+        Row: {
+          access_level: Database["public"]["Enums"]["access_level"]
+          created_at: string | null
+          file: number | null
+          folder: number | null
+          id: number
+          profile: string | null
+          team: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_level: Database["public"]["Enums"]["access_level"]
+          created_at?: string | null
+          file?: number | null
+          folder?: number | null
+          id?: number
+          profile?: string | null
+          team?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_level?: Database["public"]["Enums"]["access_level"]
+          created_at?: string | null
+          file?: number | null
+          folder?: number | null
+          id?: number
+          profile?: string | null
+          team?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_access_file_fkey"
+            columns: ["file"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_access_folder_fkey"
+            columns: ["folder"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_access_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_access_team_fkey"
+            columns: ["team"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roles: {
         Row: {
           created_at: string
@@ -2353,6 +2567,7 @@ export type Database = {
           org: string
           question: string
           required: boolean | null
+          scale_labels: Json | null
           team_ids: number[] | null
           template_id: number
           type: Database["public"]["Enums"]["question_type"]
@@ -2368,6 +2583,7 @@ export type Database = {
           org: string
           question: string
           required?: boolean | null
+          scale_labels?: Json | null
           team_ids?: number[] | null
           template_id: number
           type: Database["public"]["Enums"]["question_type"]
@@ -2383,6 +2599,7 @@ export type Database = {
           org?: string
           question?: string
           required?: boolean | null
+          scale_labels?: Json | null
           team_ids?: number[] | null
           template_id?: number
           type?: Database["public"]["Enums"]["question_type"]
@@ -2588,33 +2805,24 @@ export type Database = {
     }
     Functions: {
       authorize_role: {
-        Args: {
-          org_name: string
-        }
+        Args: { org_name: string }
         Returns: boolean
       }
       check_contract_exists: {
-        Args: {
-          p_profile_id: string
-          p_contract_id: number
-        }
+        Args: { p_profile_id: string; p_contract_id: number }
         Returns: boolean
       }
       check_contract_exists_with_org: {
-        Args: {
-          p_profile_id: string
-          p_org: string
-        }
+        Args: { p_profile_id: string; p_org: string }
         Returns: boolean
       }
       custom_access_token_hook: {
-        Args: {
-          event: Json
-        }
+        Args: { event: Json }
         Returns: Json
       }
     }
     Enums: {
+      access_level: "read" | "write" | "delete" | "full" | "owner"
       app_role: "admin" | "roles_manager"
       appraisal_status: "draft" | "submitted" | "manager_reviewed"
       boarding_state: "initial" | "pending" | "approved"
@@ -2630,6 +2838,8 @@ export type Database = {
         | "scheduled termination"
       contract_type: "employee" | "contractor"
       employment_type: "full-time" | "part-time" | "contract"
+      file_ownership_type: "employee" | "organisation"
+      file_type: "document" | "storage"
       is_open: "open" | "closed" | "partial"
       leave_status_enum:
         | "pending"
@@ -2769,6 +2979,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      access_level: ["read", "write", "delete", "full", "owner"],
       app_role: ["admin", "roles_manager"],
       appraisal_status: ["draft", "submitted", "manager_reviewed"],
       boarding_state: ["initial", "pending", "approved"],
@@ -2785,6 +2996,8 @@ export const Constants = {
       ],
       contract_type: ["employee", "contractor"],
       employment_type: ["full-time", "part-time", "contract"],
+      file_ownership_type: ["employee", "organisation"],
+      file_type: ["document", "storage"],
       is_open: ["open", "closed", "partial"],
       leave_status_enum: ["pending", "denied", "approved", "more", "cancelled"],
       leave_type_enum: ["paid", "sick", "maternity", "paternity", "unpaid"],
