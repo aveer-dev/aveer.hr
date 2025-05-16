@@ -1,34 +1,32 @@
 import { Img } from '@react-email/components';
 import { EmailContainer } from './email-template';
-import { FileWithAccess, FolderWithAccess } from '@/dal/interfaces/file-management.types';
 
 interface props {
 	senderName: string;
 	receiver: { id: string | number; name: string };
-	org?: { name: string; subdomain: string };
-	from: string;
-	to: string;
+	org: { name: string; subdomain: string } | string;
 	file: { access_level: string; name: string };
 	message?: string;
 }
 
 export const DocumentInviteEmail = ({ senderName, org, receiver, file, message }: props) => {
-	const link = `https://employee.aveer.hr/${org?.subdomain ?? ''}/${receiver.id}/files`;
+	const link = `https://employee.aveer.hr/${typeof org === 'string' ? org : org?.subdomain}/files`;
 
 	return (
-		<EmailContainer preview={`${org?.name ?? 'Aveer.hr'} | You have a new document invite`}>
+		<EmailContainer preview={`${typeof org === 'string' ? org : (org?.name ?? 'Aveer.hr')} | You have a new document invite`}>
 			<div className="mx-auto my-11 w-full max-w-[4000px]">
 				<div className="m-auto w-full max-w-[400px]">
-					<Img width="100" src="https://byprsbkeackkgjsjlcgp.supabase.co/storage/v1/object/public/platform%20assets/logo/aveer-text.png" alt="aveer logo" />
+					<Img width="100" className="max-w-28" src="https://byprsbkeackkgjsjlcgp.supabase.co/storage/v1/object/public/platform%20assets/logo/aveer-text.png" alt="aveer logo" />
 
-					<h2 className="mt-8 text-base">Hi {senderName}</h2>
+					<h2 className="mt-8 text-base">Hi {receiver.name}</h2>
 					<p className="my-5 text-sm leading-6">
-						{receiver.name} has just invited you with a &quot;{file.access_level}&quot; access to {file.name}.
+						{senderName} has just invited you with a &quot;{file.access_level}&quot; access to {file.name}.
 					</p>
 
 					{message && (
-						<div className="rounded-md bg-muted p-2 text-sm">
-							<p>{message}</p>
+						<div className="min-h-44 w-full rounded-md bg-gray-100 bg-muted px-4 py-2 text-sm">
+							<h3 className="text-xs font-medium text-gray-400">Invite message</h3>
+							<p className="mt-3 text-sm">{message}</p>
 						</div>
 					)}
 

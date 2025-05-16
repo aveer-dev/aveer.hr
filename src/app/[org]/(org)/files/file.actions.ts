@@ -199,11 +199,12 @@ interface GrantAccessArgs {
 	access_level: AccessLevel;
 	select?: string;
 	teams: number[];
-	org?: string;
+	org: string;
 	resourceName: string;
+	message: string;
 }
 
-export async function grantResourceAccessAction({ resource_id, resource_type, profiles, access_level, teams, org, resourceName }: GrantAccessArgs & { org?: string }) {
+export async function grantResourceAccessAction({ resource_id, resource_type, profiles, access_level, teams, org, resourceName, message }: GrantAccessArgs) {
 	try {
 		const supabase = await createClient();
 		const {
@@ -216,10 +217,11 @@ export async function grantResourceAccessAction({ resource_id, resource_type, pr
 		const profileRepo = new ProfileRepository();
 
 		const [{ data, error }, { data: profile, error: profileError }] = await Promise.all([
-			repo.grantAccess({ resource_id, resource_type, profiles, access_level, teams, select: '*, profile:profiles!resource_access_profile_fkey(email, first_name, last_name, id), team:teams!resource_access_team_fkey(id, name), org' }),
+			repo.grantAccess({ resource_id, resource_type, profiles, access_level, teams, select: '*, profile:profiles!resource_access_profile_fkey(email, first_name, last_name, id), team:teams!resource_access_team_fkey(id, name)' }),
 			profileRepo.getById(user!.id, 'first_name, last_name, id')
 		]);
 		if (error) throw error;
+		if (profileError) throw error;
 
 		const senderName = `${profile.first_name} ${profile.last_name}`;
 
@@ -235,12 +237,12 @@ export async function grantResourceAccessAction({ resource_id, resource_type, pr
 						from: `Aveer.hr <support@notification.aveer.hr>`,
 						react: DocumentInviteEmail({
 							receiver: { name: `${profile.first_name} ${profile.last_name}`, id: profile.id },
-							from: 'Aveer.hr <support@aveer.hr>',
-							to: profile.email,
 							file: { access_level, name: resourceName },
-							senderName
+							senderName,
+							message,
+							org
 						}),
-						subject: 'You have been granted access'
+						subject: `${senderName} just gave you access to ${resourceName}`
 					});
 				}
 			}
@@ -250,7 +252,7 @@ export async function grantResourceAccessAction({ resource_id, resource_type, pr
 			const contractRepo = new ContractRepository();
 			for (const r of data) {
 				// r.org may not exist, fallback to org param if needed
-				const orgId = (r as any).org || org;
+				const orgId = (r as any)?.org || org;
 				const team: { name: string; id: number } = r.team as any;
 				if (team && typeof team === 'object' && team.id && orgId) {
 					// Fetch all employees in this team
@@ -263,12 +265,12 @@ export async function grantResourceAccessAction({ resource_id, resource_type, pr
 								from: `Aveer.hr <support@notification.aveer.hr>`,
 								react: DocumentInviteEmail({
 									receiver: { name: `${member.profile.first_name} ${member.profile.last_name}`, id: member.id },
-									from: 'Aveer.hr',
-									to: member.profile.email,
 									file: { access_level, name: resourceName },
-									senderName
+									senderName,
+									org,
+									message
 								}),
-								subject: `${senderName} Just gave you access to ${resourceName}`
+								subject: `${senderName} just gave you access to ${resourceName}`
 							});
 						}
 					}

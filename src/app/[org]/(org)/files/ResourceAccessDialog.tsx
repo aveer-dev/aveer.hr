@@ -29,6 +29,7 @@ export function ResourceAccessDialog({ resourceId, resourceType, org, open, setO
 	const [teams, setTeams] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [accessLevel, setAccessLevel] = useState('view');
+	const [inviteMessage, setInviteMessage] = useState('');
 
 	const accessLevels = ['view', 'edit', 'full'];
 
@@ -135,10 +136,11 @@ export function ResourceAccessDialog({ resourceId, resourceType, org, open, setO
 				teams: teamIds,
 				access_level: mapAccessLevel(accessLevel) as any,
 				resourceName: resourceName,
-				org: org
+				org: org,
+				message: inviteMessage
 			});
 
-			if (error) throw error;
+			if (error) return toast.error('Failed to grant access', { description: error.message });
 			toast.success('Access granted!');
 
 			// Refresh access list
@@ -335,15 +337,15 @@ export function ResourceAccessDialog({ resourceId, resourceType, org, open, setO
 					</Popover>
 				</div>
 
-				{selected.length > 0 && <Textarea placeholder="Add a message..." className="mb-4" />}
+				{selected.length > 0 && <Textarea placeholder="Add invite message..." className="mb-4" value={inviteMessage} onChange={e => setInviteMessage(e.target.value)} />}
 
 				{selected.length == 0 && (
 					<div className="mb-4 mt-2">
 						<h3 className="mb-4 text-xs font-medium text-muted-foreground">People with access</h3>
 
-						<ScrollArea className="flex max-h-60 flex-col p-1">
+						<ScrollArea className="flex max-h-60 flex-col">
 							{accessList.length > 0 && (
-								<ul className="space-y-8">
+								<ul className="space-y-8 pr-1">
 									{accessList.map(a => (
 										<li key={(a.profile as any)?.id || (a.team as any)?.id} className="flex items-center justify-between">
 											<div className="space-y-2">
