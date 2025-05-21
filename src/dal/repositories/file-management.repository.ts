@@ -9,7 +9,7 @@ export class FileManagementRepository {
 	 * @param folder Folder payload
 	 * @param select Custom select string (default '*')
 	 */
-	async createFolder(folder: Folder, select: string = '*'): Promise<{ data: { resource: Folder; access: ResourceAccess | null } | null; error: PostgrestError | null }> {
+	async createFolder(folder: TablesInsert<'folders'>, select: string = '*'): Promise<{ data: { resource: Folder; access: ResourceAccess | null } | null; error: PostgrestError | null }> {
 		const supabase = await createClient();
 		const { data, error } = await supabase.from('folders').insert(folder).select(select).single();
 		if (error || !data || typeof data !== 'object') return { data: null, error };
@@ -35,17 +35,42 @@ export class FileManagementRepository {
 	}
 
 	/**
+	 * Helper to get the current user's team id
+	 */
+	private async getCurrentUserTeam(supabase: any, userId: string): Promise<{ teamId: number | null; error: PostgrestError | null }> {
+		const { data: contracts, error } = await supabase.from('contracts').select('team').eq('profile', userId).eq('status', 'signed').single();
+
+		if (error || !contracts) return { teamId: null, error: error || new Error('No active contract found') };
+		return { teamId: contracts.team, error: null };
+	}
+
+	/**
 	 * Get a folder by id and profile access
 	 * @param id Folder id
 	 * @param select Custom select string (default '*, resource_access!inner (access_level)')
+	 * @param [team] Team id
 	 */
-	async getFolder(id: number, select: string = '*, resource_access!inner (access_level)'): Promise<{ data: FolderWithAccess | null; error: PostgrestError | null }> {
+	async getFolder(id: number, select: string = '*, resource_access!inner (access_level)', team?: number): Promise<{ data: FolderWithAccess | null; error: PostgrestError | null }> {
 		const supabase = await createClient();
 		const { id: userId, error: userError } = await this.getCurrentUserId(supabase);
 		if (!userId || userError) return { data: null, error: userError };
 
-		// Step 1: Check if user has access to this folder
-		const { data: accessRows, error: accessError } = await supabase.from('resource_access').select('folder').eq('profile', userId).eq('folder', id).single();
+		// Get user's team if not provided
+		let teamId: number | undefined = team;
+		if (!teamId) {
+			const { teamId: userTeamId, error: teamError } = await this.getCurrentUserTeam(supabase, userId);
+			if (teamError) return { data: null, error: teamError };
+			teamId = userTeamId || undefined;
+		}
+
+		// Step 1: Check if user or team has access to this folder
+		let accessQuery = supabase.from('resource_access').select('folder').eq('folder', id);
+		if (teamId) {
+			accessQuery = accessQuery.or(`profile.eq.${userId},team.eq.${teamId}`);
+		} else {
+			accessQuery = accessQuery.eq('profile', userId);
+		}
+		const { data: accessRows, error: accessError } = await accessQuery.single();
 		if (accessError || !accessRows) return { data: null, error: accessError || new Error('No access to folder') };
 
 		// Step 2: Fetch the folder
@@ -58,15 +83,31 @@ export class FileManagementRepository {
 	 * List folders with filters and access
 	 * @param filters Filtering options
 	 * @param select Custom select string (default '*, resource_access!left (access_level)')
+	 * @param [team] Team id
 	 */
-	async listFolders(filters: FileManagementFilters, select: string = '*'): Promise<{ data: FolderWithAccess[]; error: PostgrestError | null }> {
+	async listFolders(filters: FileManagementFilters, select: string = '*', team?: number): Promise<{ data: FolderWithAccess[]; error: PostgrestError | null }> {
 		const supabase = await createClient();
 
 		const { id: userId, error: userError } = await this.getCurrentUserId(supabase);
 		if (!userId || userError) return { data: [], error: userError };
 
-		// Step 1: Get all folder IDs the user has access to
-		const { data: accessRows, error: accessError } = await supabase.from('resource_access').select('folder, access_level').eq('profile', userId).not('folder', 'is', null);
+		// Get user's team if not provided
+		let teamId: number | undefined = team;
+		if (!teamId) {
+			const { teamId: userTeamId, error: teamError } = await this.getCurrentUserTeam(supabase, userId);
+
+			if (teamError) return { data: [], error: teamError };
+			teamId = userTeamId || undefined;
+		}
+
+		// Step 1: Get all folder IDs the user or team has access to
+		let accessQuery = supabase.from('resource_access').select('folder, access_level').not('folder', 'is', null);
+		if (teamId) {
+			accessQuery = accessQuery.or(`profile.eq.${userId},team.eq.${teamId}`);
+		} else {
+			accessQuery = accessQuery.eq('profile', userId);
+		}
+		const { data: accessRows, error: accessError } = await accessQuery;
 		if (accessError) return { data: [], error: accessError };
 		const folderIds = (accessRows || []).map((row: any) => row.folder).filter(Boolean);
 		if (folderIds.length === 0) return { data: [], error: null };
@@ -92,7 +133,7 @@ export class FileManagementRepository {
 	 * @param file File payload
 	 * @param select Custom select string (default '*')
 	 */
-	async createFile(file: Omit<File, 'id' | 'created_at' | 'updated_at'>, select: string = '*'): Promise<{ data: { resource: File; access: ResourceAccess | null } | null; error: PostgrestError | null }> {
+	async createFile(file: TablesInsert<'files'>, select: string = '*'): Promise<{ data: { resource: File; access: ResourceAccess | null } | null; error: PostgrestError | null }> {
 		const supabase = await createClient();
 		const { data, error } = await supabase.from('files').insert(file).select(select).single();
 		if (error || !data || typeof data !== 'object') return { data: null, error };
@@ -108,14 +149,29 @@ export class FileManagementRepository {
 	 * Get a file by id and profile access
 	 * @param id File id
 	 * @param select Custom select string (default '*, resource_access!inner (access_level)')
+	 * @param [team] Team id
 	 */
-	async getFile(id: number, select: string = '*, resource_access!inner (access_level)'): Promise<{ data: FileWithAccess | null; error: PostgrestError | null }> {
+	async getFile(id: number, select: string = '*, resource_access!inner (access_level)', team?: number): Promise<{ data: FileWithAccess | null; error: PostgrestError | null }> {
 		const supabase = await createClient();
 		const { id: userId, error: userError } = await this.getCurrentUserId(supabase);
 		if (!userId || userError) return { data: null, error: userError };
 
-		// Step 1: Check if user has access to this file
-		const { data: accessRows, error: accessError } = await supabase.from('resource_access').select('file').eq('profile', userId).eq('file', id).single();
+		// Get user's team if not provided
+		let teamId: number | undefined = team;
+		if (!teamId) {
+			const { teamId: userTeamId, error: teamError } = await this.getCurrentUserTeam(supabase, userId);
+			if (teamError) return { data: null, error: teamError };
+			teamId = userTeamId || undefined;
+		}
+
+		// Step 1: Check if user or team has access to this file
+		let accessQuery = supabase.from('resource_access').select('file').eq('file', id);
+		if (teamId) {
+			accessQuery = accessQuery.or(`profile.eq.${userId},team.eq.${teamId}`);
+		} else {
+			accessQuery = accessQuery.eq('profile', userId);
+		}
+		const { data: accessRows, error: accessError } = await accessQuery.single();
 		if (accessError || !accessRows) return { data: null, error: accessError || new Error('No access to file') };
 
 		// Step 2: Fetch the file
@@ -128,15 +184,30 @@ export class FileManagementRepository {
 	 * List files with filters and access
 	 * @param filters Filtering options
 	 * @param select Custom select string (default '*, resource_access!left (access_level)')
+	 * @param [team] Team id
 	 */
-	async listFiles(filters: FileManagementFilters, select: string = '*'): Promise<{ data: FileWithAccess[]; error: PostgrestError | null }> {
+	async listFiles(filters: FileManagementFilters, select: string = '*', team?: number): Promise<{ data: FileWithAccess[]; error: PostgrestError | null }> {
 		const supabase = await createClient();
 
 		const { id: userId, error: userError } = await this.getCurrentUserId(supabase);
 		if (!userId || userError) return { data: [], error: userError };
 
-		// Step 1: Get all file IDs the user has access to
-		const { data: accessRows, error: accessError } = await supabase.from('resource_access').select('file, access_level').eq('profile', userId).not('file', 'is', null);
+		// Get user's team if not provided
+		let teamId: number | undefined = team;
+		if (!teamId) {
+			const { teamId: userTeamId, error: teamError } = await this.getCurrentUserTeam(supabase, userId);
+			if (teamError) return { data: [], error: teamError };
+			teamId = userTeamId || undefined;
+		}
+
+		// Step 1: Get all file IDs the user or team has access to
+		let accessQuery = supabase.from('resource_access').select('file, access_level').not('file', 'is', null);
+		if (teamId) {
+			accessQuery = accessQuery.or(`profile.eq.${userId},team.eq.${teamId}`);
+		} else {
+			accessQuery = accessQuery.eq('profile', userId);
+		}
+		const { data: accessRows, error: accessError } = await accessQuery;
 		if (accessError) return { data: [], error: accessError };
 		const fileIds = (accessRows || []).map((row: any) => row.file).filter(Boolean);
 		if (fileIds.length === 0) return { data: [], error: null };

@@ -8,18 +8,16 @@ import { AddFile } from '@/components/file-management/add-file-link';
 import { TablesInsert } from '@/type/database.types';
 import { redirect } from 'next/navigation';
 import { DocumentRepository } from '@/dal/repositories/document.repository';
+import { Suspense } from 'react';
+import { FileManagement } from '@/components/file-manager/files-page.component';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default async function ProfilePage(props: { params: Promise<{ [key: string]: string }> }) {
-	const params = await props.params;
+export default async function ProfilePage({ params }: { params: Promise<{ [key: string]: string }> }) {
+	const contract = (await params).contract;
+	const org = (await params).org;
 	const supabase = await createClient();
 
-	const { data, error } = await supabase
-		.from('contracts')
-		.select(
-			'*, profile:profiles!contracts_profile_fkey(first_name, last_name, email, id, nationality:countries!profiles_nationality_fkey(country_code, name)), org:organisations!contracts_org_fkey(name, id, subdomain), entity:legal_entities!contracts_entity_fkey(name, id, incorporation_country:countries!legal_entities_incorporation_country_fkey(country_code, name, currency_code))'
-		)
-		.eq('id', Number(params.contract))
-		.single();
+	const { data, error } = await supabase.from('contracts').select('profile, status').eq('id', Number(contract)).single();
 
 	if (error) {
 		return (
@@ -32,25 +30,29 @@ export default async function ProfilePage(props: { params: Promise<{ [key: strin
 
 	if (data.status !== 'signed') redirect('./home');
 
-	const documentsRepo = new DocumentRepository();
-	const [files, documents] = await Promise.all([supabase.from('links').select().match({ org: params.org }), documentsRepo.getUserAccessibleDocuments(params.org, data.profile?.id.toString() ?? '')]);
+	// const documentsRepo = new DocumentRepository();
+	// const [files, documents] = await Promise.all([supabase.from('links').select().match({ org: params.org }), documentsRepo.getUserAccessibleDocuments(params.org, data.profile?.id.toString() ?? '')]);
 
-	const getLinks = (path: string) => files.data?.filter(file => file.path == path);
+	// const getLinks = (path: string) => files.data?.filter(file => file.path == path);
 
-	const addLink = async (payload: TablesInsert<'links'>) => {
-		'use server';
+	// const addLink = async (payload: TablesInsert<'links'>) => {
+	// 	'use server';
 
-		const supabase = await createClient();
+	// 	const supabase = await createClient();
 
-		const { error } = await supabase.from('links').upsert({ ...payload, org: data.org.subdomain });
-		if (error) return error.code == '23505' ? `Link with name '${payload.name}' already exists` : error.message;
+	// 	const { error } = await supabase.from('links').upsert({ ...payload, org: data.org.subdomain });
+	// 	if (error) return error.code == '23505' ? `Link with name '${payload.name}' already exists` : error.message;
 
-		return true;
-	};
+	// 	return true;
+	// };
 
 	return (
 		<div className="w-full">
-			<section className="relative mt-8">
+			<Suspense fallback={<Skeleton className="h-full min-h-[300px] w-full" />}>
+				<FileManagement role="employee" userId={data.profile ?? org} params={params} />
+			</Suspense>
+
+			{/* <section className="relative mt-8">
 				<div className="mb-6 flex items-center gap-2">
 					<h2 className="text-base font-semibold text-support">Organisation files</h2>
 
@@ -122,7 +124,7 @@ export default async function ProfilePage(props: { params: Promise<{ [key: strin
 				</Tabs>
 
 				<AddFile path={`${data.org.id}/${data.profile?.id}`} addLink={addLink} documents={documents} />
-			</section>
+			</section> */}
 		</div>
 	);
 }

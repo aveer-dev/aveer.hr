@@ -2,8 +2,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { FileManagementRepository } from '@/dal/repositories/file-management.repository';
 import { FileFolderList } from './files-folders';
 import { createClient } from '@/utils/supabase/server';
+import { ROLE } from '@/type/contract.types';
 
-export const FileManagement = async ({ params }: { params: Promise<{ [key: string]: string }> }) => {
+export const FileManagement = async ({ params, role, userId }: { params: Promise<{ [key: string]: string }>; role: ROLE; userId?: string }) => {
 	const supabase = await createClient();
 	const org = (await params).org;
 	const repo = new FileManagementRepository();
@@ -26,11 +27,11 @@ export const FileManagement = async ({ params }: { params: Promise<{ [key: strin
 			</TabsList>
 
 			<TabsContent value="all">
-				<FileFolderList org={org} files={files} folders={folderData} />
+				<FileFolderList org={org} role={role} userId={userId ?? org} files={files} folders={folderData} />
 			</TabsContent>
 
 			<TabsContent value="shared">
-				<FileFolderList org={org} files={shared} folders={sharedFolders} />
+				<FileFolderList org={org} role={role} userId={userId ?? org} files={shared} folders={sharedFolders} />
 			</TabsContent>
 		</Tabs>
 	);

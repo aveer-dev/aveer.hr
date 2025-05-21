@@ -4,7 +4,7 @@ import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem } 
 import { FileWithAccess, FolderWithAccess } from '@/dal/interfaces/file-management.types';
 import { useState, useRef, Fragment } from 'react';
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { FolderClosed, FolderKey, FolderOpen, Info, User, File as FileIcon, PackageOpen, FolderPen, FilePen } from 'lucide-react';
+import { FolderClosed, FolderKey, Info, User, File as FileIcon, PackageOpen, FolderPen, FilePen } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
 import { EmployeeHoverCard } from '@/components/ui/employee-hover-card';
@@ -17,8 +17,9 @@ import { ResourceDetailsSheet } from './ResourceDetailsSheet';
 import { isUUID } from '@/lib/utils';
 import { FileActionsDropdown } from './FileActionsDropdown';
 import { useRouter } from 'next/navigation';
+import { ROLE } from '@/type/contract.types';
 
-export const FileFolderList = ({ files, folders, org }: { files: FileWithAccess[]; folders: FolderWithAccess[]; org: string }) => {
+export const FileFolderList = ({ files, folders, org, role, userId }: { files: FileWithAccess[]; folders: FolderWithAccess[]; org: string; role: ROLE; userId: string }) => {
 	const router = useRouter();
 	const [selectedFile, setSelectedFile] = useState<FileWithAccess | null>(null);
 	const [drawerOpen, setDrawerOpen] = useState(false);
@@ -195,7 +196,7 @@ export const FileFolderList = ({ files, folders, org }: { files: FileWithAccess[
 				</BreadcrumbList>
 			</Breadcrumb>
 
-			<FileActionsDropdown org={org} parentFolderId={currentFolder?.id} ownerType="organisation" ownerId={org} />
+			<FileActionsDropdown org={org} parentFolderId={currentFolder?.id} ownerType={role == 'admin' ? 'organisation' : 'employee'} ownerId={role == 'admin' ? org : userId} />
 		</div>
 	);
 

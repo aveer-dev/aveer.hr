@@ -68,8 +68,6 @@ export const FileActionsDropdown: React.FC<FileActionsDropdownProps> = ({ org, o
 				toast.promise(promise, {
 					loading: `Uploading ${file.name}...`,
 					success: async response => {
-						console.log(response);
-
 						if (response.error) return response.error.message;
 						onActionComplete?.();
 						return `${file.name} uploaded!`;
@@ -89,10 +87,11 @@ export const FileActionsDropdown: React.FC<FileActionsDropdownProps> = ({ org, o
 	// Create Document
 	const handleCreateDocument = async () => {
 		try {
-			const res = await createDocument({ org, ownedBy: 'organisation' });
+			const res = await createDocument({ org, ownedBy: ownerType });
 			if (res.error) throw res.error;
 			toast.success('Document created');
 			onActionComplete?.();
+			setOpen(false);
 		} catch (e: any) {
 			toast.error('Error creating document', { description: e.message });
 		}

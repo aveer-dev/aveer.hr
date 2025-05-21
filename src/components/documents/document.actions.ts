@@ -8,7 +8,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { format } from 'date-fns';
 import { FileManagementRepository } from '@/dal/repositories/file-management.repository';
-import { FileType } from '@/dal/interfaces/file-management.types';
+import { File, FileType } from '@/dal/interfaces/file-management.types';
 
 export const updateDocument = async (payload: TablesUpdate<'documents'>) => {
 	const supabase = await createClient();
@@ -103,7 +103,7 @@ export const createDocument = async ({ document, org, ownedBy = 'employee' }: { 
 
 	// Create a file record for the new document
 	const fileRepo = new FileManagementRepository();
-	const filePayload = {
+	const filePayload: TablesInsert<'files'> = {
 		name: res.data.name,
 		org: res.data.org,
 		owner_id: ownedBy == 'employee' ? user.id : ((org || document?.org) as string),
@@ -113,7 +113,9 @@ export const createDocument = async ({ document, org, ownedBy = 'employee' }: { 
 		entity: res.data.entity ?? null,
 		folder: null,
 		storage_url: null,
-		created_by: user.id
+		created_by: user.id,
+		created_at: null,
+		id: 0
 	};
 	const fileRes = await fileRepo.createFile(filePayload);
 

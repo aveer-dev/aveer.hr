@@ -7,7 +7,7 @@ import { ContractRepository } from '@/dal/repositories/contract.repository';
 import { TeamRepository } from '@/dal/repositories/team.repository';
 import { AccessLevel, FileWithAccess, FolderWithAccess } from '@/dal/interfaces/file-management.types';
 import { DocumentRepository } from '@/dal/repositories/document.repository';
-import { sendBulkEmail, sendEmail } from '@/api/email';
+import { sendBulkEmail } from '@/api/email';
 import DocumentInviteEmail from '@/components/emails/document-invite';
 import { ProfileRepository } from '@/dal';
 
@@ -25,6 +25,7 @@ export async function uploadFileAndCreateRecord({ file, org, ownerType, ownerId,
 		// Only allow safe characters, replace others with _
 		return name.replace(/[^a-zA-Z0-9.\-_]/g, '_').replace(/_+/g, '_');
 	}
+
 	try {
 		const supabase = await createClient();
 		const sanitizedFileName = sanitizeFileName(file.name);
@@ -76,8 +77,7 @@ export async function createFolderServerAction({ name, org, ownerType, ownerId, 
 			parent: parentFolderId ?? null,
 			entity: entity ?? null
 		};
-		const { data, error } = await repo.createFolder(folderPayload as any);
-		console.log(data, error);
+		const { data, error } = await repo.createFolder(folderPayload);
 
 		if (error) throw error;
 		revalidatePath(`/app/${org}/files`);
