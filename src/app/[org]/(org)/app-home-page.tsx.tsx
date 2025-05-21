@@ -3,13 +3,17 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { UserRound, Building2 } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 export default async function AppHomePage() {
 	const supabase = await createClient();
 
 	const {
-		data: { user }
+		data: { user },
+		error: authError
 	} = await supabase.auth.getUser();
+
+	if (authError) return redirect('/app/login');
 
 	const [{ data, error }, { data: contracts }] = await Promise.all([
 		await supabase.from('profiles_roles').select('role, organisation').match({ profile: user?.id, disable: false }),

@@ -87,7 +87,7 @@ export const OrgForm = ({ formAction, data }: PROPS) => {
 		setLoadState(true);
 		const error = await formAction(orgData);
 		setLoadState(false);
-		if (error) toast.error(error);
+		if (error) return toast.error(error);
 
 		const isSubdomainChanged = data ? data?.subdomain !== orgData.subdomain : false;
 		if (isSubdomainChanged) return process.env.NEXT_PUBLIC_ENABLE_SUBDOOMAIN == 'true' ? (location.href = `http://${prefixText}.${process.env.NEXT_PUBLIC_DOMAIN}/settings?type=org`) : router.replace(`../${prefixText}/settings?type=org`);
