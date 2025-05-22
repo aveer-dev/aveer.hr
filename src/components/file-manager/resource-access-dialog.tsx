@@ -19,6 +19,7 @@ import { SelectTrigger } from '@/components/ui/select';
 import { SelectContent, SelectItem } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PageLoader } from '@/components/ui/page-loader';
+import { LoadingSpinner } from '@/components/ui/loader';
 
 export function ResourceAccessDialog({ resourceId, resourceType, org, open, setOpen, resourceName }: { resourceId?: number; resourceType: 'file' | 'folder'; org: string; open: boolean; setOpen: (open: boolean) => void; resourceName: string }) {
 	const [openPopover, setOpenPopover] = useState(false);
@@ -429,7 +430,8 @@ export function ResourceAccessDialog({ resourceId, resourceType, org, open, setO
 						</Button>
 					)}
 
-					<Button onClick={() => (selected.length > 0 ? grantAccess() : onOpenChange(false))} className="px-8" disabled={loading}>
+					<Button onClick={() => (selected.length > 0 ? grantAccess() : onOpenChange(false))} className="gap-2 px-8" disabled={loading}>
+						{loading && <LoadingSpinner />}
 						{selected.length > 0 ? 'Send invite' : 'Close'}
 					</Button>
 				</AlertDialogFooter>

@@ -150,8 +150,9 @@ export class FileManagementRepository {
 	 * @param id File id
 	 * @param select Custom select string (default '*, resource_access!inner (access_level)')
 	 * @param [team] Team id
+	 * @param [filters] Custom filters for the file query
 	 */
-	async getFile(id: number, select: string = '*, resource_access!inner (access_level)', team?: number): Promise<{ data: FileWithAccess | null; error: PostgrestError | null }> {
+	async getFile(id: number, select: string = '*, resource_access!inner (access_level)', team?: number, filters?: FileManagementFilters): Promise<{ data: FileWithAccess | null; error: PostgrestError | null }> {
 		const supabase = await createClient();
 		const { id: userId, error: userError } = await this.getCurrentUserId(supabase);
 		if (!userId || userError) return { data: null, error: userError };
@@ -174,8 +175,18 @@ export class FileManagementRepository {
 		const { data: accessRows, error: accessError } = await accessQuery.single();
 		if (accessError || !accessRows) return { data: null, error: accessError || new Error('No access to file') };
 
-		// Step 2: Fetch the file
-		const { data, error } = await supabase.from('files').select(select).eq('id', id).single();
+		// Step 2: Fetch the file with custom filters
+		let fileQuery = supabase.from('files').select(select).eq('id', id);
+		if (filters) {
+			if (filters.org) fileQuery = fileQuery.eq('org', filters.org);
+			if (filters.entity) fileQuery = fileQuery.eq('entity', filters.entity);
+			if (filters.folder_id) fileQuery = fileQuery.eq('folder_id', filters.folder_id);
+			if (filters.owner_type) fileQuery = fileQuery.eq('owner_type', filters.owner_type);
+			if (filters.owner_id) fileQuery = fileQuery.eq('owner_id', filters.owner_id);
+			if (filters.document) fileQuery = fileQuery.eq('document', filters.document);
+			if (filters.search) fileQuery = fileQuery.ilike('name', `%${filters.search}%`);
+		}
+		const { data, error } = await fileQuery.single();
 		if (error || !data || typeof data !== 'object') return { data: null, error };
 		return { data, error: null };
 	}
@@ -219,6 +230,8 @@ export class FileManagementRepository {
 		if (filters.owner_type) query = query.eq('owner_type', filters.owner_type);
 		if (filters.owner_id) query = query.eq('owner_id', filters.owner_id);
 		if (filters.search) query = query.ilike('name', `%${filters.search}%`);
+		if (filters.document) query = query.eq('document', filters.document);
+
 		const { data, error } = await query;
 		if (error || !Array.isArray(data)) return { data: [], error };
 		const result = data.map((file: any) => ({

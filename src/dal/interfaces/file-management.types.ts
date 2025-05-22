@@ -24,6 +24,7 @@ export interface FileManagementFilters {
 	folder_id?: number;
 	owner_type?: FileOwnershipType;
 	owner_id?: string;
+	document?: number;
 	search?: string;
 }
 

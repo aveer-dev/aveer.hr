@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { DocumentMetadata, DocumentState } from '../types';
 import { Tables } from '@/type/database.types';
 
-export const useDocumentState = (initialDoc: any, currentUserId: string | undefined, employees: any) => {
+export const useDocumentState = (initialDoc: any) => {
 	// State: name, documentName, doc, documentState, contentChanged
 	// Logic: updateDocMetadata, updateDocumentState, saveDocument, debouncedSaveCallback
 	// Return all state and handlers needed by the main Document component

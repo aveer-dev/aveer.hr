@@ -1504,6 +1504,7 @@ export type Database = {
           created_at: string
           document: number | null
           entity: number | null
+          folder: number | null
           id: number
           link: string
           name: string
@@ -1515,6 +1516,7 @@ export type Database = {
           created_at?: string
           document?: number | null
           entity?: number | null
+          folder?: number | null
           id?: number
           link: string
           name: string
@@ -1526,6 +1528,7 @@ export type Database = {
           created_at?: string
           document?: number | null
           entity?: number | null
+          folder?: number | null
           id?: number
           link?: string
           name?: string
@@ -1546,6 +1549,13 @@ export type Database = {
             columns: ["entity"]
             isOneToOne: false
             referencedRelation: "legal_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "links_folder_fkey"
+            columns: ["folder"]
+            isOneToOne: false
+            referencedRelation: "folders"
             referencedColumns: ["id"]
           },
           {
@@ -2839,7 +2849,7 @@ export type Database = {
       contract_type: "employee" | "contractor"
       employment_type: "full-time" | "part-time" | "contract"
       file_ownership_type: "employee" | "organisation"
-      file_type: "document" | "storage"
+      file_type: "document" | "storage" | "link"
       is_open: "open" | "closed" | "partial"
       leave_status_enum:
         | "pending"
@@ -2997,7 +3007,7 @@ export const Constants = {
       contract_type: ["employee", "contractor"],
       employment_type: ["full-time", "part-time", "contract"],
       file_ownership_type: ["employee", "organisation"],
-      file_type: ["document", "storage"],
+      file_type: ["document", "storage", "link"],
       is_open: ["open", "closed", "partial"],
       leave_status_enum: ["pending", "denied", "approved", "more", "cancelled"],
       leave_type_enum: ["paid", "sick", "maternity", "paternity", "unpaid"],

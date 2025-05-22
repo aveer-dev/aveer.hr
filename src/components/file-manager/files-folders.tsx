@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { updateFolderServerAction, getFileDownloadUrl, updateFileServerAction, getFileUrl } from './file.actions';
 import { toast } from 'sonner';
 import { ResourceDeleteMenuItem } from './delete-folder-menu-item';
-import { ResourceAccessDialog } from './ResourceAccessDialog';
+import { ResourceAccessDialog } from './resource-access-dialog';
 import { ResourceDetailsSheet } from './ResourceDetailsSheet';
 import { isUUID } from '@/lib/utils';
 import { FileActionsDropdown } from './FileActionsDropdown';
