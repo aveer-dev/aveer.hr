@@ -110,7 +110,7 @@ export const Notifications = ({ contractId, messages }: { contractId?: number; m
 				</AlertDialogHeader>
 
 				<section className="mt-8 min-h-96 space-y-8 overflow-scroll">
-					{_messages.length && (
+					{!!_messages.length && (
 						<Accordion type="single" collapsible className="w-full" defaultValue={String(activeMessageId)}>
 							{_messages?.map((message, index) => (
 								<AccordionItem key={message.id} value={String(message.id)}>
