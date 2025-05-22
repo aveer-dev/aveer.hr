@@ -32,7 +32,7 @@ export function useProfile({ id, email, org, enabled = true }: UseProfileOptions
 		try {
 			if (id) {
 				const result = await getProfileById(id);
-				setProfile(result);
+				setProfile(result.data);
 				setProfiles([]);
 			} else if (email) {
 				const result = await getProfileByEmail(email);
