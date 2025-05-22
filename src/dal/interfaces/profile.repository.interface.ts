@@ -1,4 +1,5 @@
 import { Tables } from '@/type/database.types';
+import { PostgrestError } from '@supabase/supabase-js';
 
 export type ProfileWithRelations = Tables<'profiles'> & {
 	nationality?: Tables<'countries'>;
@@ -10,7 +11,7 @@ export interface IProfileRepository {
 	 * @param id The profile ID
 	 * @returns The profile with its relations or null if not found
 	 */
-	getById(id: string): Promise<ProfileWithRelations | null>;
+	getById(id: string, select?: string): Promise<{ data: ProfileWithRelations | null; error: PostgrestError | null }>;
 
 	/**
 	 * Get a profile by email

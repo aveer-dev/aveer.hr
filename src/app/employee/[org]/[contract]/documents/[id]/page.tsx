@@ -1,8 +1,8 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Suspense } from 'react';
-import { TemplatePageComponant } from './document-page';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { DocumentPage } from '@/components/documents/docuement-page';
 
 export default async function TemplatePage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
 	const params = await props.params;
@@ -35,7 +35,7 @@ export default async function TemplatePage(props: { params: Promise<{ [key: stri
 								</div>
 							</div>
 						}>
-						<TemplatePageComponant org={params.org} docId={params.id} />
+						<DocumentPage org={params.org} docId={params.id} />
 					</Suspense>
 				</div>
 			</AlertDialogContent>

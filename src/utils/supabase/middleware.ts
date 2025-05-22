@@ -54,6 +54,10 @@ const handleSubdomainRouting = (request: NextRequest, domain: string, path: stri
 	if (subdomain && path.includes('firebase-messaging-sw')) {
 		return NextResponse.rewrite(new URL('/firebase-messaging-sw.js', request.url));
 	}
+	// Handle PDF worker
+	if (subdomain && path.includes('pdf.worker.min.mjs')) {
+		return NextResponse.rewrite(new URL('/pdf.worker.min.mjs', request.url));
+	}
 
 	// Handle employee subdomain redirects
 	if (request.nextUrl.pathname.includes('/employee')) {

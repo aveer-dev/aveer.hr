@@ -5,36 +5,41 @@ import { cn } from '@/lib/utils';
 import { useEmployeeProfileTeam } from '@/hooks';
 import { Skeleton } from './skeleton';
 import { Separator } from './separator';
+import { Tables } from '@/type/database.types';
 
-export const EmployeeHoverCard = ({ employeeId, org, triggerClassName, contentClassName }: { employeeId: string; org: string; triggerClassName?: string; contentClassName?: string }) => {
+export const EmployeeHoverCard = ({ employeeId, org, triggerClassName, contentClassName, profile }: { employeeId: string; org: string; triggerClassName?: string; contentClassName?: string; profile?: Tables<'profiles'> }) => {
 	const { data, error, loading } = useEmployeeProfileTeam(employeeId, org);
 
-	if (loading) {
+	if (loading && !profile) {
 		return <Skeleton className="inline h-[16.5px] w-28" />;
 	}
 
-	if (error || !data || data.length === 0) {
+	if (loading && !profile) {
+		return <Skeleton className="inline h-[16.5px] w-28" />;
+	}
+
+	if (!loading && (error || !data || data.length === 0)) {
 		return <div>Error loading employee profile.</div>;
 	}
 
 	return (
 		<HoverCard>
 			<HoverCardTrigger className={cn('underline decoration-dotted underline-offset-2', triggerClassName)}>
-				{data[0].profile.first_name} {data[0].profile.last_name}
+				{data?.[0]?.profile?.first_name || profile?.first_name} {data?.[0]?.profile?.last_name || profile?.last_name}
 			</HoverCardTrigger>
 
 			<HoverCardContent className={cn('p-3', contentClassName)} side="bottom" align="start" onClick={event => event.preventDefault()}>
 				<div className="flex flex-col gap-0.5">
 					<p className="text-xs font-medium">
-						{data[0].profile.first_name} {data[0].profile.last_name}
+						{data?.[0]?.profile?.first_name || profile?.first_name} {data?.[0]?.profile?.last_name || profile?.last_name}
 					</p>
-					<p className="text-xs text-muted-foreground">{data[0].profile.email}</p>
+					<p className="text-xs text-muted-foreground">{data?.[0]?.profile?.email || profile?.email}</p>
 				</div>
 
-				{data[0].job_title && <Separator className="my-2" />}
+				{data?.[0]?.job_title && <Separator className="my-2" />}
 
 				{data &&
-					data.map(employee => {
+					data?.map(employee => {
 						if (!employee.job_title) return null;
 
 						return (

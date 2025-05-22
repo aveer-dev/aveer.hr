@@ -20,14 +20,15 @@ import { useDocumentState } from './Document/useDocumentState';
 interface PROPS {
 	doc: Tables<'documents'>;
 	currentUserId?: string;
-	employees?: Tables<'contracts'>[] | null;
-	parentContainerId?: string;
+	fileId?: number;
 }
 
-export const Document = ({ doc: initialDoc, currentUserId, employees }: PROPS) => {
-	const { name, updateName, documentName, doc, setDoc, documentState, setDocumentState, contentChanged, setContentChanged, updateDocMetadata, updateDocumentState } = useDocumentState(initialDoc, currentUserId, employees);
+export const Document = ({ doc: initialDoc, currentUserId, fileId }: PROPS) => {
+	const { name, updateName, documentName, doc, setDoc, documentState, setDocumentState, contentChanged, setContentChanged, updateDocMetadata, updateDocumentState } = useDocumentState(initialDoc);
 	const router = useRouter();
 	const pathname = usePathname();
+
+	const resolvedFileId = fileId ?? doc.id;
 
 	const handleBack = useCallback(() => {
 		// Force a refresh of the previous page
@@ -35,18 +36,6 @@ export const Document = ({ doc: initialDoc, currentUserId, employees }: PROPS) =
 		router.push(documentsPath);
 		router.refresh();
 	}, [router, pathname]);
-
-	// Get current user info
-	const currentUser = useMemo(() => {
-		const employee = employees?.find(emp => (emp.profile as any).id === currentUserId);
-		if (!employee) return null;
-
-		return {
-			name: `${(employee.profile as any).first_name} ${(employee.profile as any).last_name}`,
-			id: currentUserId as string,
-			color: generateHslaColors(currentUserId as string)
-		};
-	}, [currentUserId, employees]);
 
 	const userPermittedAction = useCallback((): DOCUMENT_ACCESS_TYPE => {
 		if (currentUserId == doc.owner) return 'owner';
@@ -103,13 +92,8 @@ export const Document = ({ doc: initialDoc, currentUserId, employees }: PROPS) =
 		[contentChanged, saveDocument]
 	);
 
-	const { ydoc, provider, webrtcProvider, activeUsers } = useCollaboration(String(doc.id), currentUser);
-
 	const { editor } = useEditorSetup({
 		doc,
-		ydoc,
-		webrtcProvider,
-		currentUser,
 		userPermittedAction,
 		saveDocument,
 		debouncedSaveCallback,
@@ -121,22 +105,10 @@ export const Document = ({ doc: initialDoc, currentUserId, employees }: PROPS) =
 	if (!editor) return null;
 	return (
 		<section className="relative mx-auto max-w-5xl space-y-4">
-			<ActiveUsers users={activeUsers} />
+			{/* <ActiveUsers users={activeUsers} /> */}
 
 			<div className="relative space-y-6">
-				<DocumentHeader
-					name={name}
-					updateName={updateName}
-					doc={doc}
-					documentState={documentState}
-					userPermittedAction={userPermittedAction}
-					currentUserId={currentUserId}
-					onBack={handleBack}
-					initialDoc={initialDoc}
-					setDoc={setDoc}
-					updateDocMetadata={updateDocMetadata}
-					employees={employees}
-				/>
+				<DocumentHeader name={name} updateName={updateName} doc={doc} documentState={documentState} userPermittedAction={userPermittedAction} currentUserId={currentUserId} onBack={handleBack} setDoc={setDoc} updateDocMetadata={updateDocMetadata} fileId={resolvedFileId} />
 
 				<DocumentEditor editor={editor} doc={doc} userPermittedAction={userPermittedAction} />
 			</div>

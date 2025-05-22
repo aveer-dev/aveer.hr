@@ -68,37 +68,35 @@ export default async function RootLayout(props: { children: React.ReactNode; par
 			<Header />
 
 			<main className="relative mx-auto mt-[5%] min-h-screen w-full max-w-7xl px-4 py-0 pb-28 sm:px-10">
-				<section className="mx-auto max-w-3xl">
-					<div className="mb-8 flex flex-col items-start justify-between gap-8 border-b pb-8 sm:flex-row">
-						<div className="order-2 space-y-1 sm:order-1">
-							<h1 className="text-2xl font-bold">Hi, {contract?.profile?.first_name}</h1>
-							{contract && (
-								<div className="flex items-center gap-3 text-xs font-light">
-									<span className="capitalize">{contract?.job_title}</span> • <span className="capitalize">{contract?.org?.name}</span> • <span className="capitalize">{contract?.employment_type}</span>
-									<ContractStatus state={contract.status} start_date={contract.start_date || ''} end_date={contract?.end_date} />
-									{contract?.status == 'scheduled termination' && contract?.end_date && (
-										<>
-											•
-											<Badge className="h-fit gap-3 py-1 text-xs font-light" variant={contract?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
-												{format(contract?.end_date, 'PP')}
-											</Badge>
-										</>
-									)}
-								</div>
-							)}
-						</div>
-
-						<div className="order-1 flex w-full items-center justify-end gap-3 sm:order-2 sm:w-fit sm:justify-start">
-							<Notifications contractId={contract?.id} messages={messages} />
-
-							<EmployeePageSearch />
-
-							<EmployeeProfileSettings profile={contract?.profile as any} />
-						</div>
+				<section className="mb-8 flex flex-col items-start justify-between gap-8 border-b pb-8 sm:flex-row">
+					<div className="order-2 space-y-1 sm:order-1">
+						<h1 className="text-2xl font-bold">Hi, {contract?.profile?.first_name}</h1>
+						{contract && (
+							<div className="flex items-center gap-3 text-xs font-light">
+								<span className="capitalize">{contract?.job_title}</span> • <span className="capitalize">{contract?.org?.name}</span> • <span className="capitalize">{contract?.employment_type}</span>
+								<ContractStatus state={contract.status} start_date={contract.start_date || ''} end_date={contract?.end_date} />
+								{contract?.status == 'scheduled termination' && contract?.end_date && (
+									<>
+										•
+										<Badge className="h-fit gap-3 py-1 text-xs font-light" variant={contract?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>
+											{format(contract?.end_date, 'PP')}
+										</Badge>
+									</>
+								)}
+							</div>
+						)}
 					</div>
 
-					{children}
+					<div className="order-1 flex w-full items-center justify-end gap-3 sm:order-2 sm:w-fit sm:justify-start">
+						<Notifications contractId={contract?.id} messages={messages} />
+
+						<EmployeePageSearch />
+
+						<EmployeeProfileSettings profile={contract?.profile as any} />
+					</div>
 				</section>
+
+				{children}
 
 				<nav className="fixed bottom-0 left-1 right-1 z-10 flex w-full items-center justify-center gap-3 pb-6 pt-4 sm:pb-12">
 					<ProgressiveBlur className="pointer-events-none absolute bottom-0 left-0 -z-10 h-32 w-full" blurIntensity={6} />

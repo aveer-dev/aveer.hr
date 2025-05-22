@@ -1,7 +1,7 @@
 'use client';
 
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
-import { Bolt, Building2, CalendarDays, CalendarPlus, ChartPie, Files, UserPlus, Users } from 'lucide-react';
+import { Bolt, Building2, CalendarDays, CalendarPlus, ChartPie, Files, FolderTree, UserPlus, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NavLink } from './link';
 import { usePathname } from 'next/navigation';
@@ -14,6 +14,7 @@ export function NavMenu({ orgId, role }: { orgId: string; role: Database['public
 		{ label: 'People', href: '/', icon: Users, enabled: role == 'admin' },
 		{ label: 'Calendar', href: '/calendar', icon: CalendarDays, enabled: role == 'admin' },
 		{ label: 'Documents', href: '/documents', icon: Files, enabled: role == 'admin' },
+		{ label: 'File Manager', href: '/files', icon: FolderTree, enabled: role == 'admin' },
 		{ label: 'Open Roles', href: '/open-roles', icon: UserPlus, enabled: true },
 		{ label: 'Time Off', href: '/time-off', icon: CalendarPlus, enabled: role == 'admin' },
 		{ label: 'Performance', href: '/performance', icon: ChartPie, enabled: role == 'admin' },

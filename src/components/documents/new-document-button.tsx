@@ -2,20 +2,19 @@
 
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loader';
-import { Tables } from '@/type/database.types';
-import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { createDocument } from './document.actions';
 
-export const NewDocumentButton = ({ createDocument }: { createDocument: () => Promise<PostgrestSingleResponse<Tables<'documents'>>> }) => {
+export const NewDocumentButton = ({ org }: { org: string }) => {
 	const [isLoading, setLoading] = useState(false);
 	const router = useRouter();
 
 	const onCreateDocument = async () => {
 		setLoading(true);
-		const { data, error } = await createDocument();
+		const { data, error } = await createDocument({ org });
 		setLoading(false);
 
 		if (error) return toast.error(error.message);

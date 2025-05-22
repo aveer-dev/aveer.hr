@@ -2,13 +2,14 @@
 
 import { Input } from '@/components/ui/input';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { ChevronLeft, Cloud, CloudOff, CloudUpload, LockKeyhole, UnlockKeyhole, Globe, GlobeLock } from 'lucide-react';
+import { ChevronLeft, Cloud, CloudOff, CloudUpload, LockKeyhole, UnlockKeyhole, Globe, GlobeLock, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DocumentSettingsDialog } from '../document-settings-dialog';
 import { DocumentOptions } from '../document-options';
 import { Tables } from '@/type/database.types';
 import { DocumentMetadata } from '../types';
+import { ResourceAccessDialog } from '@/components/file-manager/resource-access-dialog';
+import { useState } from 'react';
 
 interface DocumentHeaderProps {
 	name: string;
@@ -18,13 +19,13 @@ interface DocumentHeaderProps {
 	userPermittedAction: () => string;
 	currentUserId?: string;
 	onBack?: () => void;
-	employees?: Tables<'contracts'>[] | null;
-	initialDoc: Tables<'documents'>;
 	setDoc: (updater: (prev: DocumentMetadata) => DocumentMetadata) => void;
 	updateDocMetadata: (prev: DocumentMetadata, updates: Partial<DocumentMetadata>) => DocumentMetadata;
+	fileId?: number;
 }
 
-export const DocumentHeader = ({ name, updateName, doc, documentState, userPermittedAction, currentUserId, onBack, employees, initialDoc, setDoc, updateDocMetadata }: DocumentHeaderProps) => {
+export const DocumentHeader = ({ name, updateName, doc, documentState, userPermittedAction, currentUserId, onBack, setDoc, updateDocMetadata, fileId }: DocumentHeaderProps) => {
+	const [accessDialogOpen, setAccessDialogOpen] = useState(false);
 	return (
 		<div className="mx-8 mb-8 flex items-center justify-between border-b pb-6">
 			<div className="flex w-full items-center gap-3 text-sm font-light text-muted-foreground">
@@ -96,16 +97,10 @@ export const DocumentHeader = ({ name, updateName, doc, documentState, userPermi
 
 				{currentUserId && (
 					<>
-						<DocumentSettingsDialog
-							employees={employees}
-							doc={{
-								...initialDoc,
-								name,
-								org: doc.org.subdomain
-							}}
-							currentUserId={currentUserId}
-							onStateChange={updates => setDoc(prev => updateDocMetadata(prev, updates as any))}
-						/>
+						<Button variant={'secondary'} onClick={() => setAccessDialogOpen(true)}>
+							<Share2 size={14} />
+						</Button>
+						<ResourceAccessDialog resourceId={fileId} resourceType="file" org={doc.org.subdomain} resourceName={name} open={accessDialogOpen} setOpen={setAccessDialogOpen} />
 						<DocumentOptions
 							currentUserId={currentUserId}
 							document={doc as unknown as Tables<'documents'>}
