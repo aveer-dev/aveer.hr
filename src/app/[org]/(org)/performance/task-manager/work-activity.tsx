@@ -178,7 +178,7 @@ export const WorkActivity = async ({ paramCycleId, org }: { paramCycleId?: strin
 
 const Issue = ({ issue, id }: { issue: PLANE_ISSUE; id?: string }) => {
 	return (
-		<Link href={'#'} legacyBehavior passHref>
+		<Link href={'#'} passHref>
 			<li className="flex cursor-pointer items-center rounded-md py-2 transition-all duration-500 hover:bg-accent hover:px-2">
 				<PriorityIcon state={issue.priority as any} />
 				<p className="ml-2 text-xs">
@@ -197,7 +197,7 @@ const Issue = ({ issue, id }: { issue: PLANE_ISSUE; id?: string }) => {
 
 const Person = ({ assignee, personIssuesDone, personIssues }: { assignee: PLANE_ASSIGNEE; personIssuesDone: number; personIssues: number }) => {
 	return (
-		<Link href={'#'} legacyBehavior passHref>
+		<Link href={'#'} passHref>
 			<li className="flex cursor-pointer items-center rounded-md py-2 transition-all duration-500 hover:bg-accent hover:px-2">
 				<div className="flex h-7 w-7 items-center justify-center rounded-full border text-xs">{assignee.first_name[0].toUpperCase()}</div>
 				<div className="ml-3">

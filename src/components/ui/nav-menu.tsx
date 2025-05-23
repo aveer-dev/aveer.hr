@@ -29,7 +29,7 @@ export function NavMenu({ orgId, role }: { orgId: string; role: Database['public
 					(item, index) =>
 						item.enabled && (
 							<NavigationMenuItem key={index}>
-								<NavLink org={orgId} href={item.href} legacyBehavior passHref>
+								<NavLink org={orgId} href={item.href} passHref>
 									<NavigationMenuLink active={item.href == '/' ? path.includes('people') || path == '/' || path == `/${orgId}` : path.includes(item.href)} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
 										<item.icon size={16} />
 										{item.label}
