@@ -23,9 +23,10 @@ interface Props {
 	answers: Tables<'appraisal_answers'>[];
 	questions: Tables<'template_questions'>[];
 	appraisalCycle: Tables<'appraisal_cycles'>;
+	customGroupNames?: { id: string; name: string }[];
 }
 
-export function EmployeeAppraisalViewer({ employees, answers, questions, appraisalCycle }: Props) {
+export function EmployeeAppraisalViewer({ employees, answers, questions, appraisalCycle, customGroupNames }: Props) {
 	const [selectedEmployee, setSelectedEmployee] = useState<string>(employees[0]?.id.toString() || '');
 
 	const currentEmployee = employees.find(e => e.id.toString() === selectedEmployee);
@@ -92,6 +93,22 @@ export function EmployeeAppraisalViewer({ employees, answers, questions, apprais
 				</div>
 			</div>
 		);
+	};
+
+	const groupNameMap = (customGroupNames || []).reduce(
+		(acc, curr) => {
+			if (curr && curr.id && typeof curr.name === 'string') acc[curr.id] = curr.name;
+			return acc;
+		},
+		{} as Record<string, string>
+	);
+	const defaultGroupLabels: Record<string, string> = {
+		growth_and_development: 'Growth and Development',
+		company_values: 'Company Values',
+		competencies: 'Competencies',
+		private_manager_assessment: 'Private Manager Assessment',
+		objectives: 'Objectives & Goals',
+		goal_scoring: 'Goal Scoring'
 	};
 
 	return (
@@ -178,7 +195,7 @@ export function EmployeeAppraisalViewer({ employees, answers, questions, apprais
 				{Object.entries(groupedQuestions).map(([group, groupQuestions]) => (
 					<Card key={group}>
 						<CardHeader>
-							<CardTitle className="text-base capitalize">{group.replace(/_/g, ' ')}</CardTitle>
+							<CardTitle className="text-base capitalize">{groupNameMap[group] || defaultGroupLabels[group] || group.replace(/_/g, ' ')}</CardTitle>
 						</CardHeader>
 
 						<CardContent className="space-y-6">

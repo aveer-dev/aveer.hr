@@ -12,7 +12,7 @@ export function ScaleIndicator({ value, max = 5, scaleLabels }: { value: number;
 					const description = labelObj?.description;
 
 					return label ? (
-						<div className="flex flex-col items-center justify-center gap-2">
+						<div key={i} className="flex flex-col items-center justify-center gap-2">
 							<Button variant={i + 1 == value ? 'secondary_success' : 'outline'} className="disabled:opacity-100" disabled size="icon">
 								{i + 1}
 							</Button>

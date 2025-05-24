@@ -7,6 +7,7 @@ import { BackButton } from '@/components/ui/back-button';
 import { AppraisalScoreSummary } from './appraisal-score-summary';
 import { EmployeeAppraisalViewer } from './employee-appraisal-viewer';
 import { ContractRepository, TeamRepository } from '@/dal';
+import { getQuestionTemplate } from '@/components/appraisal-forms/appraisal.actions';
 
 export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: string]: string }> }) => {
 	const { org, id } = await params;
@@ -25,7 +26,7 @@ export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: str
 	}
 
 	const teamsRepo = new TeamRepository();
-	const [{ data: answers, error: answersError }, { data: questions, error: questionsError }, teams] = await Promise.all([
+	const [{ data: answers, error: answersError }, { data: questions, error: questionsError }, teams, template] = await Promise.all([
 		supabase
 			.from('appraisal_answers')
 			.select('*')
@@ -33,7 +34,8 @@ export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: str
 			.in('contract_id', contracts?.map(c => c.id) || [])
 			.eq('appraisal_cycle_id', parseInt(id)),
 		supabase.from('template_questions').select('*').match({ org, template_id: appraisal.question_template }),
-		teamsRepo.getAllByOrg(org)
+		teamsRepo.getAllByOrg(org),
+		getQuestionTemplate(appraisal.question_template)
 	]);
 
 	if (answersError) {
@@ -86,7 +88,7 @@ export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: str
 					</TabsContent>
 
 					<TabsContent value="details">
-						<EmployeeAppraisalViewer employees={contracts as any} answers={answers as any} questions={questions as any} appraisalCycle={appraisal as any} />
+						<EmployeeAppraisalViewer employees={contracts as any} answers={answers as any} questions={questions as any} appraisalCycle={appraisal as any} customGroupNames={(template.custom_group_names as { id: string; name: string }[]) || []} />
 					</TabsContent>
 
 					{/* <TabsContent value="summary">

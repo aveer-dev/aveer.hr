@@ -7,7 +7,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHea
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Grip, Settings2, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Grip, Settings2, Trash2, Loader2, Pencil } from 'lucide-react';
 import { useState, useCallback } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -60,7 +60,8 @@ const templateSchema = z.object({
 	name: z.string().min(1, 'Template name is required'),
 	description: z.string().optional(),
 	is_draft: z.boolean(),
-	questions: z.array(questionSchema)
+	questions: z.array(questionSchema),
+	custom_group_names: z.array(z.object({ id: z.string(), name: z.string() })).optional()
 });
 
 type QuestionFormValues = z.infer<typeof questionSchema>;
@@ -163,9 +164,21 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 	const [selectedGroup, setSelectedGroup] = useState<QuestionFormValues['group']>('growth_and_development');
 	const [isSaving, setIsSaving] = useState(false);
 	const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+	const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+	const [customGroupNames, setCustomGroupNames] = useState<Record<string, string>>(
+		Array.isArray(template?.custom_group_names)
+			? (template?.custom_group_names as unknown[])
+					.filter((curr): curr is { id: string; name: string } => !!curr && typeof curr === 'object' && typeof (curr as any).id === 'string' && typeof (curr as any).name === 'string')
+					.reduce((acc: Record<string, string>, curr) => {
+						acc[curr.id] = curr.name;
+						return acc;
+					}, {})
+			: {}
+	);
+	const [groupNameInput, setGroupNameInput] = useState<string>('');
 	const router = useRouter();
 
-	const form = useForm<TemplateFormValues>({
+	const form = useForm<TemplateFormValues & { custom_group_names?: { id: string; name: string }[] }>({
 		resolver: zodResolver(templateSchema),
 		defaultValues: {
 			name: template?.name || '',
@@ -182,7 +195,8 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 					teams: q.team_ids?.map(id => id.toString()) || [],
 					group: (q.group as QuestionFormValues['group']) || 'growth_and_development',
 					scaleLabels: Array.isArray(q.scale_labels) ? (q.scale_labels.filter(item => item && typeof item === 'object' && !Array.isArray(item)) as { label?: string; description?: string }[]) : undefined
-				})) || []
+				})) || [],
+			custom_group_names: Array.isArray(template?.custom_group_names) ? ((template?.custom_group_names as unknown[]).filter(g => !!g && typeof g === 'object' && typeof (g as any).id === 'string' && typeof (g as any).name === 'string') as { id: string; name: string }[]) : []
 		}
 	});
 
@@ -246,17 +260,47 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 		}
 	}, [template?.id, org, form]);
 
+	const handleGroupNameEdit = (groupId: string) => {
+		setEditingGroupId(groupId);
+		setGroupNameInput(customGroupNames[groupId] || groupTitles[groupId] || '');
+	};
+
+	const handleGroupNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setGroupNameInput(e.target.value);
+	};
+
+	const handleGroupNameSave = (groupId: string) => {
+		const updated = { ...customGroupNames, [groupId]: groupNameInput };
+		setCustomGroupNames(updated);
+		setEditingGroupId(null);
+		// Update form value for custom_group_names
+		form.setValue(
+			'custom_group_names',
+			Object.entries(updated).map(([id, name]) => ({ id, name }))
+		);
+	};
+
+	const groupTitles: Record<string, string> = {
+		growth_and_development: 'Growth and Development',
+		company_values: 'Company Values',
+		competencies: 'Competencies',
+		private_manager_assessment: 'Private Manager Assessment'
+	};
+
 	const handleSave = async () => {
 		try {
 			setIsSaving(true);
 			const values = form.getValues();
+
+			const custom_group_names = form.getValues('custom_group_names') || Object.entries(customGroupNames).map(([id, name]) => ({ id, name }));
 
 			if (template) {
 				// Update existing template
 				await updateQuestionTemplate(template.id, {
 					name: values.name,
 					description: values.description,
-					is_draft: values.is_draft
+					is_draft: values.is_draft,
+					custom_group_names
 				});
 
 				await updateTemplateQuestions(
@@ -283,7 +327,8 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 					name: values.name,
 					description: values.description,
 					is_draft: values.is_draft,
-					org: org
+					org: org,
+					custom_group_names
 				});
 
 				await createTemplateQuestions(
@@ -385,8 +430,33 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 									{ id: 'private_manager_assessment', title: 'Private Manager Assessment' }
 								].map(group => (
 									<div key={group.id} className="space-y-4">
-										<div className="sticky top-0 !-mb-2 flex items-center justify-between rounded-md bg-background p-2 backdrop-blur-lg">
-											<FormLabel className="text-lg font-semibold">{group.title}</FormLabel>
+										<div className="sticky top-0 !-mb-2 flex items-center justify-between gap-4 rounded-md bg-background p-2 backdrop-blur-lg">
+											<FormLabel className="flex w-full items-center gap-2 text-lg font-semibold">
+												{editingGroupId === group.id ? (
+													<input
+														type="text"
+														className="w-full rounded border px-2 py-1 text-base font-semibold outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2"
+														value={groupNameInput}
+														onChange={handleGroupNameChange}
+														onBlur={() => handleGroupNameSave(group.id)}
+														onKeyDown={e => {
+															if (e.key === 'Enter') {
+																e.preventDefault();
+																handleGroupNameSave(group.id);
+															}
+														}}
+														autoFocus
+													/>
+												) : (
+													<>
+														{customGroupNames[group.id] || group.title}
+														<Button type="button" size="icon" variant="ghost" className="ml-2 h-8 w-8 p-0" onClick={() => handleGroupNameEdit(group.id)}>
+															<Pencil size={14} />
+														</Button>
+													</>
+												)}
+											</FormLabel>
+
 											<Button
 												variant="outline"
 												type="button"

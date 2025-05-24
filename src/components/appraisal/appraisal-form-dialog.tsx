@@ -4,13 +4,14 @@ import { Tables } from '@/type/database.types';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
-import { getTemplateQuestions } from '../appraisal-forms/appraisal.actions';
+import { getQuestionTemplate, getTemplateQuestions } from '../appraisal-forms/appraisal.actions';
 import { cn } from '@/lib/utils';
 import { AppraisalReviewSelector } from './appraisal-review-selector';
 import { EmployeeAppraisalForm } from './employee-appraisal-form';
 import { useRouter } from 'next/navigation';
 import { getTeamAppraisalAnswers } from './appraisal.actions';
 import { PageLoader } from '../ui/page-loader';
+
 interface Props {
 	org: string;
 	contract: Tables<'contracts'>;
@@ -54,6 +55,7 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 	const [selectedReviewType, setSelectedReviewType] = useState<'self' | 'manager' | 'summary'>('self');
 	const [selectedEmployee, setSelectedEmployee] = useState<Tables<'contracts'>>(contract);
 	const [teamMembersAnswers, setTeamMembersAnswers] = useState<Tables<'appraisal_answers'>[]>([]);
+	const [customGroupNames, setCustomGroupNames] = useState<{ id: string; name: string }[]>([]);
 
 	const isSelectedEmplyeesManager = selectedEmployee.direct_report == contract.id || (isManager && selectedEmployee.team == manager?.team);
 
@@ -63,8 +65,9 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 
 			try {
 				setIsLoading(true);
-				const fetchedQuestions = await getTemplateQuestions({ org, templateId: appraisalCycle.question_template });
+				const [fetchedQuestions, template] = await Promise.all([getTemplateQuestions({ org, templateId: appraisalCycle.question_template }), getQuestionTemplate(appraisalCycle.question_template)]);
 				setAllQuestions(fetchedQuestions);
+				setCustomGroupNames(template.custom_group_names as { id: string; name: string }[]);
 			} catch (error) {
 				console.error('Failed to fetch questions:', error);
 			} finally {
@@ -174,6 +177,7 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 							isSelectedEmplyeesManager={isSelectedEmplyeesManager}
 							groupedQuestions={groupedQuestions}
 							teams={teams}
+							customGroupNames={customGroupNames}
 						/>
 					</div>
 				</div>

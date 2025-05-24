@@ -37,6 +37,7 @@ interface Props {
 	setOpen: (open: boolean) => void;
 	groupedQuestions: GroupedQuestions;
 	teams?: Tables<'teams'>[] | null;
+	customGroupNames?: { id: string; name: string }[];
 }
 
 const isAppraisalSubmitted = (reviewType: 'self' | 'manager', answer?: Tables<'appraisal_answers'> | null): boolean => {
@@ -60,7 +61,7 @@ const canUpdateAppraisal = (reviewType: 'self' | 'manager', isManager: boolean, 
 	}
 };
 
-export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, appraisalCycle, activeTab, setActiveTab, answer, selectedReviewType, isManager, selectedEmployee, contract, isSelectedEmplyeesManager }: Props) => {
+export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, appraisalCycle, activeTab, setActiveTab, answer, selectedReviewType, isManager, selectedEmployee, contract, isSelectedEmplyeesManager, customGroupNames }: Props) => {
 	const router = useRouter();
 	const questionGroups = Object.keys(groupedQuestions) as QuestionGroup[];
 	// const [currentGroup, setCurrentGroup] = useState<QuestionGroup>(questionGroups[0]);
@@ -428,6 +429,23 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 		setActiveTab(previousGroup);
 	};
 
+	const groupNameMap = (customGroupNames || []).reduce(
+		(acc, curr) => {
+			if (curr && curr.id && typeof curr.name === 'string') acc[curr.id] = curr.name;
+			return acc;
+		},
+		{} as Record<string, string>
+	);
+	const defaultGroupLabels: Record<QuestionGroup, string> = {
+		growth_and_development: 'Growth & Development',
+		company_values: 'Company Values',
+		competencies: 'Competencies',
+		private_manager_assessment: 'Manager Assessment',
+		objectives: 'Objectives & Goals',
+		goal_scoring: 'Goal Scoring'
+	};
+	const getGroupLabel = (group: QuestionGroup) => groupNameMap[group] || defaultGroupLabels[group] || group;
+
 	const getPreviousGroupLabel = (group: QuestionGroup) => {
 		const previousGroupIndex = questionGroups.indexOf(group) - 1;
 		let previousGroup = questionGroups[previousGroupIndex];
@@ -436,9 +454,9 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 		if ((previousGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (previousGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
 			previousGroup = questionGroups[previousGroupIndex - 1];
-			return `: ${groupLabels[previousGroup as QuestionGroup]}`;
+			return `: ${getGroupLabel(previousGroup as QuestionGroup)}`;
 		}
-		return `: ${groupLabels[previousGroup as QuestionGroup]}`;
+		return `: ${getGroupLabel(previousGroup as QuestionGroup)}`;
 	};
 
 	const getNextGroupLabel = (group: QuestionGroup) => {
@@ -449,10 +467,10 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 		if ((nextGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (nextGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
 			nextGroup = questionGroups[nextGroupIndex + 1];
-			return `: ${groupLabels[nextGroup as QuestionGroup]}`;
+			return `: ${getGroupLabel(nextGroup as QuestionGroup)}`;
 		}
 
-		return `: ${groupLabels[nextGroup as QuestionGroup]}`;
+		return `: ${getGroupLabel(nextGroup as QuestionGroup)}`;
 	};
 
 	const groupLabels: Record<QuestionGroup, string> = {
@@ -596,7 +614,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 						})
 						.map(group => (
 							<TabsTrigger key={group} value={group} className="relative whitespace-nowrap">
-								{groupLabels[group]}
+								{getGroupLabel(group)}
 
 								{selectedReviewType !== 'summary' && group !== 'goal_scoring' && group !== 'objectives' && (
 									<div

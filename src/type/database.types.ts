@@ -1247,6 +1247,24 @@ export type Database = {
           },
         ]
       }
+      hocuspocus_documents: {
+        Row: {
+          id: string
+          update: string | null
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          update?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          update?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inbox: {
         Row: {
           created_at: string
@@ -2296,6 +2314,7 @@ export type Database = {
         Row: {
           created_at: string | null
           created_by: string
+          custom_group_names: Json[] | null
           description: string | null
           id: number
           is_draft: boolean
@@ -2306,6 +2325,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           created_by?: string
+          custom_group_names?: Json[] | null
           description?: string | null
           id?: number
           is_draft?: boolean
@@ -2316,6 +2336,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           created_by?: string
+          custom_group_names?: Json[] | null
           description?: string | null
           id?: number
           is_draft?: boolean
