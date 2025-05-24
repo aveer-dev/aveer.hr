@@ -26,7 +26,7 @@ export const useDocumentActions = ({ document, onActionComplete, onStateChange }
 		setDeleteState(false);
 
 		if (error) return toast.error(error.message);
-		router.replace('./');
+		router.replace('./documents');
 		onActionComplete?.();
 	};
 

@@ -114,8 +114,7 @@ export const createDocument = async ({ document, org, ownedBy = 'employee' }: { 
 		folder: null,
 		storage_url: null,
 		created_by: user.id,
-		created_at: null,
-		id: 0
+		created_at: null
 	};
 	const fileRes = await fileRepo.createFile(filePayload);
 
