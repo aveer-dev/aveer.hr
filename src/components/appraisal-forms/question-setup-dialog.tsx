@@ -159,8 +159,8 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 
 	return (
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
-			<AlertDialogContent className="flex h-screen max-w-full flex-col overflow-y-auto p-0">
-				<AlertDialogHeader className="mx-auto w-full max-w-2xl pt-16">
+			<AlertDialogContent className="flex h-screen max-w-full flex-col overflow-y-auto">
+				<AlertDialogHeader className="mx-auto w-full max-w-2xl pt-16 text-left">
 					<AlertDialogTitle className="flex items-center justify-between gap-2">
 						{question ? 'Edit Question' : 'Add Question'}
 						<Badge variant="secondary" className="text-xs">

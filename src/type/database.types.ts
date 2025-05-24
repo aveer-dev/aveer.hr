@@ -2318,7 +2318,7 @@ export type Database = {
           description: string | null
           id: number
           is_draft: boolean
-          name: string
+          name: string | null
           org: string
           updated_at: string | null
         }
@@ -2329,7 +2329,7 @@ export type Database = {
           description?: string | null
           id?: number
           is_draft?: boolean
-          name: string
+          name?: string | null
           org: string
           updated_at?: string | null
         }
@@ -2340,7 +2340,7 @@ export type Database = {
           description?: string | null
           id?: number
           is_draft?: boolean
-          name?: string
+          name?: string | null
           org?: string
           updated_at?: string | null
         }

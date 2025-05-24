@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Grip, Settings2, Trash2, Loader2, Pencil } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
@@ -23,6 +23,7 @@ import { Separator } from '../ui/separator';
 import { Label } from '../ui/label';
 import { LoadingSpinner } from '../ui/loader';
 import { DeleteTemplateDialog } from './delete-template-dialog';
+import { useDebounce } from '@/hooks/use-debounce';
 
 const questionSchema = z
 	.object({
@@ -157,6 +158,9 @@ const QuestionItem = ({ question, onEdit, onRemove }: QuestionItemProps) => {
 	);
 };
 
+// Deep equality check (if lodash not available)
+const deepEqual = (a: any, b: any) => JSON.stringify(a) === JSON.stringify(b);
+
 export const QuestionTemplateDialog = ({ children, onSave, teams, template, template_questions, org }: QuestionTemplateDialogProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [isQuestionDialogOpen, setIsQuestionDialogOpen] = useState(false);
@@ -177,6 +181,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 	);
 	const [groupNameInput, setGroupNameInput] = useState<string>('');
 	const router = useRouter();
+	const lastAutoSaved = useRef<any>(null);
 
 	const form = useForm<TemplateFormValues & { custom_group_names?: { id: string; name: string }[] }>({
 		resolver: zodResolver(templateSchema),
@@ -207,18 +212,47 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 		})
 	);
 
-	const handleDragEnd = (event: { active: any; over: any }) => {
+	const handleDragEnd = async (event: { active: any; over: any }) => {
 		const { active, over } = event;
 
 		if (active.id !== over.id) {
 			const questions = form.getValues('questions');
 			const oldIndex = questions.findIndex(q => q.id === active.id);
 			const newIndex = questions.findIndex(q => q.id === over.id);
-			form.setValue('questions', arrayMove(questions, oldIndex, newIndex));
+			const newQuestions = arrayMove(questions, oldIndex, newIndex);
+			form.setValue('questions', newQuestions);
+			// Instantly update questions in backend (no debounce)
+			if (template) {
+				toast.promise(
+					updateTemplateQuestions(
+						template.id,
+						newQuestions.map((q, index) => ({
+							id: parseInt(q.id),
+							question: q.question,
+							manager_question: q.managerQuestion,
+							type: q.type,
+							options: q.options,
+							required: q.required,
+							team_ids: q.teams.map(id => parseInt(id)),
+							order_index: index,
+							template_id: template.id,
+							org: org,
+							group: q.group,
+							scale_labels: q.scaleLabels || null
+						})),
+						template_questions || []
+					),
+					{
+						loading: 'Reordering questions...',
+						success: 'Questions reordered',
+						error: 'Failed to reorder questions'
+					}
+				);
+			}
 		}
 	};
 
-	const handleAddQuestion = (question: QuestionFormValues) => {
+	const handleAddQuestion = async (question: QuestionFormValues) => {
 		const currentQuestions = form.getValues('questions');
 		const questionWithGroup = { ...question, group: selectedGroup };
 		const updatedQuestions = editingQuestion ? currentQuestions.map(q => (q.id === question.id ? questionWithGroup : q)) : [...currentQuestions, questionWithGroup];
@@ -230,6 +264,33 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 
 		if (editingQuestion) {
 			setEditingQuestion(undefined);
+		}
+		if (template) {
+			toast.promise(
+				updateTemplateQuestions(
+					template.id,
+					updatedQuestions.map((q, index) => ({
+						id: parseInt(q.id),
+						question: q.question,
+						manager_question: q.managerQuestion,
+						type: q.type,
+						options: q.options,
+						required: q.required,
+						team_ids: q.teams.map(id => parseInt(id)),
+						order_index: index,
+						template_id: template.id,
+						org: org,
+						group: q.group,
+						scale_labels: q.scaleLabels || null
+					})),
+					template_questions || []
+				),
+				{
+					loading: 'Saving question...',
+					success: 'Questions updated',
+					error: 'Failed to update questions'
+				}
+			);
 		}
 	};
 
@@ -273,11 +334,13 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 		const updated = { ...customGroupNames, [groupId]: groupNameInput };
 		setCustomGroupNames(updated);
 		setEditingGroupId(null);
-		// Update form value for custom_group_names
 		form.setValue(
 			'custom_group_names',
 			Object.entries(updated).map(([id, name]) => ({ id, name }))
 		);
+		if (template) {
+			debouncedAutoSave(form.getValues());
+		}
 	};
 
 	const groupTitles: Record<string, string> = {
@@ -381,12 +444,60 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 		}
 	};
 
+	const debouncedAutoSave = useDebounce(async (values: TemplateFormValues & { custom_group_names?: { id: string; name: string }[] }) => {
+		if (template) {
+			toast.promise(
+				(async () => {
+					await updateQuestionTemplate(template.id, {
+						name: values.name,
+						description: values.description,
+						is_draft: true,
+						custom_group_names: values.custom_group_names
+					});
+					await updateTemplateQuestions(
+						template.id,
+						values.questions.map((q, index) => ({
+							id: parseInt(q.id),
+							question: q.question,
+							manager_question: q.managerQuestion,
+							type: q.type,
+							options: q.options,
+							required: q.required,
+							team_ids: q.teams.map(id => parseInt(id)),
+							order_index: index,
+							template_id: template.id,
+							org: org,
+							group: q.group,
+							scale_labels: q.scaleLabels || null
+						})),
+						template_questions || []
+					);
+				})(),
+				{
+					loading: 'Saving...',
+					success: 'Saved',
+					error: 'Auto-save failed'
+				}
+			);
+		}
+	}, 1000);
+
+	// Watch form values for auto-save
+	useEffect(() => {
+		const values = form.getValues();
+		if (form.formState.isDirty && form.formState.isValid && template && !deepEqual(values, lastAutoSaved.current)) {
+			debouncedAutoSave(values);
+			lastAutoSaved.current = values;
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [form.formState.isDirty, form.formState.isValid, template, debouncedAutoSave]);
+
 	return (
 		<>
 			<AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
 				<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 
-				<AlertDialogContent className="flex h-screen max-w-full flex-col overflow-y-auto p-0">
+				<AlertDialogContent className="flex h-screen max-w-full flex-col overflow-y-auto py-0">
 					<AlertDialogHeader className="mx-auto mb-8 w-full max-w-2xl pt-16">
 						<AlertDialogTitle>{template ? 'Edit' : 'Create'} Question Template</AlertDialogTitle>
 						<AlertDialogDescription>{template ? 'Edit' : 'Create'} a new question template to be used in the appraisal process</AlertDialogDescription>
@@ -495,11 +606,19 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 																		setSelectedGroup(question.group);
 																		setIsQuestionDialogOpen(true);
 																	}}
-																	onRemove={() => {
+																	onRemove={async () => {
 																		const questions = form.getValues('questions');
 																		const updatedQuestions = questions.filter(q => q.id !== question.id);
 																		form.setValue('questions', updatedQuestions);
 																		form.reset({ ...form.getValues(), questions: updatedQuestions });
+																		// Instantly update questions in backend (no debounce)
+																		if (template) {
+																			toast.promise(deleteQuestionTemplate(template.id, question.id), {
+																				loading: 'Removing question...',
+																				success: 'Question removed',
+																				error: 'Failed to remove question'
+																			});
+																		}
 																	}}
 																/>
 															))}

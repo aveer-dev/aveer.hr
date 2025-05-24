@@ -28,25 +28,25 @@ export const AppraisalsPage = async ({ params }: { params: Promise<{ [key: strin
 			</div>
 
 			<Tabs defaultValue="templates" className="w-full">
-				<div className="flex items-center justify-between">
+				<div className="flex flex-col items-start justify-between gap-4 md:flex-row">
 					<TabsList className="flex w-fit">
 						<TabsTrigger value="templates">Question Templates</TabsTrigger>
 						<TabsTrigger value="cycles">Appraisal Cycles</TabsTrigger>
 					</TabsList>
 
-					<div className="flex gap-2">
-						<TabsContent value="cycles" className="m-0">
+					<div className="flex w-full gap-2 md:w-fit">
+						<TabsContent value="cycles" className="m-0 w-full">
 							<AppraisalCycleDialog org={org}>
-								<Button>
+								<Button className="w-full md:w-fit">
 									<PlusIcon size={12} className="mr-2" />
 									Add Appraisal Cycle
 								</Button>
 							</AppraisalCycleDialog>
 						</TabsContent>
 
-						<TabsContent value="templates" className="m-0">
+						<TabsContent value="templates" className="m-0 w-full">
 							<QuestionTemplateDialog teams={teams} org={org}>
-								<Button>
+								<Button className="w-full md:w-fit">
 									<PlusIcon size={12} className="mr-2" />
 									Create Question Template
 								</Button>
