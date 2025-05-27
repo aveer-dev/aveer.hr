@@ -1,11 +1,13 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { QuestionTemplateDialog } from './question-template-dialog';
 import { Tables } from '@/type/database.types';
 import { EmployeeHoverCard } from '../ui/employee-hover-card';
 import { format } from 'date-fns';
+import { Button } from '../ui/button';
+import { Separator } from '../ui/separator';
+
 interface AppraisalQuestionsListProps {
 	org: string;
 	teams: Tables<'teams'>[];
@@ -33,23 +35,25 @@ export const AppraisalQuestionsTemplates = async ({ org, teams }: AppraisalQuest
 	}
 
 	return (
-		<div className="space-y-8">
+		<div className="space-y-1">
 			{data.map(template => (
-				<QuestionTemplateDialog key={template.id} teams={teams} org={org} template={template}>
-					<Card className="w-full cursor-pointer">
-						<CardHeader className="p-3 pb-2">
-							<CardTitle className="text-sm font-normal">{template.name}</CardTitle>
-							{template.description && <CardDescription className="text-xs">{template.description}</CardDescription>}
-						</CardHeader>
+				<>
+					<QuestionTemplateDialog key={template.id} teams={teams} org={org} template={template}>
+						<Button className="h-[unset] w-full justify-between gap-2 p-4 text-left" variant="ghost">
+							<h4 className="text-sm font-normal">{template.name}</h4>
 
-						<CardContent className="flex justify-between gap-2 p-3">
-							<div className="text-xs text-muted-foreground">
-								Created by: <EmployeeHoverCard employeeId={template.created_by.id} org={org} triggerClassName="text-muted-foreground" contentClassName="text-xs" />
+							<div className="flex justify-between gap-4">
+								<div className="text-xs text-muted-foreground">
+									Created by: <EmployeeHoverCard employeeId={template.created_by.id} org={org} triggerClassName="text-muted-foreground" contentClassName="text-xs" />
+								</div>
+								<Separator orientation="vertical" />
+								<div className="text-xs text-muted-foreground">Last updated: {format(template.updated_at || new Date(), 'MMM d, yyyy')}</div>
 							</div>
-							<div className="text-xs text-muted-foreground">Last updated: {format(template.updated_at || new Date(), 'MMM d, yyyy')}</div>
-						</CardContent>
-					</Card>
-				</QuestionTemplateDialog>
+						</Button>
+					</QuestionTemplateDialog>
+
+					<Separator />
+				</>
 			))}
 		</div>
 	);

@@ -18,7 +18,7 @@ interface AppraisalCycleCardDialogProps {
 }
 
 const AppraisalCycleCardDialog = ({ org, cycle }: AppraisalCycleCardDialogProps) => (
-	<Button className="h-[unset] w-full justify-between gap-2 p-3 px-0 hover:bg-transparent hover:text-primary" variant="ghost">
+	<Button className="h-[unset] w-full cursor-auto justify-between gap-2 p-3 px-0 hover:bg-transparent hover:text-primary" variant="ghost">
 		<Link href={`./performance/${cycle.id}`} className={cn(buttonVariants({ variant: 'link' }), 'max-w-md truncate px-0 text-sm font-medium')}>
 			{cycle.name}
 		</Link>
@@ -64,12 +64,14 @@ export const AppraisalCyclesList = async ({ org }: Props) => {
 						<Separator className="w-full max-w-3xl" />
 					</div>
 
-					{cycles
-						.filter(cycle => new Date(cycle.start_date) <= new Date() && new Date(cycle.end_date) >= new Date())
-						.map(cycle => {
-							const isActive = new Date(cycle.start_date) <= new Date() && new Date(cycle.end_date) >= new Date();
-							return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} badge={isActive ? <Badge variant="outline">Active</Badge> : null} />;
-						})}
+					<div className="divide-y">
+						{cycles
+							.filter(cycle => new Date(cycle.start_date) <= new Date() && new Date(cycle.end_date) >= new Date())
+							.map(cycle => {
+								const isActive = new Date(cycle.start_date) <= new Date() && new Date(cycle.end_date) >= new Date();
+								return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} badge={isActive ? <Badge variant="outline">Active</Badge> : null} />;
+							})}
+					</div>
 				</div>
 			)}
 
@@ -81,12 +83,14 @@ export const AppraisalCyclesList = async ({ org }: Props) => {
 						<Separator className="w-full max-w-3xl" />
 					</div>
 
-					{cycles
-						.filter(cycle => new Date(cycle.end_date) < new Date())
-						.map(cycle => {
-							const isPast = new Date(cycle.end_date) < new Date();
-							return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} badge={isPast ? <Badge variant="secondary">Past</Badge> : null} />;
-						})}
+					<div className="divide-y">
+						{cycles
+							.filter(cycle => new Date(cycle.end_date) < new Date())
+							.map(cycle => {
+								const isPast = new Date(cycle.end_date) < new Date();
+								return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} badge={isPast ? <Badge variant="secondary">Past</Badge> : null} />;
+							})}
+					</div>
 				</div>
 			)}
 		</div>

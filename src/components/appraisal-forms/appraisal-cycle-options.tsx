@@ -17,7 +17,7 @@ export const AppraisalCycleOptions = ({ cycle, org }: { cycle: Tables<'appraisal
 					</Button>
 				</DropdownMenuTrigger>
 
-				<DropdownMenuContent className="w-56" align="end">
+				<DropdownMenuContent className="w-44" align="end">
 					<AppraisalCycleDialog key={cycle.id} org={org} cycle={cycle}>
 						<DropdownMenuItem
 							onSelect={e => {

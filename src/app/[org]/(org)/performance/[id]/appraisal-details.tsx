@@ -8,7 +8,6 @@ import { AppraisalScoreSummary } from './appraisal-score-summary';
 import { EmployeeAppraisalViewer } from './employee-appraisal-viewer';
 import { ContractRepository, TeamRepository } from '@/dal';
 import { getQuestionTemplate } from '@/components/appraisal-forms/appraisal.actions';
-import { Separator } from '@/components/ui/separator';
 import { AppraisalCycleDialog } from '@/components/appraisal-forms/appraisal-cycle-dialog';
 import { Button } from '@/components/ui/button';
 import { ListCollapse } from 'lucide-react';
