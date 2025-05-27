@@ -7,6 +7,7 @@ import { EmployeeHoverCard } from '../ui/employee-hover-card';
 import { format } from 'date-fns';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
+import { Fragment } from 'react';
 
 interface AppraisalQuestionsListProps {
 	org: string;
@@ -37,8 +38,8 @@ export const AppraisalQuestionsTemplates = async ({ org, teams }: AppraisalQuest
 	return (
 		<div className="space-y-1">
 			{data.map(template => (
-				<>
-					<QuestionTemplateDialog key={template.id} teams={teams} org={org} template={template}>
+				<Fragment key={template.id}>
+					<QuestionTemplateDialog teams={teams} org={org} template={template}>
 						<Button className="h-[unset] w-full justify-between gap-2 p-4 text-left" variant="ghost">
 							<h4 className="text-sm font-normal">{template.name}</h4>
 
@@ -53,7 +54,7 @@ export const AppraisalQuestionsTemplates = async ({ org, teams }: AppraisalQuest
 					</QuestionTemplateDialog>
 
 					<Separator />
-				</>
+				</Fragment>
 			))}
 		</div>
 	);
