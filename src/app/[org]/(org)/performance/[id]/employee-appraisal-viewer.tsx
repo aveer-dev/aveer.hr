@@ -26,7 +26,7 @@ interface Props {
 	customGroupNames?: { id: string; name: string }[];
 }
 
-export function EmployeeAppraisalViewer({ employees, answers, questions, appraisalCycle, customGroupNames }: Props) {
+export function EmployeeAppraisalViewer({ employees, answers, questions, customGroupNames }: Props) {
 	const [selectedEmployee, setSelectedEmployee] = useState<string>(employees[0]?.id.toString() || '');
 
 	const currentEmployee = employees.find(e => e.id.toString() === selectedEmployee);
@@ -113,9 +113,7 @@ export function EmployeeAppraisalViewer({ employees, answers, questions, apprais
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<h2 className="text-lg font-semibold"></h2>
-
+			<div className="mt-10 flex justify-between">
 				<Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
 					<SelectTrigger className="w-[250px]">
 						<SelectValue placeholder="Select an employee" />
@@ -130,26 +128,22 @@ export function EmployeeAppraisalViewer({ employees, answers, questions, apprais
 				</Select>
 			</div>
 
-			<div className="rounded-lg border bg-card">
-				<div className="p-4 text-sm text-muted-foreground">
-					<div className="flex justify-between">
-						<div className="space-y-4">
-							<p>
-								Employee: {currentEmployee.profile.first_name} {currentEmployee.profile.last_name}
-							</p>
-							<p>Position: {currentEmployee.job_title}</p>
-						</div>
-
-						{employeeAnswer && (
-							<div className="space-y-4 text-right">
-								<p>Self Review: {employeeAnswer.employee_submission_date ? format(new Date(employeeAnswer.employee_submission_date), 'MMM d, yyyy') : 'Not submitted'}</p>
-								<p>Manager Review: {employeeAnswer.manager_submission_date ? format(new Date(employeeAnswer.manager_submission_date), 'MMM d, yyyy') : 'Not submitted'}</p>
-							</div>
-						)}
-					</div>
+			<div className="!mt-12 flex items-end justify-between">
+				<div className="space-y-1">
+					<h3 className="text-sm font-medium">
+						{currentEmployee.profile.first_name} {currentEmployee.profile.last_name}
+					</h3>
+					<p className="text-xs text-muted-foreground">Position: {currentEmployee.job_title}</p>
 				</div>
-			</div>
 
+				{employeeAnswer && (
+					<div className="flex items-center justify-end gap-4 text-xs text-muted-foreground">
+						<p>Self Review: {employeeAnswer.employee_submission_date ? format(new Date(employeeAnswer.employee_submission_date), 'MMM d, yyyy') : 'Not submitted'}</p>
+						<Separator className="h-4" orientation="vertical" />
+						<p>Manager Review: {employeeAnswer.manager_submission_date ? format(new Date(employeeAnswer.manager_submission_date), 'MMM d, yyyy') : 'Not submitted'}</p>
+					</div>
+				)}
+			</div>
 			{objectives.length > 0 && (
 				<Card>
 					<CardHeader>
@@ -161,16 +155,16 @@ export function EmployeeAppraisalViewer({ employees, answers, questions, apprais
 							<div key={objective.id} className="space-y-6">
 								{index > 0 && <Separator />}
 								<div className="mb-8">
-									<h2 className="mb-1 text-xs font-light text-muted-foreground">objective:</h2>
+									<h2 className="mb-1 text-xs font-light text-muted-foreground">objective {index + 1}:</h2>
 									<h3 className="text-sm font-medium">{objective.title}</h3>
 									<p className="mt-2 text-xs text-muted-foreground">{objective.description}</p>
 								</div>
 
 								<div className="space-y-8">
-									{objective.goals.map(goal => (
-										<div key={goal.id} className="ml-4 space-y-6">
+									{objective.goals.map((goal, index) => (
+										<div key={goal.id} className="space-y-6">
 											<div>
-												<h3 className="mb-1 text-xs font-light text-muted-foreground">goal:</h3>
+												<h3 className="mb-1 text-xs font-light text-muted-foreground">goal {index + 1}:</h3>
 
 												<div className="flex items-center gap-2">
 													<h4 className="text-sm font-medium">{goal.title}</h4>

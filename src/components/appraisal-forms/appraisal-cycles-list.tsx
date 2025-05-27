@@ -1,14 +1,12 @@
 import { createClient } from '@/utils/supabase/server';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
-import { AppraisalCycleDialog } from './appraisal-cycle-dialog';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import { Button } from '../ui/button';
-import { EmployeeHoverCard } from '../ui/employee-hover-card';
+import { Button, buttonVariants } from '../ui/button';
 import { ReactNode } from 'react';
-
+import { cn } from '@/lib/utils';
+import { AppraisalCycleOptions } from './appraisal-cycle-options';
 interface Props {
 	org: string;
 }
@@ -19,34 +17,20 @@ interface AppraisalCycleCardDialogProps {
 	badge?: ReactNode;
 }
 
-const AppraisalCycleCardDialog = ({ org, cycle, badge }: AppraisalCycleCardDialogProps) => (
-	<AppraisalCycleDialog key={cycle.id} org={org} cycle={cycle}>
-		<Card className="w-full cursor-pointer">
-			<CardHeader className="p-4">
-				<div className="flex items-center justify-between">
-					<div className="space-y-1">
-						<CardTitle className="text-base font-medium">{cycle.name}</CardTitle>
-						<CardDescription className="text-xs">
-							{format(new Date(cycle.start_date), 'MMM d, yyyy')} - {format(new Date(cycle.end_date), 'MMM d, yyyy')}
-						</CardDescription>
-					</div>
-					<div className="flex items-center gap-2">{badge}</div>
-				</div>
-			</CardHeader>
-			<CardContent className="p-4 pt-0">
-				<div className="flex items-end justify-between gap-2 text-xs text-muted-foreground">
-					<span>
-						Created by: <EmployeeHoverCard employeeId={cycle.created_by.id} org={org} triggerClassName="text-muted-foreground" contentClassName="text-xs" />
-					</span>
-					<Link href={`/${org}/performance/${cycle.id}`}>
-						<Button variant="secondary" className="border">
-							Review Appraisal
-						</Button>
-					</Link>
-				</div>
-			</CardContent>
-		</Card>
-	</AppraisalCycleDialog>
+const AppraisalCycleCardDialog = ({ org, cycle }: AppraisalCycleCardDialogProps) => (
+	<Button className="h-[unset] w-full justify-between gap-2 p-3 px-0 hover:bg-transparent hover:text-primary" variant="ghost">
+		<Link href={`./performance/${cycle.id}`} className={cn(buttonVariants({ variant: 'link' }), 'max-w-md truncate px-0 text-sm font-medium')}>
+			{cycle.name}
+		</Link>
+
+		<div className="flex items-center gap-4">
+			<div className="max-w-sm truncate">
+				{format(new Date(cycle.start_date), 'MMM d, yyyy')} - {format(new Date(cycle.end_date), 'MMM d, yyyy')}
+			</div>
+
+			<AppraisalCycleOptions cycle={cycle} org={org} />
+		</div>
+	</Button>
 );
 
 export const AppraisalCyclesList = async ({ org }: Props) => {
@@ -70,10 +54,16 @@ export const AppraisalCyclesList = async ({ org }: Props) => {
 	}
 
 	return (
-		<div className="space-y-12">
+		<div className="mt-12 space-y-12">
 			{/* Active Appraisals Section */}
+
 			{cycles.some(cycle => new Date(cycle.start_date) <= new Date() && new Date(cycle.end_date) >= new Date()) && (
 				<div className="space-y-4">
+					<div className="flex items-center justify-between gap-2">
+						<h3 className="w-fit text-sm font-medium text-muted-foreground">Active Appraisals</h3>
+						<Separator className="w-full max-w-3xl" />
+					</div>
+
 					{cycles
 						.filter(cycle => new Date(cycle.start_date) <= new Date() && new Date(cycle.end_date) >= new Date())
 						.map(cycle => {

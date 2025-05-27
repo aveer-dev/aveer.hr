@@ -46,17 +46,17 @@ const isAppraisalSubmitted = (reviewType: 'self' | 'manager', answer?: Tables<'a
 };
 
 const canUpdateAppraisal = (reviewType: 'self' | 'manager', isManager: boolean, isSelectedEmplyeesManager: boolean, selectedEmployee: Tables<'contracts'>, contract: Tables<'contracts'>, dueDatePassed: boolean, answer?: Tables<'appraisal_answers'> | null): boolean => {
-	// First check if already submitted
-	if (isAppraisalSubmitted(reviewType, answer)) return false;
-
 	// Then check due date
 	if (dueDatePassed) return false;
 
-	// Check permissions based on review type
 	if (reviewType === 'self') {
-		return selectedEmployee.id === contract.id;
+		// Employees can update their self review even after submission,
+		// until their manager submits their review
+		const managerSubmitted = !!answer?.manager_submission_date;
+		return selectedEmployee.id === contract.id && !managerSubmitted;
 	} else {
-		// manager review
+		// For manager review, prevent update if already submitted
+		if (isAppraisalSubmitted('manager', answer)) return false;
 		return isManager && isSelectedEmplyeesManager;
 	}
 };
@@ -64,7 +64,6 @@ const canUpdateAppraisal = (reviewType: 'self' | 'manager', isManager: boolean, 
 export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, appraisalCycle, activeTab, setActiveTab, answer, selectedReviewType, isManager, selectedEmployee, contract, isSelectedEmplyeesManager, customGroupNames }: Props) => {
 	const router = useRouter();
 	const questionGroups = Object.keys(groupedQuestions) as QuestionGroup[];
-	// const [currentGroup, setCurrentGroup] = useState<QuestionGroup>(questionGroups[0]);
 	const [managerAnswers, setManagerAnswers] = useState<AnswersState>({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [answers, setAnswers] = useState<AnswersState>({});

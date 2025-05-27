@@ -1,26 +1,23 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Tables } from '@/type/database.types';
-import { format } from 'date-fns';
 
-export const AppraisalOverview = async ({ contracts, appraisal, answers }: { contracts: Tables<'contracts'>[]; appraisal: Tables<'appraisal_cycles'>; answers: Tables<'appraisal_answers'>[] }) => {
+export const AppraisalOverview = async ({ contracts, answers }: { contracts: Tables<'contracts'>[]; answers: Tables<'appraisal_answers'>[] }) => {
 	// Calculate progress for each employee
 	const employeeProgress = contracts?.map(contract => {
 		const employeeAnswer = answers?.find(a => a.contract_id === contract.id);
-		const managerAnswer = answers?.find(a => a.manager_contract_id === contract.id);
 
 		// If no answer exists, progress is 0
 		const employeeProgress = employeeAnswer?.employee_submission_date ? 100 : 0;
-		const managerProgress = managerAnswer?.manager_submission_date ? 100 : 0;
+		const managerProgress = employeeAnswer?.manager_submission_date ? 100 : 0;
 
 		return {
 			contract,
 			employeeProgress,
 			managerProgress,
 			employeeAnswer,
-			managerAnswer,
-			hasStarted: !!employeeAnswer || !!managerAnswer
+			hasStarted: !!employeeAnswer
 		};
 	});
 
@@ -34,27 +31,6 @@ export const AppraisalOverview = async ({ contracts, appraisal, answers }: { con
 
 	return (
 		<div className="">
-			<Card className="bg-accent">
-				<CardContent className="space-y-6 p-6">
-					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-						<div className="flex items-center gap-2">
-							<h3 className="text-sm font-medium text-muted-foreground">Self-Review Due Date</h3>
-							<p className="text-sm">{format(new Date(appraisal.self_review_due_date), 'MMM d, yyyy')}</p>
-						</div>
-						<div className="flex items-center gap-2">
-							<h3 className="text-sm font-medium text-muted-foreground">Manager Review Due Date</h3>
-							<p className="text-sm">{format(new Date(appraisal.manager_review_due_date), 'MMM d, yyyy')}</p>
-						</div>
-					</div>
-				</CardContent>
-			</Card>
-
-			{/* <Alert variant="default" className="mt-6">
-				<AlertCircle className="h-4 w-4" />
-				<AlertTitle className="text-sm">Appraisal Cycle is currently active</AlertTitle>
-				<AlertDescription className="text-sm font-normal text-muted-foreground">You can still submit your self-review and manager review for this cycle.</AlertDescription>
-			</Alert> */}
-
 			<section className="mb-12 mt-12 space-y-8">
 				<h2 className="text-sm text-muted-foreground">Overall Progress</h2>
 

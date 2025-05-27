@@ -25,9 +25,10 @@ interface props {
 	org: string;
 	cycle?: Tables<'appraisal_cycles'>;
 	children?: React.ReactNode;
+	readOnly?: boolean;
 }
 
-export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
+export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false }: props) => {
 	const [isUpdatingAppraisal, setAppraisalUpdateState] = useState(false);
 	const [isOpen, setIsOpen] = useState(false);
 	const [questionTemplates, setQuestionTemplates] = useState<Tables<'question_templates'>[] | null>(null);
@@ -160,7 +161,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 								<FormItem>
 									<FormLabel>Name</FormLabel>
 									<FormControl>
-										<Input placeholder="Q4 2023 Performance Review" {...field} />
+										<Input placeholder="Q4 2023 Performance Review" {...field} readOnly={readOnly} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -174,7 +175,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 								<FormItem>
 									<FormLabel>Description</FormLabel>
 									<FormControl>
-										<Textarea placeholder="End of year performance review cycle" {...field} />
+										<Textarea placeholder="End of year performance review cycle" {...field} readOnly={readOnly} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -197,7 +198,6 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 														<TooltipTrigger asChild>
 															<Info className="ml-1 inline-block" size={12} />
 														</TooltipTrigger>
-
 														<TooltipContent>
 															<p>The start date of the appraisal cycle</p>
 														</TooltipContent>
@@ -205,7 +205,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} />
+												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -224,7 +224,6 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 														<TooltipTrigger asChild>
 															<Info className="ml-1 inline-block" size={12} />
 														</TooltipTrigger>
-
 														<TooltipContent>
 															<p>The end date of the appraisal cycle</p>
 														</TooltipContent>
@@ -232,7 +231,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} />
+												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -251,7 +250,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 									render={({ field }) => (
 										<FormItem className="w-full">
 											<FormLabel>
-												Self Review Due Date
+												Self Review Due by
 												<TooltipProvider>
 													<Tooltip>
 														<TooltipTrigger asChild>
@@ -264,7 +263,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} />
+												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -277,7 +276,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 									render={({ field }) => (
 										<FormItem className="w-full">
 											<FormLabel>
-												Manager Review Due Date
+												Manager Review Due by
 												<TooltipProvider>
 													<Tooltip>
 														<TooltipTrigger asChild>
@@ -290,7 +289,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} />
+												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -305,9 +304,9 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Question Template</FormLabel>
-									<Select onValueChange={value => field.onChange(parseInt(value))} defaultValue={field.value?.toString()}>
+									<Select onValueChange={value => field.onChange(parseInt(value))} defaultValue={field.value?.toString()} disabled={readOnly}>
 										<FormControl>
-											<SelectTrigger>
+											<SelectTrigger className="disabled:opacity-100">
 												<SelectValue placeholder="Select a question template" />
 											</SelectTrigger>
 										</FormControl>
@@ -326,13 +325,15 @@ export const AppraisalCycleDialog = ({ org, cycle, children }: props) => {
 							)}
 						/>
 
-						<div className="flex gap-3">
-							{cycle && <DeleteAppraisalCycle org={org} cycle={cycle} />}
+						{!readOnly && (
+							<div className="flex gap-3">
+								{cycle && <DeleteAppraisalCycle org={org} cycle={cycle} />}
 
-							<Button type="submit" className="w-full" disabled={isUpdatingAppraisal}>
-								{isUpdatingAppraisal && <LoadingSpinner className="mr-2" />} {cycle ? 'Update Appraisal Cycle' : 'Create Appraisal Cycle'}
-							</Button>
-						</div>
+								<Button type="submit" className="w-full" disabled={isUpdatingAppraisal}>
+									{isUpdatingAppraisal && <LoadingSpinner className="mr-2" />} {cycle ? 'Update Appraisal Cycle' : 'Create Appraisal Cycle'}
+								</Button>
+							</div>
+						)}
 					</form>
 				</Form>
 			</SheetContent>

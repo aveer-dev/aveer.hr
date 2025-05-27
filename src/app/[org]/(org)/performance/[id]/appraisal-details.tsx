@@ -8,6 +8,12 @@ import { AppraisalScoreSummary } from './appraisal-score-summary';
 import { EmployeeAppraisalViewer } from './employee-appraisal-viewer';
 import { ContractRepository, TeamRepository } from '@/dal';
 import { getQuestionTemplate } from '@/components/appraisal-forms/appraisal.actions';
+import { Separator } from '@/components/ui/separator';
+import { AppraisalCycleDialog } from '@/components/appraisal-forms/appraisal-cycle-dialog';
+import { Button } from '@/components/ui/button';
+import { ListCollapse } from 'lucide-react';
+import { EmployeeObjectivesList } from './employee-objectives-list';
+import { AppraisalQuestionsStats } from './appraisal-questions-stats';
 
 export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: string]: string }> }) => {
 	const { org, id } = await params;
@@ -54,17 +60,35 @@ export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: str
 		return <div>No teams found</div>;
 	}
 
-	return (
-		<div className="container mx-auto space-y-6 py-6">
-			<div className="relative flex items-center justify-between">
-				<BackButton className="mb-6" />
+	// Collect all unique team_ids from questions
+	const teamIdSet = new Set<number>();
+	(questions || []).forEach(q => {
+		if (Array.isArray(q.team_ids)) {
+			q.team_ids.forEach((id: number) => teamIdSet.add(id));
+		}
+	});
+	const teamIds = Array.from(teamIdSet);
 
+	// Fetch team details for these ids
+	let teamsForQuestions: any[] = [];
+	if (teamIds.length > 0) {
+		const { data: teamsData } = await supabase.from('teams').select('*').in('id', teamIds);
+		teamsForQuestions = teamsData || [];
+	}
+
+	return (
+		<div className="mx-auto space-y-6 py-6">
+			<div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h1 className="text-2xl font-bold">{appraisal.name}</h1>
-					<p className="text-sm text-muted-foreground">{appraisal.description}</p>
+					<BackButton className="mb-6" />
+
+					<div>
+						<h1 className="text-2xl font-bold">{appraisal.name}</h1>
+						<p className="text-sm text-muted-foreground">{appraisal.description}</p>
+					</div>
 				</div>
 
-				<Badge variant="outline">
+				<Badge variant="outline" className="w-fit">
 					{format(new Date(appraisal.start_date), 'MMM d, yyyy')} - {format(new Date(appraisal.end_date), 'MMM d, yyyy')}
 				</Badge>
 			</div>
@@ -73,14 +97,24 @@ export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: str
 
 			{answers.length > 0 && (
 				<Tabs defaultValue="overview" className="w-full">
-					<TabsList className="grid w-fit grid-cols-3">
-						<TabsTrigger value="overview">Overview</TabsTrigger>
-						<TabsTrigger value="scores">Scores</TabsTrigger>
-						<TabsTrigger value="details">Details</TabsTrigger>
-					</TabsList>
+					<div className="flex items-center justify-between gap-4">
+						<TabsList className="flex w-fit px-2">
+							<TabsTrigger value="overview">Overview</TabsTrigger>
+							<TabsTrigger value="scores">Scores</TabsTrigger>
+							<TabsTrigger value="objectives">Objectives & Goals</TabsTrigger>
+							<TabsTrigger value="questions">Questions Summary</TabsTrigger>
+							<TabsTrigger value="details">Deep Dive</TabsTrigger>
+						</TabsList>
+
+						<AppraisalCycleDialog org={org} cycle={appraisal}>
+							<Button variant="outline" size="icon">
+								<ListCollapse size={14} />
+							</Button>
+						</AppraisalCycleDialog>
+					</div>
 
 					<TabsContent value="overview">
-						<AppraisalOverview contracts={contracts as any} appraisal={appraisal as any} answers={answers as any} />
+						<AppraisalOverview contracts={contracts as any} answers={answers as any} />
 					</TabsContent>
 
 					<TabsContent value="scores">
@@ -89,6 +123,14 @@ export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: str
 
 					<TabsContent value="details">
 						<EmployeeAppraisalViewer employees={contracts as any} answers={answers as any} questions={questions as any} appraisalCycle={appraisal as any} customGroupNames={(template.custom_group_names as { id: string; name: string }[]) || []} />
+					</TabsContent>
+
+					<TabsContent value="objectives">
+						<EmployeeObjectivesList employees={contracts as any} answers={answers as any} />
+					</TabsContent>
+
+					<TabsContent value="questions">
+						<AppraisalQuestionsStats questions={questions as any} answers={answers as any} employees={contracts as any} teamsForQuestions={teamsForQuestions} />
 					</TabsContent>
 
 					{/* <TabsContent value="summary">
