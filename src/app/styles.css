@@ -11,59 +11,113 @@
 		@apply mt-0;
 	}
 
-	/* Heading styles */
+	& * {
+		@apply font-normal;
+	}
+
+	/* Base Typography */
 	h1,
 	h2,
 	h3,
 	h4,
 	h5,
 	h6 {
-		line-height: 1.1;
-		margin-top: 2.5rem;
-		text-wrap: pretty;
-		font-weight: 500;
-	}
-
-	h1,
-	h2,
-	h3 {
-		margin-bottom: 1rem;
+		@apply text-wrap font-semibold leading-tight;
+		@apply mb-2;
 	}
 
 	h1 {
-		font-size: 1.4rem;
+		@apply mt-8 text-3xl;
 	}
 
 	h2 {
-		font-size: 1.2rem;
+		@apply mt-6 text-2xl;
 	}
 
 	h3 {
-		font-size: 1.1rem;
+		@apply mt-5 text-xl;
 	}
 
-	h4,
+	h4 {
+		@apply mt-5 text-lg;
+	}
+
 	h5,
 	h6 {
-		font-size: 1rem;
+		@apply mt-5 text-base;
 	}
 
-	strong {
-		@apply font-medium;
+	/* Text Elements */
+	p {
+		@apply mb-1.5 text-base leading-7;
+		@apply text-neutral-900 dark:text-neutral-100;
 	}
 
-	p,
-	li {
-		@apply mb-4 text-sm leading-8 [word-spacing:0.05rem];
+	strong,
+	b {
+		@apply font-semibold;
+	}
+
+	em,
+	i {
+		@apply italic;
 	}
 
 	a {
-		@apply underline;
+		@apply text-primary underline decoration-primary/30 hover:decoration-primary/60;
+		@apply transition-colors duration-200;
 	}
 
+	/* Lists */
 	ul,
 	ol {
-		@apply list-[unset] pl-4;
+		@apply mb-4 ml-6;
+	}
+
+	ul {
+		@apply list-disc;
+	}
+
+	ol {
+		@apply list-decimal;
+	}
+
+	li {
+		@apply mb-1 text-base leading-7;
+		@apply marker:text-neutral-400;
+	}
+
+	/* Inline Elements */
+	code {
+		@apply bg-neutral-100 dark:bg-neutral-800;
+		@apply rounded px-1.5 py-0.5 text-sm;
+	}
+
+	mark {
+		@apply bg-yellow-100 dark:bg-yellow-900/30;
+		@apply rounded px-1;
+	}
+
+	sub,
+	sup {
+		@apply text-xs;
+	}
+
+	/* Horizontal Rule */
+	hr {
+		@apply my-8 border-neutral-200 dark:border-neutral-800;
+	}
+
+	/* Block Elements */
+	blockquote {
+		@apply border-l-4 border-neutral-200 pl-4 dark:border-neutral-700;
+		@apply my-6 italic text-neutral-700 dark:text-neutral-300;
+	}
+
+	pre {
+		@apply bg-neutral-100 dark:bg-neutral-900;
+		@apply my-4 rounded-lg p-4;
+		@apply overflow-x-auto;
 	}
 }
 
@@ -216,4 +270,12 @@
 			@apply bg-accent/50;
 		}
 	}
+}
+
+.collaboration-cursor__caret {
+	@apply pointer-events-none relative -ml-[1px] -mr-[1px] break-normal border-l border-r border-black;
+}
+
+.collaboration-cursor__label {
+	@apply absolute -left-[1px] -top-[1.4em] w-fit select-none whitespace-nowrap rounded rounded-tl-none px-1.5 py-0.5 text-xs font-semibold leading-none text-black;
 }

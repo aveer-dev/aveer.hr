@@ -8,9 +8,10 @@ import { ColumnsMenu } from '@/components/tiptap/extensions/MultiColumn/menus';
 import { TableRowMenu, TableColumnMenu } from '@/components/tiptap/extensions/Table/menus';
 import ImageBlockMenu from '@/components/tiptap/extensions/ImageBlock/components/ImageBlockMenu';
 import { DOCUMENT_ACCESS_TYPE } from '../types';
+import { Tables } from '@/type/database.types';
 
 // Props: editor, doc, userPermittedAction, menuContainerRef
-const DocumentEditor = ({ editor, doc, userPermittedAction }: { editor: Editor; doc: any; userPermittedAction: () => DOCUMENT_ACCESS_TYPE }) => {
+const DocumentEditor = ({ editor, doc, userPermittedAction }: { editor: Editor; doc: Tables<'documents'> & { org: { name: string; subdomain: string } }; userPermittedAction: () => DOCUMENT_ACCESS_TYPE }) => {
 	const menuContainerRef = useRef(null);
 	return (
 		<div ref={menuContainerRef}>

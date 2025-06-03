@@ -938,6 +938,7 @@ export type Database = {
           contract_variables: string[]
           created_at: string
           entity: number | null
+          hocuspocus_doc_id: string | null
           html: string
           id: number
           json: Json | null
@@ -960,6 +961,7 @@ export type Database = {
           contract_variables?: string[]
           created_at?: string
           entity?: number | null
+          hocuspocus_doc_id?: string | null
           html?: string
           id?: number
           json?: Json | null
@@ -982,6 +984,7 @@ export type Database = {
           contract_variables?: string[]
           created_at?: string
           entity?: number | null
+          hocuspocus_doc_id?: string | null
           html?: string
           id?: number
           json?: Json | null
@@ -1001,6 +1004,13 @@ export type Database = {
           version?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "documents_hocuspocus_doc_id_fkey"
+            columns: ["hocuspocus_doc_id"]
+            isOneToOne: false
+            referencedRelation: "hocuspocus_documents"
+            referencedColumns: ["name"]
+          },
           {
             foreignKeyName: "documents_owner_employee_fkey"
             columns: ["owner_employee"]
@@ -1249,18 +1259,18 @@ export type Database = {
       }
       hocuspocus_documents: {
         Row: {
-          id: string
-          update: string | null
+          data: string | null
+          name: string
           updated_at: string
         }
         Insert: {
-          id: string
-          update?: string | null
+          data?: string | null
+          name?: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          update?: string | null
+          data?: string | null
+          name?: string
           updated_at?: string
         }
         Relationships: []

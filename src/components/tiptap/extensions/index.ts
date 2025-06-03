@@ -22,7 +22,7 @@ export { FileHandler } from '@tiptap-pro/extension-file-handler';
 
 export { Selection } from './Selection';
 export { HorizontalRule } from './HorizontalRule';
-// export { Heading } from './Heading';
+export { Heading } from './Heading';
 export { TrailingNode } from './TrailingNode';
 export { SlashCommand } from './SlashCommand';
 export { FontSize } from './FontSize';
@@ -45,3 +45,6 @@ export { Table, TableCell, TableHeader, TableRow } from './Table';
 export { Document } from './Document';
 export { Mention } from '@tiptap/extension-mention';
 export { SignatureImage } from './SignatureImage';
+
+export { Column, Columns } from '@/components/tiptap/extensions/MultiColumn';
+export { CustomMention } from '@/components/tiptap/extensions/Mention';

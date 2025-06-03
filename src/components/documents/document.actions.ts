@@ -93,12 +93,15 @@ export const createDocument = async ({ document, org, ownedBy = 'employee' }: { 
 	} = await supabase.auth.getUser();
 	if (!user) return redirect('/app/login');
 
-	let payload: TablesInsert<'documents'> = { org: '' };
+	// create hocuspocus document
+	const hocuspocusDocument = await supabase.from('hocuspocus_documents').insert({}).select().single();
+	if (hocuspocusDocument.error || !hocuspocusDocument.data) return hocuspocusDocument;
+
+	let payload: TablesInsert<'documents'> = { org: '', hocuspocus_doc_id: hocuspocusDocument.data.name };
 	if (document) payload = document;
 	if (org) payload = { org, shared_with: [{ profile: user.id, access: 'owner' }], name: `New Document - ${format(new Date(), 'PPP')}` };
 
 	const res = await supabase.from('documents').insert(payload).select().single();
-
 	if (res.error || !res.data) return res;
 
 	// Create a file record for the new document

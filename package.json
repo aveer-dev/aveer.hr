@@ -59,11 +59,13 @@
 		"@tiptap/core": "^2.11.0",
 		"@tiptap/extension-bullet-list": "^2.11.0",
 		"@tiptap/extension-collaboration": "^2.11.9",
+		"@tiptap/extension-collaboration-caret": "3.0.0-next.7",
 		"@tiptap/extension-collaboration-cursor": "^2.11.9",
 		"@tiptap/extension-color": "^2.9.1",
 		"@tiptap/extension-document": "^2.11.0",
 		"@tiptap/extension-dropcursor": "^2.11.0",
 		"@tiptap/extension-focus": "^2.9.1",
+		"@tiptap/extension-heading": "^2.12.0",
 		"@tiptap/extension-highlight": "^2.9.1",
 		"@tiptap/extension-horizontal-rule": "^2.9.1",
 		"@tiptap/extension-image": "^2.9.1",
@@ -135,6 +137,7 @@
 	},
 	"devDependencies": {
 		"@tailwindcss/container-queries": "^0.1.1",
+		"@tailwindcss/typography": "^0.5.16",
 		"@types/core-js": "^2.5.8",
 		"@types/node": "^20.17.17",
 		"@types/react": "19.0.1",
@@ -158,5 +161,10 @@
 		"@types/react-dom": "19.0.2",
 		"react-is": "19.0.0"
 	},
-	"packageManager": "pnpm@9.15.2+sha512.93e57b0126f0df74ce6bff29680394c0ba54ec47246b9cf321f0121d8d9bb03f750a705f24edc3c1180853afd7c2c3b94196d0a3d53d3e069d9e2793ef11f321"
+	"packageManager": "pnpm@9.15.2+sha512.93e57b0126f0df74ce6bff29680394c0ba54ec47246b9cf321f0121d8d9bb03f750a705f24edc3c1180853afd7c2c3b94196d0a3d53d3e069d9e2793ef11f321",
+	"description": "![Frame 43](https://github.com/user-attachments/assets/ee618f4f-044b-4722-b0c1-07638060154f)",
+	"main": "index.js",
+	"keywords": [],
+	"author": "",
+	"license": "ISC"
 }

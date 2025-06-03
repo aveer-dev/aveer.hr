@@ -16,6 +16,9 @@ import { ActiveUsers } from './Document/ActiveUsers';
 import { useEditorSetup } from './Document/useEditorSetup';
 import { useCollaboration } from './Document/useCollaboration';
 import { useDocumentState } from './Document/useDocumentState';
+import ExtensionKit from '../tiptap/extensions/extension-kit';
+import { useEditor } from '@tiptap/react';
+import { Document as TiptapDocument } from '@tiptap/extension-document';
 
 interface PROPS {
 	doc: Tables<'documents'>;
@@ -91,6 +94,23 @@ export const Document = ({ doc: initialDoc, currentUserId, fileId }: PROPS) => {
 			}, 1000),
 		[contentChanged, saveDocument]
 	);
+
+	// const editor = useEditor({
+	// 	extensions: [TiptapDocument, ...ExtensionKit],
+	// 	immediatelyRender: false,
+	// 	content: '<h3>Something...</h3>',
+	// 	onUpdate({ editor }) {
+	// 		// if (doc.locked || doc.signed_lock) return;
+	// 		const newContent = editor.getHTML();
+	// 		const newJson = editor.getJSON();
+	// 		console.log(newJson);
+
+	// 		// if (newContent !== doc.html) {
+	// 		// 	setContentChanged(true);
+	// 		// 	debouncedSaveCallback({ html: newContent, json: newJson });
+	// 		// }
+	// 	}
+	// });
 
 	const { editor } = useEditorSetup({
 		doc,

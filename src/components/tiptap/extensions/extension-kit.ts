@@ -10,7 +10,7 @@ import {
 	FileHandler,
 	Focus,
 	FontSize,
-	// Heading,
+	Heading,
 	Highlight,
 	HorizontalRule,
 	ImageBlock,
@@ -30,11 +30,16 @@ import {
 import uploadImage from '../lib/api';
 
 import { ImageUpload } from './ImageUpload';
+import { HocuspocusProvider } from '@hocuspocus/provider';
 
-export const ExtensionKit: any = [
+interface ExtensionKitProps {
+	provider?: HocuspocusProvider | null;
+}
+
+export const ExtensionKit = ({ provider }: ExtensionKitProps) => [
 	Selection,
 	HorizontalRule,
-	StarterKit.configure({ dropcursor: false, horizontalRule: false, document: false }),
+	StarterKit.configure({ dropcursor: false, horizontalRule: false, document: false, heading: false, history: false }),
 	TextStyle,
 	FontSize,
 	Color,
@@ -44,6 +49,7 @@ export const ExtensionKit: any = [
 	}),
 	Highlight.configure({ multicolor: true }),
 	Underline,
+	Heading.configure({ levels: [1, 2, 3, 4, 5, 6] }),
 	// CharacterCount.configure({ limit: 50000 }),
 	ImageUpload.configure(),
 	ImageBlock.configure({ allowBase64: false }),
