@@ -24,6 +24,7 @@ import { Label } from '../ui/label';
 import { LoadingSpinner } from '../ui/loader';
 import { DeleteTemplateDialog } from './delete-template-dialog';
 import { useDebounce } from '@/hooks/use-debounce';
+import { Badge } from '@/components/ui/badge';
 
 const questionSchema = z
 	.object({
@@ -82,9 +83,10 @@ interface QuestionItemProps {
 	question: QuestionFormValues;
 	onEdit: () => void;
 	onRemove: () => void;
+	teams: Tables<'teams'>[];
 }
 
-const QuestionItem = ({ question, onEdit, onRemove }: QuestionItemProps) => {
+const QuestionItem = ({ question, onEdit, onRemove, teams }: QuestionItemProps) => {
 	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: question.id });
 
 	const style = {
@@ -116,9 +118,24 @@ const QuestionItem = ({ question, onEdit, onRemove }: QuestionItemProps) => {
 						{question.question && (
 							<div className="space-y-4">
 								<div className="text-sm font-light leading-6">
-									<div className="mb-2 text-xs font-light text-muted-foreground">Self review question</div>
+									<div className="mb-2 flex items-center justify-between gap-2 text-xs font-light text-muted-foreground">
+										<div>Self review question</div>
+
+										<div className="flex items-center gap-2">
+											{question.teams.map(teamId => (
+												<Badge key={teamId} variant="outline" className="text-xs">
+													{teams.find(team => team.id === Number(teamId))?.name}
+												</Badge>
+											))}
+											<Badge variant="secondary" className="text-xs">
+												Type: {question.type === 'textarea' ? 'Text' : question.type === 'yesno' ? 'Yes/No' : question.type === 'scale' ? 'Scale' : 'Multiple Choice'}
+											</Badge>
+											<Badge variant="secondary" className="text-xs">
+												{question.required ? 'Required' : 'Optional'}
+											</Badge>
+										</div>
+									</div>
 									{question.question}
-									{question.required && <span className="text-sm text-destructive">*</span>}
 								</div>
 							</div>
 						)}
@@ -599,6 +616,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 															.filter(q => q.group === group.id)
 															.map((question, index) => (
 																<QuestionItem
+																	teams={teams}
 																	key={question.id}
 																	question={question}
 																	onEdit={() => {
