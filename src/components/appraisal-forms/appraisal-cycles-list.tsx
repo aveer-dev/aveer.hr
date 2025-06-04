@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Button, buttonVariants } from '../ui/button';
+import { buttonVariants } from '../ui/button';
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { AppraisalCycleOptions } from './appraisal-cycle-options';
@@ -18,7 +18,7 @@ interface AppraisalCycleCardDialogProps {
 }
 
 const AppraisalCycleCardDialog = ({ org, cycle }: AppraisalCycleCardDialogProps) => (
-	<Button className="h-[unset] w-full cursor-auto justify-between gap-2 p-3 px-0 hover:bg-transparent hover:text-primary" variant="ghost">
+	<li className={cn(buttonVariants({ variant: 'ghost' }), 'h-[unset] w-full cursor-auto justify-between gap-2 p-3 px-0 hover:bg-transparent hover:text-primary')}>
 		<Link href={`./performance/${cycle.id}`} className={cn(buttonVariants({ variant: 'link' }), 'max-w-md truncate px-0 text-sm font-medium')}>
 			{cycle.name}
 		</Link>
@@ -30,7 +30,7 @@ const AppraisalCycleCardDialog = ({ org, cycle }: AppraisalCycleCardDialogProps)
 
 			<AppraisalCycleOptions cycle={cycle} org={org} />
 		</div>
-	</Button>
+	</li>
 );
 
 export const AppraisalCyclesList = async ({ org }: Props) => {
@@ -64,14 +64,14 @@ export const AppraisalCyclesList = async ({ org }: Props) => {
 						<Separator className="w-full max-w-3xl" />
 					</div>
 
-					<div className="divide-y">
+					<ul className="divide-y">
 						{cycles
 							.filter(cycle => new Date(cycle.start_date) <= new Date() && new Date(cycle.end_date) >= new Date())
 							.map(cycle => {
 								const isActive = new Date(cycle.start_date) <= new Date() && new Date(cycle.end_date) >= new Date();
 								return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} badge={isActive ? <Badge variant="outline">Active</Badge> : null} />;
 							})}
-					</div>
+					</ul>
 				</div>
 			)}
 
@@ -83,14 +83,14 @@ export const AppraisalCyclesList = async ({ org }: Props) => {
 						<Separator className="w-full max-w-3xl" />
 					</div>
 
-					<div className="divide-y">
+					<ul className="divide-y">
 						{cycles
 							.filter(cycle => new Date(cycle.end_date) < new Date())
 							.map(cycle => {
 								const isPast = new Date(cycle.end_date) < new Date();
 								return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} badge={isPast ? <Badge variant="secondary">Past</Badge> : null} />;
 							})}
-					</div>
+					</ul>
 				</div>
 			)}
 		</div>

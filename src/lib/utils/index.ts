@@ -1,8 +1,8 @@
 import { differenceInSeconds } from 'date-fns';
 
-export const currencyFormat = ({ currency, value }: { currency?: string; value: number }) => {
+export const currencyFormat = ({ currency, countryCode, value }: { currency?: string; countryCode?: string; value: number }) => {
 	return new Intl.NumberFormat(
-		'en-US',
+		`en-${countryCode || 'US'}`,
 		currency
 			? {
 					style: 'currency',

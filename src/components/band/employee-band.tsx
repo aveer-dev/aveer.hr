@@ -10,7 +10,7 @@ interface props {
 export const EmployeeBand = async ({ org }: props) => {
 	const supabase = await createClient();
 
-	const { data, error } = await supabase.from('employee_levels').select().eq('org', org);
+	const [{ data, error }, { data: entities }] = await Promise.all([supabase.from('employee_levels').select().eq('org', org), supabase.from('legal_entities').select('*, incorporation_country(currency_code, country_code, id)').eq('org', org)]);
 
 	if (error) {
 		return (
@@ -30,12 +30,12 @@ export const EmployeeBand = async ({ org }: props) => {
 
 			<InputsContainer>
 				{data.map(band => (
-					<EmployeeBandDialog band={band} key={band.id} org={org} />
+					<EmployeeBandDialog band={band} key={band.id} org={org} entities={entities} />
 				))}
 
 				{data.length == 0 && <Card className="flex h-32 items-center justify-center text-xs text-muted-foreground">You do not have any employee levels yet</Card>}
 
-				<EmployeeBandDialog org={org} />
+				<EmployeeBandDialog org={org} entities={entities} />
 			</InputsContainer>
 		</FormSection>
 	);

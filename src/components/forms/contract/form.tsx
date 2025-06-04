@@ -47,6 +47,7 @@ type ENTITY = Tables<'legal_entities'> & {
 	incorporation_country: {
 		currency_code: string;
 		name: string;
+		country_code: string;
 	};
 };
 
@@ -745,7 +746,15 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 							</FormSectionDescription>
 
 							<InputsContainer>
-								<PayInput currency={entityCurrency} form={form} name="salary" label="Gross annual salary" minValue={selectedLevel?.min_salary && Number(selectedLevel?.min_salary)} maxValue={selectedLevel?.max_salary && Number(selectedLevel?.max_salary)} />
+								<PayInput
+									currency={entityCurrency}
+									form={form}
+									countryCode={entitiesData.entities?.find(entity => entity.id == Number(form.getValues('entity')))?.incorporation_country?.country_code}
+									name="salary"
+									label="Gross annual salary"
+									minValue={selectedLevel?.min_salary && Number(selectedLevel?.min_salary)}
+									maxValue={selectedLevel?.max_salary && Number(selectedLevel?.max_salary)}
+								/>
 
 								<FormField
 									control={form.control}

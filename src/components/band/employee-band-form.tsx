@@ -2,14 +2,13 @@
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
+import { Tables, TablesInsert } from '@/type/database.types';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Check, ChevronDown, ChevronRight, Info, Trash2 } from 'lucide-react';
+import { Check, ChevronDown, ChevronRight, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MinMaxPay } from '@/components/forms/min-max-pay';
@@ -23,6 +22,8 @@ import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 import { DeleteBandDialog } from './delete-band-dialog';
 import { createBand, updateBand } from './band.action';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formSchema = z.object({
 	level: z.string(),
@@ -38,29 +39,35 @@ const formSchema = z.object({
 			min: z.number().positive().optional().nullable(),
 			max: z.number().positive().optional().nullable()
 		})
-		.refine(bonus => (bonus.min && bonus.max ? bonus.min < bonus.max : true), { message: 'Max bonus must be higher than min bonus' })
+		.refine(bonus => (Number(bonus?.min) > 0 && Number(bonus?.max) > 0 ? Number(bonus?.min) < Number(bonus?.max) : true), { message: 'Max bonus must be higher than min bonus' })
 		.optional(),
 	org: z.string(),
+	entity: z.number(),
 	fixed_allowance: z
 		.array(z.object({ name: z.string(), amount: z.string(), frequency: z.string() }))
 		.optional()
 		.nullable()
 });
 
+type Entity = Tables<'legal_entities'> & { incorporation_country: { currency_code: string | null; country_code: string; id: number } };
+
 interface props {
 	band?: Tables<'employee_levels'>;
 	org: string;
+	entities: Entity[] | null;
 }
 
-export const EmployeeBandDialog = ({ band, org }: props) => {
+export const EmployeeBandDialog = ({ band, org, entities }: props) => {
 	const [isDialogOpen, openDialog] = useState(false);
-	const [showSigningBonus, toggleShowSigningBonus] = useState(false);
+	const [showSigningBonus, toggleShowSigningBonus] = useState(!!(band?.min_signing_bonus || band?.max_signing_bonus));
 	const [showFixedAllowance, toggleShowFixedAllowance] = useState(false);
 	const [isLevelsOpen, toggleLevelsDropdown] = useState(false);
 	const [jobLevels] = useState<string[]>(levels);
 	const [orgJobLevels, updateOrgJobLevels] = useState<string[]>([]);
 	const [levelQuery, setLevelQuery] = useState<string>('');
 	const [isSubmitting, setSubmitState] = useState(false);
+	const [selectedEntity, setSelectedEntity] = useState<Entity | null>(entities?.find(entity => entity.id === band?.entity) || entities?.[0] || null);
+
 	const router = useRouter();
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -74,27 +81,26 @@ export const EmployeeBandDialog = ({ band, org }: props) => {
 				min: band?.min_salary || 0,
 				max: band?.max_salary || 0
 			},
-			signing_bonus: {
-				min: band?.min_signing_bonus || 0,
-				max: band?.max_signing_bonus || 0
-			}
+			signing_bonus: band?.min_signing_bonus || band?.max_signing_bonus ? { min: band?.min_signing_bonus || 0, max: band?.max_signing_bonus || 0 } : undefined,
+			entity: band?.entity || entities?.[0]?.id || 0
 		}
 	});
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setSubmitState(true);
-		const band: TablesInsert<'employee_levels'> | TablesInsert<'employee_levels'> = {
+		const payload: TablesInsert<'employee_levels'> = {
 			level: values.level,
 			org: values.org,
 			role: values.role,
 			min_salary: values.salary.min,
 			max_salary: values.salary.max,
-			min_signing_bonus: values.signing_bonus?.min,
-			max_signing_bonus: values.signing_bonus?.max,
-			fixed_allowance: values.fixed_allowance
+			min_signing_bonus: values.signing_bonus?.min || null,
+			max_signing_bonus: values.signing_bonus?.max || null,
+			fixed_allowance: values.fixed_allowance,
+			entity: values.entity
 		};
 
-		const response = band ? await updateBand({ ...band, id: band.id }, org) : await createBand(band, org);
+		const response = band ? await updateBand({ ...payload, id: band.id }, org) : await createBand(payload, org);
 		setSubmitState(false);
 
 		if (typeof response == 'string' && response !== 'Update') return toast.error('😥 Error', { description: response });
@@ -118,12 +124,14 @@ export const EmployeeBandDialog = ({ band, org }: props) => {
 		);
 	};
 
-	useEffect(() => {
-		if (band) {
-			toggleShowSigningBonus(!!(band?.min_signing_bonus || band?.max_signing_bonus));
-			toggleShowFixedAllowance(!!band?.fixed_allowance?.length);
+	const handleSigningBonusToggle = (checked: boolean) => {
+		toggleShowSigningBonus(checked);
+		if (checked) {
+			form.setValue('signing_bonus', { min: 0, max: 0 });
+		} else {
+			form.setValue('signing_bonus', undefined);
 		}
-	}, [band]);
+	};
 
 	return (
 		<Sheet open={isDialogOpen} onOpenChange={openDialog}>
@@ -131,7 +139,7 @@ export const EmployeeBandDialog = ({ band, org }: props) => {
 				<Button variant={band ? 'outline' : 'default'} className={cn('flex w-full items-center justify-between p-4 text-xs', band && 'h-fit')}>
 					{band ? (
 						<div>
-							{band.level} • <span className="text-muted-foreground">{band.role}</span>
+							{band.level} {!!band.role && <span className="text-muted-foreground">• {band.role}</span>}
 						</div>
 					) : (
 						'Add new band'
@@ -147,9 +155,44 @@ export const EmployeeBandDialog = ({ band, org }: props) => {
 					<SheetDescription className="text-xs">This enables you to categorize employee benefits once, in a level.</SheetDescription>
 				</SheetHeader>
 
+				{(!entities || entities.length === 0) && (
+					<Alert variant="secondary">
+						<Info size={14} />
+						<AlertTitle>Legal Entity Required</AlertTitle>
+						<AlertDescription>You must have at least one legal entity before creating a band.</AlertDescription>
+					</Alert>
+				)}
+
 				<div className="grid gap-4 py-6">
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+							<FormField
+								control={form.control}
+								name="entity"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Legal Entity</FormLabel>
+
+										<Select onValueChange={field.onChange} defaultValue={field.value?.toString() || selectedEntity?.id?.toString()}>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Select a verified email to display" />
+												</SelectTrigger>
+											</FormControl>
+
+											<SelectContent>
+												{entities?.map(entity => (
+													<SelectItem key={entity.id} value={entity.id.toString()} onSelect={() => setSelectedEntity(entity)}>
+														{entity.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
 							<FormField
 								control={form.control}
 								name="level"
@@ -256,7 +299,15 @@ export const EmployeeBandDialog = ({ band, org }: props) => {
 								)}
 							/>
 
-							<MinMaxPay form={form} isToggled name="salary" label="salary" formLabel="Base annual salary range" />
+							<MinMaxPay
+								form={form}
+								isToggled
+								name="salary"
+								label="salary"
+								currency={selectedEntity?.incorporation_country?.currency_code || undefined}
+								countryCode={selectedEntity?.incorporation_country?.country_code || undefined}
+								formLabel="Base annual salary range"
+							/>
 
 							<MinMaxPay
 								form={form}
@@ -264,8 +315,10 @@ export const EmployeeBandDialog = ({ band, org }: props) => {
 								label="bonus"
 								formLabel="Signing bonus range"
 								showToggle
-								toggle={event => toggleShowSigningBonus(event)}
+								toggle={handleSigningBonusToggle}
 								isToggled={showSigningBonus}
+								currency={selectedEntity?.incorporation_country?.currency_code || undefined}
+								countryCode={selectedEntity?.incorporation_country?.country_code || undefined}
 								tooltip="A one-time payment offered to an employee upon accepting a job, often used as an incentive."
 							/>
 

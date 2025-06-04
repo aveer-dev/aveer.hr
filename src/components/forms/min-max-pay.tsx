@@ -15,11 +15,12 @@ interface props {
 	tooltip?: string;
 	showToggle?: boolean;
 	isToggled?: boolean;
-	toggle?: Dispatch<SetStateAction<boolean>>;
+	toggle?: (checked: boolean) => void;
 	currency?: string;
+	countryCode?: string;
 }
 
-export const MinMaxPay = ({ form, name, label, formLabel, tooltip, showToggle, isToggled, toggle, currency }: props) => {
+export const MinMaxPay = ({ form, name, label, formLabel, tooltip, showToggle, isToggled, toggle, currency, countryCode }: props) => {
 	return (
 		<FormField
 			control={form.control}
@@ -44,7 +45,7 @@ export const MinMaxPay = ({ form, name, label, formLabel, tooltip, showToggle, i
 								</TooltipProvider>
 							)}
 						</div>
-						{showToggle && <Switch checked={isToggled} onCheckedChange={event => (toggle ? toggle(event) : false)} id="signin-bonus" className="scale-75" />}
+						{showToggle && <Switch checked={isToggled} onCheckedChange={toggle} id="signin-bonus" className="scale-75" />}
 					</FormLabel>
 
 					{isToggled && (
@@ -56,9 +57,9 @@ export const MinMaxPay = ({ form, name, label, formLabel, tooltip, showToggle, i
 									<FormItem>
 										<FormLabel>Min {label}</FormLabel>
 										<FormControl>
-											<Input type="number" {...field} onChange={(event: { target: { value: any } }) => form.setValue(`${name}.min`, Number(event.target.value))} placeholder="Min amount" />
+											<Input {...field} onChange={(event: { target: { value: any } }) => form.setValue(`${name}.min`, Number(event.target.value))} placeholder="Min amount" />
 										</FormControl>
-										<FormDescription className="!mt-1 text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(field.value), currency })}</FormDescription>
+										{!!field.value && <FormDescription className="!mt-1 ml-1 text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(field.value), currency, countryCode })}</FormDescription>}
 										<FormMessage />
 									</FormItem>
 								)}
@@ -71,9 +72,9 @@ export const MinMaxPay = ({ form, name, label, formLabel, tooltip, showToggle, i
 									<FormItem>
 										<FormLabel>Max {label}</FormLabel>
 										<FormControl>
-											<Input type="number" {...field} onChange={event => form.setValue(`${name}.max`, Number(event.target.value))} placeholder="Max amount" />
+											<Input {...field} onChange={event => form.setValue(`${name}.max`, Number(event.target.value))} placeholder="Max amount" />
 										</FormControl>
-										<FormDescription className="!mt-1 text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(field.value), currency })}</FormDescription>
+										{!!field.value && <FormDescription className="!mt-1 ml-1 text-xs font-light text-muted-foreground">{currencyFormat({ value: Number(field.value), currency, countryCode })}</FormDescription>}
 										<FormMessage />
 									</FormItem>
 								)}

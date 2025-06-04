@@ -15,9 +15,10 @@ interface props {
 	salaryInvalid?: boolean;
 	validateSalary?: (salary: number) => void;
 	currency: string;
+	countryCode?: string;
 }
 
-export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue, validateSalary, currency }: props) => {
+export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue, validateSalary, currency, countryCode }: props) => {
 	const EmployeeBandSalaryRange = () => {
 		if (!minValue || !maxValue) return;
 
@@ -75,7 +76,7 @@ export const PayInput = ({ form, salaryInvalid, name, label, minValue, maxValue,
 						/>
 					</FormControl>
 					<FormMessage />
-					{field.value && <FormDescription>{currencyFormat({ currency, value: Number(field.value) })}</FormDescription>}
+					{field.value && <FormDescription className="ml-1">{currencyFormat({ currency, value: Number(field.value), countryCode })}</FormDescription>}
 					{salaryInvalid && <FormDescription className="text-destructive">Amount must be within the selected employee level&apos;s range</FormDescription>}
 				</FormItem>
 			)}
