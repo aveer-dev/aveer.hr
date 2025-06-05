@@ -5,6 +5,7 @@ import { Bolt, Building2, CalendarDays, CalendarPlus, ChartPie, Files, FolderTre
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import { Database } from '@/type/database.types';
+import Link from 'next/link';
 
 export function NavMenu({ orgId, role }: { orgId: string; role: Database['public']['Enums']['app_role'] }) {
 	const path = usePathname();
@@ -32,9 +33,11 @@ export function NavMenu({ orgId, role }: { orgId: string; role: Database['public
 					(item, index) =>
 						item.enabled && (
 							<NavigationMenuItem key={index}>
-								<NavigationMenuLink href={getHref(item.href)} active={item.href == '/' ? path.includes('people') || path == '/' || path == `/${orgId}` : path.includes(item.href)} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
-									<item.icon size={16} />
-									{item.label}
+								<NavigationMenuLink asChild active={item.href == '/' ? path.includes('people') || path == '/' || path == `/${orgId}` : path.includes(item.href)} className={cn(navigationMenuTriggerStyle(), 'gap-3 font-light')}>
+									<Link href={getHref(item.href)}>
+										<item.icon size={16} />
+										{item.label}
+									</Link>
 								</NavigationMenuLink>
 							</NavigationMenuItem>
 						)

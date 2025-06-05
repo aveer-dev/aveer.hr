@@ -212,7 +212,7 @@ export const FileFolderList = ({ files, folders, org, role, userId }: { files: F
 		const { error, data } = await getFileDownloadUrl(file);
 
 		if (error) {
-			toast.error('Failed to get download link', { id: toastId });
+			toast.error('Failed to get download link', { id: toastId, description: error.message });
 			return;
 		}
 
