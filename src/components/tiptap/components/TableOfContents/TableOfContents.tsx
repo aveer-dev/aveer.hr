@@ -2,7 +2,7 @@
 
 import { Editor as CoreEditor } from '@tiptap/core';
 import { memo } from 'react';
-import { TableOfContentsStorage } from '@tiptap-pro/extension-table-of-contents';
+// import { TableOfContentsStorage } from '@tiptap-pro/extension-table-of-contents';
 import { cn } from '@/lib/utils';
 import { useEditorState } from '@tiptap/react';
 
@@ -12,15 +12,15 @@ export type TableOfContentsProps = {
 };
 
 export const TableOfContents = memo(({ editor }: TableOfContentsProps) => {
-	const content = useEditorState({
-		editor,
-		selector: ctx => (ctx.editor.storage.tableOfContents as TableOfContentsStorage).content
-	});
+	// const content = useEditorState({
+	// 	editor,
+	// 	selector: ctx => (ctx.editor.storage.tableOfContents as TableOfContentsStorage).content
+	// });
 
 	return (
 		<>
 			<div className="mb-2 text-xs font-semibold uppercase text-neutral-500 dark:text-neutral-400">Table of contents</div>
-			{content.length > 0 ? (
+			{/* {content.length > 0 ? (
 				<div className="flex flex-col gap-1">
 					{content.map(item => (
 						<a
@@ -37,7 +37,7 @@ export const TableOfContents = memo(({ editor }: TableOfContentsProps) => {
 				</div>
 			) : (
 				<div className="text-sm text-muted-foreground">Docuement headings will show here...</div>
-			)}
+			)} */}
 		</>
 	);
 });
