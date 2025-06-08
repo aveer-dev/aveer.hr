@@ -1,5 +1,4 @@
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.update_applicants_on_insert()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -11,15 +10,10 @@ BEGIN
     WHERE id = NEW.role;
     RETURN NEW;
 END;
-$function$
-;
-
+$function$;
 create policy "Policy with table joins"
 on "public"."open_roles"
 as permissive
 for update
 to authenticated
 using (true);
-
-
-

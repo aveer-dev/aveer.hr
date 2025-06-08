@@ -11,28 +11,16 @@ create table "public"."inbox" (
     "send_time" timestamp with time zone,
     "updated_at" timestamp with time zone
 );
-
-
 alter table "public"."inbox" enable row level security;
-
 CREATE UNIQUE INDEX inbox_pkey ON public.inbox USING btree (id);
-
 alter table "public"."inbox" add constraint "inbox_pkey" PRIMARY KEY using index "inbox_pkey";
-
 alter table "public"."inbox" add constraint "inbox_entity_fkey" FOREIGN KEY (entity) REFERENCES legal_entities(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
-
 alter table "public"."inbox" validate constraint "inbox_entity_fkey";
-
 alter table "public"."inbox" add constraint "inbox_org_fkey" FOREIGN KEY (org) REFERENCES organisations(subdomain) ON UPDATE CASCADE ON DELETE CASCADE not valid;
-
 alter table "public"."inbox" validate constraint "inbox_org_fkey";
-
 alter table "public"."inbox" add constraint "inbox_sender_profile_fkey" FOREIGN KEY (sender_profile) REFERENCES profiles(id) ON UPDATE CASCADE ON DELETE RESTRICT not valid;
-
 alter table "public"."inbox" validate constraint "inbox_sender_profile_fkey";
-
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.custom_access_token_hook(event jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -67,67 +55,40 @@ AS $function$declare
 
     -- Return the modified or original event
     return event;
-  end;$function$
-;
-
+  end;$function$;
 grant delete on table "public"."inbox" to "anon";
-
 grant insert on table "public"."inbox" to "anon";
-
 grant references on table "public"."inbox" to "anon";
-
 grant select on table "public"."inbox" to "anon";
-
 grant trigger on table "public"."inbox" to "anon";
-
 grant truncate on table "public"."inbox" to "anon";
-
 grant update on table "public"."inbox" to "anon";
-
 grant delete on table "public"."inbox" to "authenticated";
-
 grant insert on table "public"."inbox" to "authenticated";
-
 grant references on table "public"."inbox" to "authenticated";
-
 grant select on table "public"."inbox" to "authenticated";
-
 grant trigger on table "public"."inbox" to "authenticated";
-
 grant truncate on table "public"."inbox" to "authenticated";
-
 grant update on table "public"."inbox" to "authenticated";
-
 grant delete on table "public"."inbox" to "service_role";
-
 grant insert on table "public"."inbox" to "service_role";
-
 grant references on table "public"."inbox" to "service_role";
-
 grant select on table "public"."inbox" to "service_role";
-
 grant trigger on table "public"."inbox" to "service_role";
-
 grant truncate on table "public"."inbox" to "service_role";
-
 grant update on table "public"."inbox" to "service_role";
-
 create policy "Enable insert for users auth org access"
 on "public"."inbox"
 as permissive
 for insert
 to authenticated
 with check (( SELECT authorize_role(inbox.org) AS authorize_role));
-
-
 create policy "Enable read access for auth users "
 on "public"."inbox"
 as permissive
 for select
 to authenticated
 using (( SELECT ((auth.jwt() ->> 'user_role_org'::text) = inbox.org)));
-
-
 create policy "Only admin in the org can update message"
 on "public"."inbox"
 as permissive
@@ -135,14 +96,9 @@ for update
 to authenticated
 using (( SELECT authorize_role(inbox.org) AS authorize_role))
 with check (( SELECT ((auth.jwt() ->> 'user_role_org'::text) = inbox.org)));
-
-
 create policy "Only allow admins  to delete inbox messages"
 on "public"."inbox"
 as permissive
 for delete
 to authenticated
 using (( SELECT authorize_role(inbox.org) AS authorize_role));
-
-
-

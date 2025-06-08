@@ -1,7 +1,5 @@
 drop policy "Enable insert for org's ad users only" on "public"."notifications";
-
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.notify_time_off_insert()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -18,15 +16,10 @@ AS $function$BEGIN
             New.contract,
             '/time-off');
     RETURN NEW;
-END;$function$
-;
-
+END;$function$;
 create policy "Enable insert for org's users only"
 on "public"."notifications"
 as permissive
 for insert
 to authenticated
 with check (( SELECT ((auth.jwt() ->> 'user_role_org'::text) = notifications.org)));
-
-
-

@@ -344,10 +344,10 @@ CREATE OR REPLACE FUNCTION "public"."notify_time_off_insert"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$BEGIN
     INSERT INTO public.notifications (created_at, body, "for", org, title, sender_profile, sender_contract, link)
-    VALUES (now(), 
-            'One of your employees has just request for a time off. Open notification to review leave request details. From "'||TO_CHAR(NEW."from", 
-'Day, DD Month YYYY')||'" to "'||TO_CHAR(NEW."to", 
-'Day, DD Month YYYY')||'"', 
+    VALUES (now(),
+            'One of your employees has just request for a time off. Open notification to review leave request details. From "'||TO_CHAR(NEW."from",
+'Day, DD Month YYYY')||'" to "'||TO_CHAR(NEW."to",
+'Day, DD Month YYYY')||'"',
             'admin',
             NEW.org,
             'New Leave Request',
@@ -383,7 +383,7 @@ CREATE OR REPLACE FUNCTION "public"."reminder_insert_notification"() RETURNS "tr
     LANGUAGE "plpgsql"
     AS $$BEGIN
     INSERT INTO public.notifications (body, "for", org, title, sender_profile, sender_contract, link, schedule_at)
-    VALUES ('This is to notify you about your remainder. Requested a reminder about ' || NEW.title, 
+    VALUES ('This is to notify you about your remainder. Requested a reminder about ' || NEW.title,
             'employee',
             NEW.org,
             'Reminder | ' || NEW.title,
@@ -441,7 +441,7 @@ BEGIN
             NEW.status = 'awaiting org signature';
         END IF;
     END IF;
-    
+
     RETURN NEW;
 END;
 $$;

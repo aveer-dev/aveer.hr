@@ -1,5 +1,3 @@
-
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -10,95 +8,31 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-
-
 CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "extensions";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
-
-
-
-
-
-
 COMMENT ON SCHEMA "public" IS 'standard public schema';
-
-
-
 CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "pgjwt" WITH SCHEMA "extensions";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
-
-
-
-
-
-
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
-
-
-
-
-
-
 CREATE TYPE "public"."app_role" AS ENUM (
-    'admin'
+    'admin',
+    'roles_manager'
 );
-
-
 ALTER TYPE "public"."app_role" OWNER TO "postgres";
-
-
 CREATE TYPE "public"."boarding_state" AS ENUM (
     'initial',
     'pending',
     'approved'
 );
-
-
 ALTER TYPE "public"."boarding_state" OWNER TO "postgres";
-
-
 CREATE TYPE "public"."boarding_type" AS ENUM (
     'on',
     'off'
 );
-
-
 ALTER TYPE "public"."boarding_type" OWNER TO "postgres";
-
-
 CREATE TYPE "public"."contract_state" AS ENUM (
     'awaiting signatures',
     'awaiting org signature',
@@ -108,56 +42,28 @@ CREATE TYPE "public"."contract_state" AS ENUM (
     'terminated',
     'scheduled termination'
 );
-
-
 ALTER TYPE "public"."contract_state" OWNER TO "postgres";
-
-
 COMMENT ON TYPE "public"."contract_state" IS 'State options of contracts';
-
-
-
 CREATE TYPE "public"."contract_type" AS ENUM (
     'employee',
     'contractor'
 );
-
-
 ALTER TYPE "public"."contract_type" OWNER TO "postgres";
-
-
 COMMENT ON TYPE "public"."contract_type" IS 'Employee or contractor';
-
-
-
 CREATE TYPE "public"."employment_type" AS ENUM (
     'full-time',
     'part-time',
     'contract'
 );
-
-
 ALTER TYPE "public"."employment_type" OWNER TO "postgres";
-
-
 COMMENT ON TYPE "public"."employment_type" IS 'Full-time or part-time options';
-
-
-
 CREATE TYPE "public"."is_open" AS ENUM (
     'open',
     'closed',
     'partial'
 );
-
-
 ALTER TYPE "public"."is_open" OWNER TO "postgres";
-
-
 COMMENT ON TYPE "public"."is_open" IS 'Is contract open, closed, partial';
-
-
-
 CREATE TYPE "public"."leave_status_enum" AS ENUM (
     'pending',
     'denied',
@@ -165,11 +71,7 @@ CREATE TYPE "public"."leave_status_enum" AS ENUM (
     'more',
     'cancelled'
 );
-
-
 ALTER TYPE "public"."leave_status_enum" OWNER TO "postgres";
-
-
 CREATE TYPE "public"."leave_type_enum" AS ENUM (
     'paid',
     'sick',
@@ -177,48 +79,26 @@ CREATE TYPE "public"."leave_type_enum" AS ENUM (
     'paternity',
     'unpaid'
 );
-
-
 ALTER TYPE "public"."leave_type_enum" OWNER TO "postgres";
-
-
 CREATE TYPE "public"."policy_types" AS ENUM (
     'time_off',
     'role_application',
     'boarding'
 );
-
-
 ALTER TYPE "public"."policy_types" OWNER TO "postgres";
-
-
 CREATE TYPE "public"."role_status" AS ENUM (
     'open',
     'close'
 );
-
-
 ALTER TYPE "public"."role_status" OWNER TO "postgres";
-
-
 COMMENT ON TYPE "public"."role_status" IS 'Is role open or closed';
-
-
-
 CREATE TYPE "public"."work_locations" AS ENUM (
     'on-site',
     'remote',
     'hybrid'
 );
-
-
 ALTER TYPE "public"."work_locations" OWNER TO "postgres";
-
-
 COMMENT ON TYPE "public"."work_locations" IS 'Where will people work from?';
-
-
-
 CREATE OR REPLACE FUNCTION "public"."authorize_role"("org_name" "text") RETURNS boolean
     LANGUAGE "plpgsql" STABLE SECURITY DEFINER
     AS $$DECLARE
@@ -244,11 +124,7 @@ BEGIN
     RETURN bind_role > 0;
   END IF;
 END;$$;
-
-
 ALTER FUNCTION "public"."authorize_role"("org_name" "text") OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."custom_access_token_hook"("event" "jsonb") RETURNS "jsonb"
     LANGUAGE "plpgsql" STABLE
     AS $$declare
@@ -281,11 +157,7 @@ CREATE OR REPLACE FUNCTION "public"."custom_access_token_hook"("event" "jsonb") 
     -- Return the modified or original event
     return event;
   end;$$;
-
-
 ALTER FUNCTION "public"."custom_access_token_hook"("event" "jsonb") OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."handle_new_user"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO ''
@@ -296,11 +168,7 @@ begin
   return new;
 end;
 $$;
-
-
 ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."update_applicants_on_delete"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
@@ -311,11 +179,7 @@ BEGIN
     RETURN OLD;
 END;
 $$;
-
-
 ALTER FUNCTION "public"."update_applicants_on_delete"() OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."update_applicants_on_insert"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
@@ -326,11 +190,7 @@ BEGIN
     RETURN NEW;
 END;
 $$;
-
-
 ALTER FUNCTION "public"."update_applicants_on_insert"() OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."update_contract_status"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     AS $$
@@ -344,19 +204,13 @@ BEGIN
             NEW.status = 'awaiting org signature';
         END IF;
     END IF;
-    
+
     RETURN NEW;
 END;
 $$;
-
-
 ALTER FUNCTION "public"."update_contract_status"() OWNER TO "postgres";
-
 SET default_tablespace = '';
-
 SET default_table_access_method = "heap";
-
-
 CREATE TABLE IF NOT EXISTS "public"."appraisal_answers" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -380,11 +234,7 @@ CREATE TABLE IF NOT EXISTS "public"."appraisal_answers" (
     "submission_date" "date",
     CONSTRAINT "appraisal_answers_contract_score_check" CHECK (("contract_score" < 100))
 );
-
-
 ALTER TABLE "public"."appraisal_answers" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."appraisal_answers" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."appraisal_answers_id_seq"
     START WITH 1
@@ -393,9 +243,6 @@ ALTER TABLE "public"."appraisal_answers" ALTER COLUMN "id" ADD GENERATED BY DEFA
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."appraisal_history" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -405,11 +252,7 @@ CREATE TABLE IF NOT EXISTS "public"."appraisal_history" (
     "start_date" "date" DEFAULT "now"() NOT NULL,
     "end_date" "date" NOT NULL
 );
-
-
 ALTER TABLE "public"."appraisal_history" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."appraisal_history" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."appraisal_history_id_seq"
     START WITH 1
@@ -418,9 +261,6 @@ ALTER TABLE "public"."appraisal_history" ALTER COLUMN "id" ADD GENERATED BY DEFA
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."appraisal_questions" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -430,11 +270,7 @@ CREATE TABLE IF NOT EXISTS "public"."appraisal_questions" (
     "updateded_at" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text"),
     "questions" "jsonb"[] NOT NULL
 );
-
-
 ALTER TABLE "public"."appraisal_questions" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."appraisal_questions" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."appraisal_questions_id_seq"
     START WITH 1
@@ -443,9 +279,6 @@ ALTER TABLE "public"."appraisal_questions" ALTER COLUMN "id" ADD GENERATED BY DE
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."appraisal_settings" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -455,11 +288,7 @@ CREATE TABLE IF NOT EXISTS "public"."appraisal_settings" (
     "entity" bigint,
     "timeline" smallint DEFAULT '2'::smallint NOT NULL
 );
-
-
 ALTER TABLE "public"."appraisal_settings" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."appraisal_settings" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."appraisal_settings_id_seq"
     START WITH 1
@@ -468,9 +297,6 @@ ALTER TABLE "public"."appraisal_settings" ALTER COLUMN "id" ADD GENERATED BY DEF
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."approval_policies" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -482,19 +308,9 @@ CREATE TABLE IF NOT EXISTS "public"."approval_policies" (
     "updated_at" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text"),
     "is_default" boolean DEFAULT false NOT NULL
 );
-
-
 ALTER TABLE "public"."approval_policies" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."approval_policies" IS 'All approval policies, like time-off approval policy';
-
-
-
 COMMENT ON COLUMN "public"."approval_policies"."updated_at" IS 'Last update date';
-
-
-
 ALTER TABLE "public"."approval_policies" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."approval_policies_id_seq"
     START WITH 1
@@ -503,9 +319,6 @@ ALTER TABLE "public"."approval_policies" ALTER COLUMN "id" ADD GENERATED BY DEFA
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."boarding_check_lists" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -518,11 +331,7 @@ CREATE TABLE IF NOT EXISTS "public"."boarding_check_lists" (
     "name" "text" NOT NULL,
     "description" "text"
 );
-
-
 ALTER TABLE "public"."boarding_check_lists" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."boarding_check_lists" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."boarding_check_lists_id_seq"
     START WITH 1
@@ -531,20 +340,13 @@ ALTER TABLE "public"."boarding_check_lists" ALTER COLUMN "id" ADD GENERATED BY D
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE SEQUENCE IF NOT EXISTS "public"."boaring_check_list_id_seq"
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
 ALTER TABLE "public"."boaring_check_list_id_seq" OWNER TO "postgres";
-
-
 CREATE TABLE IF NOT EXISTS "public"."contract_check_list" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -555,11 +357,7 @@ CREATE TABLE IF NOT EXISTS "public"."contract_check_list" (
     "state" "public"."boarding_state" DEFAULT 'initial'::"public"."boarding_state" NOT NULL,
     "levels" "jsonb"[] DEFAULT '{}'::"jsonb"[] NOT NULL
 );
-
-
 ALTER TABLE "public"."contract_check_list" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."contract_check_list" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."contract_check_list_id_seq"
     START WITH 1
@@ -568,9 +366,6 @@ ALTER TABLE "public"."contract_check_list" ALTER COLUMN "id" ADD GENERATED BY DE
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."contracts" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -614,83 +409,25 @@ CREATE TABLE IF NOT EXISTS "public"."contracts" (
     "onboarding" bigint,
     "direct_report" bigint
 );
-
-
 ALTER TABLE "public"."contracts" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."contracts" IS 'User contracts, they bind profiles (user) to legal entities';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."paid_leave" IS 'Normal number of leave days for employees';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."sick_leave" IS 'Number of sick leave days approved';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."profile" IS 'The owner of the contract';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."entity" IS 'Legal entity this contract belongs to';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."org_signed" IS 'Date, if organization has signed contract';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."profile_signed" IS 'Date, if profile user has signed';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."status" IS 'State of the contract';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."signed_by" IS 'The person that signed this document on-behalf of the legal entity';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."profile_signature_string" IS 'Signature string used to sign contract';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."org_signature_string" IS 'Signature string used by org rep';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."terminated_by" IS 'The profile that terminated contract.';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."org" IS 'org';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."role" IS 'Option to fetch details directly from roles, if connected';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."sick_leave_used" IS 'Number of sick leave days used';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."paid_leave_used" IS 'Number of paid leave used';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."paternity_leave_used" IS 'Number of paternity leave days used';
-
-
-
 COMMENT ON COLUMN "public"."contracts"."level_name" IS 'Level, for manual input support';
-
-
-
 ALTER TABLE "public"."contracts" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."contracts_id_seq"
     START WITH 1
@@ -699,9 +436,6 @@ ALTER TABLE "public"."contracts" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS I
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."countries" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -712,19 +446,9 @@ CREATE TABLE IF NOT EXISTS "public"."countries" (
     "currency_code" character varying(3),
     "currency_name" character varying(50)
 );
-
-
 ALTER TABLE "public"."countries" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."countries" IS 'List of all the countries in the world';
-
-
-
 COMMENT ON COLUMN "public"."countries"."can_legal_entity" IS 'Is it possible for the company to be a legal entity?';
-
-
-
 ALTER TABLE "public"."countries" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."countries_id_seq"
     START WITH 1
@@ -733,9 +457,6 @@ ALTER TABLE "public"."countries" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS I
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."dashboard_stats" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -743,19 +464,9 @@ CREATE TABLE IF NOT EXISTS "public"."dashboard_stats" (
     "contracts" numeric DEFAULT '0'::numeric NOT NULL,
     "org" "text" NOT NULL
 );
-
-
 ALTER TABLE "public"."dashboard_stats" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."dashboard_stats" IS 'Auto-populated dashboard stats data';
-
-
-
 COMMENT ON COLUMN "public"."dashboard_stats"."org" IS 'organisation';
-
-
-
 ALTER TABLE "public"."dashboard_stats" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."dashboard_stats_id_seq"
     START WITH 1
@@ -764,9 +475,6 @@ ALTER TABLE "public"."dashboard_stats" ALTER COLUMN "id" ADD GENERATED BY DEFAUL
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."employee_levels" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -780,23 +488,10 @@ CREATE TABLE IF NOT EXISTS "public"."employee_levels" (
     "max_salary" numeric DEFAULT '0'::numeric NOT NULL,
     "max_signing_bonus" numeric
 );
-
-
 ALTER TABLE "public"."employee_levels" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."employee_levels" IS 'Think of it like salary bands. You get the gist now?';
-
-
-
 COMMENT ON COLUMN "public"."employee_levels"."min_salary" IS 'Minimum salary of people in this level';
-
-
-
 COMMENT ON COLUMN "public"."employee_levels"."max_salary" IS 'Maximum salary of people in this level';
-
-
-
 ALTER TABLE "public"."employee_levels" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."employee_levels_id_seq"
     START WITH 1
@@ -805,9 +500,6 @@ ALTER TABLE "public"."employee_levels" ALTER COLUMN "id" ADD GENERATED BY DEFAUL
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."job_applications" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -835,15 +527,8 @@ CREATE TABLE IF NOT EXISTS "public"."job_applications" (
     "custom_answers" "jsonb"[] DEFAULT '{}'::"jsonb"[],
     "levels" "jsonb"[] DEFAULT '{}'::"jsonb"[] NOT NULL
 );
-
-
 ALTER TABLE "public"."job_applications" OWNER TO "postgres";
-
-
 COMMENT ON COLUMN "public"."job_applications"."documents" IS 'All documents used for applications';
-
-
-
 ALTER TABLE "public"."job_applications" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."job_applications_id_seq"
     START WITH 1
@@ -852,9 +537,6 @@ ALTER TABLE "public"."job_applications" ALTER COLUMN "id" ADD GENERATED BY DEFAU
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."legal_entities" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -872,51 +554,17 @@ CREATE TABLE IF NOT EXISTS "public"."legal_entities" (
     "org" "text" NOT NULL,
     "rn" "text"
 );
-
-
 ALTER TABLE "public"."legal_entities" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."legal_entities" IS 'Legal details of every organization';
-
-
-
 COMMENT ON COLUMN "public"."legal_entities"."formation_date" IS 'Date company was incorporated.';
-
-
-
 COMMENT ON COLUMN "public"."legal_entities"."tax_no" IS 'Across different countries, they have different names for the number generated for every company, for tax purpose. Whatever the name it, I call it tax_no';
-
-
-
 COMMENT ON COLUMN "public"."legal_entities"."sic" IS 'For industry classification of each company';
-
-
-
 COMMENT ON COLUMN "public"."legal_entities"."address_state" IS 'Company''s physical address: state';
-
-
-
 COMMENT ON COLUMN "public"."legal_entities"."address_code" IS 'Post code or zip code of entity physical address';
-
-
-
 COMMENT ON COLUMN "public"."legal_entities"."street_address" IS 'Legal physical address street address';
-
-
-
 COMMENT ON COLUMN "public"."legal_entities"."is_eor" IS 'Is the company an EOR company?';
-
-
-
 COMMENT ON COLUMN "public"."legal_entities"."org" IS 'org';
-
-
-
 COMMENT ON COLUMN "public"."legal_entities"."rn" IS 'Company registration number, for any kind of company';
-
-
-
 ALTER TABLE "public"."legal_entities" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."legal entities_id_seq"
     START WITH 1
@@ -925,9 +573,6 @@ ALTER TABLE "public"."legal_entities" ALTER COLUMN "id" ADD GENERATED BY DEFAULT
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 ALTER TABLE "public"."legal_entities" ALTER COLUMN "address_state" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."legal_entities_address_state_seq"
     START WITH 1
@@ -936,9 +581,6 @@ ALTER TABLE "public"."legal_entities" ALTER COLUMN "address_state" ADD GENERATED
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."links" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -949,11 +591,7 @@ CREATE TABLE IF NOT EXISTS "public"."links" (
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "name" "text" NOT NULL
 );
-
-
 ALTER TABLE "public"."links" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."links" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."links_id_seq"
     START WITH 1
@@ -962,9 +600,6 @@ ALTER TABLE "public"."links" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENT
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."managers" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -974,11 +609,7 @@ CREATE TABLE IF NOT EXISTS "public"."managers" (
     "team" bigint NOT NULL,
     "profile" "uuid"
 );
-
-
 ALTER TABLE "public"."managers" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."managers" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."managers_id_seq"
     START WITH 1
@@ -987,9 +618,6 @@ ALTER TABLE "public"."managers" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS ID
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."okr_objectives" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -998,11 +626,7 @@ CREATE TABLE IF NOT EXISTS "public"."okr_objectives" (
     "entity" bigint,
     "objective" "text" NOT NULL
 );
-
-
 ALTER TABLE "public"."okr_objectives" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."okr_objectives" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."okr_objectives_id_seq"
     START WITH 1
@@ -1011,9 +635,6 @@ ALTER TABLE "public"."okr_objectives" ALTER COLUMN "id" ADD GENERATED BY DEFAULT
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."okr_results" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1023,11 +644,7 @@ CREATE TABLE IF NOT EXISTS "public"."okr_results" (
     "entity" bigint,
     "result" "text" NOT NULL
 );
-
-
 ALTER TABLE "public"."okr_results" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."okr_results" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."okr_results_id_seq"
     START WITH 1
@@ -1036,9 +653,6 @@ ALTER TABLE "public"."okr_results" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."okrs" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1048,11 +662,7 @@ CREATE TABLE IF NOT EXISTS "public"."okrs" (
     "start" timestamp with time zone NOT NULL,
     "end" timestamp with time zone NOT NULL
 );
-
-
 ALTER TABLE "public"."okrs" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."okrs" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."okrs_id_seq"
     START WITH 1
@@ -1061,9 +671,6 @@ ALTER TABLE "public"."okrs" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTI
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."open_roles" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1094,39 +701,14 @@ CREATE TABLE IF NOT EXISTS "public"."open_roles" (
     "policy" bigint,
     "direct_report" bigint
 );
-
-
 ALTER TABLE "public"."open_roles" OWNER TO "postgres";
-
-
 COMMENT ON COLUMN "public"."open_roles"."paid_leave" IS 'Normal number of leave days for employees';
-
-
-
 COMMENT ON COLUMN "public"."open_roles"."sick_leave" IS 'Number of sick leave days approved';
-
-
-
 COMMENT ON COLUMN "public"."open_roles"."entity" IS 'Legal entity this contract belongs to';
-
-
-
 COMMENT ON COLUMN "public"."open_roles"."org" IS 'org';
-
-
-
 COMMENT ON COLUMN "public"."open_roles"."state" IS 'Is contract an open role';
-
-
-
 COMMENT ON COLUMN "public"."open_roles"."applicants" IS 'Updated by postgress function, counts and updates the number of applicants for this role';
-
-
-
 COMMENT ON COLUMN "public"."open_roles"."level_name" IS 'Support for manual level system';
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."org_documents" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1140,19 +722,9 @@ CREATE TABLE IF NOT EXISTS "public"."org_documents" (
     "signature_text" "text",
     "org" "text"
 );
-
-
 ALTER TABLE "public"."org_documents" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."org_documents" IS 'All possible documents for an organisation';
-
-
-
 COMMENT ON COLUMN "public"."org_documents"."signature_text" IS 'Text used as signature';
-
-
-
 ALTER TABLE "public"."org_documents" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."org_documents_id_seq"
     START WITH 1
@@ -1161,9 +733,6 @@ ALTER TABLE "public"."org_documents" ALTER COLUMN "id" ADD GENERATED BY DEFAULT 
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."org_settings" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1179,11 +748,7 @@ CREATE TABLE IF NOT EXISTS "public"."org_settings" (
     "paternity_leave" smallint DEFAULT '20'::smallint,
     "salary_date" "date"
 );
-
-
 ALTER TABLE "public"."org_settings" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."org_settings" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."org_settings_id_seq"
     START WITH 1
@@ -1192,9 +757,6 @@ ALTER TABLE "public"."org_settings" ALTER COLUMN "id" ADD GENERATED BY DEFAULT A
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."organisations" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1203,19 +765,9 @@ CREATE TABLE IF NOT EXISTS "public"."organisations" (
     "website" "text",
     "subdomain" "text" NOT NULL
 );
-
-
 ALTER TABLE "public"."organisations" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."organisations" IS 'All organisations';
-
-
-
 COMMENT ON COLUMN "public"."organisations"."subdomain" IS 'Subdomain url prefix';
-
-
-
 ALTER TABLE "public"."organisations" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."organisations_id_seq"
     START WITH 1
@@ -1224,9 +776,6 @@ ALTER TABLE "public"."organisations" ALTER COLUMN "id" ADD GENERATED BY DEFAULT 
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 ALTER TABLE "public"."open_roles" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."profile_contract_id_seq"
     START WITH 1
@@ -1235,9 +784,6 @@ ALTER TABLE "public"."open_roles" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS 
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."profiles" (
     "id" "uuid" NOT NULL,
     "first_name" "text" NOT NULL,
@@ -1251,23 +797,10 @@ CREATE TABLE IF NOT EXISTS "public"."profiles" (
     "mobile" "text",
     "gender" "text"
 );
-
-
 ALTER TABLE "public"."profiles" OWNER TO "postgres";
-
-
 COMMENT ON COLUMN "public"."profiles"."nationality" IS 'User''s country';
-
-
-
 COMMENT ON COLUMN "public"."profiles"."email" IS 'User''s personal email address';
-
-
-
 COMMENT ON COLUMN "public"."profiles"."mobile" IS 'Mobile phone number';
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."profiles_roles" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1276,38 +809,18 @@ CREATE TABLE IF NOT EXISTS "public"."profiles_roles" (
     "organisation" "text" NOT NULL,
     "disable" boolean DEFAULT false NOT NULL
 );
-
-
 ALTER TABLE "public"."profiles_roles" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."profiles_roles" IS 'Profile and their roles';
-
-
-
 COMMENT ON COLUMN "public"."profiles_roles"."profile" IS 'Link user profile';
-
-
-
 COMMENT ON COLUMN "public"."profiles_roles"."organisation" IS 'organisation';
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."roles" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "description" "text",
     "name" "public"."app_role" DEFAULT 'admin'::"public"."app_role" NOT NULL
 );
-
-
 ALTER TABLE "public"."roles" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."roles" IS 'Roles for users';
-
-
-
 ALTER TABLE "public"."roles" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."roles_id_seq"
     START WITH 1
@@ -1316,20 +829,13 @@ ALTER TABLE "public"."roles" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENT
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."states" (
     "id" integer NOT NULL,
     "name" character varying(100) NOT NULL,
     "short_code" character varying(10) NOT NULL,
     "country_code" character varying(2) NOT NULL
 );
-
-
 ALTER TABLE "public"."states" OWNER TO "postgres";
-
-
 CREATE SEQUENCE IF NOT EXISTS "public"."states_id_seq"
     AS integer
     START WITH 1
@@ -1337,26 +843,15 @@ CREATE SEQUENCE IF NOT EXISTS "public"."states_id_seq"
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
 ALTER TABLE "public"."states_id_seq" OWNER TO "postgres";
-
-
 ALTER SEQUENCE "public"."states_id_seq" OWNED BY "public"."states"."id";
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."team_roles" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "name" character varying NOT NULL,
     "description" "text"
 );
-
-
 ALTER TABLE "public"."team_roles" OWNER TO "postgres";
-
-
 ALTER TABLE "public"."team_roles" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."team_roles_id_seq"
     START WITH 1
@@ -1365,9 +860,6 @@ ALTER TABLE "public"."team_roles" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS 
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."teams" (
     "id" bigint NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1376,15 +868,8 @@ CREATE TABLE IF NOT EXISTS "public"."teams" (
     "description" "text",
     "updated_at" timestamp with time zone DEFAULT ("now"() AT TIME ZONE 'utc'::"text") NOT NULL
 );
-
-
 ALTER TABLE "public"."teams" OWNER TO "postgres";
-
-
 COMMENT ON TABLE "public"."teams" IS 'teams, departments, groups, whatever UI or orgs choose to call it.';
-
-
-
 ALTER TABLE "public"."teams" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."teams_id_seq"
     START WITH 1
@@ -1393,9 +878,6 @@ ALTER TABLE "public"."teams" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENT
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."time_off" (
     "id" bigint NOT NULL,
     "profile" "uuid" NOT NULL,
@@ -1413,31 +895,12 @@ CREATE TABLE IF NOT EXISTS "public"."time_off" (
     "levels" "jsonb"[] DEFAULT '{}'::"jsonb"[],
     "hand_over" bigint
 );
-
-
 ALTER TABLE "public"."time_off" OWNER TO "postgres";
-
-
 COMMENT ON COLUMN "public"."time_off"."org" IS 'The org the time off belongs to';
-
-
-
 COMMENT ON COLUMN "public"."time_off"."hand_over_note" IS 'Note for handover person';
-
-
-
 COMMENT ON COLUMN "public"."time_off"."note" IS 'Leave note, for approver';
-
-
-
 COMMENT ON COLUMN "public"."time_off"."levels" IS 'Copied from related org policy';
-
-
-
 COMMENT ON COLUMN "public"."time_off"."hand_over" IS 'Who will take over during time off period';
-
-
-
 ALTER TABLE "public"."time_off" ALTER COLUMN "id" ADD GENERATED ALWAYS AS IDENTITY (
     SEQUENCE NAME "public"."time_off_id_seq"
     START WITH 1
@@ -1446,9 +909,6 @@ ALTER TABLE "public"."time_off" ALTER COLUMN "id" ADD GENERATED ALWAYS AS IDENTI
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 ALTER TABLE "public"."profiles_roles" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
     SEQUENCE NAME "public"."user_roles_id_seq"
     START WITH 1
@@ -1457,1529 +917,528 @@ ALTER TABLE "public"."profiles_roles" ALTER COLUMN "id" ADD GENERATED BY DEFAULT
     NO MAXVALUE
     CACHE 1
 );
-
-
-
 ALTER TABLE ONLY "public"."states" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."states_id_seq"'::"regclass");
-
-
-
 ALTER TABLE ONLY "public"."appraisal_answers"
     ADD CONSTRAINT "appraisal_answers_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."appraisal_history"
     ADD CONSTRAINT "appraisal_history_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."appraisal_questions"
     ADD CONSTRAINT "appraisal_questions_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."appraisal_settings"
     ADD CONSTRAINT "appraisal_settings_org_key" UNIQUE ("org");
-
-
-
 ALTER TABLE ONLY "public"."appraisal_settings"
     ADD CONSTRAINT "appraisal_settings_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."approval_policies"
     ADD CONSTRAINT "approval_policies_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."boarding_check_lists"
     ADD CONSTRAINT "boaring_check_list_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."contract_check_list"
     ADD CONSTRAINT "contract_check_list_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."countries"
     ADD CONSTRAINT "countries_country_code_key" UNIQUE ("country_code");
-
-
-
 ALTER TABLE ONLY "public"."countries"
     ADD CONSTRAINT "countries_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."dashboard_stats"
     ADD CONSTRAINT "dashboard_stats_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."employee_levels"
     ADD CONSTRAINT "employee_levels_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."job_applications"
     ADD CONSTRAINT "job_applications_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."legal_entities"
     ADD CONSTRAINT "legal entities_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."links"
     ADD CONSTRAINT "links_name_key" UNIQUE ("name");
-
-
-
 ALTER TABLE ONLY "public"."links"
     ADD CONSTRAINT "links_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."managers"
     ADD CONSTRAINT "managers_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."okr_objectives"
     ADD CONSTRAINT "objectives_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."okr_results"
     ADD CONSTRAINT "okr_results_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."okrs"
     ADD CONSTRAINT "okrs_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."org_documents"
     ADD CONSTRAINT "org_documents_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."org_settings"
     ADD CONSTRAINT "org_settings_org_key" UNIQUE ("org");
-
-
-
 ALTER TABLE ONLY "public"."org_settings"
     ADD CONSTRAINT "org_settings_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."organisations"
     ADD CONSTRAINT "organisations_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."organisations"
     ADD CONSTRAINT "organisations_subdomain_key" UNIQUE ("subdomain");
-
-
-
 ALTER TABLE ONLY "public"."open_roles"
     ADD CONSTRAINT "profile_contract_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."profiles"
     ADD CONSTRAINT "profiles_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."roles"
     ADD CONSTRAINT "roles_name_key" UNIQUE ("name");
-
-
-
 ALTER TABLE ONLY "public"."roles"
     ADD CONSTRAINT "roles_nm_key" UNIQUE ("name");
-
-
-
 ALTER TABLE ONLY "public"."roles"
     ADD CONSTRAINT "roles_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."states"
     ADD CONSTRAINT "states_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."team_roles"
     ADD CONSTRAINT "team_roles_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."teams"
     ADD CONSTRAINT "teams_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."time_off"
     ADD CONSTRAINT "time_off_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."profiles_roles"
     ADD CONSTRAINT "user_roles_pkey" PRIMARY KEY ("id");
-
-
-
 CREATE OR REPLACE TRIGGER "job_applications_delete_trigger" AFTER DELETE ON "public"."job_applications" FOR EACH ROW EXECUTE FUNCTION "public"."update_applicants_on_delete"();
-
-
-
 CREATE OR REPLACE TRIGGER "job_applications_insert_trigger" AFTER INSERT ON "public"."job_applications" FOR EACH ROW EXECUTE FUNCTION "public"."update_applicants_on_insert"();
-
-
-
 CREATE OR REPLACE TRIGGER "update_contract_status_trigger" BEFORE UPDATE ON "public"."contracts" FOR EACH ROW EXECUTE FUNCTION "public"."update_contract_status"();
-
-
-
 ALTER TABLE ONLY "public"."appraisal_answers"
     ADD CONSTRAINT "appraisal_answers_appraisal_fkey" FOREIGN KEY ("appraisal") REFERENCES "public"."appraisal_history"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."appraisal_answers"
     ADD CONSTRAINT "appraisal_answers_contract_fkey" FOREIGN KEY ("contract") REFERENCES "public"."contracts"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."appraisal_answers"
     ADD CONSTRAINT "appraisal_answers_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."appraisal_answers"
     ADD CONSTRAINT "appraisal_answers_manager_contract_fkey" FOREIGN KEY ("manager_contract") REFERENCES "public"."contracts"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."appraisal_answers"
     ADD CONSTRAINT "appraisal_answers_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."appraisal_answers"
     ADD CONSTRAINT "appraisal_answers_org_profile_fkey" FOREIGN KEY ("org_profile") REFERENCES "public"."profiles"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."appraisal_history"
     ADD CONSTRAINT "appraisal_history_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."appraisal_history"
     ADD CONSTRAINT "appraisal_history_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."appraisal_questions"
     ADD CONSTRAINT "appraisal_questions_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."appraisal_questions"
     ADD CONSTRAINT "appraisal_questions_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."appraisal_settings"
     ADD CONSTRAINT "appraisal_settings_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."appraisal_settings"
     ADD CONSTRAINT "appraisal_settings_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."approval_policies"
     ADD CONSTRAINT "approval_policies_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."boarding_check_lists"
     ADD CONSTRAINT "boaring_check_list_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."boarding_check_lists"
     ADD CONSTRAINT "boaring_check_list_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."boarding_check_lists"
     ADD CONSTRAINT "boaring_check_list_policy_fkey" FOREIGN KEY ("policy") REFERENCES "public"."approval_policies"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
-
 ALTER TABLE ONLY "public"."contract_check_list"
     ADD CONSTRAINT "contract_check_list_boarding_fkey" FOREIGN KEY ("boarding") REFERENCES "public"."boarding_check_lists"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."contract_check_list"
     ADD CONSTRAINT "contract_check_list_contract_fkey" FOREIGN KEY ("contract") REFERENCES "public"."contracts"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."contract_check_list"
     ADD CONSTRAINT "contract_check_list_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_direct_report_fkey" FOREIGN KEY ("direct_report") REFERENCES "public"."contracts"("id") ON UPDATE CASCADE ON DELETE SET NULL;
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_level_fkey" FOREIGN KEY ("level") REFERENCES "public"."employee_levels"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_offboarding_fkey" FOREIGN KEY ("offboarding") REFERENCES "public"."boarding_check_lists"("id") ON UPDATE CASCADE ON DELETE SET NULL;
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_onboarding_fkey" FOREIGN KEY ("onboarding") REFERENCES "public"."boarding_check_lists"("id") ON UPDATE CASCADE ON DELETE SET NULL;
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_profile_fkey" FOREIGN KEY ("profile") REFERENCES "public"."profiles"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_role_fkey" FOREIGN KEY ("role") REFERENCES "public"."open_roles"("id");
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_signed_by_fkey" FOREIGN KEY ("signed_by") REFERENCES "public"."profiles"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_team_fkey" FOREIGN KEY ("team") REFERENCES "public"."teams"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."contracts"
     ADD CONSTRAINT "contracts_terminated_by_fkey" FOREIGN KEY ("terminated_by") REFERENCES "public"."profiles"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."dashboard_stats"
     ADD CONSTRAINT "dashboard_stats_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."employee_levels"
     ADD CONSTRAINT "employee_levels_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."employee_levels"
     ADD CONSTRAINT "employee_levels_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."job_applications"
     ADD CONSTRAINT "job_applications_country_location_fkey" FOREIGN KEY ("country_location") REFERENCES "public"."countries"("country_code") ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
-
 ALTER TABLE ONLY "public"."job_applications"
     ADD CONSTRAINT "job_applications_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."job_applications"
     ADD CONSTRAINT "job_applications_role_fkey" FOREIGN KEY ("role") REFERENCES "public"."open_roles"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."legal_entities"
     ADD CONSTRAINT "legal_entities_address_state_fkey" FOREIGN KEY ("address_state") REFERENCES "public"."states"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."legal_entities"
     ADD CONSTRAINT "legal_entities_incorporation_country_fkey" FOREIGN KEY ("incorporation_country") REFERENCES "public"."countries"("country_code") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."legal_entities"
     ADD CONSTRAINT "legal_entities_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."links"
     ADD CONSTRAINT "links_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."links"
     ADD CONSTRAINT "links_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."managers"
     ADD CONSTRAINT "managers_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."managers"
     ADD CONSTRAINT "managers_person_fkey" FOREIGN KEY ("person") REFERENCES "public"."contracts"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."managers"
     ADD CONSTRAINT "managers_profile_fkey" FOREIGN KEY ("profile") REFERENCES "public"."profiles"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."managers"
     ADD CONSTRAINT "managers_role_fkey1" FOREIGN KEY ("role") REFERENCES "public"."team_roles"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."managers"
     ADD CONSTRAINT "managers_team_fkey" FOREIGN KEY ("team") REFERENCES "public"."teams"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."okr_objectives"
     ADD CONSTRAINT "objectives_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."okr_objectives"
     ADD CONSTRAINT "objectives_okr_fkey" FOREIGN KEY ("okr") REFERENCES "public"."okrs"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."okr_objectives"
     ADD CONSTRAINT "objectives_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."okr_results"
     ADD CONSTRAINT "okr_results_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."okr_results"
     ADD CONSTRAINT "okr_results_okr_fkey" FOREIGN KEY ("okr") REFERENCES "public"."okrs"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."okr_results"
     ADD CONSTRAINT "okr_results_okr_objective_fkey" FOREIGN KEY ("okr_objective") REFERENCES "public"."okr_objectives"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."okr_results"
     ADD CONSTRAINT "okr_results_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."okrs"
     ADD CONSTRAINT "okrs_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."okrs"
     ADD CONSTRAINT "okrs_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."open_roles"
     ADD CONSTRAINT "open_roles_direct_report_fkey" FOREIGN KEY ("direct_report") REFERENCES "public"."contracts"("id") ON UPDATE CASCADE ON DELETE SET NULL;
-
-
-
 ALTER TABLE ONLY "public"."open_roles"
     ADD CONSTRAINT "open_roles_policy_fkey" FOREIGN KEY ("policy") REFERENCES "public"."approval_policies"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."open_roles"
     ADD CONSTRAINT "open_roles_team_fkey" FOREIGN KEY ("team") REFERENCES "public"."teams"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."org_documents"
     ADD CONSTRAINT "org_documents_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."org_documents"
     ADD CONSTRAINT "org_documents_eor_entity_fkey" FOREIGN KEY ("eor_entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."org_documents"
     ADD CONSTRAINT "org_documents_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."org_documents"
     ADD CONSTRAINT "org_documents_profile_fkey" FOREIGN KEY ("profile") REFERENCES "public"."profiles"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."org_documents"
     ADD CONSTRAINT "org_documents_signed_by_fkey" FOREIGN KEY ("signed_by") REFERENCES "public"."profiles"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."org_settings"
     ADD CONSTRAINT "org_settings_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."open_roles"
     ADD CONSTRAINT "profile_contract_entity_fkey" FOREIGN KEY ("entity") REFERENCES "public"."legal_entities"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."open_roles"
     ADD CONSTRAINT "profile_contract_level_fkey" FOREIGN KEY ("level") REFERENCES "public"."employee_levels"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
-
 ALTER TABLE ONLY "public"."open_roles"
     ADD CONSTRAINT "profile_contract_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."profiles"
     ADD CONSTRAINT "profiles_id_fkey" FOREIGN KEY ("id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."profiles"
     ADD CONSTRAINT "profiles_nationality_fkey" FOREIGN KEY ("nationality") REFERENCES "public"."countries"("country_code") ON UPDATE CASCADE ON DELETE SET NULL;
-
-
-
 ALTER TABLE ONLY "public"."profiles"
     ADD CONSTRAINT "profiles_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."profiles_roles"
     ADD CONSTRAINT "profiles_roles_organisation_fkey" FOREIGN KEY ("organisation") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."profiles_roles"
     ADD CONSTRAINT "profiles_roles_profile_fkey" FOREIGN KEY ("profile") REFERENCES "public"."profiles"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."profiles_roles"
     ADD CONSTRAINT "profiles_roles_role_fkey" FOREIGN KEY ("role") REFERENCES "public"."roles"("name") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."states"
     ADD CONSTRAINT "states_country_code_fkey" FOREIGN KEY ("country_code") REFERENCES "public"."countries"("country_code");
-
-
-
 ALTER TABLE ONLY "public"."teams"
     ADD CONSTRAINT "teams_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."time_off"
     ADD CONSTRAINT "time_off_contract_fkey" FOREIGN KEY ("contract") REFERENCES "public"."contracts"("id") ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."time_off"
     ADD CONSTRAINT "time_off_hand_over_fkey" FOREIGN KEY ("hand_over") REFERENCES "public"."contracts"("id") ON UPDATE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."time_off"
     ADD CONSTRAINT "time_off_org_fkey" FOREIGN KEY ("org") REFERENCES "public"."organisations"("subdomain") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
 ALTER TABLE ONLY "public"."time_off"
     ADD CONSTRAINT "time_off_profile_fkey" FOREIGN KEY ("profile") REFERENCES "public"."profiles"("id") ON DELETE CASCADE;
-
-
-
 CREATE POLICY "Allow auth admin to read user roles" ON "public"."profiles_roles" FOR SELECT TO "supabase_auth_admin" USING (true);
-
-
-
 CREATE POLICY "Enable all access for authenticated users only" ON "public"."profiles" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for auth users" ON "public"."boarding_check_lists" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."appraisal_answers" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."appraisal_history" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."appraisal_settings" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."contract_check_list" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."contracts" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."dashboard_stats" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."employee_levels" TO "authenticated" USING (true) WITH CHECK (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."legal_entities" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."links" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."managers" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."okr_objectives" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."okr_results" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."org_settings" TO "authenticated" USING (true) WITH CHECK (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."organisations" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable all for authenticated users only" ON "public"."teams" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable delete for auth and admin users" ON "public"."appraisal_questions" FOR DELETE TO "authenticated" USING ((( SELECT ((("auth"."jwt"() ->> 'user_role'::"text"))::"public"."app_role" = 'admin'::"public"."app_role")) AND ( SELECT (("auth"."jwt"() ->> 'user_role_org'::"text") = "appraisal_questions"."org"))));
-
-
-
 CREATE POLICY "Enable delete for authenticated users only" ON "public"."approval_policies" FOR DELETE TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable delete for authenticated users only" ON "public"."time_off" FOR DELETE TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable delete for users based on user_id" ON "public"."okrs" FOR DELETE USING ((( SELECT ((("auth"."jwt"() ->> 'user_role'::"text"))::"public"."app_role" = 'admin'::"public"."app_role")) AND ( SELECT (("auth"."jwt"() ->> 'user_role_org'::"text") = "okrs"."org"))));
-
-
-
 CREATE POLICY "Enable insert for all users" ON "public"."job_applications" FOR INSERT WITH CHECK (true);
-
-
-
 CREATE POLICY "Enable insert for authenticated admin users only" ON "public"."appraisal_questions" FOR INSERT TO "authenticated" WITH CHECK ((( SELECT ((("auth"."jwt"() ->> 'user_role'::"text"))::"public"."app_role" = 'admin'::"public"."app_role")) AND ( SELECT (("auth"."jwt"() ->> 'user_role_org'::"text") = "appraisal_questions"."org"))));
-
-
-
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."approval_policies" FOR INSERT TO "authenticated" WITH CHECK (true);
-
-
-
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."legal_entities" FOR INSERT TO "authenticated" WITH CHECK (true);
-
-
-
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."okrs" FOR INSERT TO "authenticated" WITH CHECK (( SELECT "public"."authorize_role"("okrs"."org") AS "authorize_role"));
-
-
-
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."org_documents" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."organisations" FOR INSERT TO "authenticated" WITH CHECK (true);
-
-
-
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."profiles_roles" TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."time_off" FOR INSERT TO "authenticated" WITH CHECK (true);
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."appraisal_questions" FOR SELECT TO "authenticated" USING (( SELECT (("auth"."jwt"() ->> 'user_role_org'::"text") = "appraisal_questions"."org")));
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."countries" FOR SELECT USING (true);
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."job_applications" FOR SELECT USING (true);
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."legal_entities" FOR SELECT USING (true);
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."open_roles" FOR SELECT USING (true);
-
-
-
 CREATE POLICY "Enable read access for all users" ON "public"."states" FOR SELECT USING (true);
-
-
-
 CREATE POLICY "Enable read access for auth users" ON "public"."approval_policies" FOR SELECT TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable read access for auth users" ON "public"."time_off" FOR SELECT TO "authenticated" USING (true);
-
-
-
 CREATE POLICY "Enable update for auth and admin users" ON "public"."appraisal_questions" FOR UPDATE TO "authenticated" USING ((( SELECT ((("auth"."jwt"() ->> 'user_role'::"text"))::"public"."app_role" = 'admin'::"public"."app_role")) AND ( SELECT (("auth"."jwt"() ->> 'user_role_org'::"text") = "appraisal_questions"."org")))) WITH CHECK ((( SELECT ((("auth"."jwt"() ->> 'user_role'::"text"))::"public"."app_role" = 'admin'::"public"."app_role")) AND ( SELECT (("auth"."jwt"() ->> 'user_role_org'::"text") = "appraisal_questions"."org"))));
-
-
-
 CREATE POLICY "Enable update for auth users" ON "public"."approval_policies" FOR UPDATE TO "authenticated" USING (true) WITH CHECK (true);
-
-
-
 CREATE POLICY "Enable update for auth users" ON "public"."time_off" FOR UPDATE TO "authenticated" USING (true) WITH CHECK (true);
-
-
-
 CREATE POLICY "Enable update for authenticated users only" ON "public"."job_applications" FOR UPDATE TO "authenticated" USING (true) WITH CHECK (true);
-
-
-
 CREATE POLICY "Enable users to view their own data only" ON "public"."okrs" FOR SELECT TO "authenticated" USING ((( SELECT ((("auth"."jwt"() ->> 'user_role'::"text"))::"public"."app_role" = 'admin'::"public"."app_role")) AND ( SELECT (("auth"."jwt"() ->> 'user_role_org'::"text") = "okrs"."org"))));
-
-
-
 ALTER TABLE "public"."appraisal_answers" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."appraisal_history" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."appraisal_questions" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."appraisal_settings" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."approval_policies" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."boarding_check_lists" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."contract_check_list" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."contracts" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."countries" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."dashboard_stats" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."employee_levels" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."job_applications" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."legal_entities" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."links" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."managers" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."okr_objectives" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."okr_results" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."okrs" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."open_roles" ENABLE ROW LEVEL SECURITY;
-
-
 CREATE POLICY "open_roles_policy" ON "public"."open_roles" USING ((EXISTS ( SELECT 1
    FROM "public"."profiles_roles"
   WHERE (("profiles_roles"."profile" = "auth"."uid"()) AND ("profiles_roles"."organisation" = "open_roles"."org")))));
-
-
-
 ALTER TABLE "public"."org_documents" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."org_settings" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."organisations" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."profiles" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."profiles_roles" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."roles" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."states" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."team_roles" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."teams" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."time_off" ENABLE ROW LEVEL SECURITY;
-
-
 CREATE POLICY "update_own_profile_policy" ON "public"."profiles" FOR UPDATE USING (("id" = "auth"."uid"()));
-
-
-
-
-
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
-
-
-
-
-
 GRANT USAGE ON SCHEMA "public" TO "postgres";
 GRANT USAGE ON SCHEMA "public" TO "anon";
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
 GRANT USAGE ON SCHEMA "public" TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 GRANT ALL ON FUNCTION "public"."authorize_role"("org_name" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."authorize_role"("org_name" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."authorize_role"("org_name" "text") TO "service_role";
-
-
-
 GRANT ALL ON FUNCTION "public"."custom_access_token_hook"("event" "jsonb") TO "anon";
 GRANT ALL ON FUNCTION "public"."custom_access_token_hook"("event" "jsonb") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."custom_access_token_hook"("event" "jsonb") TO "service_role";
-
-
-
 GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "anon";
 GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
-
-
-
 GRANT ALL ON FUNCTION "public"."update_applicants_on_delete"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_applicants_on_delete"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_applicants_on_delete"() TO "service_role";
-
-
-
 GRANT ALL ON FUNCTION "public"."update_applicants_on_insert"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_applicants_on_insert"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_applicants_on_insert"() TO "service_role";
-
-
-
 GRANT ALL ON FUNCTION "public"."update_contract_status"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_contract_status"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_contract_status"() TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 GRANT ALL ON TABLE "public"."appraisal_answers" TO "anon";
 GRANT ALL ON TABLE "public"."appraisal_answers" TO "authenticated";
 GRANT ALL ON TABLE "public"."appraisal_answers" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."appraisal_answers_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."appraisal_answers_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."appraisal_answers_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."appraisal_history" TO "anon";
 GRANT ALL ON TABLE "public"."appraisal_history" TO "authenticated";
 GRANT ALL ON TABLE "public"."appraisal_history" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."appraisal_history_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."appraisal_history_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."appraisal_history_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."appraisal_questions" TO "anon";
 GRANT ALL ON TABLE "public"."appraisal_questions" TO "authenticated";
 GRANT ALL ON TABLE "public"."appraisal_questions" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."appraisal_questions_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."appraisal_questions_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."appraisal_questions_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."appraisal_settings" TO "anon";
 GRANT ALL ON TABLE "public"."appraisal_settings" TO "authenticated";
 GRANT ALL ON TABLE "public"."appraisal_settings" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."appraisal_settings_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."appraisal_settings_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."appraisal_settings_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."approval_policies" TO "anon";
 GRANT ALL ON TABLE "public"."approval_policies" TO "authenticated";
 GRANT ALL ON TABLE "public"."approval_policies" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."approval_policies_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."approval_policies_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."approval_policies_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."boarding_check_lists" TO "anon";
 GRANT ALL ON TABLE "public"."boarding_check_lists" TO "authenticated";
 GRANT ALL ON TABLE "public"."boarding_check_lists" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."boarding_check_lists_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."boarding_check_lists_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."boarding_check_lists_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."boaring_check_list_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."boaring_check_list_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."boaring_check_list_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."contract_check_list" TO "anon";
 GRANT ALL ON TABLE "public"."contract_check_list" TO "authenticated";
 GRANT ALL ON TABLE "public"."contract_check_list" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."contract_check_list_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."contract_check_list_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."contract_check_list_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."contracts" TO "anon";
 GRANT ALL ON TABLE "public"."contracts" TO "authenticated";
 GRANT ALL ON TABLE "public"."contracts" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."contracts_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."contracts_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."contracts_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."countries" TO "anon";
 GRANT ALL ON TABLE "public"."countries" TO "authenticated";
 GRANT ALL ON TABLE "public"."countries" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."countries_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."countries_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."countries_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."dashboard_stats" TO "anon";
 GRANT ALL ON TABLE "public"."dashboard_stats" TO "authenticated";
 GRANT ALL ON TABLE "public"."dashboard_stats" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."dashboard_stats_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."dashboard_stats_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."dashboard_stats_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."employee_levels" TO "anon";
 GRANT ALL ON TABLE "public"."employee_levels" TO "authenticated";
 GRANT ALL ON TABLE "public"."employee_levels" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."employee_levels_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."employee_levels_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."employee_levels_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."job_applications" TO "anon";
 GRANT ALL ON TABLE "public"."job_applications" TO "authenticated";
 GRANT ALL ON TABLE "public"."job_applications" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."job_applications_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."job_applications_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."job_applications_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."legal_entities" TO "anon";
 GRANT ALL ON TABLE "public"."legal_entities" TO "authenticated";
 GRANT ALL ON TABLE "public"."legal_entities" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."legal entities_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."legal entities_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."legal entities_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."legal_entities_address_state_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."legal_entities_address_state_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."legal_entities_address_state_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."links" TO "anon";
 GRANT ALL ON TABLE "public"."links" TO "authenticated";
 GRANT ALL ON TABLE "public"."links" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."links_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."links_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."links_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."managers" TO "anon";
 GRANT ALL ON TABLE "public"."managers" TO "authenticated";
 GRANT ALL ON TABLE "public"."managers" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."managers_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."managers_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."managers_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."okr_objectives" TO "anon";
 GRANT ALL ON TABLE "public"."okr_objectives" TO "authenticated";
 GRANT ALL ON TABLE "public"."okr_objectives" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."okr_objectives_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."okr_objectives_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."okr_objectives_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."okr_results" TO "anon";
 GRANT ALL ON TABLE "public"."okr_results" TO "authenticated";
 GRANT ALL ON TABLE "public"."okr_results" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."okr_results_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."okr_results_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."okr_results_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."okrs" TO "anon";
 GRANT ALL ON TABLE "public"."okrs" TO "authenticated";
 GRANT ALL ON TABLE "public"."okrs" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."okrs_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."okrs_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."okrs_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."open_roles" TO "anon";
 GRANT ALL ON TABLE "public"."open_roles" TO "authenticated";
 GRANT ALL ON TABLE "public"."open_roles" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."org_documents" TO "anon";
 GRANT ALL ON TABLE "public"."org_documents" TO "authenticated";
 GRANT ALL ON TABLE "public"."org_documents" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."org_documents_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."org_documents_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."org_documents_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."org_settings" TO "anon";
 GRANT ALL ON TABLE "public"."org_settings" TO "authenticated";
 GRANT ALL ON TABLE "public"."org_settings" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."org_settings_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."org_settings_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."org_settings_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."organisations" TO "anon";
 GRANT ALL ON TABLE "public"."organisations" TO "authenticated";
 GRANT ALL ON TABLE "public"."organisations" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."organisations_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."organisations_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."organisations_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."profile_contract_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."profile_contract_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."profile_contract_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."profiles" TO "anon";
 GRANT ALL ON TABLE "public"."profiles" TO "authenticated";
 GRANT ALL ON TABLE "public"."profiles" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."profiles_roles" TO "anon";
 GRANT ALL ON TABLE "public"."profiles_roles" TO "authenticated";
 GRANT ALL ON TABLE "public"."profiles_roles" TO "service_role";
 GRANT ALL ON TABLE "public"."profiles_roles" TO "supabase_auth_admin";
-
-
-
 GRANT ALL ON TABLE "public"."roles" TO "anon";
 GRANT ALL ON TABLE "public"."roles" TO "authenticated";
 GRANT ALL ON TABLE "public"."roles" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."roles_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."roles_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."roles_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."states" TO "anon";
 GRANT ALL ON TABLE "public"."states" TO "authenticated";
 GRANT ALL ON TABLE "public"."states" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."states_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."states_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."states_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."team_roles" TO "anon";
 GRANT ALL ON TABLE "public"."team_roles" TO "authenticated";
 GRANT ALL ON TABLE "public"."team_roles" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."team_roles_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."team_roles_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."team_roles_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."teams" TO "anon";
 GRANT ALL ON TABLE "public"."teams" TO "authenticated";
 GRANT ALL ON TABLE "public"."teams" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."teams_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."teams_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."teams_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON TABLE "public"."time_off" TO "anon";
 GRANT ALL ON TABLE "public"."time_off" TO "authenticated";
 GRANT ALL ON TABLE "public"."time_off" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."time_off_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."time_off_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."time_off_id_seq" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."user_roles_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."user_roles_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."user_roles_id_seq" TO "service_role";
-
-
-
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "service_role";
-
-
-
-
-
-
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "service_role";
-
-
-
-
-
-
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 RESET ALL;

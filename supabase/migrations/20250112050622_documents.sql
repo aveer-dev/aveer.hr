@@ -14,68 +14,36 @@ create table "public"."documents" (
     "locked" boolean not null default false,
     "template" boolean not null default false
 );
-
-
 alter table "public"."documents" enable row level security;
-
 CREATE UNIQUE INDEX templates_pkey ON public.documents USING btree (id);
-
 alter table "public"."documents" add constraint "templates_pkey" PRIMARY KEY using index "templates_pkey";
-
 alter table "public"."documents" add constraint "documents_owner_fkey" FOREIGN KEY (owner) REFERENCES profiles(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
-
 alter table "public"."documents" validate constraint "documents_owner_fkey";
-
 alter table "public"."documents" add constraint "templates_entity_fkey" FOREIGN KEY (entity) REFERENCES legal_entities(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
-
 alter table "public"."documents" validate constraint "templates_entity_fkey";
-
 alter table "public"."documents" add constraint "templates_org_fkey" FOREIGN KEY (org) REFERENCES organisations(subdomain) ON UPDATE CASCADE ON DELETE CASCADE not valid;
-
 alter table "public"."documents" validate constraint "templates_org_fkey";
-
 grant delete on table "public"."documents" to "anon";
-
 grant insert on table "public"."documents" to "anon";
-
 grant references on table "public"."documents" to "anon";
-
 grant select on table "public"."documents" to "anon";
-
 grant trigger on table "public"."documents" to "anon";
-
 grant truncate on table "public"."documents" to "anon";
-
 grant update on table "public"."documents" to "anon";
-
 grant delete on table "public"."documents" to "authenticated";
-
 grant insert on table "public"."documents" to "authenticated";
-
 grant references on table "public"."documents" to "authenticated";
-
 grant select on table "public"."documents" to "authenticated";
-
 grant trigger on table "public"."documents" to "authenticated";
-
 grant truncate on table "public"."documents" to "authenticated";
-
 grant update on table "public"."documents" to "authenticated";
-
 grant delete on table "public"."documents" to "service_role";
-
 grant insert on table "public"."documents" to "service_role";
-
 grant references on table "public"."documents" to "service_role";
-
 grant select on table "public"."documents" to "service_role";
-
 grant trigger on table "public"."documents" to "service_role";
-
 grant truncate on table "public"."documents" to "service_role";
-
 grant update on table "public"."documents" to "service_role";
-
 create policy "Only admins can work with documents"
 on "public"."documents"
 as permissive
@@ -83,6 +51,3 @@ for all
 to authenticated
 using (true)
 with check (( SELECT authorize_role(documents.org) AS authorize_role));
-
-
-

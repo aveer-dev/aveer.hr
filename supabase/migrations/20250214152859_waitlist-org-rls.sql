@@ -4,20 +4,12 @@ create table "public"."waitlist" (
     "email" text not null,
     "source" text not null
 );
-
-
 alter table "public"."waitlist" enable row level security;
-
 CREATE UNIQUE INDEX waitlist_email_key ON public.waitlist USING btree (email);
-
 CREATE UNIQUE INDEX waitlist_pkey ON public.waitlist USING btree (id);
-
 alter table "public"."waitlist" add constraint "waitlist_pkey" PRIMARY KEY using index "waitlist_pkey";
-
 alter table "public"."waitlist" add constraint "waitlist_email_key" UNIQUE using index "waitlist_email_key";
-
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.authorize_role(org_name text)
  RETURNS boolean
  LANGUAGE plpgsql
@@ -51,65 +43,37 @@ BEGIN
 
   -- If user_role_org matches org_name, return true
   RETURN true;
-END;$function$
-;
-
+END;$function$;
 grant delete on table "public"."waitlist" to "anon";
-
 grant insert on table "public"."waitlist" to "anon";
-
 grant references on table "public"."waitlist" to "anon";
-
 grant select on table "public"."waitlist" to "anon";
-
 grant trigger on table "public"."waitlist" to "anon";
-
 grant truncate on table "public"."waitlist" to "anon";
-
 grant update on table "public"."waitlist" to "anon";
-
 grant delete on table "public"."waitlist" to "authenticated";
-
 grant insert on table "public"."waitlist" to "authenticated";
-
 grant references on table "public"."waitlist" to "authenticated";
-
 grant select on table "public"."waitlist" to "authenticated";
-
 grant trigger on table "public"."waitlist" to "authenticated";
-
 grant truncate on table "public"."waitlist" to "authenticated";
-
 grant update on table "public"."waitlist" to "authenticated";
-
 grant delete on table "public"."waitlist" to "service_role";
-
 grant insert on table "public"."waitlist" to "service_role";
-
 grant references on table "public"."waitlist" to "service_role";
-
 grant select on table "public"."waitlist" to "service_role";
-
 grant trigger on table "public"."waitlist" to "service_role";
-
 grant truncate on table "public"."waitlist" to "service_role";
-
 grant update on table "public"."waitlist" to "service_role";
-
 create policy "Enable read access for all users"
 on "public"."organisations"
 as permissive
 for select
 to public
 using (true);
-
-
 create policy "Allow public insert"
 on "public"."waitlist"
 as permissive
 for insert
 to public
 with check (true);
-
-
-

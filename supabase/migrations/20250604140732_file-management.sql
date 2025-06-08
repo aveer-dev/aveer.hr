@@ -10,8 +10,6 @@ alter table "public"."folders" alter column "updated_at" set default (now() AT T
 
 alter table "public"."folders" alter column "updated_at" set not null;
 
-alter table "public"."question_templates" add column "custom_group_names" jsonb[];
-
 alter table "public"."question_templates" alter column "name" drop not null;
 
 set check_function_bodies = off;

@@ -1,7 +1,5 @@
 drop trigger if exists "reminder_notification_insert" on "public"."reminders";
-
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.notify_inbox_insert()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -26,9 +24,5 @@ AS $function$BEGIN
     );
 
     RETURN NEW;
-END;$function$
-;
-
+END;$function$;
 CREATE TRIGGER inbox_insert_trigger AFTER INSERT ON public.inbox FOR EACH ROW EXECUTE FUNCTION notify_inbox_insert();
-
-

@@ -1,5 +1,4 @@
 set check_function_bodies = off;
-
 CREATE OR REPLACE FUNCTION public.notify_inbox_insert()
  RETURNS trigger
  LANGUAGE plpgsql
@@ -24,7 +23,4 @@ AS $function$BEGIN
     );
 
     RETURN NEW;
-END;$function$
-;
-
-
+END;$function$;
