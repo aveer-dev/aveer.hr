@@ -96,7 +96,8 @@ export function MultiTargetSelect({ teams, employees, value, onChange, className
 					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent align="start" className="w-full p-0">
+
+			<PopoverContent align="start" className="w-full p-0" side="bottom">
 				<Command>
 					<CommandInput value={inputValue} onValueChange={setInputValue} placeholder="Search teams or employees..." />
 					<CommandEmpty>No team or employee found.</CommandEmpty>
@@ -104,7 +105,6 @@ export function MultiTargetSelect({ teams, employees, value, onChange, className
 						{filteredTeams.length === 0 && <div className="px-2 py-1 text-xs text-muted-foreground">No teams</div>}
 						{filteredTeams.map(team => (
 							<CommandItem key={team.id} onSelect={() => handleSelect('team-' + team.id)}>
-								<Check className={cn('mr-2 h-4 w-4', value.includes('team-' + team.id) ? 'opacity-100' : 'opacity-0')} />
 								<Users size={12} className="mr-1" />
 								{team.name}
 							</CommandItem>
@@ -114,7 +114,6 @@ export function MultiTargetSelect({ teams, employees, value, onChange, className
 						{filteredEmployees.length === 0 && <div className="px-2 py-1 text-xs text-muted-foreground">No employees</div>}
 						{filteredEmployees.map(emp => (
 							<CommandItem key={emp.id} onSelect={() => handleSelect('emp-' + emp.id)}>
-								<Check className={cn('mr-2 h-4 w-4', value.includes('emp-' + emp.id) ? 'opacity-100' : 'opacity-0')} />
 								<User size={12} className="mr-1" />
 								{emp.profile?.first_name} {emp.profile?.last_name} {emp.profile?.email && <span className="ml-1 text-xs text-muted-foreground">({emp.profile?.email})</span>}
 							</CommandItem>
