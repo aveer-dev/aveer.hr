@@ -102,8 +102,9 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 
 		allQuestions.forEach(question => {
 			const group = question.group as QuestionGroup;
-
-			if (group && (question.team_ids?.length == 0 || question.team_ids?.includes((selectedEmployee.team as any)?.id || selectedEmployee.team))) {
+			const teamMatch = !question.team_ids?.length || question.team_ids.includes((selectedEmployee.team as any)?.id || selectedEmployee.team);
+			const empMatch = !question.employee_ids?.length || question.employee_ids.includes(selectedEmployee.id);
+			if (group && (teamMatch || empMatch)) {
 				if (!grouped[group]) grouped[group] = [];
 				grouped[group].push(question);
 			}
@@ -144,19 +145,17 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 				{(isLoading || isTeamAnswersLoading) && <PageLoader isLoading={isLoading || isTeamAnswersLoading} />}
 
 				<div className="flex h-full w-full flex-col md:flex-row">
-					<div className="sticky top-0 h-screen w-full overflow-y-auto md:w-64 md:flex-shrink-0">
-						<AppraisalReviewSelector
-							selectedEmployee={selectedEmployee}
-							teamMembers={teamMembers}
-							contract={contract}
-							contractAnswer={contractAnswer}
-							isSelfReviewDueDatePassed={isSelfReviewDueDatePassed}
-							handleReviewTypeSelect={handleReviewTypeSelect}
-							manager={manager}
-							activeReviewType={selectedReviewType}
-							teamMembersAnswers={teamMembersAnswers}
-						/>
-					</div>
+					<AppraisalReviewSelector
+						selectedEmployee={selectedEmployee}
+						teamMembers={teamMembers}
+						contract={contract}
+						contractAnswer={contractAnswer}
+						isSelfReviewDueDatePassed={isSelfReviewDueDatePassed}
+						handleReviewTypeSelect={handleReviewTypeSelect}
+						manager={manager}
+						activeReviewType={selectedReviewType}
+						teamMembersAnswers={teamMembersAnswers}
+					/>
 
 					{/* Appraisal Form */}
 					<div className="flex-1 overflow-y-auto p-1 md:-ml-[16rem] md:py-24">
@@ -166,6 +165,7 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 								setOpen(state);
 							}}
 							org={org}
+							handleReviewTypeSelect={handleReviewTypeSelect}
 							appraisalCycle={appraisalCycle}
 							activeTab={activeTab}
 							setActiveTab={setActiveTab}
@@ -177,6 +177,7 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 							isSelectedEmplyeesManager={isSelectedEmplyeesManager}
 							groupedQuestions={groupedQuestions}
 							teams={teams}
+							teamMembers={teamMembers}
 							customGroupNames={customGroupNames}
 						/>
 					</div>

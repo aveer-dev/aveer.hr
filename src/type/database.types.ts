@@ -548,6 +548,165 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          chat_id: number
+          content: string
+          created_at: string
+          id: number
+          is_deleted: boolean | null
+          metadata: Json | null
+          model: string | null
+          parent_message_id: number | null
+          role: string
+          search_vector: unknown | null
+          updated_at: string
+        }
+        Insert: {
+          chat_id: number
+          content: string
+          created_at?: string
+          id?: number
+          is_deleted?: boolean | null
+          metadata?: Json | null
+          model?: string | null
+          parent_message_id?: number | null
+          role: string
+          search_vector?: unknown | null
+          updated_at?: string
+        }
+        Update: {
+          chat_id?: number
+          content?: string
+          created_at?: string
+          id?: number
+          is_deleted?: boolean | null
+          metadata?: Json | null
+          model?: string | null
+          parent_message_id?: number | null
+          role?: string
+          search_vector?: unknown | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_tool_usage: {
+        Row: {
+          created_at: string | null
+          execution_time_ms: number | null
+          id: number
+          message_id: number
+          tool_input: Json | null
+          tool_name: string
+          tool_output: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          execution_time_ms?: number | null
+          id?: number
+          message_id: number
+          tool_input?: Json | null
+          tool_name: string
+          tool_output?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          execution_time_ms?: number | null
+          id?: number
+          message_id?: number
+          tool_input?: Json | null
+          tool_name?: string
+          tool_output?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_tool_usage_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chats: {
+        Row: {
+          contract_id: number | null
+          created_at: string | null
+          id: number
+          is_archived: boolean | null
+          last_message_at: string | null
+          metadata: Json | null
+          model: string | null
+          org: string
+          profile_id: string
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contract_id?: number | null
+          created_at?: string | null
+          id?: number
+          is_archived?: boolean | null
+          last_message_at?: string | null
+          metadata?: Json | null
+          model?: string | null
+          org: string
+          profile_id: string
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contract_id?: number | null
+          created_at?: string | null
+          id?: number
+          is_archived?: boolean | null
+          last_message_at?: string | null
+          metadata?: Json | null
+          model?: string | null
+          org?: string
+          profile_id?: string
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chats_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "chats_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_calendar_config: {
         Row: {
           calendar_id: string
@@ -1097,7 +1256,7 @@ export type Database = {
       }
       files: {
         Row: {
-          created_at: string | null
+          created_at: string
           created_by: string
           document: number | null
           entity: number | null
@@ -1112,7 +1271,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           created_by?: string
           document?: number | null
           entity?: number | null
@@ -1127,7 +1286,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           created_by?: string
           document?: number | null
           entity?: number | null
@@ -1181,7 +1340,7 @@ export type Database = {
       }
       folders: {
         Row: {
-          created_at: string | null
+          created_at: string
           created_by: string
           entity: number | null
           id: number
@@ -1190,10 +1349,10 @@ export type Database = {
           owner_id: string
           owner_type: Database["public"]["Enums"]["file_ownership_type"]
           parent: number | null
-          updated_at: string | null
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           created_by?: string
           entity?: number | null
           id?: number
@@ -1202,10 +1361,10 @@ export type Database = {
           owner_id: string
           owner_type: Database["public"]["Enums"]["file_ownership_type"]
           parent?: number | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           created_by?: string
           entity?: number | null
           id?: number
@@ -1214,7 +1373,7 @@ export type Database = {
           owner_id?: string
           owner_type?: Database["public"]["Enums"]["file_ownership_type"]
           parent?: number | null
-          updated_at?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1246,24 +1405,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      hocuspocus_documents: {
-        Row: {
-          id: string
-          update: string | null
-          updated_at: string
-        }
-        Insert: {
-          id: string
-          update?: string | null
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          update?: string | null
-          updated_at?: string
-        }
-        Relationships: []
       }
       inbox: {
         Row: {
@@ -1647,6 +1788,48 @@ export type Database = {
             columns: ["team"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          feedback_type: string
+          id: number
+          message_id: number
+          profile_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          feedback_type: string
+          id?: number
+          message_id: number
+          profile_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          feedback_type?: string
+          id?: number
+          message_id?: number
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_feedback_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: true
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_feedback_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2268,7 +2451,7 @@ export type Database = {
           id: number
           organisation: string
           profile: string
-          role: Database["public"]["Enums"]["app_role"]
+          role: Database["public"]["Enums"]["app_role__old_version_to_be_dropped"]
         }
         Insert: {
           created_at?: string
@@ -2276,7 +2459,7 @@ export type Database = {
           id?: number
           organisation: string
           profile?: string
-          role: Database["public"]["Enums"]["app_role"]
+          role: Database["public"]["Enums"]["app_role__old_version_to_be_dropped"]
         }
         Update: {
           created_at?: string
@@ -2284,7 +2467,7 @@ export type Database = {
           id?: number
           organisation?: string
           profile?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          role?: Database["public"]["Enums"]["app_role__old_version_to_be_dropped"]
         }
         Relationships: [
           {
@@ -2486,19 +2669,19 @@ export type Database = {
           created_at: string
           description: string | null
           id: number
-          name: Database["public"]["Enums"]["app_role"]
+          name: Database["public"]["Enums"]["app_role__old_version_to_be_dropped"]
         }
         Insert: {
           created_at?: string
           description?: string | null
           id?: number
-          name?: Database["public"]["Enums"]["app_role"]
+          name: Database["public"]["Enums"]["app_role__old_version_to_be_dropped"]
         }
         Update: {
           created_at?: string
           description?: string | null
           id?: number
-          name?: Database["public"]["Enums"]["app_role"]
+          name?: Database["public"]["Enums"]["app_role__old_version_to_be_dropped"]
         }
         Relationships: []
       }
@@ -2590,6 +2773,7 @@ export type Database = {
       template_questions: {
         Row: {
           created_at: string | null
+          employee_ids: number[]
           group: Database["public"]["Enums"]["question_group"]
           id: number
           manager_question: string | null
@@ -2606,6 +2790,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          employee_ids?: number[]
           group?: Database["public"]["Enums"]["question_group"]
           id?: number
           manager_question?: string | null
@@ -2622,6 +2807,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          employee_ids?: number[]
           group?: Database["public"]["Enums"]["question_group"]
           id?: number
           manager_question?: string | null
@@ -2851,10 +3037,15 @@ export type Database = {
         Args: { event: Json }
         Returns: Json
       }
+      has_role_in_org: {
+        Args: { org_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       access_level: "read" | "write" | "delete" | "full" | "owner"
       app_role: "admin" | "roles_manager"
+      app_role__old_version_to_be_dropped: "admin" | "roles_manager"
       appraisal_status: "draft" | "submitted" | "manager_reviewed"
       boarding_state: "initial" | "pending" | "approved"
       boarding_type: "on" | "off"
@@ -3012,6 +3203,7 @@ export const Constants = {
     Enums: {
       access_level: ["read", "write", "delete", "full", "owner"],
       app_role: ["admin", "roles_manager"],
+      app_role__old_version_to_be_dropped: ["admin", "roles_manager"],
       appraisal_status: ["draft", "submitted", "manager_reviewed"],
       boarding_state: ["initial", "pending", "approved"],
       boarding_type: ["on", "off"],

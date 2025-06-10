@@ -10,11 +10,10 @@ export class TeamRepository implements ITeamRepository {
 		return data;
 	}
 
-	async getAllByOrg(org: string): Promise<Tables<'teams'>[]> {
+	async getAllByOrg(org: string) {
 		const supabase = await createClient();
 		const { data, error } = await supabase.from('teams').select('*').eq('org', org);
-		if (error || !data) return [];
-		return data;
+		return { data, error };
 	}
 
 	async getByName(org: string, name: string): Promise<Tables<'teams'>[]> {

@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
-import AppraisalsPageComponent from './page-component';
+import AppraisalPageComponent from './page-component';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function AppraisalsPage(props: { params: Promise<{ [key: string]: string }> }) {
+export default function PerformancePage(props: { params: Promise<{ [key: string]: string }> }) {
 	return (
 		<Suspense
 			fallback={
@@ -10,10 +10,9 @@ export default function AppraisalsPage(props: { params: Promise<{ [key: string]:
 					<Skeleton className="h-11 w-full" />
 					<Skeleton className="h-11 w-full" />
 					<Skeleton className="h-11 w-full" />
-					<Skeleton className="h-11 w-full" />
 				</div>
 			}>
-			<AppraisalsPageComponent params={props.params} />
+			<AppraisalPageComponent params={props.params} />
 		</Suspense>
 	);
 }

@@ -53,6 +53,13 @@ export const AppraisalQuestionsStats: React.FC<Props> = ({ questions, answers, e
 						{/* Group name heading */}
 						<h3 className="mb-4 text-sm font-normal text-muted-foreground">{formattedGroupName}</h3>
 						{groupQuestions.map(q => {
+							// For each question q, filter employees:
+							const relevantEmployees = employees.filter(emp => {
+								const teamMatch = !q.team_ids?.length || q.team_ids.includes((emp.team as any)?.id || emp.team);
+								const empMatch = !q.employee_ids?.length || q.employee_ids.includes(emp.id);
+								return teamMatch || empMatch;
+							});
+
 							// Get answer distributions for self and manager
 							let chart: React.ReactNode = null;
 							if (q.type === 'scale') {
@@ -274,14 +281,14 @@ export const AppraisalQuestionsStats: React.FC<Props> = ({ questions, answers, e
 															<div className="border-b pb-2 pr-3 text-xs font-semibold text-muted-foreground">Employee</div>
 
 															<ResizablePanelGroup direction="vertical" className="w-full">
-																{employees.map((emp, rowIdx) => (
+																{relevantEmployees.map((emp, rowIdx) => (
 																	<React.Fragment key={emp.id}>
-																		<ResizablePanel defaultSize={100 / employees.length} minSize={10} className="min-h-[32px]">
+																		<ResizablePanel defaultSize={100 / relevantEmployees.length} minSize={10} className="min-h-[32px]">
 																			<div className="flex h-full items-center border-b py-2 pr-3 text-sm">
 																				{emp.profile.first_name} {emp.profile.last_name}
 																			</div>
 																		</ResizablePanel>
-																		{rowIdx < employees.length - 1 && <ResizableHandle withHandle />}
+																		{rowIdx < relevantEmployees.length - 1 && <ResizableHandle withHandle />}
 																	</React.Fragment>
 																))}
 															</ResizablePanelGroup>
@@ -293,14 +300,14 @@ export const AppraisalQuestionsStats: React.FC<Props> = ({ questions, answers, e
 															<div className="border-b px-3 pb-2 text-xs font-semibold text-muted-foreground">Self Answer</div>
 
 															<ResizablePanelGroup direction="vertical" className="w-full">
-																{employees.map((emp, rowIdx) => {
+																{relevantEmployees.map((emp, rowIdx) => {
 																	const selfAns = getAnswersForQuestion(q.id, 'self').find(a => a && a.contract_id === emp.id);
 																	return (
 																		<React.Fragment key={emp.id}>
-																			<ResizablePanel defaultSize={100 / employees.length} minSize={10} className="min-h-[32px]">
+																			<ResizablePanel defaultSize={100 / relevantEmployees.length} minSize={10} className="min-h-[32px]">
 																				<div className="flex h-full items-center border-b px-3 py-2 text-sm">{selfAns ? selfAns.answer?.toString() : <span className="italic text-muted-foreground">No answer</span>}</div>
 																			</ResizablePanel>
-																			{rowIdx < employees.length - 1 && <ResizableHandle withHandle />}
+																			{rowIdx < relevantEmployees.length - 1 && <ResizableHandle withHandle />}
 																		</React.Fragment>
 																	);
 																})}
@@ -313,14 +320,14 @@ export const AppraisalQuestionsStats: React.FC<Props> = ({ questions, answers, e
 															<div className="border-b px-3 pb-2 text-xs font-semibold text-muted-foreground">Manager Answer</div>
 
 															<ResizablePanelGroup direction="vertical" className="w-full">
-																{employees.map((emp, rowIdx) => {
+																{relevantEmployees.map((emp, rowIdx) => {
 																	const mgrAns = getAnswersForQuestion(q.id, 'manager').find(a => a && a.contract_id === emp.id);
 																	return (
 																		<React.Fragment key={emp.id}>
-																			<ResizablePanel defaultSize={100 / employees.length} minSize={10} className="min-h-[32px]">
+																			<ResizablePanel defaultSize={100 / relevantEmployees.length} minSize={10} className="min-h-[32px]">
 																				<div className="flex h-full items-center border-b px-3 py-2 text-sm">{mgrAns ? mgrAns.answer?.toString() : <span className="italic text-muted-foreground">No answer</span>}</div>
 																			</ResizablePanel>
-																			{rowIdx < employees.length - 1 && <ResizableHandle withHandle />}
+																			{rowIdx < relevantEmployees.length - 1 && <ResizableHandle withHandle />}
 																		</React.Fragment>
 																	);
 																})}

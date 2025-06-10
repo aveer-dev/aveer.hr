@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { Tables } from '@/type/database.types';
 import { useCallback, useEffect, useState, useMemo } from 'react';
@@ -21,6 +20,7 @@ import { LoadingSpinner } from '../ui/loader';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { Switch } from '../ui/switch';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../ui/tooltip';
+import { AppraisalReviewSelector } from './appraisal-review-selector';
 type QuestionGroup = 'growth_and_development' | 'company_values' | 'competencies' | 'private_manager_assessment' | 'objectives' | 'goal_scoring';
 
 interface Props {
@@ -37,6 +37,8 @@ interface Props {
 	setOpen: (open: boolean) => void;
 	groupedQuestions: GroupedQuestions;
 	teams?: Tables<'teams'>[] | null;
+	handleReviewTypeSelect: (type: 'self' | 'manager' | 'summary', employee: Tables<'contracts'>, answer: Tables<'appraisal_answers'> | null) => void;
+	teamMembers?: Tables<'contracts'>[] | null;
 	customGroupNames?: { id: string; name: string }[];
 }
 
@@ -61,7 +63,24 @@ const canUpdateAppraisal = (reviewType: 'self' | 'manager', isManager: boolean, 
 	}
 };
 
-export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, appraisalCycle, activeTab, setActiveTab, answer, selectedReviewType, isManager, selectedEmployee, contract, isSelectedEmplyeesManager, customGroupNames }: Props) => {
+export const EmployeeAppraisalForm = ({
+	teams,
+	groupedQuestions,
+	setOpen,
+	org,
+	appraisalCycle,
+	activeTab,
+	setActiveTab,
+	answer,
+	selectedReviewType,
+	isManager,
+	selectedEmployee,
+	contract,
+	isSelectedEmplyeesManager,
+	customGroupNames,
+	handleReviewTypeSelect,
+	teamMembers
+}: Props) => {
 	const router = useRouter();
 	const questionGroups = Object.keys(groupedQuestions) as QuestionGroup[];
 	const [managerAnswers, setManagerAnswers] = useState<AnswersState>({});
@@ -89,11 +108,12 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	);
 
 	const shouldShowQuestion = (question: Tables<'template_questions'>) => {
-		// For private_manager_assessment, only show to managers
 		if (question.group === 'private_manager_assessment') {
 			return isManager && selectedReviewType === 'manager';
 		}
-		return true;
+		const teamMatch = !question.team_ids?.length || question.team_ids.includes((selectedEmployee.team as any)?.id || selectedEmployee.team);
+		const empMatch = !question.employee_ids?.length || question.employee_ids.includes(selectedEmployee.id);
+		return teamMatch || empMatch;
 	};
 
 	const isSelfReviewDueDatePassed = new Date(appraisalCycle.self_review_due_date) < new Date();
@@ -435,6 +455,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 		},
 		{} as Record<string, string>
 	);
+
 	const defaultGroupLabels: Record<QuestionGroup, string> = {
 		growth_and_development: 'Growth & Development',
 		company_values: 'Company Values',
@@ -443,6 +464,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 		objectives: 'Objectives & Goals',
 		goal_scoring: 'Goal Scoring'
 	};
+
 	const getGroupLabel = (group: QuestionGroup) => groupNameMap[group] || defaultGroupLabels[group] || group;
 
 	const getPreviousGroupLabel = (group: QuestionGroup) => {
@@ -584,60 +606,65 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 	return (
 		<div className="mx-auto flex w-full max-w-2xl flex-col">
-			<div className="mb-4 flex items-center justify-between">
-				<h2 className="text-2xl font-semibold">{appraisalCycle.name}</h2>
+			<div className="my-6 block w-full md:hidden">
+				<AppraisalReviewSelector
+					mode="dropdown"
+					selectedEmployee={selectedEmployee}
+					teamMembers={teamMembers}
+					contract={contract}
+					contractAnswer={answer ?? undefined}
+					isSelfReviewDueDatePassed={isSelfReviewDueDatePassed}
+					handleReviewTypeSelect={handleReviewTypeSelect}
+					activeReviewType={selectedReviewType}
+					manager={undefined}
+					teamMembersAnswers={undefined}
+				/>
 			</div>
 
-			{selectedReviewType === 'self' && isSelfReviewDueDatePassed && (
-				<Alert className="mb-4 border bg-accent py-2">
-					<AlertDescription className="text-xs font-normal">Review due date has passed. You can no longer edit or submit this appraisal.</AlertDescription>
-				</Alert>
-			)}
-
-			{selectedReviewType === 'manager' && isManagerReviewDueDatePassed && (
-				<Alert className="mb-4 border bg-accent py-2">
-					<AlertDescription className="text-xs font-normal">Review due date has passed. You can no longer edit or submit this appraisal.</AlertDescription>
-				</Alert>
-			)}
-
 			<Tabs value={activeTab} onValueChange={value => setActiveTab(value as QuestionGroup)} className="w-full space-y-10">
-				<TabsList className="mb-10 flex h-[unset] w-fit p-2">
-					{questionGroups
-						.filter(group => {
-							// Show all tabs except private_manager_assessment to non-managers
-							if (group === 'private_manager_assessment') {
-								return isSelectedEmplyeesManager && selectedReviewType === 'manager';
-							}
+				<div className="relative">
+					<TabsList className="no-scrollbar mb-10 flex h-[unset] w-fit max-w-full items-start justify-start overflow-x-auto p-2 pr-14">
+						{questionGroups
+							.filter(group => {
+								// Show all tabs except private_manager_assessment to non-managers
+								if (group === 'private_manager_assessment') {
+									return isSelectedEmplyeesManager && selectedReviewType === 'manager';
+								}
 
-							return true;
-						})
-						.map(group => (
-							<TabsTrigger key={group} value={group} className="relative whitespace-nowrap">
-								{getGroupLabel(group)}
+								return true;
+							})
+							.map(group => (
+								<TabsTrigger key={group} value={group} className="relative whitespace-nowrap">
+									{getGroupLabel(group)}
 
-								{selectedReviewType !== 'summary' && group !== 'goal_scoring' && group !== 'objectives' && (
-									<div
-										className={cn(
-											'ml-2 h-2 w-2 rounded-md',
-											getGroupStatus(group) === 'Completed' && 'bg-green-500/75',
-											getGroupStatus(group) === 'In Progress' && 'bg-yellow-500',
-											getGroupStatus(group) === 'Not Started' && 'bg-primary-foreground shadow'
-										)}></div>
-								)}
-							</TabsTrigger>
-						))}
+									{selectedReviewType !== 'summary' && group !== 'goal_scoring' && group !== 'objectives' && (
+										<div
+											className={cn(
+												'ml-2 h-2 w-2 rounded-md',
+												getGroupStatus(group) === 'Completed' && 'bg-green-500/75',
+												getGroupStatus(group) === 'In Progress' && 'bg-yellow-500',
+												getGroupStatus(group) === 'Not Started' && 'bg-primary-foreground shadow'
+											)}></div>
+									)}
+								</TabsTrigger>
+							))}
 
-					{selectedReviewType === 'summary' && (
-						<>
-							<TabsTrigger value="self_scoring" className="relative whitespace-nowrap">
-								Self Scoring
-							</TabsTrigger>
-							<TabsTrigger value="manager_scoring" className="relative whitespace-nowrap">
-								Manager Scoring
-							</TabsTrigger>
-						</>
-					)}
-				</TabsList>
+						{selectedReviewType === 'summary' && (
+							<>
+								<TabsTrigger value="self_scoring" className="relative whitespace-nowrap">
+									Self Scoring
+								</TabsTrigger>
+								<TabsTrigger value="manager_scoring" className="relative whitespace-nowrap">
+									Manager Scoring
+								</TabsTrigger>
+							</>
+						)}
+
+						<div className="pointer-events-none absolute right-0 top-0 flex h-full w-24 items-center justify-end bg-gradient-to-r from-transparent to-muted pr-4">
+							<ChevronRight size={14} />
+						</div>
+					</TabsList>
+				</div>
 
 				{activeTab === 'objectives' && (
 					<TabsContent className="min-h-36 space-y-4" value="objectives">
@@ -964,7 +991,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 						const canEditManagerAnswer = isManager && selectedEmployee.id !== contract.id && !isManagerReviewDueDatePassed && isSelectedEmplyeesManager;
 
 						return (
-							<TabsContent className="min-h-36 space-y-8" key={group} value={group}>
+							<TabsContent className="min-h-36 space-y-10" key={group} value={group}>
 								{groupedQuestions[group].map(currentQuestion => {
 									// Only render if the question should be shown for this employee's team
 									if (!shouldShowQuestion(currentQuestion)) return null;
@@ -1245,31 +1272,27 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 			<Separator className="!my-10" />
 
 			<div className="flex justify-end gap-4">
-				<Button variant="outline" className="mr-auto" onClick={() => setOpen(false)}>
-					Close
-				</Button>
+				{/* {(selectedReviewType === 'self' && !isSelfReviewDueDatePassed) || (selectedReviewType === 'manager' && !isManagerReviewDueDatePassed) && ( */}
+				<>
+					<Button variant="secondary" className="gap-4" onClick={handlePrevious} disabled={questionGroups.indexOf(activeTab as QuestionGroup) === 0}>
+						<ChevronLeft size={14} /> Previous{getPreviousGroupLabel(activeTab as QuestionGroup)}
+					</Button>
 
-				{!isSelfReviewDueDatePassed && (
-					<>
-						<Button variant="secondary" className="gap-4" onClick={handlePrevious} disabled={questionGroups.indexOf(activeTab as QuestionGroup) === 0}>
-							<ChevronLeft size={14} /> Previous{getPreviousGroupLabel(activeTab as QuestionGroup)}
+					{(questionGroups.indexOf(activeTab as QuestionGroup) === questionGroups.length - 1 && (selectedReviewType === 'self' ? !isSelfReviewDueDatePassed && selectedEmployee.id === contract.id : isSelectedEmplyeesManager && !isManagerReviewDueDatePassed)) ||
+					(questionGroups.indexOf(activeTab as QuestionGroup) + 1 == questionGroups.length - 1 &&
+						questionGroups[questionGroups.indexOf(activeTab as QuestionGroup) + 1] === 'private_manager_assessment' &&
+						(selectedReviewType === 'self' ? !isSelfReviewDueDatePassed : !isManagerReviewDueDatePassed && !isSelectedEmplyeesManager)) ? (
+						<Button onClick={handleSubmit} className="gap-4">
+							{isSubmitting ? 'Submitting...' : 'Submit Appraisal'} <Send size={14} />
 						</Button>
-
-						{(questionGroups.indexOf(activeTab as QuestionGroup) === questionGroups.length - 1 && (selectedReviewType === 'self' ? !isSelfReviewDueDatePassed && selectedEmployee.id === contract.id : isSelectedEmplyeesManager && !isManagerReviewDueDatePassed)) ||
-						(questionGroups.indexOf(activeTab as QuestionGroup) + 1 == questionGroups.length - 1 &&
-							questionGroups[questionGroups.indexOf(activeTab as QuestionGroup) + 1] === 'private_manager_assessment' &&
-							(selectedReviewType === 'self' ? !isSelfReviewDueDatePassed : !isManagerReviewDueDatePassed && !isSelectedEmplyeesManager)) ? (
-							<Button onClick={handleSubmit} className="gap-4">
-								{isSubmitting ? 'Submitting...' : 'Submit Appraisal'} <Send size={14} />
-							</Button>
-						) : (
-							<Button onClick={handleNext} className="gap-4" disabled={questionGroups.indexOf(activeTab as QuestionGroup) === questionGroups.length - 1}>
-								Next {getNextGroupLabel(activeTab as QuestionGroup)}
-								<ChevronRight size={14} />
-							</Button>
-						)}
-					</>
-				)}
+					) : (
+						<Button onClick={handleNext} className="gap-4" disabled={questionGroups.indexOf(activeTab as QuestionGroup) === questionGroups.length - 1}>
+							Next {getNextGroupLabel(activeTab as QuestionGroup)}
+							<ChevronRight size={14} />
+						</Button>
+					)}
+				</>
+				{/* )} */}
 			</div>
 
 			<AlertDialog open={!!editingObjective} onOpenChange={() => setEditingObjective(null)}>

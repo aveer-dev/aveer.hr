@@ -19,8 +19,9 @@ import { Badge } from '../ui/badge';
 import { Tables } from '@/type/database.types';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { MultiTeamSelect } from '@/components/ui/multi-team-select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { MultiTargetSelect } from './multi-team-select';
+import { ContractWithProfile } from '@/dal/interfaces/contract.repository.interface';
 
 const questionSchema = z
 	.object({
@@ -31,6 +32,7 @@ const questionSchema = z
 		options: z.array(z.string()).optional(),
 		required: z.boolean(),
 		teams: z.array(z.string()),
+		employees: z.array(z.string()),
 		group: z.enum(['growth_and_development', 'company_values', 'competencies', 'private_manager_assessment']),
 		scaleLabels: z
 			.array(
@@ -69,10 +71,11 @@ interface QuestionSetupDialogProps {
 	question?: QuestionFormValues;
 	onSave: (question: QuestionFormValues) => void;
 	teams: Tables<'teams'>[];
+	employees: ContractWithProfile[];
 	group: QuestionFormValues['group'];
 }
 
-export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, teams, group }: QuestionSetupDialogProps) => {
+export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, teams, employees, group }: QuestionSetupDialogProps) => {
 	const [isTypePopoverOpen, setIsTypePopoverOpen] = useState(false);
 	const [showScaleLabels, setShowScaleLabels] = useState(question?.type === 'scale' && !!question?.scaleLabels && question?.scaleLabels.length > 0);
 
@@ -86,6 +89,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 			options: question?.options || [],
 			required: question?.required || true,
 			teams: question?.teams || [],
+			employees: question?.employees || [],
 			group: group,
 			scaleLabels: question?.scaleLabels && question?.scaleLabels.length === 5 ? question.scaleLabels : Array(5).fill({ label: '', description: '' })
 		}
@@ -101,6 +105,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 				options: question.options || [],
 				required: question.required,
 				teams: question.teams,
+				employees: question.employees,
 				group: group,
 				scaleLabels: question.scaleLabels && question.scaleLabels.length === 5 ? question.scaleLabels : Array(5).fill({ label: '', description: '' })
 			});
@@ -114,6 +119,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 				options: [],
 				required: false,
 				teams: [],
+				employees: [],
 				group: group,
 				scaleLabels: Array(5).fill({ label: '', description: '' })
 			});
@@ -131,6 +137,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 				options: [],
 				required: false,
 				teams: [],
+				employees: [],
 				group: group,
 				scaleLabels: Array(5).fill({ label: '', description: '' })
 			});
@@ -149,6 +156,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 				options: [],
 				required: false,
 				teams: [],
+				employees: [],
 				group: group,
 				scaleLabels: Array(5).fill({ label: '', description: '' })
 			});
@@ -305,14 +313,30 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 						<FormField
 							control={form.control}
 							name="teams"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Teams</FormLabel>
-									<FormControl>
-										<MultiTeamSelect teams={teams} value={field.value} onChange={field.onChange} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
+							render={({ field: teamField }) => (
+								<FormField
+									control={form.control}
+									name="employees"
+									render={({ field: empField }) => (
+										<FormItem>
+											<FormLabel>Teams & Employees</FormLabel>
+											<FormControl>
+												<MultiTargetSelect
+													teams={teams}
+													employees={employees}
+													value={[...teamField.value.map((id: string) => 'team-' + id), ...empField.value.map((id: string) => 'emp-' + id)]}
+													onChange={ids => {
+														const newTeams = ids.filter(id => id.startsWith('team-')).map(id => id.replace('team-', ''));
+														const newEmployees = ids.filter(id => id.startsWith('emp-')).map(id => id.replace('emp-', ''));
+														teamField.onChange(newTeams);
+														empField.onChange(newEmployees);
+													}}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 							)}
 						/>
 
@@ -428,6 +452,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 										options: [],
 										required: false,
 										teams: [],
+										employees: [],
 										group: group,
 										scaleLabels: Array(5).fill({ label: '', description: '' })
 									});

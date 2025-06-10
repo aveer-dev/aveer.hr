@@ -59,8 +59,13 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 			{/* Active Appraisals Section */}
 			{activeAppraisals.length > 0 && (
 				<div className="space-y-4">
+					<div className="flex items-center justify-between gap-2">
+						<h3 className="w-fit whitespace-nowrap pr-4 text-sm font-medium text-muted-foreground">Active Appraisals</h3>
+						<Separator className="w-[calc(100%-180px)]" />
+					</div>
+
 					{activeAppraisals.map(cycle => (
-						<AppraisalCycleCard key={cycle.id} org={org} cycle={cycle} answer={appraisalAnswers?.find(a => a.appraisal_cycle_id === cycle.id)} contract={contract} teams={teams || []} manager={manager} teamMembers={teamMembers || []} status="active" />
+						<AppraisalCycleCard key={cycle.id} org={org} cycle={cycle} answer={appraisalAnswers?.find(a => a.appraisal_cycle_id === cycle.id)} status="active" />
 					))}
 				</div>
 			)}
@@ -69,12 +74,12 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 			{pastAppraisals.length > 0 && (
 				<div className="space-y-4">
 					<div className="flex items-center justify-between gap-2">
-						<h3 className="w-fit text-sm font-medium text-muted-foreground">Past Appraisals</h3>
-						<Separator className="w-full max-w-xl" />
+						<h3 className="w-fit whitespace-nowrap pr-4 text-sm font-medium text-muted-foreground">Past Appraisals</h3>
+						<Separator className="w-[calc(100%-180px)]" />
 					</div>
 
 					{pastAppraisals.map(cycle => (
-						<AppraisalCycleCard key={cycle.id} org={org} cycle={cycle} answer={appraisalAnswers?.find(a => a.appraisal_cycle_id === cycle.id)} contract={contract} teams={teams || []} manager={manager} teamMembers={teamMembers || []} status="past" />
+						<AppraisalCycleCard key={cycle.id} org={org} cycle={cycle} answer={appraisalAnswers?.find(a => a.appraisal_cycle_id === cycle.id)} status="past" />
 					))}
 				</div>
 			)}

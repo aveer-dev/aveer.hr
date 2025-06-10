@@ -186,7 +186,7 @@ export async function getAllTeamsByOrg(org: string) {
 	try {
 		const repo = new TeamRepository();
 		const data = await repo.getAllByOrg(org);
-		return { data, error: null };
+		return data;
 	} catch (error: any) {
 		return { data: null, error };
 	}

@@ -20,9 +20,9 @@ export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: str
 	const supabase = await createClient();
 
 	const contractsRepo = new ContractRepository();
-	const [contracts, { data: appraisal, error: appraisalError }] = await Promise.all([contractsRepo.getAllByOrgWithProfile({ org, status: 'signed' }), supabase.from('appraisal_cycles').select('*').eq('id', parseInt(id)).single()]);
+	const [{ data: contracts, error: contractsError }, { data: appraisal, error: appraisalError }] = await Promise.all([contractsRepo.getAllByOrgWithProfile({ org, status: 'signed' }), supabase.from('appraisal_cycles').select('*').eq('id', parseInt(id)).single()]);
 
-	if (!contracts) {
+	if (contractsError) {
 		return <div>Error loading employee data</div>;
 	}
 
@@ -51,11 +51,11 @@ export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: str
 		return <div>Error loading template questions</div>;
 	}
 
-	if (!contracts) {
+	if (contractsError) {
 		return <div>No contracts found</div>;
 	}
 
-	if (!teams) {
+	if (teams.error) {
 		return <div>No teams found</div>;
 	}
 
@@ -117,7 +117,7 @@ export const AppraisalDetails = async ({ params }: { params: Promise<{ [key: str
 					</TabsContent>
 
 					<TabsContent value="scores">
-						<AppraisalScoreSummary teams={teams} contracts={contracts as any} answers={answers as any} />
+						<AppraisalScoreSummary teams={teams.data || []} contracts={contracts as any} answers={answers as any} />
 					</TabsContent>
 
 					<TabsContent value="details">

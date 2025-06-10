@@ -1,4 +1,5 @@
-import { Database, Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
+import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
+import { PostgrestError } from '@supabase/supabase-js';
 
 export type ContractWithRelations = Tables<'contracts'> & {
 	org?: Tables<'organisations'>;
@@ -25,18 +26,18 @@ export type ContractWithProfileAndTeam = Tables<'contracts'> & {
 };
 
 export interface IContractRepository {
-	getById(org: string, id: number | string): Promise<Tables<'contracts'> | null>;
+	getById(org: string, id: number | string): Promise<{ data: Tables<'contracts'> | null; error: PostgrestError | null }>;
 	getByProfile(profileId: string): Promise<Tables<'contracts'>[]>;
-	getAllByOrg(org: string, status?: Tables<'contracts'>['status']): Promise<Tables<'contracts'>[]>;
+	getAllByOrg(org: string, status?: Tables<'contracts'>['status']): Promise<{ data: Tables<'contracts'>[] | null; error: PostgrestError | null }>;
 	create(payload: TablesInsert<'contracts'>): Promise<Tables<'contracts'> | null>;
 	update(org: string, id: number | string, payload: TablesUpdate<'contracts'>): Promise<Tables<'contracts'> | null>;
 	delete(org: string, id: number | string): Promise<boolean>;
 
-	getByIdWithRelations(org: string, id: number | string): Promise<ContractWithRelations | null>;
+	getByIdWithRelations(org: string, id: number | string): Promise<{ data: ContractWithRelations | null; error: PostgrestError | null }>;
 	getAllByOrgWithRelations(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithRelations[]>;
 
 	getByIdWithProfile(org: string, id: number | string): Promise<ContractWithProfile | null>;
-	getAllByOrgWithProfile({ org, status }: { org: string; status?: Tables<'contracts'>['status'] }): Promise<ContractWithProfile[]>;
+	getAllByOrgWithProfile({ org, status }: { org: string; status?: Tables<'contracts'>['status'] }): Promise<{ data: ContractWithProfile[]; error: PostgrestError | null }>;
 
 	getByIdWithTeam(org: string, id: number | string): Promise<ContractWithTeam | null>;
 	getAllByOrgWithTeam(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithTeam[]>;
@@ -45,4 +46,6 @@ export interface IContractRepository {
 	getAllByOrgWithProfileAndTeam(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithProfileAndTeam[]>;
 
 	getByProfileWithProfileAndTeam(id: number | string, org: string): Promise<ContractWithProfileAndTeam[] | null>;
+
+	getByTeamStatusOrgWithProfile(params: { team: number; status?: Tables<'contracts'>['status']; org: string }): Promise<{ data: (Tables<'contracts'> & { profile?: Tables<'profiles'> & { nationality?: Tables<'countries'> } })[] | null; error: PostgrestError | null }>;
 }

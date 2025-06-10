@@ -40,8 +40,17 @@ export function EmployeeAppraisalViewer({ employees, answers, questions, customG
 	const managerGoalScores = Array.isArray(employeeAnswer?.manager_goal_score) ? (employeeAnswer.manager_goal_score as unknown as GOAL_SCORE[]) : [];
 	const [isLoadingFile, setIsLoadingFile] = useState(false);
 
-	// Group questions by their type
-	const groupedQuestions = questions.reduce(
+	// Before grouping questions:
+	const filteredQuestions = currentEmployee
+		? questions.filter(q => {
+				const teamMatch = !q.team_ids?.length || q.team_ids.includes((currentEmployee.team as any)?.id || currentEmployee.team);
+				const empMatch = !q.employee_ids?.length || q.employee_ids.includes(currentEmployee.id);
+				return teamMatch || empMatch;
+			})
+		: [];
+
+	// Then group filteredQuestions instead of all questions:
+	const groupedQuestions = filteredQuestions.reduce(
 		(acc, question) => {
 			if (!acc[question.group]) {
 				acc[question.group] = [];

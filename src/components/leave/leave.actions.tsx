@@ -39,10 +39,11 @@ export const cancelLeave = async (data: Tables<'time_off'>) => {
 
 			// Fetch the contract to get the current leave used value
 			const contractId = (data.contract as any)?.id || data.contract;
-			const contract = await contractRepo.getById(data.org, contractId);
-			if (contract && typeof contract[leaveTypeString] === 'number') {
+			const contractResult = await contractRepo.getById(data.org, contractId);
+			const contractData = contractResult.data;
+			if (contractData && typeof contractData[leaveTypeString] === 'number') {
 				const payload: TablesUpdate<'contracts'> = {
-					[leaveTypeString]: (contract[leaveTypeString] as number) - leaveDays
+					[leaveTypeString]: (contractData[leaveTypeString] as number) - leaveDays
 				};
 				await contractRepo.update(data.org, contractId, payload);
 			}

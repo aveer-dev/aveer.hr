@@ -25,6 +25,7 @@ import { LoadingSpinner } from '../ui/loader';
 import { DeleteTemplateDialog } from './delete-template-dialog';
 import { useDebounce } from '@/hooks/use-debounce';
 import { Badge } from '@/components/ui/badge';
+import { ContractWithProfile } from '@/dal/interfaces/contract.repository.interface';
 
 const questionSchema = z
 	.object({
@@ -35,6 +36,7 @@ const questionSchema = z
 		options: z.array(z.string()).optional(),
 		required: z.boolean(),
 		teams: z.array(z.string()),
+		employees: z.array(z.string()),
 		group: z.enum(['growth_and_development', 'company_values', 'competencies', 'private_manager_assessment']),
 		scaleLabels: z
 			.array(
@@ -73,6 +75,7 @@ interface QuestionTemplateDialogProps {
 	children: React.ReactNode;
 	onSave?: () => void;
 	teams: Tables<'teams'>[];
+	employees: ContractWithProfile[];
 	template?: Tables<'question_templates'>;
 	template_questions?: Tables<'template_questions'>[];
 
@@ -84,9 +87,10 @@ interface QuestionItemProps {
 	onEdit: () => void;
 	onRemove: () => void;
 	teams: Tables<'teams'>[];
+	employees: ContractWithProfile[];
 }
 
-const QuestionItem = ({ question, onEdit, onRemove, teams }: QuestionItemProps) => {
+const QuestionItem = ({ question, onEdit, onRemove, teams, employees }: QuestionItemProps) => {
 	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: question.id });
 
 	const style = {
@@ -127,6 +131,15 @@ const QuestionItem = ({ question, onEdit, onRemove, teams }: QuestionItemProps) 
 													{teams.find(team => team.id === Number(teamId))?.name}
 												</Badge>
 											))}
+											{question.employees &&
+												question.employees.map(empId => {
+													const emp = employees.find(e => e.id === Number(empId));
+													return (
+														<Badge key={empId} variant="secondary" className="text-xs">
+															{emp ? `${emp.profile?.first_name} ${emp.profile?.last_name}` : `Employee: ${empId}`}
+														</Badge>
+													);
+												})}
 											<Badge variant="secondary" className="text-xs">
 												Type: {question.type === 'textarea' ? 'Text' : question.type === 'yesno' ? 'Yes/No' : question.type === 'scale' ? 'Scale' : 'Multiple Choice'}
 											</Badge>
@@ -178,7 +191,7 @@ const QuestionItem = ({ question, onEdit, onRemove, teams }: QuestionItemProps) 
 // Deep equality check (if lodash not available)
 const deepEqual = (a: any, b: any) => JSON.stringify(a) === JSON.stringify(b);
 
-export const QuestionTemplateDialog = ({ children, onSave, teams, template, template_questions, org }: QuestionTemplateDialogProps) => {
+export const QuestionTemplateDialog = ({ children, onSave, teams, employees, template, template_questions, org }: QuestionTemplateDialogProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [isQuestionDialogOpen, setIsQuestionDialogOpen] = useState(false);
 	const [editingQuestion, setEditingQuestion] = useState<QuestionFormValues | undefined>();
@@ -215,6 +228,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 					options: q.options || [],
 					required: q.required || false,
 					teams: q.team_ids?.map(id => id.toString()) || [],
+					employees: (q.employee_ids || []).map(eid => eid.toString()),
 					group: (q.group as QuestionFormValues['group']) || 'growth_and_development',
 					scaleLabels: Array.isArray(q.scale_labels) ? (q.scale_labels.filter(item => item && typeof item === 'object' && !Array.isArray(item)) as { label?: string; description?: string }[]) : undefined
 				})) || [],
@@ -251,6 +265,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 							options: q.options,
 							required: q.required,
 							team_ids: q.teams.map(id => parseInt(id)),
+							employee_ids: q.employees.map(eid => Number(eid)),
 							order_index: index,
 							template_id: template.id,
 							org: org,
@@ -273,15 +288,8 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 		const currentQuestions = form.getValues('questions');
 		const questionWithGroup = { ...question, group: selectedGroup };
 		const updatedQuestions = editingQuestion ? currentQuestions.map(q => (q.id === question.id ? questionWithGroup : q)) : [...currentQuestions, questionWithGroup];
-
-		form.reset({
-			...form.getValues(),
-			questions: updatedQuestions
-		});
-
-		if (editingQuestion) {
-			setEditingQuestion(undefined);
-		}
+		form.reset({ ...form.getValues(), questions: updatedQuestions });
+		if (editingQuestion) setEditingQuestion(undefined);
 		if (template) {
 			toast.promise(
 				updateTemplateQuestions(
@@ -294,6 +302,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 						options: q.options,
 						required: q.required,
 						team_ids: q.teams.map(id => parseInt(id)),
+						employee_ids: q.employees.map(eid => Number(eid)),
 						order_index: index,
 						template_id: template.id,
 						org: org,
@@ -325,6 +334,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 				options: q.options || [],
 				required: q.required || false,
 				teams: q.team_ids?.map(id => id.toString()) || [],
+				employees: (q.employee_ids || []).map(eid => eid.toString()),
 				group: (q.group as QuestionFormValues['group']) || 'growth_and_development',
 				scaleLabels: Array.isArray(q.scale_labels) ? (q.scale_labels.filter(item => item && typeof item === 'object' && !Array.isArray(item)) as { label?: string; description?: string }[]) : undefined,
 				org: org
@@ -393,6 +403,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 						options: q.options,
 						required: q.required,
 						team_ids: q.teams.map(id => parseInt(id)),
+						employee_ids: q.employees.map(eid => Number(eid)),
 						order_index: index,
 						template_id: template.id,
 						org: org,
@@ -420,6 +431,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 						options: q.options,
 						required: q.required,
 						team_ids: q.teams.map(id => parseInt(id)),
+						employee_ids: q.employees.map(eid => Number(eid)),
 						order_index: index,
 						template_id: newTemplate.id,
 						org: org,
@@ -481,6 +493,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 							options: q.options,
 							required: q.required,
 							team_ids: q.teams.map(id => parseInt(id)),
+							employee_ids: q.employees.map(eid => Number(eid)),
 							order_index: index,
 							template_id: template.id,
 							org: org,
@@ -638,6 +651,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 																			});
 																		}
 																	}}
+																	employees={employees}
 																/>
 															))}
 													</div>
@@ -680,7 +694,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, template, temp
 				</AlertDialogContent>
 			</AlertDialog>
 
-			<QuestionSetupDialog open={isQuestionDialogOpen} onOpenChange={setIsQuestionDialogOpen} question={editingQuestion} onSave={handleAddQuestion} teams={teams} group={selectedGroup} />
+			<QuestionSetupDialog open={isQuestionDialogOpen} onOpenChange={setIsQuestionDialogOpen} question={editingQuestion} onSave={handleAddQuestion} teams={teams} group={selectedGroup} employees={employees} />
 		</>
 	);
 };

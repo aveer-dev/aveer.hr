@@ -8,13 +8,15 @@ import { format } from 'date-fns';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
 import { Fragment } from 'react';
+import { ContractWithProfile } from '@/dal/interfaces/contract.repository.interface';
 
 interface AppraisalQuestionsListProps {
 	org: string;
 	teams: Tables<'teams'>[];
+	employees: ContractWithProfile[];
 }
 
-export const AppraisalQuestionsTemplates = async ({ org, teams }: AppraisalQuestionsListProps) => {
+export const AppraisalQuestionsTemplates = async ({ org, teams, employees }: AppraisalQuestionsListProps) => {
 	const supabase = await createClient();
 	const { data, error } = await supabase.from('question_templates').select('*, created_by(id, first_name, last_name)').match({ org });
 
@@ -39,7 +41,7 @@ export const AppraisalQuestionsTemplates = async ({ org, teams }: AppraisalQuest
 		<div className="space-y-1">
 			{data.map(template => (
 				<Fragment key={template.id}>
-					<QuestionTemplateDialog teams={teams} org={org} template={template}>
+					<QuestionTemplateDialog teams={teams} employees={employees} org={org} template={template}>
 						<Button className="h-[unset] w-full justify-between gap-2 p-4 text-left" variant="ghost">
 							<h4 className="text-sm font-normal">{template.name}</h4>
 

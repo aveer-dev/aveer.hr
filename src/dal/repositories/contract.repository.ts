@@ -3,11 +3,10 @@ import { Tables, TablesInsert, TablesUpdate } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 
 export class ContractRepository implements IContractRepository {
-	async getById(org: string, id: number | string): Promise<Tables<'contracts'> | null> {
+	async getById(org: string, id: number | string) {
 		const supabase = await createClient();
-		const { data: contractData, error: contractError } = await supabase.from('contracts').select('*').match({ org, id }).single();
-		if (contractError) return null;
-		return contractData;
+		const { data, error } = await supabase.from('contracts').select('*').match({ org, id }).single();
+		return { data, error };
 	}
 
 	async getByProfile(profileId: string): Promise<Tables<'contracts'>[]> {
@@ -17,15 +16,14 @@ export class ContractRepository implements IContractRepository {
 		return profileData;
 	}
 
-	async getAllByOrg(org: string, status?: Tables<'contracts'>['status']): Promise<Tables<'contracts'>[]> {
+	async getAllByOrg(org: string, status?: Tables<'contracts'>['status']) {
 		const supabase = await createClient();
 
 		const request = supabase.from('contracts').select('*').eq('org', org);
 		if (status) request.eq('status', status);
 
-		const { data: orgData, error: orgError } = await request;
-		if (orgError || !orgData) return [];
-		return orgData;
+		const { data, error } = await request;
+		return { data, error };
 	}
 
 	async create(payload: TablesInsert<'contracts'>): Promise<Tables<'contracts'> | null> {
@@ -48,7 +46,7 @@ export class ContractRepository implements IContractRepository {
 		return !deleteError;
 	}
 
-	async getByIdWithRelations(org: string, id: number | string): Promise<ContractWithRelations | null> {
+	async getByIdWithRelations(org: string, id: number | string) {
 		const supabase = await createClient();
 		const { data: relData, error: relError } = await supabase
 			.from('contracts')
@@ -66,8 +64,7 @@ export class ContractRepository implements IContractRepository {
 			)
 			.match({ org, id })
 			.single();
-		if (relError) return null;
-		return relData as unknown as ContractWithRelations;
+		return { data: relData as unknown as ContractWithRelations, error: relError };
 	}
 
 	async getAllByOrgWithRelations(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithRelations[]> {
@@ -100,14 +97,13 @@ export class ContractRepository implements IContractRepository {
 		return data as unknown as ContractWithProfile;
 	}
 
-	async getAllByOrgWithProfile({ org, status, team }: { org: string; status?: Tables<'contracts'>['status']; team?: number }): Promise<ContractWithProfile[]> {
+	async getAllByOrgWithProfile({ org, status, team }: { org: string; status?: Tables<'contracts'>['status']; team?: number }) {
 		const supabase = await createClient();
 		const request = supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*))').eq('org', org);
 		if (status) request.eq('status', status);
 		if (team) request.eq('team', team);
 		const { data, error } = await request;
-		if (error || !data) return [];
-		return data as unknown as ContractWithProfile[];
+		return { data: data as unknown as ContractWithProfile[], error };
 	}
 
 	async getByIdWithTeam(org: string, id: number | string): Promise<ContractWithTeam | null> {
@@ -150,5 +146,13 @@ export class ContractRepository implements IContractRepository {
 		const { data, error } = await request;
 		if (error || !data) return [];
 		return data as unknown as ContractWithProfileAndTeam[];
+	}
+
+	async getByTeamStatusOrgWithProfile({ team, status, org }: { team: number; status?: Tables<'contracts'>['status']; org: string }) {
+		const supabase = await createClient();
+		const request = supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*))').eq('org', org).eq('team', team);
+		if (status) request.eq('status', status);
+		const { data, error } = await request;
+		return { data: data as (Tables<'contracts'> & { profile?: Tables<'profiles'> & { nationality?: Tables<'countries'> } })[] | null, error };
 	}
 }
