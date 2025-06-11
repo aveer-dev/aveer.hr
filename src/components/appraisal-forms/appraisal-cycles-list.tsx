@@ -7,6 +7,7 @@ import { buttonVariants } from '../ui/button';
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { AppraisalCycleOptions } from './appraisal-cycle-options';
+
 interface Props {
 	org: string;
 }
@@ -18,18 +19,18 @@ interface AppraisalCycleCardDialogProps {
 }
 
 const AppraisalCycleCardDialog = ({ org, cycle }: AppraisalCycleCardDialogProps) => (
-	<li className={cn(buttonVariants({ variant: 'ghost' }), 'h-[unset] w-full cursor-auto justify-between gap-2 p-3 px-0 hover:bg-transparent hover:text-primary')}>
-		<Link href={`./performance/${cycle.id}`} className={cn(buttonVariants({ variant: 'link' }), 'max-w-md truncate px-0 text-sm font-medium')}>
-			{cycle.name}
+	<li className="flex items-center">
+		<Link href={`./performance/${cycle.id}`} className={cn(buttonVariants({ variant: 'ghost' }), 'h-[unset] w-full justify-between gap-2')}>
+			<div className="max-w-[9rem] truncate px-0 text-sm font-medium md:max-w-md">{cycle.name}</div>
+
+			<div className="flex items-center gap-4">
+				<div className="max-w-sm truncate">
+					{format(new Date(cycle.start_date), 'MMM d, yyyy')} - {format(new Date(cycle.end_date), 'MMM d, yyyy')}
+				</div>
+			</div>
 		</Link>
 
-		<div className="flex items-center gap-4">
-			<div className="max-w-sm truncate">
-				{format(new Date(cycle.start_date), 'MMM d, yyyy')} - {format(new Date(cycle.end_date), 'MMM d, yyyy')}
-			</div>
-
-			<AppraisalCycleOptions cycle={cycle} org={org} />
-		</div>
+		<AppraisalCycleOptions cycle={cycle} org={org} />
 	</li>
 );
 
@@ -60,8 +61,8 @@ export const AppraisalCyclesList = async ({ org }: Props) => {
 			{cycles.some(cycle => new Date(cycle.start_date) <= new Date() && new Date(cycle.end_date) >= new Date()) && (
 				<div className="space-y-4">
 					<div className="flex items-center justify-between gap-2">
-						<h3 className="w-fit text-sm font-medium text-muted-foreground">Active Appraisals</h3>
-						<Separator className="w-full max-w-3xl" />
+						<h3 className="w-fit whitespace-nowrap text-sm font-medium text-muted-foreground">Active Appraisals</h3>
+						<Separator className="w-[calc(100%-8rem)]" />
 					</div>
 
 					<ul className="divide-y">

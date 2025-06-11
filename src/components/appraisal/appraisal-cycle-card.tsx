@@ -20,9 +20,9 @@ export const AppraisalCycleCard = ({ cycle, answer, status }: AppraisalCycleCard
 	const isPast = status === 'past';
 
 	return (
-		<Link href={`./performance/${cycle.id}`} className={cn(buttonVariants({ variant: 'ghost' }), 'h-[unset] w-full justify-between gap-2 p-3')}>
-			<div className="flex items-center gap-3">
-				<div className={cn('max-w-md truncate text-sm font-medium')}>{cycle.name}</div>
+		<Link href={`./performance/${cycle.id}`} className={cn(buttonVariants({ variant: 'ghost' }), '-mx-3 h-[unset] w-full flex-col items-start justify-between gap-2 py-3 md:mx-0 md:flex-row')}>
+			<div className="flex flex-col-reverse gap-3 md:flex-row md:items-center">
+				<div className={cn('max-w-md truncate text-lg font-medium md:text-sm')}>{cycle.name}</div>
 
 				<div className="flex items-center gap-3">
 					{isActive && <Badge variant="outline">Active</Badge>}

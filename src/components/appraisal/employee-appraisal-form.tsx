@@ -20,7 +20,6 @@ import { LoadingSpinner } from '../ui/loader';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { Switch } from '../ui/switch';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../ui/tooltip';
-import { AppraisalReviewSelector } from './appraisal-review-selector';
 type QuestionGroup = 'growth_and_development' | 'company_values' | 'competencies' | 'private_manager_assessment' | 'objectives' | 'goal_scoring';
 
 interface Props {
@@ -37,8 +36,6 @@ interface Props {
 	setOpen: (open: boolean) => void;
 	groupedQuestions: GroupedQuestions;
 	teams?: Tables<'teams'>[] | null;
-	handleReviewTypeSelect: (type: 'self' | 'manager' | 'summary', employee: Tables<'contracts'>, answer: Tables<'appraisal_answers'> | null) => void;
-	teamMembers?: Tables<'contracts'>[] | null;
 	customGroupNames?: { id: string; name: string }[];
 }
 
@@ -63,24 +60,7 @@ const canUpdateAppraisal = (reviewType: 'self' | 'manager', isManager: boolean, 
 	}
 };
 
-export const EmployeeAppraisalForm = ({
-	teams,
-	groupedQuestions,
-	setOpen,
-	org,
-	appraisalCycle,
-	activeTab,
-	setActiveTab,
-	answer,
-	selectedReviewType,
-	isManager,
-	selectedEmployee,
-	contract,
-	isSelectedEmplyeesManager,
-	customGroupNames,
-	handleReviewTypeSelect,
-	teamMembers
-}: Props) => {
+export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, appraisalCycle, activeTab, setActiveTab, answer, selectedReviewType, isManager, selectedEmployee, contract, isSelectedEmplyeesManager, customGroupNames }: Props) => {
 	const router = useRouter();
 	const questionGroups = Object.keys(groupedQuestions) as QuestionGroup[];
 	const [managerAnswers, setManagerAnswers] = useState<AnswersState>({});
@@ -494,15 +474,6 @@ export const EmployeeAppraisalForm = ({
 		return `: ${getGroupLabel(nextGroup as QuestionGroup)}`;
 	};
 
-	const groupLabels: Record<QuestionGroup, string> = {
-		growth_and_development: 'Growth & Development',
-		company_values: 'Company Values',
-		competencies: 'Competencies',
-		private_manager_assessment: 'Manager Assessment',
-		objectives: 'Objectives & Goals',
-		goal_scoring: 'Goal Scoring'
-	};
-
 	const getGroupProgress = (group: QuestionGroup) => {
 		const groupQuestions = groupedQuestions[group].filter(shouldShowQuestion);
 		const answeredCount = groupQuestions.filter((q: Tables<'template_questions'>) => (selectedReviewType === 'self' ? answers[q.id] : managerAnswers[q.id]) !== undefined && (selectedReviewType === 'self' ? answers[q.id] : managerAnswers[q.id]) !== '').length;
@@ -606,21 +577,6 @@ export const EmployeeAppraisalForm = ({
 
 	return (
 		<div className="mx-auto flex w-full max-w-2xl flex-col">
-			<div className="my-6 block w-full md:hidden">
-				<AppraisalReviewSelector
-					mode="dropdown"
-					selectedEmployee={selectedEmployee}
-					teamMembers={teamMembers}
-					contract={contract}
-					contractAnswer={answer ?? undefined}
-					isSelfReviewDueDatePassed={isSelfReviewDueDatePassed}
-					handleReviewTypeSelect={handleReviewTypeSelect}
-					activeReviewType={selectedReviewType}
-					manager={undefined}
-					teamMembersAnswers={undefined}
-				/>
-			</div>
-
 			<Tabs value={activeTab} onValueChange={value => setActiveTab(value as QuestionGroup)} className="w-full space-y-10">
 				<div className="relative">
 					<TabsList className="no-scrollbar mb-10 flex h-[unset] w-fit max-w-full items-start justify-start overflow-x-auto p-2 pr-14">

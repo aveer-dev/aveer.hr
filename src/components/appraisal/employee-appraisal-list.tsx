@@ -61,7 +61,7 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 				<div className="space-y-4">
 					<div className="flex items-center justify-between gap-2">
 						<h3 className="w-fit whitespace-nowrap pr-4 text-sm font-medium text-muted-foreground">Active Appraisals</h3>
-						<Separator className="w-[calc(100%-180px)]" />
+						<Separator className="w-[calc(100%-150px)]" />
 					</div>
 
 					{activeAppraisals.map(cycle => (
@@ -75,7 +75,7 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 				<div className="space-y-4">
 					<div className="flex items-center justify-between gap-2">
 						<h3 className="w-fit whitespace-nowrap pr-4 text-sm font-medium text-muted-foreground">Past Appraisals</h3>
-						<Separator className="w-[calc(100%-180px)]" />
+						<Separator className="w-[calc(100%-150px)]" />
 					</div>
 
 					{pastAppraisals.map(cycle => (

@@ -6,6 +6,7 @@ import { useEmployeeProfileTeam } from '@/hooks';
 import { Skeleton } from './skeleton';
 import { Separator } from './separator';
 import { Tables } from '@/type/database.types';
+import { Fragment } from 'react';
 
 export const EmployeeHoverCard = ({ employeeId, org, triggerClassName, contentClassName, profile }: { employeeId: string; org: string; triggerClassName?: string; contentClassName?: string; profile?: Tables<'profiles'> }) => {
 	const { data, error, loading } = useEmployeeProfileTeam(employeeId, org);
@@ -43,7 +44,7 @@ export const EmployeeHoverCard = ({ employeeId, org, triggerClassName, contentCl
 						if (!employee.job_title) return null;
 
 						return (
-							<>
+							<Fragment key={employee.id}>
 								<ul className="flex flex-col gap-2" key={employee.id}>
 									<li className="flex items-center gap-2">
 										<div className="text-xs font-medium">Role</div>
@@ -59,7 +60,7 @@ export const EmployeeHoverCard = ({ employeeId, org, triggerClassName, contentCl
 								</ul>
 
 								{employee !== data[data.length - 1] && <Separator className="my-2" />}
-							</>
+							</Fragment>
 						);
 					})}
 			</HoverCardContent>

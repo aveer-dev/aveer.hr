@@ -42,13 +42,14 @@ export const AppraisalQuestionsTemplates = async ({ org, teams, employees }: App
 			{data.map(template => (
 				<Fragment key={template.id}>
 					<QuestionTemplateDialog teams={teams} employees={employees} org={org} template={template}>
-						<Button className="h-[unset] w-full justify-between gap-2 p-4 text-left" variant="ghost">
-							<h4 className="text-sm font-normal">{template.name}</h4>
+						<Button className="h-[unset] w-full flex-col items-start justify-between gap-2 p-4 text-left md:flex-row" variant="ghost">
+							<h4 className="text-lg font-medium md:text-sm md:font-normal">{template.name}</h4>
 
 							<div className="flex justify-between gap-4">
 								<div className="text-xs text-muted-foreground">
 									Created by: <EmployeeHoverCard employeeId={template.created_by.id} org={org} triggerClassName="text-muted-foreground" contentClassName="text-xs" />
 								</div>
+
 								<Separator orientation="vertical" />
 								<div className="text-xs text-muted-foreground">Last updated: {format(template.updated_at || new Date(), 'MMM d, yyyy')}</div>
 							</div>

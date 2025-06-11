@@ -88,7 +88,7 @@ export const AppraisalFormComponent = ({
 
 	return (
 		<div className="pb-28">
-			<div className="relative mb-4 flex items-center">
+			<div className="relative mb-4 flex items-center gap-2">
 				<BackButton />
 				<h2 className="text-2xl font-semibold">{appraisalCycle.name}</h2>
 			</div>
@@ -105,7 +105,7 @@ export const AppraisalFormComponent = ({
 				</Alert>
 			)}
 
-			<div className="mt-10 flex h-full w-full flex-col items-start md:flex-row">
+			<div className="mt-8 flex h-full w-full flex-col items-start gap-4 md:flex-row">
 				<AppraisalReviewSelector
 					selectedEmployee={selectedEmployee}
 					teamMembers={teamMembers}
@@ -119,13 +119,12 @@ export const AppraisalFormComponent = ({
 				/>
 
 				{/* Appraisal Form */}
-				<div className="flex-1 overflow-y-auto p-1">
+				<div className="w-full flex-1 overflow-y-auto p-1">
 					<EmployeeAppraisalForm
 						setOpen={() => {
 							router.refresh();
 						}}
 						org={org}
-						handleReviewTypeSelect={handleReviewTypeSelect}
 						appraisalCycle={appraisalCycle}
 						activeTab={activeTab}
 						setActiveTab={setActiveTab}
@@ -137,7 +136,6 @@ export const AppraisalFormComponent = ({
 						isSelectedEmplyeesManager={isSelectedEmplyeesManager}
 						groupedQuestions={groupedQuestions}
 						teams={teams}
-						teamMembers={teamMembers}
 						customGroupNames={customGroupNames}
 					/>
 				</div>

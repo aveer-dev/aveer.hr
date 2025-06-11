@@ -120,36 +120,35 @@ const QuestionItem = ({ question, onEdit, onRemove, teams, employees }: Question
 				<div className="flex-1 space-y-4">
 					<div className="space-y-4">
 						{question.question && (
-							<div className="space-y-4">
-								<div className="text-sm font-light leading-6">
-									<div className="mb-2 flex items-center justify-between gap-2 text-xs font-light text-muted-foreground">
-										<div>Self review question</div>
+							<div className="space-y-4 text-sm font-light leading-6">
+								<div className="flex flex-col-reverse items-start justify-between gap-4 text-xs font-light text-muted-foreground md:flex-row md:items-center md:gap-2">
+									<div>Self review question</div>
 
-										<div className="flex items-center gap-2">
-											{question.teams.map(teamId => (
-												<Badge key={teamId} variant="outline" className="text-xs">
-													{teams.find(team => team.id === Number(teamId))?.name}
-												</Badge>
-											))}
-											{question.employees &&
-												question.employees.map(empId => {
-													const emp = employees.find(e => e.id === Number(empId));
-													return (
-														<Badge key={empId} variant="secondary" className="text-xs">
-															{emp ? `${emp.profile?.first_name} ${emp.profile?.last_name}` : `Employee: ${empId}`}
-														</Badge>
-													);
-												})}
-											<Badge variant="secondary" className="text-xs">
-												Type: {question.type === 'textarea' ? 'Text' : question.type === 'yesno' ? 'Yes/No' : question.type === 'scale' ? 'Scale' : 'Multiple Choice'}
+									<div className="flex flex-wrap items-center gap-2">
+										{question.teams.map(teamId => (
+											<Badge key={teamId} variant="outline" className="text-xs">
+												{teams.find(team => team.id === Number(teamId))?.name}
 											</Badge>
-											<Badge variant="secondary" className="text-xs">
-												{question.required ? 'Required' : 'Optional'}
-											</Badge>
-										</div>
+										))}
+										{question.employees &&
+											question.employees.map(empId => {
+												const emp = employees.find(e => e.id === Number(empId));
+												return (
+													<Badge key={empId} variant="secondary" className="text-xs">
+														{emp ? `${emp.profile?.first_name} ${emp.profile?.last_name}` : `Employee: ${empId}`}
+													</Badge>
+												);
+											})}
+										<Badge variant="secondary" className="text-xs">
+											Type: {question.type === 'textarea' ? 'Text' : question.type === 'yesno' ? 'Yes/No' : question.type === 'scale' ? 'Scale' : 'Multiple Choice'}
+										</Badge>
+										<Badge variant="secondary" className="text-xs">
+											{question.required ? 'Required' : 'Optional'}
+										</Badge>
 									</div>
-									{question.question}
 								</div>
+
+								<div>{question.question}</div>
 							</div>
 						)}
 
@@ -571,7 +570,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 									{ id: 'private_manager_assessment', title: 'Private Manager Assessment' }
 								].map(group => (
 									<div key={group.id} className="space-y-4">
-										<div className="sticky top-0 !-mb-2 flex items-center justify-between gap-4 rounded-md bg-background p-2 backdrop-blur-lg">
+										<div className="sticky top-0 !-mb-2 flex flex-col items-center justify-between gap-4 rounded-md bg-background/40 p-2 backdrop-blur-lg md:flex-row">
 											<FormLabel className="flex w-full items-center gap-2 text-lg font-semibold">
 												{editingGroupId === group.id ? (
 													<input
@@ -590,7 +589,10 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 													/>
 												) : (
 													<>
-														{customGroupNames[group.id] || group.title}
+														<div className="max-w-xs truncate md:max-w-md">
+															{customGroupNames[group.id] || group.title} {customGroupNames[group.id] || group.title}
+														</div>
+
 														<Button type="button" size="icon" variant="ghost" className="ml-2 h-8 w-8 p-0" onClick={() => handleGroupNameEdit(group.id)}>
 															<Pencil size={14} />
 														</Button>
@@ -601,6 +603,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 											<Button
 												variant="outline"
 												type="button"
+												className="w-full md:w-fit"
 												onClick={() => {
 													setSelectedGroup(group.id as QuestionFormValues['group']);
 													setIsQuestionDialogOpen(true);
@@ -623,7 +626,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 														.filter(q => q.group === group.id)
 														.map(q => q.id)}
 													strategy={verticalListSortingStrategy}>
-													<div className="space-y-4">
+													<div className="space-y-8">
 														{form
 															.getValues('questions')
 															.filter(q => q.group === group.id)
