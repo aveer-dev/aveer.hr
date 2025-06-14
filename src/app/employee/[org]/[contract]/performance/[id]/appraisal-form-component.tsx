@@ -25,7 +25,7 @@ export const AppraisalFormComponent = ({
 	org: string;
 	teams: Tables<'teams'>[];
 	teamMembers: Tables<'contracts'>[];
-	manager: Tables<'managers'>;
+	manager: Tables<'managers'> | null;
 	teamMembersAnswers: Tables<'appraisal_answers'>[];
 	contract: Tables<'contracts'>;
 	questions: Tables<'template_questions'>[];
@@ -44,7 +44,7 @@ export const AppraisalFormComponent = ({
 	});
 	const contractAnswer = teamMembersAnswers.find(answer => answer.contract_id === contract.id) ?? null;
 
-	const isManager = manager.person == contract.id;
+	const isManager = manager?.person == contract.id;
 	const customGroupNames = template.custom_group_names as { id: string; name: string }[];
 
 	const [answer, setAnswer] = useState<Tables<'appraisal_answers'> | null>(contractAnswer);

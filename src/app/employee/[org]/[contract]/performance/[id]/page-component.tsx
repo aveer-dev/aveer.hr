@@ -1,6 +1,5 @@
 import { AppraisalRepository, ContractRepository, ManagerRepository, QuestionTemplateRepository, TeamRepository } from '@/dal';
 import { AppraisalFormComponent } from './appraisal-form-component';
-import { Tables } from '@/type/database.types';
 
 export default async function AppraisalPageComponent({ params }: { params: Promise<{ [key: string]: string }> }) {
 	const { id, org, contract } = await params;
@@ -29,7 +28,7 @@ export default async function AppraisalPageComponent({ params }: { params: Promi
 		questionRepo.getById(appraisalCycle.question_template)
 	]);
 
-	if (manager.error || !manager.data) {
+	if (manager.error) {
 		return (
 			<div className="flex h-56 w-full flex-col items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">
 				<p>Unable to fetch manager</p>
@@ -38,7 +37,7 @@ export default async function AppraisalPageComponent({ params }: { params: Promi
 		);
 	}
 
-	if (teamMembers.error || !teamMembers.data) {
+	if (teamMembers.error) {
 		return (
 			<div className="flex h-56 w-full flex-col items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">
 				<p>Unable to fetch team members</p>
@@ -47,7 +46,7 @@ export default async function AppraisalPageComponent({ params }: { params: Promi
 		);
 	}
 
-	if (appraisalAnswers.error || !appraisalAnswers.data) {
+	if (appraisalAnswers.error) {
 		return (
 			<div className="flex h-56 w-full flex-col items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">
 				<p>Unable to fetch appraisal answers</p>
@@ -56,7 +55,7 @@ export default async function AppraisalPageComponent({ params }: { params: Promi
 		);
 	}
 
-	if (teams.error || !teams.data) {
+	if (teams.error) {
 		return (
 			<div className="flex h-56 w-full flex-col items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">
 				<p>Unable to fetch teams</p>
@@ -92,7 +91,7 @@ export default async function AppraisalPageComponent({ params }: { params: Promi
 			template={template.data}
 			teams={teams.data || []}
 			teamMembers={teamMembers.data || []}
-			manager={manager.data}
+			manager={manager?.data || null}
 			teamMembersAnswers={teamMembersAnswers || []}
 			contract={contractData}
 			appraisalCycle={appraisalCycle}
