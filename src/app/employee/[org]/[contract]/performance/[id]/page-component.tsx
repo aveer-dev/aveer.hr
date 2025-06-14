@@ -20,7 +20,7 @@ export default async function AppraisalPageComponent({ params }: { params: Promi
 	const managerRepo = new ManagerRepository();
 	const questionRepo = new QuestionTemplateRepository();
 	const [teamMembers, manager, appraisalAnswers, teams, questions, template] = await Promise.all([
-		contractRepo.getByTeamStatusOrgWithProfile({ team: contractData.team!, status: 'signed', org }),
+		contractRepo.getByTeamStatusOrgWithProfile({ team: contractData?.team || undefined, status: 'signed', org }),
 		managerRepo.getByContract(Number(contract)),
 		appraisalRepo.getAllAnswersForCycle(Number(id)),
 		teamRepo.getAllByOrg(org),

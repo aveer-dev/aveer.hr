@@ -148,9 +148,10 @@ export class ContractRepository implements IContractRepository {
 		return data as unknown as ContractWithProfileAndTeam[];
 	}
 
-	async getByTeamStatusOrgWithProfile({ team, status, org }: { team: number; status?: Tables<'contracts'>['status']; org: string }) {
+	async getByTeamStatusOrgWithProfile({ team, status, org }: { team?: number; status?: Tables<'contracts'>['status']; org: string }) {
 		const supabase = await createClient();
-		const request = supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*))').eq('org', org).eq('team', team);
+		const request = supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*))').eq('org', org);
+		if (team) request.eq('team', team);
 		if (status) request.eq('status', status);
 		const { data, error } = await request;
 		return { data: data as (Tables<'contracts'> & { profile?: Tables<'profiles'> & { nationality?: Tables<'countries'> } })[] | null, error };
