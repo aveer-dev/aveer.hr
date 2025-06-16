@@ -39,27 +39,25 @@ export const BoardHead = ({ column, stages, moveCards }: { moveCards: (fromColum
 							</DropdownMenuPortal>
 						</DropdownMenuSub>
 
-						{column.cards.length && (
-							<ComposeMailDialog
-								isOpen={showEmailDialog}
-								toggleDialog={toggleEmailDialog}
-								recipients={column.cards.map(card => card.email)}
-								name={`Update from ${(column.cards[0].org as any).name}`}
-								onClose={state => {
-									if (state == 'success') toast.success('Application update sent');
-								}}
-								message={`Hey ${column.cards[0].first_name},
+						{column.cards.length && <DropdownMenuItem onSelect={() => toggleEmailDialog(true)}>Send email</DropdownMenuItem>}
+					</DropdownMenuGroup>
+				</DropdownMenuContent>
+			</DropdownMenu>
+
+			<ComposeMailDialog
+				isOpen={showEmailDialog}
+				toggleDialog={toggleEmailDialog}
+				recipients={column.cards.map(card => card.email)}
+				name={`Update from ${(column.cards[0]?.org as any)?.name}`}
+				onClose={state => {
+					if (state == 'success') toast.success('Application update sent');
+				}}
+				message={`Hello,
 
 ...continue message here
 
 All the best.
-HR at ${(column.cards[0].org as any).name}`}>
-								<DropdownMenuItem onSelect={event => event.preventDefault()}>Send email</DropdownMenuItem>
-							</ComposeMailDialog>
-						)}
-					</DropdownMenuGroup>
-				</DropdownMenuContent>
-			</DropdownMenu>
+HR at ${(column.cards[0]?.org as any)?.name}`}></ComposeMailDialog>
 		</div>
 	);
 };
