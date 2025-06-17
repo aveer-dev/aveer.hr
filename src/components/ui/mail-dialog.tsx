@@ -78,6 +78,7 @@ export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, reci
 	return (
 		<AlertDialog open={isOpen} onOpenChange={state => toggleDialog && toggleDialog(state)}>
 			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+
 			<AlertDialogContent className="h-screen w-screen max-w-none overflow-y-auto">
 				<div className="flex h-full w-full items-center justify-center">
 					<form action={sendMessage} className="grid w-full max-w-lg gap-8">

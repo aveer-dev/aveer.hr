@@ -20,26 +20,17 @@ const getMessageBody = (json: string) => {
 	return output;
 };
 
-export const Notifications = ({ contractId, messages }: { contractId?: number; messages: Tables<'inbox'>[] | null }) => {
+export const Notifications = ({ contractId, messages, open, setOpen }: { contractId?: number; messages: Tables<'inbox'>[] | null; open: boolean; setOpen: (open: boolean) => void }) => {
 	const searchParams = useSearchParams();
 	const activeMessageId = messages?.find(message => message.id == Number(searchParams.get('messages')))?.id;
 
 	const [_messages, updateMessages] = useState(messages || []);
-	const [open, setOpen] = useState(!!activeMessageId);
 
 	if (messages && messages.length > 0) messages = messages.filter(message => !message.draft);
 
 	useEffect(() => {
-		const down = (e: KeyboardEvent) => {
-			if (e.key === 'n' && (e.metaKey || e.ctrlKey)) {
-				e.preventDefault();
-				setOpen(open => !open);
-			}
-		};
-
-		document.addEventListener('keydown', down);
-		return () => document.removeEventListener('keydown', down);
-	}, []);
+		setOpen(!!activeMessageId);
+	}, [activeMessageId, setOpen]);
 
 	const isMessageRead = (message: Tables<'inbox'>) => !!message.read.find(msg => msg === contractId);
 
@@ -66,11 +57,11 @@ export const Notifications = ({ contractId, messages }: { contractId?: number; m
 					isMessageRead(_messages[messageIndex]) ? false : onReadMessage(_messages[messageIndex], messageIndex);
 				}
 			}}>
-			<TooltipProvider>
+			{/* <TooltipProvider>
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<AlertDialogTrigger asChild>
-							<Button onClick={() => setOpen(open => !open)} className="h-8 w-8 rounded-2xl border p-0" variant={'secondary'}>
+							<Button onClick={() => setOpen(!open)} className="h-8 w-8 rounded-2xl border p-0" variant={'secondary'}>
 								{_messages.filter(message => !isMessageRead(message)).length > 0 ? <MessageSquareDot size={12} /> : <MessageSquare size={12} />}
 							</Button>
 						</AlertDialogTrigger>
@@ -84,7 +75,7 @@ export const Notifications = ({ contractId, messages }: { contractId?: number; m
 						</p>
 					</TooltipContent>
 				</Tooltip>
-			</TooltipProvider>
+			</TooltipProvider> */}
 
 			<AlertDialogContent onCloseAutoFocus={event => event.preventDefault()} onOpenAutoFocus={event => event.preventDefault()} className="block max-h-screen w-full max-w-xl overflow-y-auto">
 				<AlertDialogHeader className="flex-row justify-between text-left">

@@ -4,6 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default async function ContractPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
 	const params = await props.params;
+
 	return (
 		<Suspense
 			fallback={

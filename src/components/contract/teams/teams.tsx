@@ -29,7 +29,7 @@ export const Teams = async ({ org, team, contractId, name, currentUser, orgSetti
 		<>
 			<section className="mt-6 w-full">
 				<div className="space-y-1">
-					<h2 className="text-lg font-semibold text-support">Team</h2>
+					<h2 className="text-base font-medium text-support">Team</h2>
 					<p className="text-xs font-light text-muted-foreground">Team name: {name}</p>
 				</div>
 
@@ -68,7 +68,7 @@ export const Teams = async ({ org, team, contractId, name, currentUser, orgSetti
 
 			<section className="mt-16 w-full">
 				<div className="space-y-1">
-					<h2 className="text-lg font-semibold text-support">Direct reports</h2>
+					<h2 className="text-base font-medium text-support">Direct reports</h2>
 					<p className="text-xs font-light text-muted-foreground">People reporting directly to you</p>
 				</div>
 

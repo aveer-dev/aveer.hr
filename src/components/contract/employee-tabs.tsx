@@ -1,6 +1,6 @@
 import { Details } from '@/components/ui/details';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ContractOverview } from './contract-overview';
+import { LeaveOverview } from './leave-overview';
 import { Profile } from './profile/profile';
 import { Teams } from './teams';
 import { Timeoff } from './time-off';
@@ -14,12 +14,12 @@ import { InfoIcon } from 'lucide-react';
 
 export const EmployeeTabs = ({ data, orgSettings, signatureType, manager, org }: { data: any; orgSettings: Tables<'org_settings'>[] | null; signatureType: 'profile' | 'org' | 'manager'; manager?: Tables<'managers'>[] | null; org: string }) => {
 	return (
-		<Tabs defaultValue={data.profile_signed && data.org_signed ? 'overview' : 'contract'} className="space-y-6">
+		<Tabs defaultValue={data.profile_signed && data.org_signed ? 'profile' : 'contract'} className="space-y-6">
 			{data.profile_signed && data.org_signed && (
 				<div className="no-scrollbar flex items-center overflow-x-auto">
 					<TabsList className={cn('mb-4 flex')}>
-						<TabsTrigger value="overview">Overview</TabsTrigger>
 						<TabsTrigger value="profile">Profile</TabsTrigger>
+						<TabsTrigger value="leave">Leave</TabsTrigger>
 						{data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && signatureType !== 'manager' && <TabsTrigger value="team">Team</TabsTrigger>}
 						{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <TabsTrigger value="requests">Requests</TabsTrigger>}
 						<TabsTrigger value="contract">Contract</TabsTrigger>
@@ -28,8 +28,8 @@ export const EmployeeTabs = ({ data, orgSettings, signatureType, manager, org }:
 				</div>
 			)}
 
-			<TabsContent value="overview">
-				<ContractOverview orgSettings={orgSettings && orgSettings[0]} reviewType={manager?.length ? 'manager' : 'employee'} data={data as any} />
+			<TabsContent value="leave">
+				<LeaveOverview orgSettings={orgSettings && orgSettings[0]} reviewType={manager?.length ? 'manager' : 'employee'} data={data as any} />
 			</TabsContent>
 
 			<TabsContent value="onboarding">

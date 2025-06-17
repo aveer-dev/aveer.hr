@@ -28,13 +28,12 @@ export class LeaveRepository implements ILeaveRepository {
 		return data;
 	}
 
-	async getByContract(org: string, contract: number, status?: Tables<'time_off'>['status']): Promise<Tables<'time_off'>[]> {
+	async getByContract(org: string, contract: number, status?: Tables<'time_off'>['status']) {
 		const supabase = await createClient();
 		const request = supabase.from('time_off').select('*').match({ org, contract });
 		if (status) request.eq('status', status);
 		const { data, error } = await request;
-		if (error || !data) return [];
-		return data;
+		return { data, error };
 	}
 
 	async create(payload: TablesInsert<'time_off'>): Promise<Tables<'time_off'> | null> {
@@ -74,7 +73,7 @@ export class LeaveRepository implements ILeaveRepository {
 		return data as unknown as LeaveWithRelations;
 	}
 
-	async getAllByOrgWithRelations(org: string, status?: Tables<'time_off'>['status']): Promise<LeaveWithRelations[]> {
+	async getAllByOrgWithRelations(org: string, status?: Tables<'time_off'>['status']) {
 		const supabase = await createClient();
 		const request = supabase
 			.from('time_off')
@@ -88,8 +87,7 @@ export class LeaveRepository implements ILeaveRepository {
 			.eq('org', org);
 		if (status) request.eq('status', status);
 		const { data, error } = await request;
-		if (error || !data) return [];
-		return data as unknown as LeaveWithRelations[];
+		return { data: data as unknown as LeaveWithRelations[], error };
 	}
 
 	async getByProfileWithRelations(org: string, profile: string, status?: Tables<'time_off'>['status']): Promise<LeaveWithRelations[]> {
@@ -110,7 +108,7 @@ export class LeaveRepository implements ILeaveRepository {
 		return data as unknown as LeaveWithRelations[];
 	}
 
-	async getByContractWithRelations(org: string, contract: number, status?: Tables<'time_off'>['status']): Promise<LeaveWithRelations[]> {
+	async getByContractWithRelations(org: string, contract: number, status?: Tables<'time_off'>['status']) {
 		const supabase = await createClient();
 		const request = supabase
 			.from('time_off')
@@ -124,7 +122,6 @@ export class LeaveRepository implements ILeaveRepository {
 			.match({ org, contract });
 		if (status) request.eq('status', status);
 		const { data, error } = await request;
-		if (error || !data) return [];
-		return data as unknown as LeaveWithRelations[];
+		return { data: data as unknown as LeaveWithRelations[], error };
 	}
 }

@@ -14,22 +14,60 @@ import { Separator } from '../ui/separator';
 import { Tables } from '@/type/database.types';
 import { EventDialog } from '../calendar/event-dialog';
 import { ROLE } from '@/type/contract.types';
-import { EmployeeCalendarComponent } from './calendar-component';
+import { ContractWithRelations, LeaveWithRelations } from '@/dal';
+
+export interface leaveDays {
+	date: Date;
+	name: string;
+	status: string;
+	data: any;
+}
 
 interface props {
 	org: string;
-	leaveDays: { date: Date; status: string; name: string; data: any }[];
-	birthdays: { id: number; job_title: string; profile: { id: string; last_name: string; first_name: string; date_of_birth: string | null } | null }[];
-	events: { date: Date; data: Tables<'calendar_events'> }[];
-	calendarEvents: Tables<'calendar_events'>[] | null;
-	teams: Tables<'teams'>[] | null;
-	employees: Tables<'contracts'>[];
+	calendarEvents: Tables<'calendar_events'>[];
+	teams: Tables<'teams'>[];
+	employees: ContractWithRelations[];
 	calendar: Tables<'calendars'> | null;
 	role: ROLE;
 	userId: string;
+	userType: ROLE;
+	timeOffs: LeaveWithRelations[];
 }
 
-export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, calendar, role, calendarEvents, userId }: props) => {
+export const Calendar = ({ org, teams, employees, calendar, role, calendarEvents, userId, userType, timeOffs }: props) => {
+	const filteredLeaveDays: leaveDays[] = [];
+	const filteredEvents: { date: Date; data: Tables<'calendar_events'> }[] = [];
+	const activeUserContractData = userType == 'employee' && employees && employees.find(employee => employee.profile?.id == userId);
+
+	for (const item of timeOffs) {
+		const startDate = new Date(item.from);
+		const endDate = new Date(item.to);
+		const name = `${item.leave_type} leave | ${item.profile.first_name} ${item.profile.last_name}`;
+		const status = item.status;
+		const data = item;
+
+		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) filteredLeaveDays.push({ date: new Date(date), name, status, data });
+	}
+
+	for (const item of calendarEvents!) {
+		const startDate = new Date((item.start as any)?.dateTime);
+		const endDate = new Date((item.end as any)?.dateTime);
+		const data = item;
+
+		const isEmployeeInvited =
+			userType !== 'admin' && activeUserContractData && (item.attendees as any[]).length
+				? !!(item.attendees as any[]).find(employee => {
+						if (employee.single) return employee.single.id == activeUserContractData.id;
+						if (employee.team) return employee.team.id == activeUserContractData.team;
+						if (employee.all) return employee.all.find((employee: any) => employee.id == activeUserContractData.id);
+						return false;
+					})
+				: true;
+
+		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) if (userType == 'admin' || isEmployeeInvited) filteredEvents.push({ date: new Date(date), data });
+	}
+
 	const dayOfWeekMatcher: DayOfWeek = {
 		dayOfWeek: [0, 6]
 	};
@@ -51,8 +89,8 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 			}}
 			modifiers={{
 				weekend: dayOfWeekMatcher,
-				leaveDay: leaveDays.map(day => day.date),
-				event: events.map(day => day.date)
+				leaveDay: filteredLeaveDays.map(day => day.date),
+				event: filteredEvents.map(day => day.date)
 			}}
 			components={{
 				Nav: ({ onNextClick, onPreviousClick }) => {
@@ -72,8 +110,6 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 									<Maximize className="" size={16} />
 								</NavLink>
 							)}
-
-							{role == 'employee' && <EmployeeCalendarComponent org={org} dobs={birthdays} calendar={calendar} calendarEvents={calendarEvents} events={events} result={leaveDays} userId={userId} />}
 						</nav>
 					);
 				},
@@ -106,10 +142,11 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 					const _isToday = isToday(date);
 					const isStartOfMonth = isFirstDayOfMonth(date);
 					const year = getYear(date);
-					const isBirthday = birthdays.filter(birthday => (birthday.profile?.date_of_birth ? isSameDay(date, setYear(birthday.profile?.date_of_birth, year)) : false));
-					const cevents = modifiers.event ? events.filter(event => isSameDay(event.date, date)) : [];
-					const dateHasEvent = (modifiers.leaveDay && !modifiers.weekend) || !!isBirthday.length || !!cevents.length;
-					const dayLeaves = leaveDays.filter(leaveDay => isSameDay(leaveDay.date, date));
+					const isBirthday = employees?.filter(employee => (employee.profile?.date_of_birth ? isSameDay(date, setYear(employee.profile?.date_of_birth, year)) : false));
+					const cevents = modifiers.event ? filteredEvents.filter(event => isSameDay(event.date, date)) : [];
+
+					const dateHasEvent = modifiers.leaveDay || !!isBirthday?.length || !!cevents.length;
+					const dayLeaves = filteredLeaveDays.filter(leaveDay => isSameDay(leaveDay.date, date));
 
 					return (
 						<Popover>
@@ -119,7 +156,7 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 									<div className="text-lg font-bold">{children}</div>
 									<div className={cn('relative mx-auto h-1 w-6 rounded-md')}>
 										<div className={cn('absolute bottom-0 left-0 top-0 flex w-full items-center justify-center rounded-md')}>
-											{!!isBirthday.length && <div className="h-1 w-full rounded-sm bg-blue-400"></div>}
+											{!!isBirthday?.length && <div className="h-1 w-full rounded-sm bg-blue-400"></div>}
 											{modifiers.event && <div className="h-1 w-full rounded-sm bg-primary/50"></div>}
 											{modifiers.leaveDay && <div className="h-1 w-full rounded-sm bg-green-300"></div>}
 										</div>
@@ -132,41 +169,35 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 									<>
 										<h3 className="text-sm font-medium">{format(date, 'PP')}</h3>
 
-										<Tabs defaultValue={!modifiers.weekend && !!dayLeaves.length && !!isBirthday.length ? 'leave' : !modifiers.weekend && !!dayLeaves.length ? 'leave' : 'birthday'}>
-											{!modifiers.weekend && !!dayLeaves.length && !!isBirthday.length && (
-												<TabsList className="mb-4 flex h-fit w-fit p-0.5">
-													{!modifiers.weekend && !!dayLeaves.length && (
-														<TabsTrigger className="py-1" value="leave">
-															Leaves
-														</TabsTrigger>
-													)}
-													{!!isBirthday.length && (
-														<TabsTrigger className="py-1" value="birthday">
-															Bithdays
-														</TabsTrigger>
-													)}
-													{!!cevents.length && calendar && (
-														<TabsTrigger className="py-1" value="events">
-															Events
-														</TabsTrigger>
-													)}
-												</TabsList>
-											)}
+										<Tabs defaultValue={!!dayLeaves.length && !!isBirthday.length ? 'leave' : !!dayLeaves.length ? 'leave' : !!cevents.length ? 'events' : 'birthday'}>
+											<TabsList className="mb-4 flex h-fit w-fit p-0.5">
+												<TabsTrigger className="py-1" value="leave">
+													Leaves
+												</TabsTrigger>
+												<TabsTrigger className="py-1" value="birthday">
+													Bithdays
+												</TabsTrigger>
+												<TabsTrigger className="py-1" value="events">
+													Events
+												</TabsTrigger>
+											</TabsList>
 
-											{!modifiers.weekend && !!dayLeaves.length && (
-												<TabsContent value="leave">
-													{dayLeaves.map((leave, index) => (
+											<TabsContent value="leave">
+												{!!dayLeaves.length ? (
+													dayLeaves.map((leave, index) => (
 														<LeaveReview hideTooltip reviewType="admin" data={leave.data} key={index + 'leave'} className={cn('max-w-56', modifiers.outside && 'opacity-10')}>
 															{leave?.name}
 														</LeaveReview>
-													))}
-												</TabsContent>
-											)}
+													))
+												) : (
+													<p className="text-xs italic text-muted-foreground">No leaves</p>
+												)}
+											</TabsContent>
 
-											{!!isBirthday.length && (
-												<TabsContent value="birthday">
+											<TabsContent value="birthday">
+												{!!isBirthday?.length ? (
 													<ul className="space-y-1">
-														{isBirthday.map(birthday => (
+														{isBirthday?.map(birthday => (
 															<li className="2 max-w-56 text-xs" key={birthday.id}>
 																<NavLink className="flex items-center gap-2 rounded-sm p-1 py-2 transition-all duration-300 hover:bg-muted" org={org} href={`/people/${birthday?.id}`}>
 																	🎉 {birthday.profile?.first_name}&apos;s birthday
@@ -175,14 +206,16 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 															</li>
 														))}
 													</ul>
-												</TabsContent>
-											)}
+												) : (
+													<p className="text-xs italic text-muted-foreground">No birthdays</p>
+												)}
+											</TabsContent>
 
-											{!!cevents.length && calendar && (
-												<TabsContent value="birthday">
+											<TabsContent value="events">
+												{!!cevents.length ? (
 													<ul className="space-y-1">
 														{cevents.map(event => (
-															<EventDialog key={event.data.id} role={role} event={event.data} teams={teams} employees={employees} org={org} calendar={calendar}>
+															<EventDialog key={event.data.id} role={role} event={event.data} teams={teams} employees={employees} org={org} calendar={calendar || null}>
 																<li className="2 flex max-w-56 items-center gap-2 rounded-sm p-1 py-2 text-xs transition-all duration-300 hover:bg-muted">
 																	<CalendarRange size={12} />
 																	{event.data.summary}
@@ -190,8 +223,10 @@ export const Calendar = ({ leaveDays, birthdays, org, events, teams, employees, 
 															</EventDialog>
 														))}
 													</ul>
-												</TabsContent>
-											)}
+												) : (
+													<p className="text-xs italic text-muted-foreground">No events</p>
+												)}
+											</TabsContent>
 										</Tabs>
 									</>
 								)}

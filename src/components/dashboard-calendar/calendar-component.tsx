@@ -7,6 +7,7 @@ import { Tables } from '@/type/database.types';
 import { LayoutList } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { ContractWithRelations, LeaveWithRelations } from '@/dal';
 
 interface reminder {
 	contract: number;
@@ -26,30 +27,18 @@ interface reminder {
 	type: string | null;
 }
 
-interface dobs {
-	id: number;
-	job_title: string;
-	profile: {
-		first_name: string;
-		last_name: string;
-		date_of_birth: string | null;
-		id: string;
-	} | null;
-}
-
 interface props {
-	contractId?: number;
+	contractId: number;
 	org: string;
-	dobs: dobs[] | null;
+	employeesData: ContractWithRelations[] | null;
 	calendar: Tables<'calendars'> | null;
 	calendarEvents: Tables<'calendar_events'>[] | null;
 	reminders?: reminder[] | null;
-	events: { date: Date; data: Tables<'calendar_events'> }[];
-	result: { date: Date; name: string; status: string; data: any }[];
-	userId: string;
+	leaveDays: LeaveWithRelations[];
+	teams: Tables<'teams'>[];
 }
 
-export const EmployeeCalendarComponent = ({ calendarEvents, reminders, dobs, org, contractId, calendar, result, events, userId }: props) => {
+export const EmployeeCalendarComponent = ({ calendarEvents, reminders, employeesData, org, contractId, calendar, leaveDays, teams }: props) => {
 	const searchParams = useSearchParams();
 	const activeCalendarEventId = searchParams.get('calendar');
 	const activeCalendarEvent = activeCalendarEventId ? calendarEvents?.find(event => Number(activeCalendarEventId) == event.id) : undefined;
@@ -67,8 +56,8 @@ export const EmployeeCalendarComponent = ({ calendarEvents, reminders, dobs, org
 				}
 			}}>
 			<SheetTrigger asChild>
-				<Button variant={'ghost'}>
-					<LayoutList size={16} />
+				<Button variant={'secondary'} size={'icon'} className="h-8 w-8">
+					<LayoutList size={12} />
 				</Button>
 			</SheetTrigger>
 
@@ -82,17 +71,16 @@ export const EmployeeCalendarComponent = ({ calendarEvents, reminders, dobs, org
 					<FullCalendar
 						calendar={calendar}
 						contractId={contractId}
+						employees={employeesData || []}
 						calendarType="vertical"
 						role="employee"
 						org={org}
-						profile={userId}
-						contract={dobs?.find(contract => contract.profile?.id == userId)?.id as number}
-						leaveDays={result}
+						timeOffs={leaveDays}
 						reminders={reminders || []}
-						dobs={dobs!.filter(contract => contract.profile?.date_of_birth) as any}
 						enableClose={true}
 						activeCalendarEvent={activeCalendarEvent}
-						events={events}
+						teams={teams}
+						calendarEvents={calendarEvents || []}
 					/>
 				</section>
 			</SheetContent>

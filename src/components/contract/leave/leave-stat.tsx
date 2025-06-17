@@ -3,7 +3,7 @@ import { Database } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/server';
 import { differenceInBusinessDays } from 'date-fns';
 
-export const LeaveStat = async ({ days, total, label, org, profile }: { days: number; total: number; label: Database['public']['Enums']['leave_type_enum']; org: string; profile: string }) => {
+export const LeaveStat = async ({ days, total, label, org, profile, minimal = false }: { days: number; total: number; label: Database['public']['Enums']['leave_type_enum']; org: string; profile: string; minimal?: boolean }) => {
 	const supabase = await createClient();
 
 	const percentage = (days / total) * 100;
@@ -25,13 +25,13 @@ export const LeaveStat = async ({ days, total, label, org, profile }: { days: nu
 
 	return (
 		<div className="space-y-2">
-			<div className="relative h-1 w-full rounded-md bg-accent">
+			<div className={cn('relative h-1 w-full rounded-md bg-accent', minimal && 'bg-background')}>
 				<div className="absolute bottom-0 left-0 top-0 z-10 rounded-md bg-foreground transition-all" style={{ width: formatedPercentage + '%' }}>
-					{formatedPercentage > 0 && <div className="absolute -right-px bottom-0 h-8 border-r pr-2 text-xs text-muted-foreground">{formatedPercentage}%</div>}
+					{formatedPercentage > 0 && !minimal && <div className="absolute -right-px bottom-0 h-8 border-r pr-2 text-xs text-muted-foreground">{formatedPercentage}%</div>}
 				</div>
 
 				<div className="absolute bottom-0 left-0 top-0 rounded-md bg-orange-300 transition-all" style={{ width: pending.percentage + percentage + '%' }}>
-					{pending.percentage > 0 && (
+					{pending.percentage > 0 && !minimal && (
 						<div className={cn('absolute -right-px bottom-0 border-r pr-2 text-xs text-muted-foreground', percentage > 0 ? 'h-16' : 'h-12')}>
 							<div>pending</div>
 							{pending.percentage}%

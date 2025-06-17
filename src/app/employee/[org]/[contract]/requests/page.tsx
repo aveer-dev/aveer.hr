@@ -1,50 +1,22 @@
-import { Applicants } from '@/components/contract/applicants';
-import { BoardingsReview } from '@/components/contract/boarding-review';
-import { Timeoff } from '@/components/contract/time-off';
 import { Skeleton } from '@/components/ui/skeleton';
-import { createClient } from '@/utils/supabase/server';
-import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
+import { RequestsPageComponent } from './requests-page';
 
 export default async function ProfilePage(props: { params: Promise<{ [key: string]: string }> }) {
-	const params = await props.params;
-	const supabase = await createClient();
-
-	const { data, error } = await supabase
-		.from('contracts')
-		.select(
-			'*, team:teams!contracts_team_fkey(name, id), profile:profiles!contracts_profile_fkey(first_name, last_name, email, id, nationality:countries!profiles_nationality_fkey(country_code, name)), org:organisations!contracts_org_fkey(name, id, subdomain), entity:legal_entities!contracts_entity_fkey(name, id, incorporation_country:countries!legal_entities_incorporation_country_fkey(country_code, name, currency_code))'
-		)
-		.eq('id', Number(params.contract))
-		.single();
-
-	if (error) {
-		return (
-			<div className="flex min-h-56 flex-col items-center justify-center gap-2 bg-muted text-center text-muted-foreground">
-				<p>Unable to fetch contract</p>
-				<p>{error?.message}</p>
-			</div>
-		);
-	}
-
-	if (data.status !== 'signed') redirect('./home');
-
-	const manager = (await supabase.from('managers').select().match({ org: params.org, person: params.contract, team: data.team?.id })).data;
-
 	return (
 		<Suspense
 			fallback={
-				<div className="space-y-12">
+				<div className="mx-auto max-w-3xl space-y-12">
 					<Skeleton className="h-56 w-full" />
 					<Skeleton className="h-56 w-full" />
 					<Skeleton className="h-56 w-full" />
 				</div>
 			}>
-			<Timeoff manager={manager && manager[0]} reviewType={manager?.length ? 'manager' : 'employee'} contract={data} org={params.org} team={data?.team?.id} />
+			<div className="mx-auto mt-24 max-w-3xl sm:mt-0">
+				<h2 className="mb-16 text-4xl font-light">Requests</h2>
 
-			<Applicants contract={data as any} org={params.org} manager={manager && manager[0]} />
-
-			<BoardingsReview manager={manager && manager[0]} contract={data} org={params.org} />
+				<RequestsPageComponent {...props} />
+			</div>
 		</Suspense>
 	);
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { UserRoundCog } from 'lucide-react';
+import { UserRoundPen } from 'lucide-react';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -89,8 +89,7 @@ export const ProfileForm = ({ data }: props) => {
 		<Sheet open={isDialogOpen} onOpenChange={toggleDialog}>
 			<SheetTrigger asChild>
 				<Button variant={'secondary'} className="h-9 gap-3">
-					Update
-					<UserRoundCog className="stroke-1" size={14} />
+					<UserRoundPen size={14} />
 				</Button>
 			</SheetTrigger>
 

@@ -7,8 +7,8 @@ import ExtensionKit from '@/components/tiptap/extensions/extension-kit';
 import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import { SlashCommand } from '@/components/tiptap/extensions/SlashCommand';
-import TableOfContents from '@tiptap-pro/extension-table-of-contents';
-import { Details, DetailsContent, DetailsSummary, Placeholder, Table, TableCell, TableHeader, TableRow, UniqueID } from '@/components/tiptap/extensions';
+// import TableOfContents from '@tiptap-pro/extension-table-of-contents';
+// import { Details, DetailsContent, DetailsSummary, Placeholder, Table, TableCell, TableHeader, TableRow, UniqueID } from '@/components/tiptap/extensions';
 import { TableOfContentsNode } from '@/components/tiptap/extensions/TableOfContentsNode';
 import { Column, Columns } from '@/components/tiptap/extensions/MultiColumn';
 import { CustomMention, suggestion } from '@/components/tiptap/extensions/Mention';
@@ -43,34 +43,34 @@ export const useEditorSetup = ({ doc, currentUser, userPermittedAction, saveDocu
 			// 		: undefined
 			// }),
 			SlashCommand,
-			TableOfContents.configure({
-				anchorTypes: ['heading', 'customAnchorType']
-			}),
-			Details.configure({
-				persist: true,
-				HTMLAttributes: {
-					class: 'details'
-				}
-			}),
-			DetailsContent,
-			DetailsSummary,
-			TableOfContentsNode,
-			Table,
-			TableCell,
-			TableHeader,
-			TableRow,
+			// TableOfContents.configure({
+			// 	anchorTypes: ['heading', 'customAnchorType']
+			// }),
+			// Details.configure({
+			// 	persist: true,
+			// 	HTMLAttributes: {
+			// 		class: 'details'
+			// 	}
+			// }),
+			// DetailsContent,
+			// DetailsSummary,
+			// TableOfContentsNode,
+			// Table,
+			// TableCell,
+			// TableHeader,
+			// TableRow,
 			Column,
 			Columns,
-			UniqueID.configure({
-				attributeName: 'id',
-				types: ['paragraph', 'heading', 'blockquote', 'codeBlock', 'table', 'imageBlock']
-			}),
-			CustomMention.configure({ suggestion }),
-			Placeholder.configure({
-				includeChildren: true,
-				showOnlyCurrent: false,
-				placeholder: () => 'Start writing here'
-			})
+			// UniqueID.configure({
+			// 	attributeName: 'id',
+			// 	types: ['paragraph', 'heading', 'blockquote', 'codeBlock', 'table', 'imageBlock']
+			// }),
+			CustomMention.configure({ suggestion })
+			// Placeholder.configure({
+			// 	includeChildren: true,
+			// 	showOnlyCurrent: false,
+			// 	placeholder: () => 'Start writing here'
+			// })
 		],
 		immediatelyRender: false,
 		shouldRerenderOnTransaction: false,

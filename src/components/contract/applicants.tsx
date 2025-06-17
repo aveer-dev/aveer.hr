@@ -18,7 +18,7 @@ export const Applicants = async ({ org, contract, manager }: props) => {
 	return (
 		<section className="mt-20 w-full">
 			<div className="flex items-center justify-between">
-				<h2 className="text-lg font-semibold text-support">Applicants review</h2>
+				<h2 className="text-base font-medium text-support">Applicants review</h2>
 			</div>
 
 			<div className="">

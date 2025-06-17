@@ -47,7 +47,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 			{data?.org && data?.profile && (
 				<div>
 					<h3 className="mb-4 text-lg font-semibold text-support">Parties</h3>
-					<ul className="grid grid-cols-2 gap-x-5 gap-y-14 border-t border-t-border pt-6">
+					<ul className="grid gap-x-5 gap-y-14 border-t border-t-border pt-6 sm:grid-cols-2">
 						<li>
 							<h2 className="text-sm text-muted-foreground">Employer</h2>
 							<div className="mt-4 space-y-3 text-xs font-light">
@@ -112,7 +112,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 					)}
 				</div>
 
-				<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
+				<ul className="grid gap-x-5 gap-y-10 border-t border-t-border pt-8 sm:grid-cols-2">
 					<li className="grid gap-3">
 						<h4 className="text-sm font-medium">Job Title</h4>
 						<p className="text-sm font-light">{data?.job_title}</p>
@@ -165,6 +165,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						</Button>
 					)}
 				</div>
+
 				<ul className="grid items-start gap-x-5 gap-y-10 border-t border-t-border pt-8">
 					<li className="grid gap-3">
 						<h4 className="text-sm font-medium">Experience</h4>
@@ -190,7 +191,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						)}
 					</div>
 
-					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
+					<ul className="grid gap-x-5 gap-y-10 border-t border-t-border pt-8 sm:grid-cols-2">
 						<li className="grid gap-3">
 							<h4 className="flex items-center gap-2 text-sm font-medium">
 								Salary
@@ -270,7 +271,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						)}
 					</div>
 
-					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
+					<ul className="grid gap-x-5 gap-y-10 border-t border-t-border pt-8 sm:grid-cols-2">
 						{formType == 'contract' && (
 							<>
 								<li className="grid gap-3">
@@ -344,7 +345,7 @@ export const Details = ({ data, back, formType, openCompensationDialog, openBene
 						)}
 					</div>
 
-					<ul className="grid grid-cols-2 gap-x-5 gap-y-10 border-t border-t-border pt-8">
+					<ul className="grid gap-x-5 gap-y-10 border-t border-t-border pt-8 sm:grid-cols-2">
 						<li className="grid gap-3">
 							<h4 className="flex items-center gap-2 text-sm font-medium">Work Location</h4>
 							<p className="text-sm font-light capitalize">{data?.work_location}</p>

@@ -1,6 +1,7 @@
 import { Tables } from '@/type/database.types';
 import { ProfileForm } from './profile-form';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface props {
 	data:
@@ -17,13 +18,13 @@ interface props {
 export const Profile = ({ data, type }: props) => {
 	return (
 		<section className="mt-6">
-			<div className="mb-4 flex items-center justify-between">
-				<h2 className="text-lg font-semibold text-support">Personal Details</h2>
+			<div className={cn('mb-4 flex items-center justify-between', type == 'profile' && 'mb-14')}>
+				<h2 className={cn(type == 'profile' ? 'text-4xl font-light' : 'text-lg font-semibold text-support')}>Personal Details</h2>
 
 				{type == 'profile' && <ProfileForm data={data as any} />}
 			</div>
 
-			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 pt-6 text-sm font-light">
+			<ul className="grid gap-x-5 gap-y-6 pt-6 text-sm font-light sm:grid-cols-2">
 				<li className="grid gap-1">
 					<h4 className="text-xs text-muted-foreground">Full name</h4>{' '}
 					<p className="font-normal">
@@ -48,7 +49,7 @@ export const Profile = ({ data, type }: props) => {
 			</ul>
 
 			<h2 className="mb-4 mt-16 text-lg font-semibold text-support">Address</h2>
-			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 border-t pt-6 text-sm font-light">
+			<ul className="grid gap-x-5 gap-y-6 border-t pt-6 text-sm font-light sm:grid-cols-2">
 				<li className="grid gap-1">
 					<h4 className="text-xs text-muted-foreground">Country of residence</h4> <p className="font-normal">{data?.address?.country || '-'}</p>
 				</li>
@@ -64,7 +65,7 @@ export const Profile = ({ data, type }: props) => {
 			</ul>
 
 			<h2 className="mb-4 mt-16 text-lg font-semibold text-support">Emergency Contact</h2>
-			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 border-t border-t-border pt-6 text-sm font-light">
+			<ul className="grid gap-x-5 gap-y-6 border-t border-t-border pt-6 text-sm font-light sm:grid-cols-2">
 				<li className="grid gap-1">
 					<h4 className="text-xs text-muted-foreground">First name</h4> <p className="font-normal">{data?.emergency_contact?.first_name || '-'}</p>
 				</li>
@@ -83,7 +84,7 @@ export const Profile = ({ data, type }: props) => {
 			</ul>
 
 			<h2 className="mb-4 mt-16 text-lg font-semibold text-support">Medical Record</h2>
-			<ul className="grid grid-cols-2 gap-x-5 gap-y-6 border-t border-t-border pt-6 text-sm font-light">
+			<ul className="grid gap-x-5 gap-y-6 border-t border-t-border pt-6 text-sm font-light sm:grid-cols-2">
 				<li className="grid gap-1">
 					<h4 className="text-xs text-muted-foreground">Blood type</h4> <p className="font-normal">{data?.medical?.blood_type || '-'}</p>
 				</li>

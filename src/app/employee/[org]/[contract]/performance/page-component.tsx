@@ -20,7 +20,9 @@ export default async function AppraisalsPageComponent({ params }: { params: Prom
 	if (contractData?.status !== 'signed') redirect('./home');
 
 	return (
-		<div className="container mx-auto px-0 py-8">
+		<div className="mx-auto mt-0 max-w-3xl px-0 py-8 sm:mt-24">
+			<h2 className="mb-24 text-4xl font-light">Appraisals</h2>
+
 			<div className="space-y-6">
 				<EmployeeAppraisalList org={org} contract={contractData} />
 			</div>

@@ -15,35 +15,36 @@ interface props {
 	calendar?: Tables<'calendars'> | null;
 	org: string;
 	contract: number;
-	profile: string;
 	role?: ROLE;
 }
 
-export const CalendarOptions = ({ org, role = 'admin', contract, profile, calendar, teams, employees }: props) => {
+export const CalendarOptions = ({ org, role = 'admin', contract, calendar, teams, employees }: props) => {
 	const [isOptionOpen, toggleOptionState] = useState(false);
-
+	const [isEventOpen, toggleEventState] = useState(false);
 	return (
-		<DropdownMenu open={isOptionOpen} onOpenChange={toggleOptionState}>
-			<DropdownMenuTrigger className="[&[data-state=open]]:bg-accent" asChild>
-				<Button variant="ghost">
-					<Plus size={16} />
-				</Button>
-			</DropdownMenuTrigger>
+		<>
+			<DropdownMenu open={isOptionOpen} onOpenChange={toggleOptionState}>
+				<DropdownMenuTrigger className="[&[data-state=open]]:bg-accent" asChild>
+					<Button variant="ghost">
+						<Plus size={16} />
+					</Button>
+				</DropdownMenuTrigger>
 
-			<DropdownMenuContent className="w-28">
-				<EventDialog role={role} teams={teams} employees={employees} org={org} onClose={toggleOptionState} calendar={calendar}>
-					<DropdownMenuItem onSelect={event => event.preventDefault()} className="gap-3">
+				<DropdownMenuContent className="w-28">
+					<DropdownMenuItem onSelect={() => toggleEventState(true)} className="gap-3">
 						<CalendarRangeIcon size={12} /> Event
 					</DropdownMenuItem>
-				</EventDialog>
 
-				<ReminderDialog org={org} onClose={toggleOptionState} contract={contract} profile={profile}>
-					<DropdownMenuItem onSelect={event => event.preventDefault()} className="gap-3">
-						<BellPlus size={12} />
-						Reminder
-					</DropdownMenuItem>
-				</ReminderDialog>
-			</DropdownMenuContent>
-		</DropdownMenu>
+					<ReminderDialog org={org} onClose={toggleOptionState} contract={contract}>
+						<DropdownMenuItem onSelect={event => event.preventDefault()} className="gap-3">
+							<BellPlus size={12} />
+							Reminder
+						</DropdownMenuItem>
+					</ReminderDialog>
+				</DropdownMenuContent>
+			</DropdownMenu>
+
+			<EventDialog noTrigger role={role} teams={teams} employees={employees} isOpen={isEventOpen} org={org} onClose={toggleOptionState} calendar={calendar} />
+		</>
 	);
 };

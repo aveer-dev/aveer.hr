@@ -235,7 +235,7 @@ export const FileFolderList = ({ files, folders, org, role, userId }: { files: F
 		<div>
 			{renderBreadcrumb()}
 
-			<div className="mt-4 space-y-2">
+			<div className="mt-4 space-y-2 overflow-x-auto">
 				{visibleItems.length > 0 &&
 					visibleItems.map(item => {
 						return (
@@ -279,20 +279,20 @@ export const FileFolderList = ({ files, folders, org, role, userId }: { files: F
 													item.name
 												)}
 											</div>
-											{item.type === 'file' && <span className="ml-2 text-xs text-muted-foreground">{item.file_type}</span>}
+											{item.type === 'file' && <span className="ml-2 hidden text-xs text-muted-foreground sm:block">{item.file_type}</span>}
 										</div>
 
 										<div className="flex items-center gap-4 text-xs text-muted-foreground">
-											<div className="flex items-center gap-2">
+											<div className="hidden items-center gap-2 sm:flex">
 												<User size={14} className="text-muted-foreground" />
 												Created by: <EmployeeHoverCard employeeId={item.created_by} org={org} contentClassName="text-xs" />
 											</div>
-											<Separator orientation="vertical" className="h-4 bg-border/75" />
-											<div className="flex items-center gap-2">
+											<Separator orientation="vertical" className="hidden h-4 bg-border/75 sm:block" />
+											<div className="hidden items-center gap-2 sm:flex">
 												<User size={14} className="text-muted-foreground" />
 												Owned by: {isUUID(item.owner_id) ? <EmployeeHoverCard employeeId={item.owner_id} org={org} contentClassName="text-xs" /> : <span>Organisation</span>}
 											</div>
-											<Separator orientation="vertical" className="h-4 bg-border/75" />
+											<Separator orientation="vertical" className="hidden h-4 bg-border/75 sm:block" />
 											<div className="text-xs text-muted-foreground">{format(item.created_at!, 'MMM d, yyyy')}</div>
 										</div>
 									</Button>

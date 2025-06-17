@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
-import { format } from 'date-fns';
 import { DocumentsList } from '@/components/documents/documents-list';
 import { DocumentRepository } from '@/dal/repositories/document.repository';
 

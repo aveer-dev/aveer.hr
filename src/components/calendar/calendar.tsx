@@ -15,27 +15,46 @@ import { EventDialog } from './event-dialog';
 import { toast } from 'sonner';
 import { CalendarDayItem } from './calendar-day';
 import { SheetClose } from '../ui/sheet';
+import { ContractWithProfile, LeaveWithRelations } from '@/dal';
 
 interface props {
-	leaveDays: { date: Date; status: string; name: string; data: any }[];
-	events: { date: Date; data: Tables<'calendar_events'> }[];
 	reminders: Tables<'reminders'>[];
-	dobs: Tables<'contracts'>[];
 	org: string;
-	profile: string;
-	contract: number;
 	role?: ROLE;
-	contractId?: number;
+	contractId: number;
 	calendar: Tables<'calendars'> | null;
 	enableClose?: boolean;
-	employees?: Tables<'contracts'>[] | null;
-	teams?: Tables<'teams'>[] | null;
+	employees: ContractWithProfile[];
+	teams: Tables<'teams'>[];
 	activeCalendarEvent?: Tables<'calendar_events'>;
 	showCalendarConfigError?: boolean;
 	calendarType?: 'grid' | 'vertical';
+	timeOffs: LeaveWithRelations[];
+	calendarEvents: Tables<'calendar_events'>[];
 }
 
-export const FullCalendar = ({ showCalendarConfigError, calendarType = 'grid', events, teams, employees, leaveDays, activeCalendarEvent, calendar, reminders, dobs, org, profile, contract, role = 'admin', contractId, enableClose }: props) => {
+export const FullCalendar = ({ showCalendarConfigError, calendarType = 'grid', timeOffs, calendarEvents, teams, employees, activeCalendarEvent, calendar, reminders, org, role = 'admin', contractId, enableClose }: props) => {
+	const filteredLeaveDays: { date: Date; name: string; status: string; data: any }[] = [];
+	const filteredCalendarEvents: { date: Date; data: Tables<'calendar_events'> }[] = [];
+
+	for (const item of timeOffs) {
+		const startDate = new Date(item.from);
+		const endDate = new Date(item.to);
+		const name = `${item.leave_type} leave | ${item.profile.first_name} ${item.profile.last_name}`;
+		const status = item.status;
+		const data = item;
+
+		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) filteredLeaveDays.push({ date: new Date(date), name, status, data });
+	}
+
+	for (const item of calendarEvents!) {
+		const startDate = new Date((item.start as any)?.dateTime);
+		const endDate = new Date((item.end as any)?.dateTime);
+		const data = item;
+
+		for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) filteredCalendarEvents.push({ date: new Date(date), data });
+	}
+
 	const dayOfWeekMatcher: DayOfWeek = {
 		dayOfWeek: [0, 6]
 	};
@@ -60,11 +79,11 @@ export const FullCalendar = ({ showCalendarConfigError, calendarType = 'grid', e
 					hidden: 'invisible'
 				}}
 				modifiers={{
-					leaveDay: leaveDays.map(day => day.date),
+					leaveDay: filteredLeaveDays.map(day => day.date),
 					weekend: dayOfWeekMatcher,
 					reminder: reminders.map(reminder => new Date(reminder.datetime)),
-					dob: dobs.map(dob => new Date((dob.profile as unknown as Tables<'profiles'>).date_of_birth as string)),
-					event: events.map(day => day.date)
+					dob: employees?.filter(employee => employee.profile?.date_of_birth).map(dob => new Date(dob.profile?.date_of_birth as string)),
+					event: filteredCalendarEvents.map(day => day.date)
 				}}
 				autoFocus
 				components={{
@@ -91,7 +110,8 @@ export const FullCalendar = ({ showCalendarConfigError, calendarType = 'grid', e
 								</div>
 
 								<div className="flex items-center space-x-1">
-									{role == 'admin' && <CalendarOptions role={role} employees={employees} teams={teams} calendar={calendar} org={org} contract={contract} profile={profile} />}
+									{/* {role == 'admin' && <CalendarOptions role={role} employees={employees} teams={teams} calendar={calendar} org={org} contract={contract} profile={profile} />} */}
+									<EventDialog role={role} teams={teams} employees={employees} calendar={calendar} org={org} />
 
 									{role == 'admin' && (
 										<>
@@ -115,7 +135,7 @@ export const FullCalendar = ({ showCalendarConfigError, calendarType = 'grid', e
 							</nav>
 						);
 					},
-					Day: props => <CalendarDayItem calendarType={calendarType} calendar={calendar} props={props} teams={teams} employees={employees} org={org} leaveDays={leaveDays} dobs={dobs} reminders={reminders} events={events} profile={profile} contract={contract} />,
+					Day: props => <CalendarDayItem calendarType={calendarType} calendar={calendar} props={props} teams={teams} employees={employees} org={org} leaveDays={filteredLeaveDays} reminders={reminders} events={filteredCalendarEvents} contract={contractId} />,
 					MonthGrid: ({ children, className, ...props }) => {
 						return calendarType == 'grid' ? (
 							<table {...props} className={cn('w-full border-collapse space-y-1', className)}>

@@ -67,7 +67,7 @@ export class ContractRepository implements IContractRepository {
 		return { data: relData as unknown as ContractWithRelations, error: relError };
 	}
 
-	async getAllByOrgWithRelations(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithRelations[]> {
+	async getAllByOrgWithRelations(org: string, status?: Tables<'contracts'>['status']) {
 		const supabase = await createClient();
 		const request = supabase
 			.from('contracts')
@@ -86,8 +86,7 @@ export class ContractRepository implements IContractRepository {
 			.eq('org', org);
 		if (status) request.eq('status', status);
 		const { data, error } = await request;
-		if (error || !data) return [];
-		return data as unknown as ContractWithRelations[];
+		return { data: data as unknown as ContractWithRelations[], error };
 	}
 
 	async getByIdWithProfile(org: string, id: number | string): Promise<ContractWithProfile | null> {
@@ -139,13 +138,12 @@ export class ContractRepository implements IContractRepository {
 		return data as unknown as ContractWithProfileAndTeam[];
 	}
 
-	async getAllByOrgWithProfileAndTeam(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithProfileAndTeam[]> {
+	async getAllByOrgWithProfileAndTeam(org: string, status?: Tables<'contracts'>['status']) {
 		const supabase = await createClient();
 		const request = supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)), team:teams!contracts_team_fkey(id, name)').eq('org', org);
 		if (status) request.eq('status', status);
 		const { data, error } = await request;
-		if (error || !data) return [];
-		return data as unknown as ContractWithProfileAndTeam[];
+		return { data: data as unknown as ContractWithProfileAndTeam[], error };
 	}
 
 	async getByTeamStatusOrgWithProfile({ team, status, org }: { team?: number; status?: Tables<'contracts'>['status']; org: string }) {

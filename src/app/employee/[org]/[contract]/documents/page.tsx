@@ -18,7 +18,11 @@ export default async function ContractsPage(props: { params: Promise<{ [key: str
 						<Skeleton className="h-72 w-full" />
 					</div>
 				}>
-				<DocumentsPage contract={Number(contract)} org={org} />
+				<div className="mx-auto mt-24 w-full sm:mt-0">
+					<h2 className="mb-16 text-4xl font-light">Documents</h2>
+
+					<DocumentsPage contract={Number(contract)} org={org} />
+				</div>
 			</Suspense>
 		</section>
 	);

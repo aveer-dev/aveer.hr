@@ -28,7 +28,7 @@ export const Header = async ({ params }: { params?: Promise<{ [key: string]: str
 	};
 
 	return (
-		<header className="sticky top-0 z-20 w-full bg-background shadow-sm">
+		<header className="sticky top-0 z-20 w-full shadow-sm backdrop-blur-2xl">
 			{orgId === 'employee' && <PushNotificationBanner updateToken={updateFCMToken} />}
 
 			<div className="flex items-center justify-between px-6 py-4">

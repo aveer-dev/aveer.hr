@@ -1,10 +1,10 @@
-import { getChartData, LeaveRequestDialog } from '@/components/contract/leave';
-import { LeaveStat } from '@/components/contract/leave/leave-stat';
+import { LeaveRequestDialog } from '@/components/contract/leave';
 import { DataTable } from '@/components/dashboard/table';
 import { columns } from '@/components/leave/column';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { ROLE } from '@/type/contract.types';
 import { createClient } from '@/utils/supabase/server';
+import { Plus } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
 export const LeavePage = async ({ params }: { params: Promise<{ [key: string]: string }> }) => {
@@ -46,35 +46,20 @@ export const LeavePage = async ({ params }: { params: Promise<{ [key: string]: s
 	]);
 	const reviewType: ROLE = 'employee';
 
-	const chartData = getChartData(data, orgSettings?.data && orgSettings?.data[0]);
 	const leaveDays = timeOffRequest!.data?.filter(item => item.status == 'approved' || item.status == 'pending');
 
 	return (
-		<div className="w-full">
-			<div className="flex items-center justify-between">
-				<h2 className="flex items-center justify-between text-base font-medium text-support">Leave summary</h2>
+		<div className="mt-24 w-full space-y-4 sm:mt-0 sm:space-y-10">
+			<div className="flex items-end justify-between">
+				<h2 className="text-4xl font-light">Leave Requests</h2>
 
 				<div className="flex items-center gap-2">
-					<LeaveRequestDialog usedLeaveDays={leaveDays} orgSettings={orgSettings?.data && orgSettings?.data[0]} contract={data} />
+					<LeaveRequestDialog usedLeaveDays={leaveDays} orgSettings={orgSettings?.data && orgSettings?.data[0]} contract={data}>
+						<Button variant="secondary" className="h-8 w-8" size={'icon'}>
+							<Plus size={16} />
+						</Button>
+					</LeaveRequestDialog>
 				</div>
-			</div>
-
-			<div className="mt-14 grid gap-x-10 gap-y-16 sm:grid-cols-2">
-				{chartData.map(stat => (
-					<LeaveStat key={stat.label} {...stat} org={org} profile={(data.profile as any).id} />
-				))}
-			</div>
-
-			{chartData.length == 0 && (
-				<div className="flex gap-4">
-					<Skeleton className="h-36 w-20" />
-					<Skeleton className="h-36 w-20" />
-					<Skeleton className="h-36 w-20" />
-				</div>
-			)}
-
-			<div className="mb-6 mt-24 flex w-full items-center justify-between pb-3">
-				<h2 className="flex items-center justify-between text-base font-medium text-support">Leave requests</h2>
 			</div>
 
 			{timeOffRequest?.error && (

@@ -24,7 +24,7 @@ const formSchema = z.object({
 	datetime: z.date({ message: 'Select reminder date' })
 });
 
-export const ReminderForm = ({ date, org, contract, profile, onCreateReminder, onClose, reminder }: { onClose?: () => void; date?: Date; org: string; contract: number; profile: string; onCreateReminder: () => void; reminder?: Tables<'reminders'> }) => {
+export const ReminderForm = ({ date, org, contract, onCreateReminder, onClose, reminder }: { onClose?: () => void; date?: Date; org: string; contract: number; onCreateReminder: () => void; reminder?: Tables<'reminders'> }) => {
 	const [isCreating, setCreatingState] = useState(false);
 	const [isDeleting, setDeletingState] = useState(false);
 	const [time, setTime] = useState(getTime(reminder?.datetime));
@@ -56,7 +56,7 @@ export const ReminderForm = ({ date, org, contract, profile, onCreateReminder, o
 			return;
 		}
 
-		const payload: TablesInsert<'reminders'> = { ...values, datetime, org, contract, profile };
+		const payload: TablesInsert<'reminders'> = { ...values, datetime, org, contract };
 
 		const response = await createReminder({ payload });
 		setCreatingState(false);

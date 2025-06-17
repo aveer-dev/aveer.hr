@@ -37,7 +37,7 @@ export const EventDialog = ({ event, role = 'admin', org, calendar, children, is
 				</AlertDialogTrigger>
 			)}
 
-			{!noTrigger && <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>}
+			{!noTrigger && children && <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>}
 
 			<AlertDialogContent className="block max-h-screen w-full max-w-full overflow-y-auto bg-white/20 backdrop-blur-sm">
 				<div className="mx-auto max-w-xl">

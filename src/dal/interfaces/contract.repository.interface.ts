@@ -34,16 +34,16 @@ export interface IContractRepository {
 	delete(org: string, id: number | string): Promise<boolean>;
 
 	getByIdWithRelations(org: string, id: number | string): Promise<{ data: ContractWithRelations | null; error: PostgrestError | null }>;
-	getAllByOrgWithRelations(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithRelations[]>;
+	getAllByOrgWithRelations(org: string, status?: Tables<'contracts'>['status']): Promise<{ data: ContractWithRelations[] | null; error: PostgrestError | null }>;
 
 	getByIdWithProfile(org: string, id: number | string): Promise<ContractWithProfile | null>;
-	getAllByOrgWithProfile({ org, status }: { org: string; status?: Tables<'contracts'>['status'] }): Promise<{ data: ContractWithProfile[]; error: PostgrestError | null }>;
+	getAllByOrgWithProfile({ org, status }: { org: string; status?: Tables<'contracts'>['status'] }): Promise<{ data: ContractWithProfile[] | null; error: PostgrestError | null }>;
 
 	getByIdWithTeam(org: string, id: number | string): Promise<ContractWithTeam | null>;
 	getAllByOrgWithTeam(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithTeam[]>;
 
 	getByIdWithProfileAndTeam(org: string, id: number | string): Promise<ContractWithProfileAndTeam | null>;
-	getAllByOrgWithProfileAndTeam(org: string, status?: Tables<'contracts'>['status']): Promise<ContractWithProfileAndTeam[]>;
+	getAllByOrgWithProfileAndTeam(org: string, status?: Tables<'contracts'>['status']): Promise<{ data: ContractWithProfileAndTeam[] | null; error: PostgrestError | null }>;
 
 	getByProfileWithProfileAndTeam(id: number | string, org: string): Promise<ContractWithProfileAndTeam[] | null>;
 

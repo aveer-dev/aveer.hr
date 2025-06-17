@@ -20,7 +20,7 @@ export const Timeoff = async ({ org, contract, reviewType, manager }: props) => 
 	return (
 		<section className="mt-6">
 			<div className="flex w-full items-center justify-between">
-				<h2 className="text-lg font-semibold text-support">Leave review</h2>
+				<h2 className="text-base font-medium text-support">Leave review</h2>
 			</div>
 
 			<Suspense>

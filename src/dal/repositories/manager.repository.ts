@@ -49,9 +49,12 @@ export class ManagerRepository implements IManagerRepository {
 		const { data, error: teamError } = await supabase.from('teams').select('*').in('id', teamIds);
 		return { data, error: teamError };
 	}
-	async getByContract(contractId: number) {
+	async getByContract({ contractId, team }: { contractId: number; team?: number }) {
 		const supabase = await createClient();
-		const { data, error } = await supabase.from('managers').select('*').eq('person', contractId).maybeSingle();
+		const request = supabase.from('managers').select('*').eq('person', contractId);
+		if (team) request.eq('team', team);
+
+		const { data, error } = await request.maybeSingle();
 		return { data, error };
 	}
 }
