@@ -23,3 +23,6 @@ export * from './repositories/calendars.repository';
 
 export * from './interfaces/org-settings.repository.interface';
 export * from './repositories/org-settings.repository';
+
+export * from './interfaces/file-management.types';
+export * from './repositories/file-management.repository';
