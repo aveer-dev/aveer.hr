@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Dock, House, CalendarClock, Signature, FilePenLine, ListChecks, File, FolderOpenDot, UserRoundCog, ArrowRightLeft, UsersRound, FileStack, MessageSquare, Settings, Search } from 'lucide-react';
+import { Dock, House, CalendarClock, Signature, FilePenLine, ListChecks, File, FolderOpenDot, UserRoundCog, UsersRound, FileStack, MessageSquare, Settings, Search } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList, CommandShortcut } from '@/components/ui/command';
 import Link from 'next/link';
 import { ProgressiveBlur } from '@/components/ui/progressive-blur';
@@ -14,10 +14,7 @@ import { EmployeeProfileSettings } from './employee-profile-settings';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { buttonVariants } from '@/components/ui/button';
 
-const quickActionCommandItems = [
-	{ label: 'Commads', icon: Dock, shortcut: 'K' },
-	{ label: 'Switch orgs', icon: ArrowRightLeft, shortcut: 'J' }
-];
+const quickActionCommandItems = [{ label: 'Commads', icon: Dock, shortcut: 'K' }];
 
 const CommandItemComponent = ({ item, onSelect }: { item: { label: string; icon: any; shortcut: string }; onSelect: (value: string) => void }) => {
 	const className =
@@ -153,7 +150,7 @@ export default function EmployeeActionBar({ contract, messages }: { contract: an
 						exit={{ opacity: 0, scale: 0.8, transform: 'translateX(-50%) translateY(10%) scale(0.8)', filter: 'blur(4px)' }}
 						transition={{ ease: 'easeInOut', delay: 0.1, duration: 0.2 }}
 						className="absolute bottom-24 left-1/2 z-20 h-fit w-[90%] max-w-md rounded-lg border shadow-md backdrop-blur-xl sm:bottom-28 sm:w-full">
-						<Command shouldFilter={false} className="bg-background/40">
+						<Command shouldFilter={false} className="bg-background/70">
 							<CommandList className="max-h-80 [&>div]:space-y-4">
 								<CommandEmpty>No results found.</CommandEmpty>
 								<CommandGroup heading="Quick actions" className="px-2">
