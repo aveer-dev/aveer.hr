@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { LeaveSummary } from './leave-summary';
 import { CalendarsRepository, ContractRepository, TeamRepository, LeaveRepository, OrgSettingsRepository } from '@/dal';
 import { EventsList } from './events-list';
+import { FileDocumentListServer } from './file-document-list.server';
 
 export default async function HomePageComponent(props: { params: Promise<{ [key: string]: string }> }) {
 	const { org, contract: contractId } = await props.params;
@@ -88,6 +89,8 @@ export default async function HomePageComponent(props: { params: Promise<{ [key:
 
 			<div className="space-y-14">
 				<EventsList contract={contract.data?.id} org={org} employees={employees.data} calendar={calendar.data} timeOffs={timeOffs.data || []} calendarEvents={calendarEvents.data || []} teams={teams.data || []} />
+
+				<FileDocumentListServer org={org} />
 
 				<LeaveSummary org={org} contract={contract.data} orgSettings={orgSettings.data} usedLeaveDays={usedLeaveDays || []} />
 

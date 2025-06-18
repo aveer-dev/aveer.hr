@@ -142,9 +142,11 @@ export const EventsList: React.FC<EventsListUIProps> = ({ loading, onNewEvent, c
 					);
 				})}
 
-				<div className="flex min-h-20 items-center justify-center">
-					<p className="text-xs text-muted-foreground">No upcoming events in the next two weeks</p>
-				</div>
+				{!hasUpcomingEventsInNextTwoWeeks(joinedEvents) && (
+					<div className="flex min-h-20 items-center justify-center">
+						<p className="text-sm text-muted-foreground">No upcoming events in the next two weeks</p>
+					</div>
+				)}
 			</div>
 		</div>
 	);
@@ -167,6 +169,7 @@ const EventRow: React.FC<{ event: EventOnCalendar; contract: number; org: string
 					<div className="flex items-center gap-2">
 						<span className="text-sm font-semibold">{event?.title || event?.summary}</span>
 					</div>
+
 					<div className="flex flex-wrap items-center gap-2 text-xs text-gray-400">
 						{isAllDay ? 'All day' : formatTimeRange(start, end, timeZone)}
 						{event.location && ` · ${event.location}`}
@@ -195,4 +198,18 @@ function formatTimeRange(start?: string, end?: string, timeZone?: string) {
 	} catch {
 		return '';
 	}
+}
+
+function hasUpcomingEventsInNextTwoWeeks(joinedEvents: any[]): boolean {
+	if (!joinedEvents.length) return false;
+
+	const todayDate = parseISO(format(new Date(), 'yyyy-MM-dd'));
+	for (let i = 0; i < 14; i++) {
+		const dateStr = format(addDays(todayDate, i), 'yyyy-MM-dd');
+		for (const event of joinedEvents) {
+			const eventDate = getEventDate(event);
+			if (eventDate === dateStr) return true;
+		}
+	}
+	return false;
 }

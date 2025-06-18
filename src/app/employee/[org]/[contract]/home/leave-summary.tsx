@@ -1,12 +1,13 @@
 import { getChartData, LeaveRequestDialog } from '@/components/contract/leave';
 import { LeaveStat } from '@/components/contract/leave/leave-stat';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { ContractWithRelations } from '@/dal';
 import { cn } from '@/lib/utils';
 import { Tables } from '@/type/database.types';
 import { List, Plus } from 'lucide-react';
 import Link from 'next/link';
 
-export const LeaveSummary = ({ org, contract, orgSettings, usedLeaveDays }: { org: string; contract: Tables<'contracts'> & { profile: Tables<'profiles'> }; orgSettings: Tables<'org_settings'> | null; usedLeaveDays: Tables<'time_off'>[] }) => {
+export const LeaveSummary = ({ org, contract, orgSettings, usedLeaveDays }: { org: string; contract: ContractWithRelations; orgSettings: Tables<'org_settings'> | null; usedLeaveDays: Tables<'time_off'>[] }) => {
 	const chartData = getChartData(contract, orgSettings);
 
 	return (
@@ -27,7 +28,7 @@ export const LeaveSummary = ({ org, contract, orgSettings, usedLeaveDays }: { or
 				</div>
 			</div>
 
-			<div className="grid gap-x-10 gap-y-7 rounded-md bg-muted p-6 sm:grid-cols-2">
+			<div className="grid gap-x-10 gap-y-7 rounded-md bg-muted px-6 py-10 sm:grid-cols-2">
 				{chartData.map(stat => (
 					<LeaveStat key={stat.label} {...stat} org={org} profile={contract.profile.id} minimal={true} />
 				))}
