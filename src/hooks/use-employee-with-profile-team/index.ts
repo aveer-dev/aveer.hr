@@ -23,7 +23,13 @@ export const useEmployeeProfileTeam = (profileId: string, org: string): UseUserP
 
 		(async () => {
 			try {
-				const contract = await getEmployees(profileId, org);
+				const { data: contract, error } = await getEmployees(profileId, org);
+
+				if (error) {
+					setData(contract);
+					setError(error.message);
+					return;
+				}
 
 				if (contract?.length == 0) {
 					const {

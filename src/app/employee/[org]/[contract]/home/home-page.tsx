@@ -47,7 +47,7 @@ export default async function HomePageComponent(props: { params: Promise<{ [key:
 	const usedLeaveDays = timeOffs.data?.filter(item => item.status == 'approved' || item.status == 'pending') || [];
 
 	return (
-		<div className="mx-auto max-w-3xl">
+		<div className="mx-auto mt-24 max-w-3xl sm:mt-0">
 			<section className="mb-8 flex w-full flex-col items-start justify-between gap-8 pb-8 sm:flex-row">
 				<div className="order-2 w-full space-y-1 text-center sm:order-1">
 					<h1 className="w-full text-2xl font-bold">Hi, {contract.data?.profile?.first_name}</h1>

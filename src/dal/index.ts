@@ -26,3 +26,6 @@ export * from './repositories/org-settings.repository';
 
 export * from './interfaces/file-management.types';
 export * from './repositories/file-management.repository';
+
+export * from './interfaces/user-update-view.repository.interface';
+export * from './repositories/user-update-view.repository';

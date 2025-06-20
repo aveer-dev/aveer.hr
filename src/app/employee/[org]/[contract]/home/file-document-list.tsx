@@ -71,7 +71,7 @@ export default function FileDocumentList({ documentFiles }: FileDocumentListProp
 	return (
 		<div className="relative space-y-4">
 			<div className="flex items-center justify-between gap-2">
-				<h2 className="mb-2 text-xs text-muted-foreground">Documents</h2>
+				<h2 className="text-xs text-muted-foreground">Documents</h2>
 
 				{/* <Link href={`./documents`} className={cn(buttonVariants({ variant: 'secondary', size: 'icon' }), 'h-8 w-8')}>
 					<ArrowUpRight size={12} />

@@ -20,7 +20,7 @@ export const EmployeeHoverCard = ({ employeeId, org, triggerClassName, contentCl
 	}
 
 	if (!loading && (error || !data || data.length === 0)) {
-		return <div>Error loading employee profile.</div>;
+		return <div>Error loading employee profile. {error}</div>;
 	}
 
 	return (

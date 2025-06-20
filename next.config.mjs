@@ -1,4 +1,5 @@
 import { withSentryConfig } from '@sentry/nextjs';
+import createMDX from '@next/mdx';
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
@@ -39,11 +40,20 @@ const nextConfig = {
 	experimental: {
 		serverActions: {
 			bodySizeLimit: '10mb'
-		}
-	}
+		},
+		mdxRs: true
+	},
+	transpilePackages: ['next-mdx-remote'],
+	pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx']
 };
 
-export default withSentryConfig(nextConfig, {
+const withMDX = createMDX({
+	extension: /\.mdx?$/
+});
+
+const mergedConfig = withMDX(nextConfig);
+
+export default withSentryConfig(mergedConfig, {
 	// For all available options, see:
 	// https://github.com/getsentry/sentry-webpack-plugin#options
 

@@ -6,8 +6,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function WebsiteLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<main>
-			<div className="min-h-screen overflow-hidden py-6">
-				<header className="mx-auto flex max-w-6xl items-center justify-between px-5">
+			<div className="min-h-screen py-6">
+				<header className="mx-auto flex max-w-7xl items-center justify-between px-5">
 					<div className="logo">
 						<Link href={'/'} className="font-logo text-3xl font-light">
 							aveer.hr

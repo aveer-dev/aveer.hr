@@ -117,7 +117,7 @@ export const EventsList: React.FC<EventsListUIProps> = ({ loading, onNewEvent, c
 	return (
 		<div className="">
 			<div className="mb-2 flex items-center justify-between">
-				<h2 className="mb-2 text-xs text-muted-foreground">Upcoming events</h2>
+				<h2 className="text-xs text-muted-foreground">Upcoming events</h2>
 
 				<EmployeeCalendarComponent employeesData={employees as any} calendarEvents={calendarEvents} org={org} calendar={calendar} contractId={contract} leaveDays={timeOffs || []} teams={teams || []} />
 			</div>

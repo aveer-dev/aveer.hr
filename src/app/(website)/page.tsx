@@ -19,7 +19,7 @@ export default async function LandingPage() {
 	};
 
 	return (
-		<section className="hero relative mx-auto grid h-full max-w-6xl items-center px-5 py-32 md:py-28 lg:grid-cols-2 lg:py-60">
+		<section className="hero relative mx-auto grid h-full max-w-7xl items-center px-5 py-32 md:py-28 lg:grid-cols-2 lg:py-60">
 			<div className="">
 				<h1 className="text-6xl font-extrabold leading-snug lg:max-w-md">
 					Employee management for

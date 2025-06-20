@@ -2995,6 +2995,51 @@ export type Database = {
           },
         ]
       }
+      user_update_views: {
+        Row: {
+          contract: number | null
+          created_at: string
+          id: string
+          last_viewed_at: string
+          platform: string
+          profile: string | null
+          updated_at: string
+        }
+        Insert: {
+          contract?: number | null
+          created_at?: string
+          id?: string
+          last_viewed_at?: string
+          platform: string
+          profile?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contract?: number | null
+          created_at?: string
+          id?: string
+          last_viewed_at?: string
+          platform?: string
+          profile?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_update_views_contract_fkey"
+            columns: ["contract"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_update_views_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       waitlist: {
         Row: {
           created_at: string

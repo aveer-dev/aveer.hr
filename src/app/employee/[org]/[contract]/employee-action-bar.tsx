@@ -135,7 +135,7 @@ export default function EmployeeActionBar({ contract, messages }: { contract: an
 
 			{/* Command Mode Visual Indicator */}
 			{commandMode && (
-				<div className="fixed bottom-12 left-4 z-30 animate-pulse rounded-lg border bg-background p-2 text-xs text-muted-foreground shadow-lg">
+				<div className="fixed bottom-12 left-14 z-30 animate-pulse rounded-lg border bg-background p-2 text-xs text-muted-foreground shadow-lg">
 					<span className="rounded-sm bg-muted px-1 py-0.5 font-bold text-primary">A</span> pressed, now press shortcut key
 				</div>
 			)}
