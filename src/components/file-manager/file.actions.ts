@@ -257,7 +257,7 @@ export async function grantResourceAccessAction({ resource_id, resource_type, pr
 				if (team && typeof team === 'object' && team.id && orgId) {
 					// Fetch all employees in this team
 					const teamContracts = await contractRepo.getAllByOrgWithProfileAndTeam(orgId);
-					const teamMembers = teamContracts.filter(tc => tc.team && tc.team.id === team.id && tc.profile && tc.profile.email);
+					const teamMembers = teamContracts.data.filter(tc => tc.team && tc.team.id === team.id && tc.profile && tc.profile.email);
 					for (const member of teamMembers) {
 						if (member.profile && member.profile.email) {
 							emailList.push({

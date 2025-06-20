@@ -62,8 +62,8 @@ export function ResourceAccessDialog({ resourceId, resourceType, org, open, setO
 
 		setLoading(true);
 		Promise.all([getAllEmployeesByOrgWithProfileAndTeam(org), getAllTeamsByOrg(org), fetchResourceAccess(resourceId, resourceType)]).then(([employeeData, teamData, accessRes]) => {
-			setEmployees(employeeData?.data || []);
-			setTeams(teamData?.data || []);
+			setEmployees(employeeData?.data || ([] as any));
+			setTeams(teamData?.data || ([] as any));
 
 			setAccessList(accessRes?.data || []);
 
