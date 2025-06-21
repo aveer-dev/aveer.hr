@@ -6,13 +6,13 @@ import { UPDATE } from '@/type/updates';
 
 const POSTS_PER_PAGE = 10;
 const CONTENTS_DIR = path.join(process.cwd(), 'src/updates-content/employee');
-const CONTENTS_DIR_ADMIN = path.join(process.cwd(), 'src/updates-content/admin');
+// const CONTENTS_DIR_ADMIN = path.join(process.cwd(), 'src/updates-content/admin');
 
 async function getUpdates(): Promise<CompileMDXResult<UPDATE>[]> {
 	const files = await fs.readdir(CONTENTS_DIR);
-	const filesAdmin = await fs.readdir(CONTENTS_DIR_ADMIN);
+	// const filesAdmin = await fs.readdir(CONTENTS_DIR_ADMIN);
 	const posts = await Promise.all(
-		[...files, ...filesAdmin]
+		files
 			.filter(file => file.endsWith('.mdx'))
 			.map(async file => {
 				const filePath = path.join(CONTENTS_DIR, file);
