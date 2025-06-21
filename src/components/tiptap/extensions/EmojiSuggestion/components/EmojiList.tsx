@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { EmojiItem } from '@tiptap-pro/extension-emoji';
+import { EmojiItem } from '@tiptap/extension-emoji';
 import React, { ForwardedRef, forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 
 import { Button } from '@/components/ui/button';

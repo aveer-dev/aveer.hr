@@ -1,6 +1,6 @@
 import { Icon } from '../../Icon';
 import { Toolbar } from '../../Toolbar';
-import DragHandle from '@tiptap-pro/extension-drag-handle-react';
+import DragHandle from '@tiptap/extension-drag-handle-react';
 import { Editor } from '@tiptap/react';
 
 import useContentItemActions from './hooks/useContentItemActions';
