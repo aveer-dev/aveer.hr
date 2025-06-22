@@ -9,7 +9,7 @@ import { CalendarEventItem } from '@/components/calendar/calendar-event-item';
 import { Tables } from '@/type/database.types';
 import { EmployeeCalendarComponent } from '@/components/dashboard-calendar/calendar-component';
 import { ContractWithProfileAndTeam, LeaveWithRelations } from '@/dal';
-import { Plus } from 'lucide-react';
+import { Calendar, Plus } from 'lucide-react';
 
 interface EventOnCalendar {
 	id: number;
@@ -143,8 +143,9 @@ export const EventsList: React.FC<EventsListUIProps> = ({ loading, onNewEvent, c
 				})}
 
 				{!hasUpcomingEventsInNextTwoWeeks(joinedEvents) && (
-					<div className="flex min-h-20 items-center justify-center">
-						<p className="text-sm text-muted-foreground">No upcoming events in the next two weeks</p>
+					<div className="flex min-h-20 flex-col items-center justify-center gap-2 text-muted-foreground">
+						<Calendar size={16} className="mb-2" />
+						<p className="text-sm">No upcoming events in the next two weeks</p>
 					</div>
 				)}
 			</div>

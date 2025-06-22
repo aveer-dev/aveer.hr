@@ -1,9 +1,9 @@
 'use client';
+
 import React, { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FileText, ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight } from 'lucide-react';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface FileDocumentListProps {
 	documentFiles: any[];
@@ -61,9 +61,9 @@ export default function FileDocumentList({ documentFiles }: FileDocumentListProp
 
 	if (!documentFiles.length) {
 		return (
-			<div className="flex flex-col items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-				<FileText size={32} className="mb-2" />
-				<span>No documents shared with you yet</span>
+			<div className="flex flex-col items-center justify-center gap-2 rounded-md bg-muted px-4 py-8 text-sm text-muted-foreground">
+				<FileText size={16} className="mb-2" />
+				<span className="text-sm">No documents shared with you yet</span>
 			</div>
 		);
 	}
@@ -104,12 +104,6 @@ export default function FileDocumentList({ documentFiles }: FileDocumentListProp
 					<Button className="absolute right-0 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 rounded-full shadow group-focus-within:flex group-hover:flex" variant="secondary" size="icon" onClick={scrollBy} aria-label="Scroll right" type="button">
 						<ChevronRight size={16} />
 					</Button>
-				)}
-
-				{!documentFiles.length && (
-					<div className="flex min-h-32 flex-col items-center justify-center gap-2 rounded-md bg-muted px-4 pb-4 pt-8 text-sm text-muted-foreground">
-						<span>No documents shared with you yet</span>
-					</div>
 				)}
 			</div>
 		</div>

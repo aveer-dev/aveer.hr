@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
-import { GlowEffect } from '@/components/ui/glow-effect';
 
 export const AppLink = async () => {
 	const supabase = await createClient();
@@ -12,14 +11,14 @@ export const AppLink = async () => {
 	const isLoggedIn = !!auth?.data.user;
 
 	return (
-		<ul className="flex items-center gap-6">
-			<li className="relative">
-				<GlowEffect colors={['#FF5733', '#33FF57', '#3357FF', '#F1C40F']} mode="colorShift" blur="soft" duration={3} scale={1} className="rounded-full" />
-				<Link href={'/app'} className={cn(buttonVariants(), 'relative gap-3 rounded-full text-sm')}>
-					{isLoggedIn ? 'Go to dashboard' : 'Login'}
-					<ChevronRight size={12} />
-				</Link>
-			</li>
-		</ul>
+		<Link
+			href={'/app'}
+			className={cn(
+				buttonVariants({ variant: 'ghost' }),
+				'relative h-7 gap-2 rounded-full font-normal transition-all group-focus-within:bg-primary/5 group-focus-within:font-medium group-hover:bg-primary/5 group-hover:font-medium group-focus-visible:bg-primary/5 group-focus-visible:font-medium'
+			)}>
+			{isLoggedIn ? 'Dashboard' : 'Login'}
+			<ChevronRight size={12} className="transition-transform duration-300 group-focus-within:translate-x-1 group-hover:translate-x-1 group-focus-visible:translate-x-1" />
+		</Link>
 	);
 };

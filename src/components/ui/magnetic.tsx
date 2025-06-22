@@ -50,7 +50,7 @@ export function Magnetic({ children, intensity = 0.6, range = 100, actionArea = 
 		return () => {
 			document.removeEventListener('mousemove', calculateDistance);
 		};
-	}, [ref, isHovered, intensity, range]);
+	}, [ref, isHovered, intensity, range, x, y]);
 
 	useEffect(() => {
 		if (actionArea === 'parent' && ref.current?.parentElement) {

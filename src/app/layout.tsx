@@ -11,7 +11,7 @@ const karla = Karla({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
 	title: 'Aveer.hr',
-	description: 'HR Service for everyone'
+	description: 'A better way to manage your employees'
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
