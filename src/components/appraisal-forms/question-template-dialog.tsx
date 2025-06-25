@@ -235,6 +235,9 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 		}
 	});
 
+	// Watch questions to make the component reactive
+	const watchedQuestions = form.watch('questions');
+
 	const sensors = useSensors(
 		useSensor(PointerSensor),
 		useSensor(KeyboardSensor, {
@@ -620,15 +623,9 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 											</div>
 										) : (
 											<DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-												<SortableContext
-													items={form
-														.getValues('questions')
-														.filter(q => q.group === group.id)
-														.map(q => q.id)}
-													strategy={verticalListSortingStrategy}>
+												<SortableContext items={watchedQuestions.filter(q => q.group === group.id).map(q => q.id)} strategy={verticalListSortingStrategy}>
 													<div className="space-y-8">
-														{form
-															.getValues('questions')
+														{watchedQuestions
 															.filter(q => q.group === group.id)
 															.map((question, index) => (
 																<QuestionItem
@@ -662,7 +659,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 											</DndContext>
 										)}
 
-										{form.getValues('questions').filter(q => q.group === group.id).length === 0 && !isLoadingQuestions && (
+										{watchedQuestions.filter(q => q.group === group.id).length === 0 && !isLoadingQuestions && (
 											<div className="flex h-36 w-full flex-col items-center justify-center gap-4 rounded-md border border-dashed">
 												<p className="text-xs text-muted-foreground">No questions added yet</p>
 											</div>
