@@ -58,15 +58,18 @@ export const AppraisalFormComponent = ({
 	useEffect(() => {
 		let grouped: any = {};
 
-		allQuestions.forEach(question => {
-			const group = question.group as QuestionGroup;
-			const teamMatch = !question.team_ids?.length || question.team_ids.includes((selectedEmployee.team as any)?.id || selectedEmployee.team);
-			const empMatch = !question.employee_ids?.length || question.employee_ids.includes(selectedEmployee.id);
-			if (group && (teamMatch || empMatch)) {
-				if (!grouped[group]) grouped[group] = [];
-				grouped[group].push(question);
-			}
-		});
+		// Sort questions by order_index first
+		allQuestions
+			.sort((a, b) => a.order_index - b.order_index)
+			.forEach(question => {
+				const group = question.group;
+				const teamMatch = !question.team_ids?.length || question.team_ids.includes((selectedEmployee.team as any)?.id || selectedEmployee.team);
+				const empMatch = !question.employee_ids?.length || question.employee_ids.includes(selectedEmployee.id);
+				if (group && (teamMatch || empMatch)) {
+					if (!grouped[group]) grouped[group] = [];
+					grouped[group].push(question);
+				}
+			});
 
 		setGroupedQuestions({ objectives: [], goal_scoring: [], ...grouped });
 	}, [allQuestions, selectedEmployee]);

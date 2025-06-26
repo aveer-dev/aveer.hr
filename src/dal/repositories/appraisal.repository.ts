@@ -85,7 +85,7 @@ export class AppraisalRepository implements IAppraisalRepository {
 	}
 	async getQuestionsByTemplate(templateId: number) {
 		const supabase = await createClient();
-		const { data, error } = await supabase.from('template_questions').select('*').eq('template_id', templateId);
+		const { data, error } = await supabase.from('template_questions').select('*').eq('template_id', templateId).order('order_index');
 		return { data, error };
 	}
 
