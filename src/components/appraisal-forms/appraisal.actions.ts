@@ -131,7 +131,7 @@ export const deleteQuestion = async (query: { id: number; org: string }) => {
 	if (canUser !== true) return canUser;
 
 	const supabase = await createClient();
-	const { error } = await supabase.from('appraisal_questions').delete().match(query);
+	const { error } = await supabase.from('template_questions').delete().match(query);
 
 	if (error) return error.message;
 	return true;
@@ -184,11 +184,11 @@ export const deleteAppraisalCycle = async (org: string, cycleId: number) => {
 	return true;
 };
 
-export async function deleteQuestionTemplate({ id, org, templateId }: { id: string; org: string; templateId: number }) {
+export async function deleteQuestionTemplate({ id, org }: { id: string; org: string }) {
 	const supabase = await createClient();
 
 	// First delete all associated questions
-	const { error: questionsError } = await supabase.from('template_questions').delete().match({ template_id: templateId, id, org }).select();
+	const { error: questionsError } = await supabase.from('template_questions').delete().match({ template_id: id, org }).select();
 
 	if (questionsError) throw questionsError;
 

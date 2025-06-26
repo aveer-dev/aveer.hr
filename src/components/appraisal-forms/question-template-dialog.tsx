@@ -18,7 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { QuestionSetupDialog } from './question-setup-dialog';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { createQuestionTemplate, updateQuestionTemplate, createTemplateQuestions, updateTemplateQuestions, getTemplateQuestions, deleteQuestionTemplate } from './appraisal.actions';
+import { createQuestionTemplate, updateQuestionTemplate, createTemplateQuestions, updateTemplateQuestions, getTemplateQuestions, deleteQuestionTemplate, deleteQuestion } from './appraisal.actions';
 import { Separator } from '../ui/separator';
 import { Label } from '../ui/label';
 import { LoadingSpinner } from '../ui/loader';
@@ -646,7 +646,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 
 																		// Instantly update questions in backend (no debounce)
 																		if (template) {
-																			toast.promise(deleteQuestionTemplate({ templateId: template.id, id: question.id, org }), {
+																			toast.promise(deleteQuestion({ id: parseInt(question.id), org }), {
 																				loading: 'Removing question...',
 																				success: 'Question removed',
 																				error: 'Failed to remove question'
@@ -673,7 +673,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 							<div className="sticky bottom-0 flex justify-end gap-4 border-t p-4 backdrop-blur-xl">
 								{template && (
 									<DeleteTemplateDialog
-										templateId={template.id}
+										id={template.id}
 										org={org}
 										onSuccess={() => {
 											setIsOpen(false);

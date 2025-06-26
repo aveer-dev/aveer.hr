@@ -10,19 +10,19 @@ import { deleteQuestionTemplate } from './appraisal.actions';
 import { LoadingSpinner } from '../ui/loader';
 
 interface DeleteTemplateDialogProps {
-	templateId: number;
+	id: number;
 	org: string;
 	onSuccess?: () => void;
 }
 
-export function DeleteTemplateDialog({ templateId, org, onSuccess }: DeleteTemplateDialogProps) {
+export function DeleteTemplateDialog({ id, org, onSuccess }: DeleteTemplateDialogProps) {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const router = useRouter();
 
 	const handleDelete = async () => {
 		try {
 			setIsDeleting(true);
-			await deleteQuestionTemplate(templateId, org);
+			await deleteQuestionTemplate({ id: id.toString(), org });
 			router.refresh();
 			toast.success('Question template deleted successfully');
 			onSuccess?.();
