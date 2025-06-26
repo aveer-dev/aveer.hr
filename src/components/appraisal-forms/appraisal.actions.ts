@@ -112,7 +112,7 @@ export async function getQuestionTemplate(id: number) {
 export async function getTemplateQuestions({ org, templateId }: { org: string; templateId: number }) {
 	const supabase = await createClient();
 
-	const { data, error } = await supabase.from('template_questions').select().match({ org, template_id: templateId });
+	const { data, error } = await supabase.from('template_questions').select().match({ org, template_id: templateId }).order('order_index');
 
 	if (error) throw error;
 	return data;
@@ -184,11 +184,11 @@ export const deleteAppraisalCycle = async (org: string, cycleId: number) => {
 	return true;
 };
 
-export async function deleteQuestionTemplate(id: number, org: string) {
+export async function deleteQuestionTemplate({ id, org, templateId }: { id: string; org: string; templateId: number }) {
 	const supabase = await createClient();
 
 	// First delete all associated questions
-	const { error: questionsError } = await supabase.from('template_questions').delete().match({ template_id: id, org }).select();
+	const { error: questionsError } = await supabase.from('template_questions').delete().match({ template_id: templateId, id, org }).select();
 
 	if (questionsError) throw questionsError;
 

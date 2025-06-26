@@ -254,6 +254,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 			const newIndex = questions.findIndex(q => q.id === over.id);
 			const newQuestions = arrayMove(questions, oldIndex, newIndex);
 			form.setValue('questions', newQuestions);
+
 			// Instantly update questions in backend (no debounce)
 			if (template) {
 				toast.promise(
@@ -268,7 +269,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 							required: q.required,
 							team_ids: q.teams.map(id => parseInt(id)),
 							employee_ids: q.employees.map(eid => Number(eid)),
-							order_index: index,
+							order_index: index, // Global order index across all questions
 							template_id: template.id,
 							org: org,
 							group: q.group,
@@ -305,7 +306,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 						required: q.required,
 						team_ids: q.teams.map(id => parseInt(id)),
 						employee_ids: q.employees.map(eid => Number(eid)),
-						order_index: index,
+						order_index: index, // Global order index across all questions
 						template_id: template.id,
 						org: org,
 						group: q.group,
@@ -406,7 +407,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 						required: q.required,
 						team_ids: q.teams.map(id => parseInt(id)),
 						employee_ids: q.employees.map(eid => Number(eid)),
-						order_index: index,
+						order_index: index, // Global order index across all questions
 						template_id: template.id,
 						org: org,
 						group: q.group,
@@ -434,7 +435,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 						required: q.required,
 						team_ids: q.teams.map(id => parseInt(id)),
 						employee_ids: q.employees.map(eid => Number(eid)),
-						order_index: index,
+						order_index: index, // Global order index across all questions
 						template_id: newTemplate.id,
 						org: org,
 						group: q.group,
@@ -496,7 +497,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 							required: q.required,
 							team_ids: q.teams.map(id => parseInt(id)),
 							employee_ids: q.employees.map(eid => Number(eid)),
-							order_index: index,
+							order_index: index, // Global order index across all questions
 							template_id: template.id,
 							org: org,
 							group: q.group,
@@ -642,9 +643,10 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 																		const updatedQuestions = questions.filter(q => q.id !== question.id);
 																		form.setValue('questions', updatedQuestions);
 																		form.reset({ ...form.getValues(), questions: updatedQuestions });
+
 																		// Instantly update questions in backend (no debounce)
 																		if (template) {
-																			toast.promise(deleteQuestionTemplate(template.id, question.id), {
+																			toast.promise(deleteQuestionTemplate({ templateId: template.id, id: question.id, org }), {
 																				loading: 'Removing question...',
 																				success: 'Question removed',
 																				error: 'Failed to remove question'
