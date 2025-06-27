@@ -593,9 +593,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 													/>
 												) : (
 													<>
-														<div className="max-w-xs truncate md:max-w-md">
-															{customGroupNames[group.id] || group.title} {customGroupNames[group.id] || group.title}
-														</div>
+														<div className="max-w-xs truncate md:max-w-md">{customGroupNames[group.id] || group.title}</div>
 
 														<Button type="button" size="icon" variant="ghost" className="ml-2 h-8 w-8 p-0" onClick={() => handleGroupNameEdit(group.id)}>
 															<Pencil size={14} />

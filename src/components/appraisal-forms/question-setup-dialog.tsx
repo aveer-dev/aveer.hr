@@ -220,7 +220,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 								control={form.control}
 								name="type"
 								render={({ field }) => {
-									const isScaleOnlyGroup = group === 'competencies' || group === 'private_manager_assessment';
+									const isScaleOnlyGroup = group === 'competencies';
 
 									return (
 										<FormItem>
