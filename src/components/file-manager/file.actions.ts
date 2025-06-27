@@ -172,8 +172,8 @@ export async function deleteFileOrFolderServerAction(resource: FileWithAccess | 
 export async function getAllEmployeesByOrgWithProfileAndTeam(org: string) {
 	try {
 		const repo = new ContractRepository();
-		const data = await repo.getAllByOrgWithProfileAndTeam(org);
-		return { data, error: null };
+		const response = await repo.getAllByOrgWithProfileAndTeam(org);
+		return response;
 	} catch (error: any) {
 		return { data: null, error };
 	}
