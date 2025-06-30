@@ -48,7 +48,7 @@ export const AppraisalFormComponent = ({
 	const customGroupNames = template.custom_group_names as { id: string; name: string }[];
 
 	const [answer, setAnswer] = useState<Tables<'appraisal_answers'> | null>(contractAnswer);
-	const [activeTab, setActiveTab] = useState<QuestionGroup>('objectives');
+	const [activeTab, setActiveTab] = useState<'objectives' | 'goal_scoring' | 'questions'>('objectives');
 	const [selectedReviewType, setSelectedReviewType] = useState<'self' | 'manager' | 'summary'>('self');
 	const [selectedEmployee, setSelectedEmployee] = useState<Tables<'contracts'>>(contract);
 
