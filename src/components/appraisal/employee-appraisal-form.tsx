@@ -20,12 +20,13 @@ import { LoadingSpinner } from '../ui/loader';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { Switch } from '../ui/switch';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../ui/tooltip';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 type QuestionGroup = 'growth_and_development' | 'company_values' | 'competencies' | 'private_manager_assessment' | 'objectives' | 'goal_scoring';
 
 interface Props {
 	appraisalCycle: Tables<'appraisal_cycles'>;
 	activeTab: string;
-	setActiveTab: (tab: QuestionGroup) => void;
+	setActiveTab: (tab: 'objectives' | 'goal_scoring' | 'questions') => void;
 	answer?: Tables<'appraisal_answers'> | null;
 	selectedReviewType: 'self' | 'manager' | 'summary';
 	isManager: boolean;
@@ -94,6 +95,13 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 		const teamMatch = !question.team_ids?.length || question.team_ids.includes((selectedEmployee.team as any)?.id || selectedEmployee.team);
 		const empMatch = !question.employee_ids?.length || question.employee_ids.includes(selectedEmployee.id);
 		return teamMatch || empMatch;
+	};
+
+	const shouldShowGroup = (group: QuestionGroup) => {
+		if (group === 'private_manager_assessment') {
+			return isManager && selectedReviewType === 'manager';
+		}
+		return true;
 	};
 
 	const isSelfReviewDueDatePassed = new Date(appraisalCycle.self_review_due_date) < new Date();
@@ -393,39 +401,28 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	};
 
 	const handleNext = () => {
-		if (activeTab === 'objectives' && selectedReviewType === 'self' && !isSelectedEmplyeesManager) {
-			if (!objectives.length) return toast.error('Please add at least one objective before proceeding');
-			if (objectives.length > 0 && objectives.some(obj => !obj.title)) return toast.error('Please add at least a title to each objective before proceeding');
-			if (objectives.length > 0 && objectives.every(obj => obj.goals.length === 0)) return toast.error('Please add at least one goal to each objective before proceeding');
-			if (objectives.length > 0 && objectives.some(obj => obj.goals.some(goal => !goal.title))) return toast.error('Please add at least a title to each goal before proceeding');
-		}
-
-		const nextGroupIndex = questionGroups.indexOf(activeTab as QuestionGroup) + 1;
-		const nextGroup = questionGroups[nextGroupIndex];
-
-		if (!nextGroup) return;
-
-		if ((nextGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (nextGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
-			setActiveTab(questionGroups[nextGroupIndex + 1] as QuestionGroup);
+		if (activeTab === 'objectives') {
+			setActiveTab('goal_scoring');
 			return;
 		}
 
-		setActiveTab(nextGroup);
+		if (activeTab === 'goal_scoring') {
+			setActiveTab('questions');
+			return;
+		}
 	};
 
 	// Update handlePrevious function
 	const handlePrevious = () => {
-		if (activeTab === 'objectives') return;
-
-		const previousGroup = questionGroups[questionGroups.indexOf(activeTab as QuestionGroup) - 1];
-		if (!previousGroup) return;
-
-		if ((previousGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (previousGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
-			setActiveTab(questionGroups[questionGroups.indexOf(previousGroup) - 1] as QuestionGroup);
+		if (activeTab === 'questions') {
+			setActiveTab('goal_scoring');
 			return;
 		}
 
-		setActiveTab(previousGroup);
+		if (activeTab === 'goal_scoring') {
+			setActiveTab('objectives');
+			return;
+		}
 	};
 
 	const groupNameMap = (customGroupNames || []).reduce(
@@ -446,46 +443,6 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	};
 
 	const getGroupLabel = (group: QuestionGroup) => groupNameMap[group] || defaultGroupLabels[group] || group;
-
-	const getPreviousGroupLabel = (group: QuestionGroup) => {
-		const previousGroupIndex = questionGroups.indexOf(group) - 1;
-		let previousGroup = questionGroups[previousGroupIndex];
-
-		if (!previousGroup) return '';
-
-		if ((previousGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (previousGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
-			previousGroup = questionGroups[previousGroupIndex - 1];
-			return `: ${getGroupLabel(previousGroup as QuestionGroup)}`;
-		}
-		return `: ${getGroupLabel(previousGroup as QuestionGroup)}`;
-	};
-
-	const getNextGroupLabel = (group: QuestionGroup) => {
-		const nextGroupIndex = questionGroups.indexOf(group) + 1;
-		let nextGroup = questionGroups[nextGroupIndex];
-
-		if (!nextGroup) return '';
-
-		if ((nextGroup === 'private_manager_assessment' && selectedReviewType === 'self') || (nextGroup === 'private_manager_assessment' && !isSelectedEmplyeesManager && selectedReviewType === 'manager')) {
-			nextGroup = questionGroups[nextGroupIndex + 1];
-			return `: ${getGroupLabel(nextGroup as QuestionGroup)}`;
-		}
-
-		return `: ${getGroupLabel(nextGroup as QuestionGroup)}`;
-	};
-
-	const getGroupProgress = (group: QuestionGroup) => {
-		const groupQuestions = groupedQuestions[group].filter(shouldShowQuestion);
-		const answeredCount = groupQuestions.filter((q: Tables<'template_questions'>) => (selectedReviewType === 'self' ? answers[q.id] : managerAnswers[q.id]) !== undefined && (selectedReviewType === 'self' ? answers[q.id] : managerAnswers[q.id]) !== '').length;
-		return (answeredCount / groupQuestions.length) * 100;
-	};
-
-	const getGroupStatus = (group: QuestionGroup) => {
-		const progress = getGroupProgress(group);
-		if (progress === 100) return 'Completed';
-		if (progress > 0) return 'In Progress';
-		return 'Not Started';
-	};
 
 	const loadAnswers = useCallback(() => {
 		if (!answer) {
@@ -576,51 +533,30 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	};
 
 	return (
-		<div className="mx-auto flex w-full max-w-2xl flex-col">
-			<Tabs value={activeTab} onValueChange={value => setActiveTab(value as QuestionGroup)} className="w-full space-y-10">
-				<div className="relative">
-					<TabsList className="no-scrollbar mb-10 flex h-[unset] w-fit max-w-full items-start justify-start overflow-x-auto p-2 pr-14">
-						{questionGroups
-							.filter(group => {
-								// Show all tabs except private_manager_assessment to non-managers
-								if (group === 'private_manager_assessment') {
-									return isSelectedEmplyeesManager && selectedReviewType === 'manager';
-								}
+		<div className="mx-auto flex w-full max-w-3xl flex-col">
+			<Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'objectives' | 'goal_scoring' | 'questions')} className="w-full space-y-10">
+				<TabsList className="no-scrollbar mb-10 flex h-[unset] w-fit max-w-full items-start justify-start overflow-x-auto p-2">
+					<TabsTrigger value="objectives" className="relative whitespace-nowrap">
+						Objectives & Goals
+					</TabsTrigger>
+					<TabsTrigger value="goal_scoring" className="relative whitespace-nowrap">
+						Goal Scoring
+					</TabsTrigger>
+					<TabsTrigger value="questions" className="relative whitespace-nowrap">
+						Appraisal Questions
+					</TabsTrigger>
 
-								return true;
-							})
-							.map(group => (
-								<TabsTrigger key={group} value={group} className="relative whitespace-nowrap">
-									{getGroupLabel(group)}
-
-									{selectedReviewType !== 'summary' && group !== 'goal_scoring' && group !== 'objectives' && (
-										<div
-											className={cn(
-												'ml-2 h-2 w-2 rounded-md',
-												getGroupStatus(group) === 'Completed' && 'bg-green-500/75',
-												getGroupStatus(group) === 'In Progress' && 'bg-yellow-500',
-												getGroupStatus(group) === 'Not Started' && 'bg-primary-foreground shadow'
-											)}></div>
-									)}
-								</TabsTrigger>
-							))}
-
-						{selectedReviewType === 'summary' && (
-							<>
-								<TabsTrigger value="self_scoring" className="relative whitespace-nowrap">
-									Self Scoring
-								</TabsTrigger>
-								<TabsTrigger value="manager_scoring" className="relative whitespace-nowrap">
-									Manager Scoring
-								</TabsTrigger>
-							</>
-						)}
-
-						<div className="pointer-events-none absolute right-0 top-0 flex h-full w-24 items-center justify-end bg-gradient-to-r from-transparent to-muted pr-4">
-							<ChevronRight size={14} />
-						</div>
-					</TabsList>
-				</div>
+					{selectedReviewType === 'summary' && (
+						<>
+							<TabsTrigger value="self_scoring" className="relative whitespace-nowrap">
+								Self Scoring
+							</TabsTrigger>
+							<TabsTrigger value="manager_scoring" className="relative whitespace-nowrap">
+								Manager Scoring
+							</TabsTrigger>
+						</>
+					)}
+				</TabsList>
 
 				{activeTab === 'objectives' && (
 					<TabsContent className="min-h-36 space-y-4" value="objectives">
@@ -938,291 +874,280 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 					</TabsContent>
 				)}
 
-				{questionGroups
-					.filter(group => group !== 'objectives' && group !== 'goal_scoring')
-					.map(group => {
-						const canViewSelfAnswer = selectedEmployee.id === contract.id || answer?.employee_submission_date !== null;
-						const canViewManagerAnswer = answer?.manager_submission_date !== null || isSelectedEmplyeesManager;
-						const canEditSelfAnswer = selectedEmployee.id === contract.id && !isSelfReviewDueDatePassed;
-						const canEditManagerAnswer = isManager && selectedEmployee.id !== contract.id && !isManagerReviewDueDatePassed && isSelectedEmplyeesManager;
+				{activeTab === 'questions' && (
+					<TabsContent className="min-h-36 space-y-10" key="questions" value="questions">
+						{questionGroups
+							.filter(group => group !== 'objectives' && group !== 'goal_scoring')
+							.map(group => {
+								const canViewSelfAnswer = selectedEmployee.id === contract.id || answer?.employee_submission_date !== null;
+								const canViewManagerAnswer = answer?.manager_submission_date !== null || isSelectedEmplyeesManager;
+								const canEditSelfAnswer = selectedEmployee.id === contract.id && !isSelfReviewDueDatePassed;
+								const canEditManagerAnswer = isManager && selectedEmployee.id !== contract.id && !isManagerReviewDueDatePassed && isSelectedEmplyeesManager;
 
-						return (
-							<TabsContent className="min-h-36 space-y-10" key={group} value={group}>
-								{groupedQuestions[group].map(currentQuestion => {
-									// Only render if the question should be shown for this employee's team
-									if (!shouldShowQuestion(currentQuestion)) return null;
+								// only show groups the user has access to
+								if (!shouldShowGroup(group)) return null;
 
-									return (
-										<div key={currentQuestion.id} className="space-y-4">
-											<div className="flex items-center gap-2">
-												<h3 className="text-base font-medium">
-													{selectedReviewType === 'manager' ? currentQuestion.manager_question : currentQuestion.question} {currentQuestion.required && <span className="text-red-500">*</span>}
-												</h3>
-												{currentQuestion.team_ids &&
-													currentQuestion.team_ids.length > 0 &&
-													currentQuestion.team_ids.map(teamId => (
-														<Badge key={teamId} variant="secondary" className="max-h-6 px-2 text-xs">
-															{teams?.find(team => team.id === teamId)?.name}
-														</Badge>
-													))}
-											</div>
+								return (
+									<Card key={group} className="border-border/30 bg-[hsl(0deg_0%_97.25%)] shadow-none drop-shadow-sm">
+										<CardHeader className="mb-6 border-b border-border py-4">
+											<CardTitle className="text-2xl font-extralight">{getGroupLabel(group)}</CardTitle>
+										</CardHeader>
 
-											{selectedReviewType === 'summary' ? (
-												<div className="space-y-4">
-													<div className="space-y-2 rounded-md bg-accent p-2">
-														<h4 className="text-xs font-medium text-muted-foreground">Employee name ({selectedEmployee.job_title})</h4>
-														{currentQuestion.type !== 'scale' && (answers[currentQuestion.id] ? <p className="text-sm font-light">{answers[currentQuestion.id]}</p> : <p className="text-sm font-light italic text-muted-foreground">No answer</p>)}
-														{currentQuestion.type === 'scale' &&
-															(answers[currentQuestion.id] ? (
-																<div className="flex items-center gap-2">
-																	{Array.from({ length: 5 }, (_, i) => (
-																		<div key={i} className={cn('h-2 w-2 rounded-full', answers[currentQuestion.id] === i + 1 && 'bg-primary')} />
-																	))}
-																</div>
-															) : (
-																<p className="text-sm font-light italic text-muted-foreground">No answer</p>
-															))}
-													</div>
+										<CardContent className="space-y-10">
+											{groupedQuestions[group].map(currentQuestion => {
+												// Only render if the question should be shown for this employee's team
+												if (!shouldShowQuestion(currentQuestion)) return null;
 
-													<h3 className="text-base font-medium">
-														{currentQuestion.question !== currentQuestion.manager_question && currentQuestion.manager_question} {currentQuestion.required && <span className="text-red-500">*</span>}
-													</h3>
-													<div className="space-y-2 rounded-md bg-accent p-2">
-														<h4 className="text-xs font-medium text-muted-foreground">Managers name ({selectedEmployee.job_title})</h4>
-														{managerAnswers[currentQuestion.id] ? <p className="text-sm font-light">{managerAnswers[currentQuestion.id]}</p> : <p className="text-sm font-light italic text-muted-foreground">No manager answer</p>}
-													</div>
-												</div>
-											) : (
-												<>
-													{currentQuestion.type === 'textarea' && (
-														<div className="relative">
-															{canEditSelfAnswer && selectedReviewType === 'self' && currentQuestion.group !== 'private_manager_assessment' && (
-																<Textarea
-																	key={`self-${currentQuestion.id}-${answer?.id}`}
-																	className="min-h-[100px] w-full rounded-md border p-2"
-																	value={answers[currentQuestion.id] || ''}
-																	onChange={e => handleAnswerChange(currentQuestion.id, e.target.value)}
-																/>
-															)}
-
-															{canEditManagerAnswer && (selectedReviewType === 'manager' || currentQuestion.group === 'private_manager_assessment') && (
-																<Textarea
-																	key={`manager-${currentQuestion.id}-${answer?.id}`}
-																	className="min-h-[100px] w-full rounded-md border p-2"
-																	value={managerAnswers[currentQuestion.id] || ''}
-																	onChange={e => handleAnswerChange(currentQuestion.id, e.target.value)}
-																/>
-															)}
-
-															{!canEditSelfAnswer && canViewSelfAnswer && selectedReviewType === 'self' && (
-																<Textarea
-																	key={`view-self-${currentQuestion.id}-${answer?.id}`}
-																	disabled={true}
-																	readOnly
-																	className="min-h-[100px] w-full rounded-md border p-2 disabled:cursor-default disabled:opacity-100"
-																	value={answers[currentQuestion.id] || ''}
-																/>
-															)}
-															{!canEditManagerAnswer && canViewManagerAnswer && selectedReviewType === 'manager' && (
-																<Textarea
-																	key={`view-manager-${currentQuestion.id}-${answer?.id}`}
-																	disabled={true}
-																	readOnly
-																	className="min-h-[100px] w-full rounded-md border p-2 disabled:cursor-default disabled:opacity-100"
-																	value={managerAnswers[currentQuestion.id] || ''}
-																/>
-															)}
-
-															{savingStates[currentQuestion.id] && (
-																<div className="absolute right-2 top-2">
-																	<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-																</div>
-															)}
-														</div>
-													)}
-
-													{currentQuestion.type === 'yesno' && (
+												return (
+													<div key={currentQuestion.id} className="space-y-4">
 														<div className="flex items-center gap-2">
-															<Button
-																disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
-																variant={
-																	selectedReviewType === 'self'
-																		? answers[currentQuestion.id] === 'yes' && canViewSelfAnswer
-																			? 'secondary_success'
-																			: 'outline'
-																		: managerAnswers[currentQuestion.id] === 'yes' && canViewManagerAnswer
-																			? 'secondary_success'
-																			: 'outline'
-																}
-																className={cn(
-																	'disabled:opacity-100',
-																	selectedReviewType === 'self'
-																		? answers[currentQuestion.id] === 'yes' && canViewSelfAnswer
-																			? 'border border-green-400'
-																			: ''
-																		: managerAnswers[currentQuestion.id] === 'yes' && canViewManagerAnswer
-																			? 'border border-green-400'
-																			: ''
-																)}
-																onClick={() => handleAnswerChange(currentQuestion.id, 'yes')}>
-																Yes
-															</Button>
-															<Button
-																disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
-																variant={
-																	selectedReviewType === 'self'
-																		? answers[currentQuestion.id] === 'no' && canViewSelfAnswer
-																			? 'secondary_success'
-																			: 'outline'
-																		: managerAnswers[currentQuestion.id] === 'no' && canViewManagerAnswer
-																			? 'secondary_success'
-																			: 'outline'
-																}
-																className={cn(
-																	'disabled:opacity-100',
-																	selectedReviewType === 'self'
-																		? answers[currentQuestion.id] === 'no' && canViewSelfAnswer
-																			? 'border border-green-400'
-																			: ''
-																		: managerAnswers[currentQuestion.id] === 'no' && canViewManagerAnswer
-																			? 'border border-green-400'
-																			: ''
-																)}
-																onClick={() => handleAnswerChange(currentQuestion.id, 'no')}>
-																No
-															</Button>
+															<h3 className="text-base font-normal">
+																{selectedReviewType === 'manager' ? currentQuestion.manager_question : currentQuestion.question} {currentQuestion.required && <span className="text-red-500">*</span>}
+															</h3>
+
+															{currentQuestion.team_ids &&
+																currentQuestion.team_ids.length > 0 &&
+																currentQuestion.team_ids.map(teamId => (
+																	<Badge key={teamId} variant="secondary" className="max-h-6 px-2 text-xs">
+																		{teams?.find(team => team.id === teamId)?.name}
+																	</Badge>
+																))}
 														</div>
-													)}
 
-													{currentQuestion.type === 'scale' && (
-														<div className="flex items-center gap-8">
-															{[1, 2, 3, 4, 5].map(num => {
-																const scaleLabels = Array.isArray(currentQuestion.scale_labels) ? currentQuestion.scale_labels : [];
-																const labelObj = scaleLabels[num - 1];
-																const isObj = labelObj && typeof labelObj === 'object' && !Array.isArray(labelObj);
-																const label = isObj && typeof labelObj.label === 'string' && labelObj.label;
-																const description = isObj && typeof labelObj.description === 'string' ? labelObj.description : undefined;
+														{selectedReviewType === 'summary' ? (
+															<div className="space-y-4">
+																<div className="space-y-2 rounded-md bg-accent p-2">
+																	<h4 className="text-xs font-medium text-muted-foreground">Employee name ({selectedEmployee.job_title})</h4>
+																	{currentQuestion.type !== 'scale' &&
+																		(answers[currentQuestion.id] ? <p className="text-sm font-light">{answers[currentQuestion.id]}</p> : <p className="text-sm font-light italic text-muted-foreground">No answer</p>)}
+																	{currentQuestion.type === 'scale' &&
+																		(answers[currentQuestion.id] ? (
+																			<div className="flex items-center gap-2">
+																				{Array.from({ length: 5 }, (_, i) => (
+																					<div key={i} className={cn('h-2 w-2 rounded-full', answers[currentQuestion.id] === i + 1 && 'bg-primary')} />
+																				))}
+																			</div>
+																		) : (
+																			<p className="text-sm font-light italic text-muted-foreground">No answer</p>
+																		))}
+																</div>
 
-																return label ? (
-																	<div className="flex flex-col items-center justify-center gap-2">
+																<h3 className="text-base font-medium">
+																	{currentQuestion.question !== currentQuestion.manager_question && currentQuestion.manager_question} {currentQuestion.required && <span className="text-red-500">*</span>}
+																</h3>
+																<div className="space-y-2 rounded-md bg-accent p-2">
+																	<h4 className="text-xs font-medium text-muted-foreground">Managers name ({selectedEmployee.job_title})</h4>
+																	{managerAnswers[currentQuestion.id] ? <p className="text-sm font-light">{managerAnswers[currentQuestion.id]}</p> : <p className="text-sm font-light italic text-muted-foreground">No manager answer</p>}
+																</div>
+															</div>
+														) : (
+															<>
+																{currentQuestion.type === 'textarea' && (
+																	<div className="relative">
+																		<Textarea
+																			className={cn(
+																				'min-h-[100px] w-full rounded-md border p-2',
+																				(!canEditSelfAnswer && selectedReviewType === 'self') || (!canEditManagerAnswer && selectedReviewType === 'manager') ? 'disabled:cursor-default disabled:opacity-100' : ''
+																			)}
+																			value={selectedReviewType === 'self' ? answers[currentQuestion.id] || '' : managerAnswers[currentQuestion.id] || ''}
+																			onChange={e => handleAnswerChange(currentQuestion.id, e.target.value)}
+																			disabled={(selectedReviewType === 'self' && !canEditSelfAnswer) || (selectedReviewType === 'manager' && !canEditManagerAnswer)}
+																			readOnly={(selectedReviewType === 'self' && !canEditSelfAnswer) || (selectedReviewType === 'manager' && !canEditManagerAnswer)}
+																		/>
+
+																		{savingStates[currentQuestion.id] && (
+																			<div className="absolute right-2 top-2">
+																				<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+																			</div>
+																		)}
+																	</div>
+																)}
+
+																{currentQuestion.type === 'yesno' && (
+																	<div className="flex items-center gap-2">
 																		<Button
 																			disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
-																			className={cn(
-																				'disabled:opacity-100',
-																				selectedReviewType === 'self'
-																					? answers[currentQuestion.id] === num && canViewSelfAnswer
-																						? 'border border-green-400'
-																						: ''
-																					: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
-																						? 'border border-green-400'
-																						: ''
-																			)}
-																			size="icon"
 																			variant={
 																				selectedReviewType === 'self'
-																					? answers[currentQuestion.id] === num && canViewSelfAnswer
+																					? answers[currentQuestion.id] === 'yes' && canViewSelfAnswer
 																						? 'secondary_success'
 																						: 'outline'
-																					: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
+																					: managerAnswers[currentQuestion.id] === 'yes' && canViewManagerAnswer
 																						? 'secondary_success'
 																						: 'outline'
 																			}
-																			onClick={() => handleAnswerChange(currentQuestion.id, num)}>
-																			{num}
-																		</Button>
-
-																		<div className="flex items-center gap-2">
-																			<div className="text-xs text-muted-foreground">{label}</div>
-																			{description && (
-																				<TooltipProvider key={num}>
-																					<Tooltip>
-																						<TooltipTrigger>
-																							<Info size={12} className="text-muted-foreground" />
-																						</TooltipTrigger>
-																						<TooltipContent>
-																							<div className="max-w-64 text-xs">{description}</div>
-																						</TooltipContent>
-																					</Tooltip>
-																				</TooltipProvider>
+																			className={cn(
+																				'disabled:opacity-100',
+																				selectedReviewType === 'self'
+																					? answers[currentQuestion.id] === 'yes' && canViewSelfAnswer
+																						? 'border border-green-400'
+																						: ''
+																					: managerAnswers[currentQuestion.id] === 'yes' && canViewManagerAnswer
+																						? 'border border-green-400'
+																						: ''
 																			)}
-																		</div>
+																			onClick={() => handleAnswerChange(currentQuestion.id, 'yes')}>
+																			Yes
+																		</Button>
+																		<Button
+																			disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
+																			variant={
+																				selectedReviewType === 'self'
+																					? answers[currentQuestion.id] === 'no' && canViewSelfAnswer
+																						? 'secondary_success'
+																						: 'outline'
+																					: managerAnswers[currentQuestion.id] === 'no' && canViewManagerAnswer
+																						? 'secondary_success'
+																						: 'outline'
+																			}
+																			className={cn(
+																				'disabled:opacity-100',
+																				selectedReviewType === 'self'
+																					? answers[currentQuestion.id] === 'no' && canViewSelfAnswer
+																						? 'border border-green-400'
+																						: ''
+																					: managerAnswers[currentQuestion.id] === 'no' && canViewManagerAnswer
+																						? 'border border-green-400'
+																						: ''
+																			)}
+																			onClick={() => handleAnswerChange(currentQuestion.id, 'no')}>
+																			No
+																		</Button>
 																	</div>
-																) : (
-																	<Button
-																		disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
-																		className={cn(
-																			'disabled:opacity-100',
-																			selectedReviewType === 'self'
-																				? answers[currentQuestion.id] === num && canViewSelfAnswer
-																					? 'border border-green-400'
-																					: ''
-																				: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
-																					? 'border border-green-400'
-																					: ''
-																		)}
-																		size="icon"
-																		key={num}
-																		variant={
-																			selectedReviewType === 'self'
-																				? answers[currentQuestion.id] === num && canViewSelfAnswer
-																					? 'secondary_success'
-																					: 'outline'
-																				: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
-																					? 'secondary_success'
-																					: 'outline'
-																		}
-																		onClick={() => handleAnswerChange(currentQuestion.id, num)}>
-																		{num}
-																	</Button>
-																);
-															})}
-														</div>
-													)}
+																)}
 
-													{currentQuestion.type === 'multiselect' && (
-														<div className="flex flex-wrap gap-2">
-															{currentQuestion.options?.map((option: string) => (
-																<Button
-																	key={option}
-																	variant={
-																		selectedReviewType === 'self'
-																			? (answers[currentQuestion.id] as string[])?.includes(option) && canViewSelfAnswer
-																				? 'secondary_success'
-																				: 'outline'
-																			: (managerAnswers[currentQuestion.id] as string[])?.includes(option) && canViewManagerAnswer
-																				? 'secondary_success'
-																				: 'outline'
-																	}
-																	className={cn(
-																		'disabled:opacity-100',
-																		selectedReviewType === 'self'
-																			? (answers[currentQuestion.id] as string[])?.includes(option) && canViewSelfAnswer
-																				? 'border border-green-400'
-																				: ''
-																			: (managerAnswers[currentQuestion.id] as string[])?.includes(option) && canViewManagerAnswer
-																				? 'border border-green-400'
-																				: ''
-																	)}
-																	onClick={() => {
-																		if (selectedReviewType === 'self' ? isSelfReviewDueDatePassed : isManagerReviewDueDatePassed) return;
-																		const currentAnswers = (selectedReviewType === 'self' ? answers[currentQuestion.id] || [] : managerAnswers[currentQuestion.id] || []) as string[];
-																		const newAnswers = currentAnswers.length > 0 ? (currentAnswers.includes(option) ? currentAnswers.filter(a => a !== option) : [...currentAnswers, option]) : [option];
-																		handleAnswerChange(currentQuestion.id, newAnswers);
-																	}}
-																	disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}>
-																	{option}
-																</Button>
-															))}
-														</div>
-													)}
-												</>
-											)}
-										</div>
-									);
-								})}
-							</TabsContent>
-						);
-					})}
+																{currentQuestion.type === 'scale' && (
+																	<div className="flex items-center gap-8">
+																		{[1, 2, 3, 4, 5].map(num => {
+																			const scaleLabels = Array.isArray(currentQuestion.scale_labels) ? currentQuestion.scale_labels : [];
+																			const labelObj = scaleLabels[num - 1];
+																			const isObj = labelObj && typeof labelObj === 'object' && !Array.isArray(labelObj);
+																			const label = isObj && typeof labelObj.label === 'string' && labelObj.label;
+																			const description = isObj && typeof labelObj.description === 'string' ? labelObj.description : undefined;
+
+																			return label ? (
+																				<div className="flex flex-col items-center justify-center gap-2">
+																					<Button
+																						disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
+																						className={cn(
+																							'disabled:opacity-100',
+																							selectedReviewType === 'self'
+																								? answers[currentQuestion.id] === num && canViewSelfAnswer
+																									? 'border border-green-400'
+																									: ''
+																								: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
+																									? 'border border-green-400'
+																									: ''
+																						)}
+																						size="icon"
+																						variant={
+																							selectedReviewType === 'self'
+																								? answers[currentQuestion.id] === num && canViewSelfAnswer
+																									? 'secondary_success'
+																									: 'outline'
+																								: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
+																									? 'secondary_success'
+																									: 'outline'
+																						}
+																						onClick={() => handleAnswerChange(currentQuestion.id, num)}>
+																						{num}
+																					</Button>
+
+																					<div className="flex items-center gap-2">
+																						<div className="text-xs text-muted-foreground">{label}</div>
+																						{description && (
+																							<TooltipProvider key={num}>
+																								<Tooltip>
+																									<TooltipTrigger>
+																										<Info size={12} className="text-muted-foreground" />
+																									</TooltipTrigger>
+																									<TooltipContent>
+																										<div className="max-w-64 text-xs">{description}</div>
+																									</TooltipContent>
+																								</Tooltip>
+																							</TooltipProvider>
+																						)}
+																					</div>
+																				</div>
+																			) : (
+																				<Button
+																					disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
+																					className={cn(
+																						'disabled:opacity-100',
+																						selectedReviewType === 'self'
+																							? answers[currentQuestion.id] === num && canViewSelfAnswer
+																								? 'border border-green-400'
+																								: ''
+																							: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
+																								? 'border border-green-400'
+																								: ''
+																					)}
+																					size="icon"
+																					key={num}
+																					variant={
+																						selectedReviewType === 'self'
+																							? answers[currentQuestion.id] === num && canViewSelfAnswer
+																								? 'secondary_success'
+																								: 'outline'
+																							: managerAnswers[currentQuestion.id] === num && canViewManagerAnswer
+																								? 'secondary_success'
+																								: 'outline'
+																					}
+																					onClick={() => handleAnswerChange(currentQuestion.id, num)}>
+																					{num}
+																				</Button>
+																			);
+																		})}
+																	</div>
+																)}
+
+																{currentQuestion.type === 'multiselect' && (
+																	<div className="flex flex-wrap gap-2">
+																		{currentQuestion.options?.map((option: string) => (
+																			<Button
+																				key={option}
+																				variant={
+																					selectedReviewType === 'self'
+																						? (answers[currentQuestion.id] as string[])?.includes(option) && canViewSelfAnswer
+																							? 'secondary_success'
+																							: 'outline'
+																						: (managerAnswers[currentQuestion.id] as string[])?.includes(option) && canViewManagerAnswer
+																							? 'secondary_success'
+																							: 'outline'
+																				}
+																				className={cn(
+																					'disabled:opacity-100',
+																					selectedReviewType === 'self'
+																						? (answers[currentQuestion.id] as string[])?.includes(option) && canViewSelfAnswer
+																							? 'border border-green-400'
+																							: ''
+																						: (managerAnswers[currentQuestion.id] as string[])?.includes(option) && canViewManagerAnswer
+																							? 'border border-green-400'
+																							: ''
+																				)}
+																				onClick={() => {
+																					if (selectedReviewType === 'self' ? isSelfReviewDueDatePassed : isManagerReviewDueDatePassed) return;
+																					const currentAnswers = (selectedReviewType === 'self' ? answers[currentQuestion.id] || [] : managerAnswers[currentQuestion.id] || []) as string[];
+																					const newAnswers = currentAnswers.length > 0 ? (currentAnswers.includes(option) ? currentAnswers.filter(a => a !== option) : [...currentAnswers, option]) : [option];
+																					handleAnswerChange(currentQuestion.id, newAnswers);
+																				}}
+																				disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}>
+																				{option}
+																			</Button>
+																		))}
+																	</div>
+																)}
+															</>
+														)}
+													</div>
+												);
+											})}
+										</CardContent>
+									</Card>
+								);
+							})}
+					</TabsContent>
+				)}
 			</Tabs>
 
 			<Separator className="!my-10" />
@@ -1231,19 +1156,16 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 				{/* {(selectedReviewType === 'self' && !isSelfReviewDueDatePassed) || (selectedReviewType === 'manager' && !isManagerReviewDueDatePassed) && ( */}
 				<>
 					<Button variant="secondary" className="gap-4" onClick={handlePrevious} disabled={questionGroups.indexOf(activeTab as QuestionGroup) === 0}>
-						<ChevronLeft size={14} /> Previous{getPreviousGroupLabel(activeTab as QuestionGroup)}
+						<ChevronLeft size={14} /> Previous
 					</Button>
 
-					{(questionGroups.indexOf(activeTab as QuestionGroup) === questionGroups.length - 1 && (selectedReviewType === 'self' ? !isSelfReviewDueDatePassed && selectedEmployee.id === contract.id : isSelectedEmplyeesManager && !isManagerReviewDueDatePassed)) ||
-					(questionGroups.indexOf(activeTab as QuestionGroup) + 1 == questionGroups.length - 1 &&
-						questionGroups[questionGroups.indexOf(activeTab as QuestionGroup) + 1] === 'private_manager_assessment' &&
-						(selectedReviewType === 'self' ? !isSelfReviewDueDatePassed : !isManagerReviewDueDatePassed && !isSelectedEmplyeesManager)) ? (
+					{activeTab === 'questions' ? (
 						<Button onClick={handleSubmit} className="gap-4">
 							{isSubmitting ? 'Submitting...' : 'Submit Appraisal'} <Send size={14} />
 						</Button>
 					) : (
-						<Button onClick={handleNext} className="gap-4" disabled={questionGroups.indexOf(activeTab as QuestionGroup) === questionGroups.length - 1}>
-							Next {getNextGroupLabel(activeTab as QuestionGroup)}
+						<Button onClick={handleNext} className="gap-4">
+							`Next
 							<ChevronRight size={14} />
 						</Button>
 					)}

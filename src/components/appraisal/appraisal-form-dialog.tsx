@@ -48,7 +48,7 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 		goal_scoring: []
 	});
 	const [answer, setAnswer] = useState<Tables<'appraisal_answers'> | null>(contractAnswer ?? null);
-	const [activeTab, setActiveTab] = useState<QuestionGroup>('objectives');
+	const [activeTab, setActiveTab] = useState<'objectives' | 'goal_scoring' | 'questions'>('objectives');
 	const [isLoading, setIsLoading] = useState(true);
 	const [isTeamAnswersLoading, setIsTeamAnswersLoading] = useState(true);
 	const isSelfReviewDueDatePassed = new Date(appraisalCycle.self_review_due_date) < new Date();
