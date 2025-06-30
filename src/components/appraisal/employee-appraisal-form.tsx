@@ -77,6 +77,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	const [deletingGoal, setDeletingGoal] = useState<string | null>(null);
 	const [enableWeights, setEnableWeights] = useState<boolean>(false);
 	const [localAnswerId, setLocalAnswerId] = useState<number | undefined>(answer?.id);
+	const [focusedQuestionId, setFocusedQuestionId] = useState<number | null>(null);
 
 	const canUpdateSelfReview = useMemo(
 		() => canUpdateAppraisal('self', isManager, isSelectedEmplyeesManager, selectedEmployee, contract, new Date(appraisalCycle.self_review_due_date) < new Date(), answer),
@@ -532,6 +533,17 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 		}
 	};
 
+	const isQuestionHighlighted = (questionId: number) => {
+		return focusedQuestionId === questionId;
+	};
+
+	const isQuestionDimmed = (questionId: number) => {
+		const hasHighlightedQuestion = Object.values(groupedQuestions)
+			.flat()
+			.some(q => isQuestionHighlighted(q.id));
+		return hasHighlightedQuestion && !isQuestionHighlighted(questionId);
+	};
+
 	return (
 		<div className="mx-auto flex w-full max-w-3xl flex-col">
 			<Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'objectives' | 'goal_scoring' | 'questions')} className="w-full space-y-10">
@@ -887,19 +899,28 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 								// only show groups the user has access to
 								if (!shouldShowGroup(group)) return null;
 
+								/* group */
 								return (
-									<Card key={group} className="border-border/30 bg-[hsl(0deg_0%_97.25%)] shadow-none drop-shadow-sm">
+									<Card key={group} className="border-border/30 bg-[hsl(0deg_0%_97%)] shadow-none drop-shadow-sm">
 										<CardHeader className="mb-6 border-b border-border py-4">
 											<CardTitle className="text-2xl font-extralight">{getGroupLabel(group)}</CardTitle>
 										</CardHeader>
 
-										<CardContent className="space-y-10">
+										<CardContent className="space-y-10 px-2">
 											{groupedQuestions[group].map(currentQuestion => {
 												// Only render if the question should be shown for this employee's team
 												if (!shouldShowQuestion(currentQuestion)) return null;
 
+												/* question and options */
 												return (
-													<div key={currentQuestion.id} className="space-y-4">
+													<div
+														key={currentQuestion.id}
+														className={cn('space-y-4 rounded-lg p-4 outline-none transition-all duration-500', isQuestionHighlighted(currentQuestion.id) && 'bg-white ring-2 ring-ring/10', isQuestionDimmed(currentQuestion.id) && 'opacity-30')}
+														onMouseEnter={() => setFocusedQuestionId(currentQuestion.id)}
+														onMouseLeave={() => setFocusedQuestionId(null)}
+														onFocus={() => setFocusedQuestionId(currentQuestion.id)}
+														onBlur={() => setFocusedQuestionId(null)}
+														tabIndex={0}>
 														<div className="flex items-center gap-2">
 															<h3 className="text-base font-normal">
 																{selectedReviewType === 'manager' ? currentQuestion.manager_question : currentQuestion.question} {currentQuestion.required && <span className="text-red-500">*</span>}
@@ -914,6 +935,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																))}
 														</div>
 
+														{/* summary */}
 														{selectedReviewType === 'summary' ? (
 															<div className="space-y-4">
 																<div className="space-y-2 rounded-md bg-accent p-2">
