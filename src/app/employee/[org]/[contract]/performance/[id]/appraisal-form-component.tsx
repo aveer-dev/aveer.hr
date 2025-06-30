@@ -9,8 +9,6 @@ import { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { BackButton } from '@/components/ui/back-button';
 
-type QuestionGroup = 'growth_and_development' | 'company_values' | 'competencies' | 'private_manager_assessment' | 'objectives' | 'goal_scoring';
-
 export const AppraisalFormComponent = ({
 	org,
 	teams,
