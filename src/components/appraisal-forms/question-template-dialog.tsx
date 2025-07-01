@@ -291,11 +291,14 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 		const currentQuestions = form.getValues('questions');
 		const questionWithGroup = { ...question, group: selectedGroup };
 		const updatedQuestions = editingQuestion ? currentQuestions.map(q => (q.id === question.id ? questionWithGroup : q)) : [...currentQuestions, questionWithGroup];
-		form.reset({ ...form.getValues(), questions: updatedQuestions });
-		if (editingQuestion) setEditingQuestion(undefined);
-		if (template) {
-			toast.promise(
-				updateTemplateQuestions(
+
+		try {
+			// Update form state
+			form.reset({ ...form.getValues(), questions: updatedQuestions });
+
+			// If we're editing a template, save immediately
+			if (template) {
+				await updateTemplateQuestions(
 					template.id,
 					updatedQuestions.map((q, index) => ({
 						id: parseInt(q.id),
@@ -306,20 +309,25 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 						required: q.required,
 						team_ids: q.teams.map(id => parseInt(id)),
 						employee_ids: q.employees.map(eid => Number(eid)),
-						order_index: index, // Global order index across all questions
+						order_index: index,
 						template_id: template.id,
 						org: org,
 						group: q.group,
 						scale_labels: q.scaleLabels || null
 					})),
 					template_questions || []
-				),
-				{
-					loading: 'Saving question...',
-					success: 'Questions updated',
-					error: 'Failed to update questions'
-				}
-			);
+				);
+
+				// Update lastAutoSaved to prevent duplicate auto-save
+				lastAutoSaved.current = form.getValues();
+			}
+
+			if (editingQuestion) setEditingQuestion(undefined);
+			toast.success('Question saved successfully');
+		} catch (error) {
+			toast.error('Failed to save question');
+			// Rollback form state on error
+			form.reset({ ...form.getValues(), questions: currentQuestions });
 		}
 	};
 
@@ -395,26 +403,6 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 					is_draft: values.is_draft,
 					custom_group_names
 				});
-
-				await updateTemplateQuestions(
-					template.id,
-					values.questions.map((q, index) => ({
-						id: parseInt(q.id),
-						question: q.question,
-						manager_question: q.managerQuestion,
-						type: q.type,
-						options: q.options,
-						required: q.required,
-						team_ids: q.teams.map(id => parseInt(id)),
-						employee_ids: q.employees.map(eid => Number(eid)),
-						order_index: index, // Global order index across all questions
-						template_id: template.id,
-						org: org,
-						group: q.group,
-						scale_labels: q.scaleLabels || null
-					})),
-					template_questions || []
-				);
 			} else {
 				// Create new template
 				const newTemplate = await createQuestionTemplate({
