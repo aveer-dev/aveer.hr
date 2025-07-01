@@ -42,7 +42,7 @@ export const AppraisalFormComponent = ({
 	});
 	const contractAnswer = teamMembersAnswers.find(answer => answer.contract_id === contract.id) ?? null;
 
-	const isManager = manager?.person == contract.id;
+	const isManager = manager?.person === contract.id || teamMembers.some(member => member.direct_report === contract.id);
 	const customGroupNames = template.custom_group_names as { id: string; name: string }[];
 
 	const [answer, setAnswer] = useState<Tables<'appraisal_answers'> | null>(contractAnswer);
@@ -50,7 +50,7 @@ export const AppraisalFormComponent = ({
 	const [selectedReviewType, setSelectedReviewType] = useState<'self' | 'manager' | 'summary'>('self');
 	const [selectedEmployee, setSelectedEmployee] = useState<Tables<'contracts'>>(contract);
 
-	const isSelectedEmplyeesManager = selectedEmployee.direct_report == contract.id || (isManager && selectedEmployee.team == manager?.team);
+	const isSelectedEmployeesManager = selectedEmployee.direct_report === contract.id || (isManager && !!manager?.team && selectedEmployee.team === manager.team);
 
 	// Group questions whenever selectedEmployee changes
 	useEffect(() => {
@@ -134,7 +134,7 @@ export const AppraisalFormComponent = ({
 						isManager={isManager}
 						selectedEmployee={selectedEmployee}
 						contract={contract}
-						isSelectedEmplyeesManager={isSelectedEmplyeesManager}
+						isSelectedEmplyeesManager={isSelectedEmployeesManager}
 						groupedQuestions={groupedQuestions}
 						teams={teams}
 						customGroupNames={customGroupNames}

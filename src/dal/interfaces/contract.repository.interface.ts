@@ -47,5 +47,10 @@ export interface IContractRepository {
 
 	getByProfileWithProfileAndTeam({ id, org }: { id: number | string; org: string }): Promise<{ data: ContractWithProfileAndTeam[] | null; error: PostgrestError | null }>;
 
-	getByTeamStatusOrgWithProfile(params: { team: number; status?: Tables<'contracts'>['status']; org: string }): Promise<{ data: (Tables<'contracts'> & { profile?: Tables<'profiles'> & { nationality?: Tables<'countries'> } })[] | null; error: PostgrestError | null }>;
+	getByTeamStatusOrgWithProfile(params: {
+		team?: number;
+		status?: Tables<'contracts'>['status'];
+		org: string;
+		contractId?: number;
+	}): Promise<{ data: (Tables<'contracts'> & { profile?: Tables<'profiles'> & { nationality?: Tables<'countries'> } })[] | null; error: PostgrestError | null }>;
 }

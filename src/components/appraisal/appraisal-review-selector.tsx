@@ -29,9 +29,9 @@ export const AppraisalReviewSelector = ({
 }) => {
 	const ReviewButtons = ({ employee, answer }: { employee: Tables<'contracts'>; answer: Tables<'appraisal_answers'> | null }) => {
 		const isMyContract = employee.id === contract.id;
-		const isEmplyeesManager = employee.direct_report == contract.id || (!!manager && employee.team == manager?.team);
-		const canViewManagerReview = isEmplyeesManager || (answer && answer?.manager_submission_date !== null);
-		const canEditManagerReview = isEmplyeesManager && answer?.status !== 'manager_reviewed';
+		const isEmployeesManager = employee.direct_report === contract.id || (!!manager?.team && employee.team === manager.team);
+		const canViewManagerReview = isEmployeesManager || (answer && answer?.manager_submission_date !== null);
+		const canEditManagerReview = isEmployeesManager && answer?.status !== 'manager_reviewed';
 		const canViewEmployeeReview = isMyContract || (answer && answer?.employee_submission_date !== null);
 		const canEditEmployeeReview = isMyContract && !isSelfReviewDueDatePassed;
 
@@ -64,9 +64,9 @@ export const AppraisalReviewSelector = ({
 
 	const ReviewOptions = ({ employee, answer }: { employee: Tables<'contracts'>; answer: Tables<'appraisal_answers'> | null }) => {
 		const isMyContract = employee.id === contract.id;
-		const isEmplyeesManager = employee.direct_report == contract.id || (!!manager && employee.team == manager?.team);
-		const canViewManagerReview = isEmplyeesManager || (answer && answer?.manager_submission_date !== null);
-		const canEditManagerReview = isEmplyeesManager && answer?.status !== 'manager_reviewed';
+		const isEmployeesManager = employee.direct_report === contract.id || (!!manager?.team && employee.team === manager.team);
+		const canViewManagerReview = isEmployeesManager || (answer && answer?.manager_submission_date !== null);
+		const canEditManagerReview = isEmployeesManager && answer?.status !== 'manager_reviewed';
 		const canViewEmployeeReview = isMyContract || (answer && answer?.employee_submission_date !== null);
 		const canEditEmployeeReview = isMyContract && !isSelfReviewDueDatePassed;
 
@@ -132,7 +132,7 @@ export const AppraisalReviewSelector = ({
 				</Collapsible>
 
 				{/* Manager Reviews Group */}
-				{!!manager && (
+				{!!manager && teamMembers && teamMembers.length > 0 && (
 					<div className="space-y-4">
 						<h3 className="text-xs font-medium text-muted-foreground">Your team</h3>
 

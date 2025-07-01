@@ -57,7 +57,7 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 	const [teamMembersAnswers, setTeamMembersAnswers] = useState<Tables<'appraisal_answers'>[]>([]);
 	const [customGroupNames, setCustomGroupNames] = useState<{ id: string; name: string }[]>([]);
 
-	const isSelectedEmplyeesManager = selectedEmployee.direct_report == contract.id || (isManager && selectedEmployee.team == manager?.team);
+	const isSelectedEmployeesManager = selectedEmployee.direct_report === contract.id || (isManager && !!manager?.team && selectedEmployee.team === manager.team);
 
 	useEffect(() => {
 		const fetchQuestions = async () => {
@@ -173,7 +173,7 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 							isManager={isManager}
 							selectedEmployee={selectedEmployee}
 							contract={contract}
-							isSelectedEmplyeesManager={isSelectedEmplyeesManager}
+							isSelectedEmplyeesManager={isSelectedEmployeesManager}
 							groupedQuestions={groupedQuestions}
 							teams={teams}
 							customGroupNames={customGroupNames}
