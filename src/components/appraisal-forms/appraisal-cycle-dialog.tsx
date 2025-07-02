@@ -26,11 +26,13 @@ interface props {
 	cycle?: Tables<'appraisal_cycles'>;
 	children?: React.ReactNode;
 	readOnly?: boolean;
+	noAction?: boolean;
+	isOpen?: boolean;
+	setIsOpen?: (isOpen: boolean) => void;
 }
 
-export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false }: props) => {
+export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, noAction = false, isOpen, setIsOpen }: props) => {
 	const [isUpdatingAppraisal, setAppraisalUpdateState] = useState(false);
-	const [isOpen, setIsOpen] = useState(false);
 	const [questionTemplates, setQuestionTemplates] = useState<Tables<'question_templates'>[] | null>(null);
 	const router = useRouter();
 
@@ -126,7 +128,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false }:
 			}
 
 			router.refresh();
-			setIsOpen(false);
+			setIsOpen && setIsOpen(false);
 		} catch (error) {
 			toast.error('An error occurred', { description: error instanceof Error ? error.message : 'Unknown error' });
 		} finally {
@@ -135,8 +137,8 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false }:
 	};
 
 	return (
-		<Sheet open={isOpen} onOpenChange={setIsOpen}>
-			<SheetTrigger asChild>{children ? children : <Button variant="default">Create Appraisal Cycle</Button>}</SheetTrigger>
+		<Sheet open={isOpen} onOpenChange={setIsOpen || (() => {})}>
+			{!noAction && <SheetTrigger asChild>{children ? children : <Button variant="default">Create Appraisal Cycle</Button>}</SheetTrigger>}
 
 			<SheetContent className="w-full overflow-auto pb-24 sm:max-w-md">
 				<SheetHeader className="mb-6">

@@ -20,7 +20,7 @@ interface AppraisalCycleCardDialogProps {
 
 const AppraisalCycleCardDialog = ({ org, cycle }: AppraisalCycleCardDialogProps) => (
 	<li className="flex items-center">
-		<Link href={`./performance/${cycle.id}`} className={cn(buttonVariants({ variant: 'ghost' }), 'h-[unset] w-full justify-between gap-2')}>
+		<Link href={`./performance/${cycle.id}`} className={cn(buttonVariants({ variant: 'ghost' }), 'h-10 w-full justify-between gap-2')}>
 			<div className="max-w-[9rem] truncate px-0 text-sm font-medium md:max-w-md">{cycle.name}</div>
 
 			<div className="flex items-center gap-4">

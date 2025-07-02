@@ -50,7 +50,7 @@ export const AppraisalFormComponent = ({
 	const [selectedReviewType, setSelectedReviewType] = useState<'self' | 'manager' | 'summary'>('self');
 	const [selectedEmployee, setSelectedEmployee] = useState<Tables<'contracts'>>(contract);
 
-	const isSelectedEmployeesManager = selectedEmployee.direct_report === contract.id || (isManager && !!manager?.team && selectedEmployee.team === manager.team);
+	const isSelectedEmployeesManager = selectedEmployee.direct_report === contract.id || (isManager && !!manager?.team && selectedEmployee.team === manager.team && selectedEmployee.id !== manager.person);
 
 	// Group questions whenever selectedEmployee changes
 	useEffect(() => {
@@ -71,12 +71,6 @@ export const AppraisalFormComponent = ({
 
 		setGroupedQuestions({ objectives: [], goal_scoring: [], ...grouped });
 	}, [allQuestions, selectedEmployee]);
-
-	useEffect(() => {
-		if ((contractAnswer && answer?.contract_id !== contractAnswer.contract_id) || (contractAnswer && !answer)) {
-			setAnswer(contractAnswer);
-		}
-	}, [contractAnswer, answer]);
 
 	const handleReviewTypeSelect = (type: 'self' | 'manager' | 'summary', employee: Tables<'contracts'>, answer: Tables<'appraisal_answers'> | null) => {
 		setSelectedReviewType(type);

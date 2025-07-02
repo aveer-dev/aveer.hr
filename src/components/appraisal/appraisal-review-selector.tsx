@@ -29,7 +29,7 @@ export const AppraisalReviewSelector = ({
 }) => {
 	const ReviewButtons = ({ employee, answer }: { employee: Tables<'contracts'>; answer: Tables<'appraisal_answers'> | null }) => {
 		const isMyContract = employee.id === contract.id;
-		const isEmployeesManager = employee.direct_report === contract.id || (!!manager?.team && employee.team === manager.team);
+		const isEmployeesManager = employee.direct_report === contract.id || (!!manager?.team && employee.team === manager.team && employee.id !== manager.person);
 		const canViewManagerReview = isEmployeesManager || (answer && answer?.manager_submission_date !== null);
 		const canEditManagerReview = isEmployeesManager && answer?.status !== 'manager_reviewed';
 		const canViewEmployeeReview = isMyContract || (answer && answer?.employee_submission_date !== null);

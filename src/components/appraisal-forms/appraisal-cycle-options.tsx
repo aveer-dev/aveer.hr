@@ -6,8 +6,11 @@ import { AppraisalCycleDialog } from './appraisal-cycle-dialog';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Tables } from '@/type/database.types';
+import { useState } from 'react';
 
 export const AppraisalCycleOptions = ({ cycle, org }: { cycle: Tables<'appraisal_cycles'>; org: string }) => {
+	const [isOpen, setIsOpen] = useState(false);
+
 	return (
 		<div>
 			<DropdownMenu>
@@ -18,21 +21,15 @@ export const AppraisalCycleOptions = ({ cycle, org }: { cycle: Tables<'appraisal
 				</DropdownMenuTrigger>
 
 				<DropdownMenuContent className="w-44" align="end">
-					<AppraisalCycleDialog key={cycle.id} org={org} cycle={cycle}>
-						<DropdownMenuItem
-							onSelect={e => {
-								e.stopPropagation();
-								e.preventDefault();
-							}}>
-							Update Appraisal Cycle
-						</DropdownMenuItem>
-					</AppraisalCycleDialog>
+					<DropdownMenuItem onSelect={() => setIsOpen(true)}>Update Appraisal Cycle</DropdownMenuItem>
 
 					<Link href={`./performance/${cycle.id}`}>
 						<DropdownMenuItem>Review Appraisal Metrics</DropdownMenuItem>
 					</Link>
 				</DropdownMenuContent>
 			</DropdownMenu>
+
+			<AppraisalCycleDialog key={cycle.id} org={org} cycle={cycle} isOpen={isOpen} setIsOpen={setIsOpen} noAction />
 		</div>
 	);
 };

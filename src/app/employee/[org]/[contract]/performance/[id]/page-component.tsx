@@ -6,7 +6,7 @@ export default async function AppraisalPageComponent({ params }: { params: Promi
 
 	const appraisalRepo = new AppraisalRepository();
 	const contractRepo = new ContractRepository();
-	const [{ data: appraisalCycle, error: appraisalCycleError }, { data: contractData, error: contractError }] = await Promise.all([appraisalRepo.getCycleById(Number(id)), contractRepo.getById(org, Number(contract))]);
+	const [{ data: appraisalCycle, error: appraisalCycleError }, { data: contractData, error: contractError }] = await Promise.all([appraisalRepo.getCycleById(Number(id)), contractRepo.getByIdWithProfile(org, Number(contract))]);
 
 	if (contractError || !contractData) {
 		return <div className="flex h-56 w-full items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">Error: {contractError?.message}</div>;

@@ -89,11 +89,10 @@ export class ContractRepository implements IContractRepository {
 		return { data: data as unknown as ContractWithRelations[], error };
 	}
 
-	async getByIdWithProfile(org: string, id: number | string): Promise<ContractWithProfile | null> {
+	async getByIdWithProfile(org: string, id: number | string) {
 		const supabase = await createClient();
 		const { data, error } = await supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*))').match({ org, id }).single();
-		if (error) return null;
-		return data as unknown as ContractWithProfile;
+		return { data: data as ContractWithProfile, error };
 	}
 
 	async getAllByOrgWithProfile({ org, status, team }: { org: string; status?: Tables<'contracts'>['status']; team?: number }) {
