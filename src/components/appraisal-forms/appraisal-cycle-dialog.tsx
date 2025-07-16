@@ -33,6 +33,7 @@ interface props {
 
 export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, noAction = false, isOpen, setIsOpen }: props) => {
 	const [isUpdatingAppraisal, setAppraisalUpdateState] = useState(false);
+	const [isSheetOpen, setIsSheetOpen] = useState(isOpen || false);
 	const [questionTemplates, setQuestionTemplates] = useState<Tables<'question_templates'>[] | null>(null);
 	const router = useRouter();
 
@@ -89,6 +90,10 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 	});
 
 	useEffect(() => {
+		setIsSheetOpen(isOpen || false);
+	}, [isOpen]);
+
+	useEffect(() => {
 		const fetchTemplates = async () => {
 			try {
 				const templates = await getQuestionTemplates({ org });
@@ -98,10 +103,10 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 			}
 		};
 
-		if (isOpen) {
+		if (isSheetOpen) {
 			fetchTemplates();
 		}
-	}, [isOpen, org]);
+	}, [isSheetOpen, org]);
 
 	const onSubmit = async (values: z.infer<typeof formSchema>) => {
 		setAppraisalUpdateState(true);
@@ -137,7 +142,12 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 	};
 
 	return (
-		<Sheet open={isOpen} onOpenChange={setIsOpen || (() => {})}>
+		<Sheet
+			open={isSheetOpen}
+			onOpenChange={state => {
+				setIsSheetOpen(state);
+				setIsOpen && setIsOpen(state);
+			}}>
 			{!noAction && <SheetTrigger asChild>{children ? children : <Button variant="default">Create Appraisal Cycle</Button>}</SheetTrigger>}
 
 			<SheetContent className="w-full overflow-auto pb-24 sm:max-w-md">
