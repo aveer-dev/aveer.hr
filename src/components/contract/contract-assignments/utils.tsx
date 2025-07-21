@@ -114,12 +114,12 @@ export const getLeaveRequests = async ({ manager, contract, org, status }: { sta
 			// Use request's levels if they exist, otherwise use default levels
 			const levels = timeoff.levels?.length ? timeoff.levels : defaultLevels;
 
+			// For managers: include if it's not their own request AND (they manage the team OR they're in approval levels)
+			const isManager = manager && manager.person !== timeoff.contract.id && (timeoff.contract.team == (contract.team?.id || contract.team) || levels.find(level => level.id == String(contract.id)));
+			const isDirectReport = timeoff.contract.direct_report == contract.id;
+
 			// Determine if request should be included based on manager status
-			const shouldInclude = manager
-				? // For managers: include if it's not their own request AND (they manage the team OR they're the direct report OR they're in approval levels)
-					manager.person !== timeoff.contract.id && (timeoff.contract.team == (contract.team?.id || contract.team) || timeoff.contract.direct_report == contract.id || levels.find(level => level.id == String(contract.id)))
-				: // For non-managers: include if they're in approval levels
-					levels.find(level => level.id == String(contract.id));
+			const shouldInclude = isManager || isDirectReport || levels.find(level => level.id == String(contract.id));
 
 			return shouldInclude ? timeoff : null;
 		}) || []
@@ -161,12 +161,11 @@ export const getBoardingRequests = async ({ manager, contract, org }: { manager?
 			// Use request's levels if they exist, otherwise use default levels
 			const levels: any[] = boarding.levels?.length ? boarding.levels : defaultLevels;
 
+			const isManager = manager && manager.person !== boarding.contract.id && (boarding.contract.team == (contract.team?.id || contract.team) || levels.find(level => level.id == contract.id));
+			const isDirectReport = boarding.contract.direct_report == contract.id;
+
 			// Determine if request should be included based on manager status
-			const shouldInclude = manager
-				? // For managers: include if it's not their own request AND (they manage the team OR they're the direct report OR they're in approval levels)
-					manager.person !== boarding.contract.id && (boarding.contract.team == (contract.team?.id || contract.team) || boarding.contract.direct_report == contract.id || levels.find(level => level.id == contract.id))
-				: // For non-managers: include if they're in approval levels
-					levels.find(level => level.id == contract.id);
+			const shouldInclude = isManager || isDirectReport || levels.find(level => level.id == contract.id);
 
 			return shouldInclude ? boarding : null;
 		}) || []
