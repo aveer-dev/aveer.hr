@@ -9,7 +9,7 @@ export default async function OrgChartPage(props: { params: Promise<{ org: strin
 
 	const [{ data: teams, error: teamsError }, { data: people, error: peopleError }, { data: managers, error: managersError }] = await Promise.all([
 		supabase.from('teams').select('id, name').match({ org }),
-		supabase.from('contracts').select('id, job_title, team, direct_report, profile:profiles!contracts_profile_fkey(id, first_name, last_name)').match({ org }),
+		supabase.from('contracts').select('id, job_title, team, direct_report, profile:profiles!contracts_profile_fkey(id, first_name, last_name)').match({ org, status: 'signed' }),
 		supabase.from('managers').select('id, team:teams!managers_team_fkey(id, name), profile:profiles!managers_profile_fkey(first_name, last_name), person(id, team, job_title, direct_report)').match({ org })
 	]);
 
