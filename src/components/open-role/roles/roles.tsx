@@ -33,14 +33,16 @@ export const Roles = async ({ orgId, type }: props) => {
 		return (
 			<div className="flex min-h-[50vh] flex-col items-center justify-center gap-10 text-center">
 				<div className="grid gap-3">
-					<p className="text-base font-bold">You do not have any open roles yet</p>
-					<p className="text-xs text-muted-foreground">Will you like to create one?</p>
+					<p className="text-base font-bold">{type == 'role' ? 'You do not have any open roles yet' : 'There are no open roles at the moment'}</p>
+					<p className="text-xs text-muted-foreground">{type == 'role' ? 'Will you like to create one?' : 'Please check back later'}</p>
 				</div>
 
-				<Link href={'./open-roles/new'} className={cn(buttonVariants(), 'gap-4')}>
-					<Plus size={12} />
-					Create role
-				</Link>
+				{type == 'role' && (
+					<Link href={'./open-roles/new'} className={cn(buttonVariants(), 'gap-4')}>
+						<Plus size={12} />
+						Create role
+					</Link>
+				)}
 			</div>
 		);
 	}
