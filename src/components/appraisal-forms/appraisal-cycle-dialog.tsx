@@ -14,12 +14,13 @@ import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Info } from 'lucide-react';
+import { CheckCircle, Info, ListChecks } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Textarea } from '../ui/textarea';
 import { DeleteAppraisalCycle } from './delete-appraisal-cycle';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 interface props {
 	org: string;
@@ -30,6 +31,21 @@ interface props {
 	isOpen?: boolean;
 	setIsOpen?: (isOpen: boolean) => void;
 }
+
+const appraisalTypes = [
+	{
+		name: 'Objectives and Goals Accessment',
+		value: 'objectives_goals_accessment',
+		description: 'Employees will be asked to provide their objectives, they and their manager will score them, and provide feedback on their performance.',
+		icon: ListChecks
+	},
+	{
+		name: 'Direct Score',
+		value: 'direct_score',
+		description: 'Employees and managers will be asked to score themselves on a scale of 1 to 5, with feedback on their performance.',
+		icon: CheckCircle
+	}
+];
 
 export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, noAction = false, isOpen, setIsOpen }: props) => {
 	const [isUpdatingAppraisal, setAppraisalUpdateState] = useState(false);
@@ -54,7 +70,8 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 			manager_review_due_date: z.string(),
 			question_template: z.number(),
 			name: z.string().min(1, { message: 'Name is required' }),
-			description: z.string().optional()
+			description: z.string().optional(),
+			type: z.enum(['objectives_goals_accessment', 'direct_score'])
 		})
 		.refine(data => new Date(data.end_date) > new Date(data.start_date), { message: 'End date must be after start date', path: ['end_date'] })
 		.refine(
@@ -85,7 +102,8 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 			manager_review_due_date: cycle?.manager_review_due_date || new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
 			question_template: cycle?.question_template,
 			name: cycle?.name || '',
-			description: cycle?.description || ''
+			description: cycle?.description || '',
+			type: cycle?.type || 'objectives_goals_accessment'
 		}
 	});
 
@@ -99,7 +117,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 				const templates = await getQuestionTemplates({ org });
 				setQuestionTemplates(templates);
 			} catch (error) {
-				console.error('Error fetching question templates:', error);
+				toast.error('Error fetching question templates', { description: error instanceof Error ? error?.message : 'Unknown error' });
 			}
 		};
 
@@ -150,7 +168,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 			}}>
 			{!noAction && <SheetTrigger asChild>{children ? children : <Button variant="default">Create Appraisal Cycle</Button>}</SheetTrigger>}
 
-			<SheetContent className="w-full overflow-auto pb-24 sm:max-w-md">
+			<SheetContent className="w-full overflow-auto pb-24 sm:max-w-lg">
 				<SheetHeader className="mb-6">
 					<SheetTitle>Appraisal Cycle Settings</SheetTitle>
 					<SheetDescription>Configure your organization&apos;s appraisal cycle settings</SheetDescription>
@@ -188,6 +206,43 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 									<FormLabel>Description</FormLabel>
 									<FormControl>
 										<Textarea placeholder="End of year performance review cycle" {...field} readOnly={readOnly} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="type"
+							render={({ field }) => (
+								<FormItem className="space-y-3">
+									<FormLabel>Appraisal Type</FormLabel>
+									<FormControl>
+										<RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex items-stretch gap-4">
+											{appraisalTypes.map(type => (
+												<FormItem className="group w-full space-y-0" key={type.value}>
+													<FormControl className="pointer-events-none absolute m-0 h-0 w-0 translate-x-[-100%] p-0 opacity-0">
+														<RadioGroupItem value={type.value} />
+													</FormControl>
+
+													<FormLabel className="relative flex h-full w-full flex-col gap-3 rounded-md border bg-background p-4 text-left font-normal backdrop-blur-3xl transition-colors duration-500 hover:!bg-accent group-has-[input:checked]:border-muted-foreground group-has-[input:checked]:bg-accent/50">
+														<type.icon size={16} />
+														<div className="flex flex-col gap-1">
+															<div className="text-sm font-medium">{type.name}</div>
+															<Tooltip>
+																<TooltipTrigger asChild className="absolute right-2 top-2">
+																	<Info className="ml-1 inline-block" size={12} />
+																</TooltipTrigger>
+																<TooltipContent className="max-w-xs">
+																	<p>Employees will be asked to provide their objectives, they and their manager will score them, and provide feedback on their performance.</p>
+																</TooltipContent>
+															</Tooltip>
+														</div>
+													</FormLabel>
+												</FormItem>
+											))}
+										</RadioGroup>
 									</FormControl>
 									<FormMessage />
 								</FormItem>

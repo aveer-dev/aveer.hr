@@ -90,7 +90,7 @@ export const AppraisalReviewSelector = ({
 	};
 
 	return (
-		<>
+		<section className="border-r pr-10">
 			<div className="mt-4 w-full md:hidden">
 				<Select
 					onValueChange={value => {
@@ -162,6 +162,6 @@ export const AppraisalReviewSelector = ({
 					</div>
 				)}
 			</div>
-		</>
+		</section>
 	);
 };

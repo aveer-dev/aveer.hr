@@ -12,6 +12,7 @@ export interface IAppraisalRepository {
 	// Appraisal Answers
 	getAnswerById(id: number): Promise<{ data: Tables<'appraisal_answers'> | null; error: PostgrestError | null }>;
 	getAllAnswersForCycle(cycleId: number): Promise<{ data: Tables<'appraisal_answers'>[] | null; error: PostgrestError | null }>;
+	getAllOrgAnswers(org: string): Promise<{ data: Tables<'appraisal_answers'>[] | null; error: PostgrestError | null }>;
 	createAnswer(payload: TablesInsert<'appraisal_answers'>): Promise<{ data: Tables<'appraisal_answers'> | null; error: PostgrestError | null }>;
 	updateAnswer(id: number, payload: TablesUpdate<'appraisal_answers'>): Promise<{ data: Tables<'appraisal_answers'> | null; error: PostgrestError | null }>;
 	deleteAnswer(id: number): Promise<{ data: null; error: PostgrestError | null }>;

@@ -76,11 +76,16 @@ const config = {
 					to: {
 						height: '0'
 					}
+				},
+				'short-spin': {
+					from: { transform: 'rotate(0deg)' },
+					to: { transform: 'rotate(180deg)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'short-spin': 'short-spin .5s ease-in-out forwards'
 			}
 		}
 	},

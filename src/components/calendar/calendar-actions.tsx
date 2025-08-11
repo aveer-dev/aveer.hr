@@ -261,7 +261,7 @@ export const createCalendarEvent = async ({ calendar, payload, attendees, virtua
 			const gCalendarPayload: calendar_v3.Schema$Event = { summary: payload.summary, description: payload.description, location: payload.location, recurrence: [payload.recurrence as string], attendees, start: payload.start as any, end: payload.end as any };
 			if (virtual) gCalendarPayload.conferenceData = { createRequest: { requestId: uuid(), conferenceSolutionKey: { type: 'hangoutsMeet' } } };
 
-			event = await createGCalendarEvent({ calendarId: calendar.calendar_id, payload: gCalendarPayload, org: payload.org });
+			event = await createGCalendarEvent({ calendarId: calendar.calendar_id, payload: gCalendarPayload, org: payload.org as string });
 			if (!event.data.id) throw 'Unable to create calendar event';
 		}
 

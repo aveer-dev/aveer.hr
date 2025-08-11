@@ -20,13 +20,12 @@ import { LoadingSpinner } from '../ui/loader';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { Switch } from '../ui/switch';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../ui/tooltip';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 type QuestionGroup = 'growth_and_development' | 'company_values' | 'competencies' | 'private_manager_assessment' | 'objectives' | 'goal_scoring';
 
 interface Props {
 	appraisalCycle: Tables<'appraisal_cycles'>;
 	activeTab: string;
-	setActiveTab: (tab: 'objectives' | 'goal_scoring' | 'questions') => void;
+	setActiveTab: (tab: 'objectives' | 'goal_scoring' | 'questions' | 'direct_score') => void;
 	answer?: Tables<'appraisal_answers'> | null;
 	selectedReviewType: 'self' | 'manager' | 'summary';
 	isManager: boolean;
@@ -40,10 +39,43 @@ interface Props {
 	customGroupNames?: { id: string; name: string }[];
 }
 
+interface DirectScore {
+	score: number | null;
+	comment: string;
+}
+
 const isAppraisalSubmitted = (reviewType: 'self' | 'manager', answer?: Tables<'appraisal_answers'> | null): boolean => {
 	if (!answer) return false;
 	return reviewType === 'self' ? !!answer.employee_submission_date : !!answer.manager_submission_date;
 };
+
+const directScoreLabels = [
+	{
+		score: 1,
+		label: 'Poor',
+		description: 'The employee has performed poorly and needs to improve.'
+	},
+	{
+		score: 2,
+		label: 'Fair',
+		description: 'The employee has performed fairly and needs to improve.'
+	},
+	{
+		score: 3,
+		label: 'Good',
+		description: 'The employee has performed well and needs to improve.'
+	},
+	{
+		score: 4,
+		label: 'Very Good',
+		description: 'The employee has performed very well and needs to improve.'
+	},
+	{
+		score: 5,
+		label: 'Excellent',
+		description: 'The employee has performed exceptionally well and needs to improve.'
+	}
+];
 
 const canUpdateAppraisal = (reviewType: 'self' | 'manager', isManager: boolean, isSelectedEmplyeesManager: boolean, selectedEmployee: Tables<'contracts'>, contract: Tables<'contracts'>, dueDatePassed: boolean, answer?: Tables<'appraisal_answers'> | null): boolean => {
 	// Then check due date
@@ -78,6 +110,8 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	const [enableWeights, setEnableWeights] = useState<boolean>(false);
 	const [localAnswerId, setLocalAnswerId] = useState<number | undefined>(answer?.id);
 	const [focusedQuestionId, setFocusedQuestionId] = useState<number | null>(null);
+	const [directScore, setDirectScore] = useState<DirectScore>((answer?.direct_score as unknown as DirectScore) || { score: null, comment: '' });
+	const [directManagerScore, setDirectManagerScore] = useState<DirectScore>((answer?.manager_direct_score as unknown as DirectScore) || { score: null, comment: '' });
 
 	const canUpdateSelfReview = useMemo(
 		() => canUpdateAppraisal('self', isManager, isSelectedEmplyeesManager, selectedEmployee, contract, new Date(appraisalCycle.self_review_due_date) < new Date(), answer),
@@ -107,10 +141,15 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 	const isSelfReviewDueDatePassed = new Date(appraisalCycle.self_review_due_date) < new Date();
 	const isManagerReviewDueDatePassed = new Date(appraisalCycle.manager_review_due_date) < new Date();
+	const canViewSelfAnswer = selectedEmployee.id === contract.id || answer?.employee_submission_date !== null;
+	const canViewManagerAnswer = answer?.manager_submission_date !== null || isSelectedEmplyeesManager;
+	const canEditSelfAnswer = selectedEmployee.id === contract.id && !isSelfReviewDueDatePassed;
+	const canEditManagerAnswer = isManager && selectedEmployee.id !== contract.id && !isManagerReviewDueDatePassed && isSelectedEmplyeesManager;
 
-	const autoSaveAnswerDebounced = useDebounce(async (questionId: number, value: any) => {
+	const autoSaveAnswerDebounced = useDebounce(async ({ questionId, value }: { questionId?: number; value: any }) => {
 		try {
-			setSavingStates(prev => ({ ...prev, [questionId]: true }));
+			if (questionId) setSavingStates(prev => ({ ...prev, [questionId]: true }));
+			if (directScore) setSavingStates(prev => ({ ...prev, direct_score: true }));
 
 			const payload: Parameters<typeof autoSaveAnswer>[0] = {
 				answerId: localAnswerId,
@@ -119,7 +158,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 				org,
 				appraisalCycleId: appraisalCycle.id,
 				contractId: selectedEmployee.id,
-				answerType: selectedReviewType
+				answerOwner: selectedReviewType
 			};
 
 			const savePromise = autoSaveAnswer(payload);
@@ -135,9 +174,10 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 				setLocalAnswerId(result[0].id);
 			}
 		} catch (error) {
-			console.error('Failed to auto-save answer:', error);
+			toast.error('Failed to save answer', { description: error instanceof Error ? error.message : 'An unknown error occurred' });
 		} finally {
-			setSavingStates(prev => ({ ...prev, [questionId]: false }));
+			if (questionId) setSavingStates(prev => ({ ...prev, [questionId]: false }));
+			if (directScore) setSavingStates(prev => ({ ...prev, direct_score: false }));
 		}
 	}, 1000);
 
@@ -248,19 +288,21 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 		}
 	};
 
-	const handleAnswerChange = (questionId: number, value: any) => {
+	const handleAnswerChange = ({ questionId, value }: { questionId?: number; value: any }) => {
 		if (selectedReviewType === 'manager') {
 			if (!canUpdateManagerReview) {
 				toast.error(isAppraisalSubmitted('manager', answer) ? 'Cannot update answers after submission' : isManagerReviewDueDatePassed ? 'Cannot update answers after manager review due date has passed' : 'You do not have permission to update this review');
 				return;
 			}
 
-			setManagerAnswers(prev => ({
-				...prev,
-				[questionId]: value
-			}));
+			if (questionId) {
+				setManagerAnswers(prev => ({
+					...prev,
+					[questionId]: value
+				}));
+			}
 
-			autoSaveAnswerDebounced(questionId, value);
+			autoSaveAnswerDebounced({ questionId, value });
 			return;
 		}
 
@@ -269,12 +311,14 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 			return;
 		}
 
-		setAnswers(prev => ({
-			...prev,
-			[questionId]: value
-		}));
+		if (questionId) {
+			setAnswers(prev => ({
+				...prev,
+				[questionId]: value
+			}));
+		}
 
-		autoSaveAnswerDebounced(questionId, value);
+		autoSaveAnswerDebounced({ questionId, value });
 	};
 
 	const getUnansweredRequiredQuestions = () => {
@@ -320,6 +364,21 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 		if (unansweredQuestions.length > 0) {
 			toast.error('You are yet to answer some required questions.');
 			return;
+		}
+
+		// check appraisal cycle type, if it is direct score, check if direct score is filled
+		if (appraisalCycle.type === 'direct_score') {
+			if (!directScore.score) {
+				toast.error('Please fill in the direct score before submitting.');
+				return;
+			}
+		}
+
+		if (appraisalCycle.type === 'objectives_goals_accessment') {
+			if (!objectives.length) {
+				toast.error('Please add some objectives before submitting.');
+				return;
+			}
 		}
 
 		// Check if all objectives have at least one goal
@@ -402,6 +461,11 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	};
 
 	const handleNext = () => {
+		if (appraisalCycle.type === 'direct_score' && activeTab === 'direct_score') {
+			setActiveTab('questions');
+			return;
+		}
+
 		if (activeTab === 'objectives') {
 			setActiveTab('goal_scoring');
 			return;
@@ -415,6 +479,11 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 	// Update handlePrevious function
 	const handlePrevious = () => {
+		if (appraisalCycle.type === 'direct_score' && activeTab === 'questions') {
+			setActiveTab('direct_score');
+			return;
+		}
+
 		if (activeTab === 'questions') {
 			setActiveTab('goal_scoring');
 			return;
@@ -449,6 +518,11 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 		if (!answer) {
 			setAnswers({});
 			setManagerAnswers({});
+			setObjectives([]);
+			setEnableWeights(false);
+			setDirectScore({ score: null, comment: '' });
+			setDirectManagerScore({ score: null, comment: '' });
+
 			return;
 		}
 
@@ -473,7 +547,10 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 		setAnswers(_answers);
 		setManagerAnswers(_managerAnswers);
+
 		setObjectives((answer.objectives as unknown as Objective[]) || []);
+		setDirectManagerScore((answer?.manager_direct_score as unknown as DirectScore) ?? { score: null, comment: '' });
+		setDirectScore((answer?.direct_score as unknown as DirectScore) ?? { score: null, comment: '' });
 		setEnableWeights((answer.objectives as unknown as Objective[])?.some(obj => obj?.weight) || false);
 
 		const initialGoalScores: GOAL_SCORE[] = [];
@@ -544,16 +621,30 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 		return hasHighlightedQuestion && !isQuestionHighlighted(questionId);
 	};
 
+	const isQuestionInGroupHighlighted = (group: QuestionGroup) => {
+		const hasHighlightedQuestion = groupedQuestions[group].some(q => isQuestionHighlighted(q.id));
+		return hasHighlightedQuestion;
+	};
+
 	return (
 		<div className="mx-auto flex w-full max-w-3xl flex-col">
 			<Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'objectives' | 'goal_scoring' | 'questions')} className="w-full space-y-10">
 				<TabsList className="no-scrollbar mb-10 flex h-[unset] w-fit max-w-full items-start justify-start overflow-x-auto p-2">
-					<TabsTrigger value="objectives" className="relative whitespace-nowrap">
-						Objectives & Goals
-					</TabsTrigger>
-					<TabsTrigger value="goal_scoring" className="relative whitespace-nowrap">
-						Goal Scoring
-					</TabsTrigger>
+					{appraisalCycle.type === 'objectives_goals_accessment' && (
+						<>
+							<TabsTrigger value="objectives" className="relative whitespace-nowrap">
+								Objectives & Goals
+							</TabsTrigger>
+							<TabsTrigger value="goal_scoring" className="relative whitespace-nowrap">
+								Goal Scoring
+							</TabsTrigger>
+						</>
+					)}
+					{appraisalCycle.type === 'direct_score' && (
+						<TabsTrigger value="direct_score" className="relative whitespace-nowrap">
+							Score
+						</TabsTrigger>
+					)}
 					<TabsTrigger value="questions" className="relative whitespace-nowrap">
 						Appraisal Questions
 					</TabsTrigger>
@@ -886,27 +977,95 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 					</TabsContent>
 				)}
 
+				{activeTab === 'direct_score' && (
+					<TabsContent className="min-h-36 space-y-10" key="direct_score" value="direct_score">
+						<div className="space-y-6">
+							<h3 className="text-base font-medium">Score {isSelectedEmplyeesManager ? `${(selectedEmployee.profile as any)?.first_name}` : 'Yourself'}</h3>
+
+							<div className="space-y-2">
+								<Label htmlFor="comment">Score</Label>
+								<div className="flex items-center gap-8">
+									{directScoreLabels.map(label => (
+										<div key={label.score} className="flex flex-col items-center justify-center gap-2">
+											<Button
+												disabled={selectedReviewType === 'self' ? !canEditSelfAnswer : !canEditManagerAnswer}
+												className={cn(
+													'h-16 w-16 disabled:opacity-100',
+													selectedReviewType === 'self' ? (directScore.score === label.score ? 'border border-green-400' : '') : directManagerScore.score === label.score && canViewManagerAnswer ? 'border border-green-400' : ''
+												)}
+												size="icon"
+												variant={
+													selectedReviewType === 'self' ? (directScore.score === label.score && canViewSelfAnswer ? 'secondary_success' : 'outline') : directManagerScore.score === label.score && canViewManagerAnswer ? 'secondary_success' : 'outline'
+												}
+												onClick={() => {
+													handleAnswerChange({ value: { ...directScore, score: label.score } });
+													if (selectedReviewType === 'self') {
+														setDirectScore(prev => ({ ...prev, score: label.score }));
+													} else {
+														setDirectManagerScore(prev => ({ ...prev, score: label.score }));
+													}
+												}}>
+												{label.score}
+											</Button>
+
+											<div className="flex items-center gap-2">
+												<div className="text-xs text-support">{label.label}</div>
+												{label.description && (
+													<TooltipProvider key={label.score}>
+														<Tooltip>
+															<TooltipTrigger>
+																<Info size={12} className="text-muted-foreground" />
+															</TooltipTrigger>
+															<TooltipContent>
+																<div className="max-w-64 text-xs">{label.description}</div>
+															</TooltipContent>
+														</Tooltip>
+													</TooltipProvider>
+												)}
+											</div>
+										</div>
+									))}
+								</div>
+							</div>
+
+							<div className="space-y-2">
+								<Label htmlFor="comment">Comment</Label>
+								<Textarea
+									disabled={selectedReviewType === 'self' ? !canEditSelfAnswer : !canEditManagerAnswer}
+									id="comment"
+									placeholder="Add a comment about the score..."
+									className="min-h-[100px] w-full rounded-md border p-2 disabled:cursor-default disabled:opacity-100"
+									value={selectedReviewType === 'self' ? directScore.comment : directManagerScore.comment}
+									onChange={e => {
+										handleAnswerChange({ value: { ...directScore, comment: e.target.value } });
+										if (selectedReviewType === 'self') {
+											setDirectScore(prev => ({ ...prev, comment: e.target.value }));
+										} else {
+											setDirectManagerScore(prev => ({ ...prev, comment: e.target.value }));
+										}
+									}}
+								/>
+							</div>
+						</div>
+					</TabsContent>
+				)}
+
 				{activeTab === 'questions' && (
 					<TabsContent className="min-h-36 space-y-10" key="questions" value="questions">
 						{questionGroups
 							.filter(group => group !== 'objectives' && group !== 'goal_scoring')
 							.map(group => {
-								const canViewSelfAnswer = selectedEmployee.id === contract.id || answer?.employee_submission_date !== null;
-								const canViewManagerAnswer = answer?.manager_submission_date !== null || isSelectedEmplyeesManager;
-								const canEditSelfAnswer = selectedEmployee.id === contract.id && !isSelfReviewDueDatePassed;
-								const canEditManagerAnswer = isManager && selectedEmployee.id !== contract.id && !isManagerReviewDueDatePassed && isSelectedEmplyeesManager;
-
 								// only show groups the user has access to
 								if (!shouldShowGroup(group)) return null;
 
 								/* group */
 								return (
-									<Card key={group} className="border-border/30 bg-[hsl(0deg_0%_97%)] shadow-none drop-shadow-sm">
-										<CardHeader className="mb-6 border-b border-border py-4">
-											<CardTitle className="text-2xl font-extralight">{getGroupLabel(group)}</CardTitle>
-										</CardHeader>
+									<div key={group} className="">
+										{/* <CardHeader className="mb-6 border-b border-border py-4"> */}
+										<h2 className={cn('text-sm font-medium transition-all duration-500', !isQuestionInGroupHighlighted(group) && focusedQuestionId && 'opacity-80 blur-md')}>{getGroupLabel(group)}</h2>
+										{/* </CardHeader> */}
 
-										<CardContent className="space-y-10 px-2">
+										<div className="mt-4 space-y-10">
 											{groupedQuestions[group].map(currentQuestion => {
 												// Only render if the question should be shown for this employee's team
 												if (!shouldShowQuestion(currentQuestion)) return null;
@@ -915,14 +1074,14 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 												return (
 													<div
 														key={currentQuestion.id}
-														className={cn('space-y-4 rounded-lg p-4 outline-none transition-all duration-500', isQuestionHighlighted(currentQuestion.id) && 'bg-white ring-2 ring-ring/10', isQuestionDimmed(currentQuestion.id) && 'opacity-30')}
+														className={cn('space-y-4 outline-none transition-all duration-500', isQuestionHighlighted(currentQuestion.id) && 'bg-white', isQuestionDimmed(currentQuestion.id) && 'opacity-80 blur-md')}
 														onMouseEnter={() => setFocusedQuestionId(currentQuestion.id)}
 														onMouseLeave={() => setFocusedQuestionId(null)}
 														onFocus={() => setFocusedQuestionId(currentQuestion.id)}
 														onBlur={() => setFocusedQuestionId(null)}
 														tabIndex={0}>
 														<div className="flex items-center gap-2">
-															<h3 className="text-base font-normal">
+															<h3 className="text-sm font-light leading-6">
 																{selectedReviewType === 'manager' ? currentQuestion.manager_question : currentQuestion.question} {currentQuestion.required && <span className="text-red-500">*</span>}
 															</h3>
 
@@ -972,7 +1131,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																				(!canEditSelfAnswer && selectedReviewType === 'self') || (!canEditManagerAnswer && selectedReviewType === 'manager') ? 'disabled:cursor-default disabled:opacity-100' : ''
 																			)}
 																			value={selectedReviewType === 'self' ? answers[currentQuestion.id] || '' : managerAnswers[currentQuestion.id] || ''}
-																			onChange={e => handleAnswerChange(currentQuestion.id, e.target.value)}
+																			onChange={e => handleAnswerChange({ questionId: currentQuestion.id, value: e.target.value })}
 																			disabled={(selectedReviewType === 'self' && !canEditSelfAnswer) || (selectedReviewType === 'manager' && !canEditManagerAnswer)}
 																			readOnly={(selectedReviewType === 'self' && !canEditSelfAnswer) || (selectedReviewType === 'manager' && !canEditManagerAnswer)}
 																		/>
@@ -1008,7 +1167,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																						? 'border border-green-400'
 																						: ''
 																			)}
-																			onClick={() => handleAnswerChange(currentQuestion.id, 'yes')}>
+																			onClick={() => handleAnswerChange({ questionId: currentQuestion.id, value: 'yes' })}>
 																			Yes
 																		</Button>
 																		<Button
@@ -1032,7 +1191,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																						? 'border border-green-400'
 																						: ''
 																			)}
-																			onClick={() => handleAnswerChange(currentQuestion.id, 'no')}>
+																			onClick={() => handleAnswerChange({ questionId: currentQuestion.id, value: 'no' })}>
 																			No
 																		</Button>
 																	</div>
@@ -1048,7 +1207,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																			const description = isObj && typeof labelObj.description === 'string' ? labelObj.description : undefined;
 
 																			return label ? (
-																				<div className="flex flex-col items-center justify-center gap-2">
+																				<div key={num} className="flex flex-col items-center justify-center gap-2">
 																					<Button
 																						disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}
 																						className={cn(
@@ -1071,7 +1230,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																									? 'secondary_success'
 																									: 'outline'
 																						}
-																						onClick={() => handleAnswerChange(currentQuestion.id, num)}>
+																						onClick={() => handleAnswerChange({ questionId: currentQuestion.id, value: num })}>
 																						{num}
 																					</Button>
 
@@ -1115,7 +1274,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																								? 'secondary_success'
 																								: 'outline'
 																					}
-																					onClick={() => handleAnswerChange(currentQuestion.id, num)}>
+																					onClick={() => handleAnswerChange({ questionId: currentQuestion.id, value: num })}>
 																					{num}
 																				</Button>
 																			);
@@ -1151,7 +1310,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 																					if (selectedReviewType === 'self' ? isSelfReviewDueDatePassed : isManagerReviewDueDatePassed) return;
 																					const currentAnswers = (selectedReviewType === 'self' ? answers[currentQuestion.id] || [] : managerAnswers[currentQuestion.id] || []) as string[];
 																					const newAnswers = currentAnswers.length > 0 ? (currentAnswers.includes(option) ? currentAnswers.filter(a => a !== option) : [...currentAnswers, option]) : [option];
-																					handleAnswerChange(currentQuestion.id, newAnswers);
+																					handleAnswerChange({ questionId: currentQuestion.id, value: newAnswers });
 																				}}
 																				disabled={selectedReviewType === 'self' ? !canEditSelfAnswer || currentQuestion.group === 'private_manager_assessment' : !canEditManagerAnswer}>
 																				{option}
@@ -1164,8 +1323,8 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 													</div>
 												);
 											})}
-										</CardContent>
-									</Card>
+										</div>
+									</div>
 								);
 							})}
 					</TabsContent>
@@ -1187,7 +1346,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 						</Button>
 					) : (
 						<Button onClick={handleNext} className="gap-4">
-							`Next
+							Next
 							<ChevronRight size={14} />
 						</Button>
 					)}

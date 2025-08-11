@@ -273,7 +273,7 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 											{isScaleOnlyGroup && (
 												<TooltipProvider>
 													<Tooltip>
-														<TooltipTrigger className="!mt-0">
+														<TooltipTrigger type="button" className="!mt-0">
 															<Info size={12} className="text-muted-foreground" />
 														</TooltipTrigger>
 

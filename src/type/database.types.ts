@@ -40,12 +40,14 @@ export type Database = {
           appraisal_cycle_id: number | null
           contract_id: number | null
           created_at: string | null
+          direct_score: Json | null
           employee_goal_score: Json[] | null
           employee_submission_date: string | null
           goals: Json[] | null
           id: number
           manager_answers: Json[]
           manager_contract_id: number | null
+          manager_direct_score: Json | null
           manager_goal_score: Json[] | null
           manager_submission_date: string | null
           objectives: Json[] | null
@@ -58,12 +60,14 @@ export type Database = {
           appraisal_cycle_id?: number | null
           contract_id?: number | null
           created_at?: string | null
+          direct_score?: Json | null
           employee_goal_score?: Json[] | null
           employee_submission_date?: string | null
           goals?: Json[] | null
           id?: never
           manager_answers?: Json[]
           manager_contract_id?: number | null
+          manager_direct_score?: Json | null
           manager_goal_score?: Json[] | null
           manager_submission_date?: string | null
           objectives?: Json[] | null
@@ -76,12 +80,14 @@ export type Database = {
           appraisal_cycle_id?: number | null
           contract_id?: number | null
           created_at?: string | null
+          direct_score?: Json | null
           employee_goal_score?: Json[] | null
           employee_submission_date?: string | null
           goals?: Json[] | null
           id?: never
           manager_answers?: Json[]
           manager_contract_id?: number | null
+          manager_direct_score?: Json | null
           manager_goal_score?: Json[] | null
           manager_submission_date?: string | null
           objectives?: Json[] | null
@@ -127,6 +133,7 @@ export type Database = {
           question_template: number
           self_review_due_date: string
           start_date: string
+          type: Database["public"]["Enums"]["appraisal_type"]
         }
         Insert: {
           created_at?: string
@@ -141,6 +148,7 @@ export type Database = {
           question_template: number
           self_review_due_date: string
           start_date?: string
+          type?: Database["public"]["Enums"]["appraisal_type"]
         }
         Update: {
           created_at?: string
@@ -155,6 +163,7 @@ export type Database = {
           question_template?: number
           self_review_due_date?: string
           start_date?: string
+          type?: Database["public"]["Enums"]["appraisal_type"]
         }
         Relationships: [
           {
@@ -385,57 +394,102 @@ export type Database = {
       calendar_events: {
         Row: {
           attendees: Json
+          birthday_properties: Json | null
           calendar_id: string | null
+          conference_data: Json | null
           created_at: string
+          creator: Json | null
           description: string | null
           end: Json
           entity: number | null
+          etag: string | null
           event_id: string | null
+          event_type: Database["public"]["Enums"]["event_type"] | null
+          extended_properties: Json | null
+          iCalUID: string | null
           id: number
+          kind: string | null
           location: string | null
+          locked: boolean | null
           meeting_link: string | null
-          org: string
+          org: string | null
+          organizer: Json | null
+          profile: string | null
           recurrence: string | null
+          recurring_eventId: string | null
           reminders: Json[] | null
+          source: Json | null
           start: Json
+          status: Database["public"]["Enums"]["event_status"] | null
           summary: string
           time_zone: string | null
+          visibility: Database["public"]["Enums"]["event_visibility"] | null
         }
         Insert: {
           attendees: Json
+          birthday_properties?: Json | null
           calendar_id?: string | null
+          conference_data?: Json | null
           created_at?: string
+          creator?: Json | null
           description?: string | null
           end: Json
           entity?: number | null
+          etag?: string | null
           event_id?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"] | null
+          extended_properties?: Json | null
+          iCalUID?: string | null
           id?: number
+          kind?: string | null
           location?: string | null
+          locked?: boolean | null
           meeting_link?: string | null
-          org: string
+          org?: string | null
+          organizer?: Json | null
+          profile?: string | null
           recurrence?: string | null
+          recurring_eventId?: string | null
           reminders?: Json[] | null
+          source?: Json | null
           start: Json
+          status?: Database["public"]["Enums"]["event_status"] | null
           summary: string
           time_zone?: string | null
+          visibility?: Database["public"]["Enums"]["event_visibility"] | null
         }
         Update: {
           attendees?: Json
+          birthday_properties?: Json | null
           calendar_id?: string | null
+          conference_data?: Json | null
           created_at?: string
+          creator?: Json | null
           description?: string | null
           end?: Json
           entity?: number | null
+          etag?: string | null
           event_id?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"] | null
+          extended_properties?: Json | null
+          iCalUID?: string | null
           id?: number
+          kind?: string | null
           location?: string | null
+          locked?: boolean | null
           meeting_link?: string | null
-          org?: string
+          org?: string | null
+          organizer?: Json | null
+          profile?: string | null
           recurrence?: string | null
+          recurring_eventId?: string | null
           reminders?: Json[] | null
+          source?: Json | null
           start?: Json
+          status?: Database["public"]["Enums"]["event_status"] | null
           summary?: string
           time_zone?: string | null
+          visibility?: Database["public"]["Enums"]["event_visibility"] | null
         }
         Relationships: [
           {
@@ -459,6 +513,13 @@ export type Database = {
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
           },
+          {
+            foreignKeyName: "calendar_events_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       calendar_platform_tokens: {
@@ -466,8 +527,9 @@ export type Database = {
           created_at: string
           entity: number | null
           id: number
-          org: string
+          org: string | null
           platform: Database["public"]["Enums"]["calendar_platform"] | null
+          profile: string | null
           refresh_token: string
           token: string
         }
@@ -475,8 +537,9 @@ export type Database = {
           created_at?: string
           entity?: number | null
           id?: number
-          org: string
+          org?: string | null
           platform?: Database["public"]["Enums"]["calendar_platform"] | null
+          profile?: string | null
           refresh_token: string
           token: string
         }
@@ -484,8 +547,9 @@ export type Database = {
           created_at?: string
           entity?: number | null
           id?: number
-          org?: string
+          org?: string | null
           platform?: Database["public"]["Enums"]["calendar_platform"] | null
+          profile?: string | null
           refresh_token?: string
           token?: string
         }
@@ -504,32 +568,87 @@ export type Database = {
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
           },
+          {
+            foreignKeyName: "calendar_platform_tokens_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       calendars: {
         Row: {
+          access_role:
+            | Database["public"]["Enums"]["calendar_access_type"]
+            | null
+          background_color: string | null
           calendar_id: string
+          color_id: string | null
+          conference_properties: Json | null
           created_at: string
+          default: boolean
+          default_reminders: Json[] | null
+          description: string | null
           entity: number | null
+          etag: string | null
+          foreground_color: string | null
+          hidden: boolean | null
           id: number
-          org: string
+          org: string | null
           platform: string
+          primary: boolean | null
+          profile: string | null
+          summary: string | null
+          time_zone: string | null
         }
         Insert: {
+          access_role?:
+            | Database["public"]["Enums"]["calendar_access_type"]
+            | null
+          background_color?: string | null
           calendar_id: string
+          color_id?: string | null
+          conference_properties?: Json | null
           created_at?: string
+          default?: boolean
+          default_reminders?: Json[] | null
+          description?: string | null
           entity?: number | null
+          etag?: string | null
+          foreground_color?: string | null
+          hidden?: boolean | null
           id?: number
-          org: string
+          org?: string | null
           platform: string
+          primary?: boolean | null
+          profile?: string | null
+          summary?: string | null
+          time_zone?: string | null
         }
         Update: {
+          access_role?:
+            | Database["public"]["Enums"]["calendar_access_type"]
+            | null
+          background_color?: string | null
           calendar_id?: string
+          color_id?: string | null
+          conference_properties?: Json | null
           created_at?: string
+          default?: boolean
+          default_reminders?: Json[] | null
+          description?: string | null
           entity?: number | null
+          etag?: string | null
+          foreground_color?: string | null
+          hidden?: boolean | null
           id?: number
-          org?: string
+          org?: string | null
           platform?: string
+          primary?: boolean | null
+          profile?: string | null
+          summary?: string | null
+          time_zone?: string | null
         }
         Relationships: [
           {
@@ -542,9 +661,16 @@ export type Database = {
           {
             foreignKeyName: "calendars_org_fkey"
             columns: ["org"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "organisations"
             referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "calendars_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1402,6 +1528,72 @@ export type Database = {
             columns: ["parent"]
             isOneToOne: false
             referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      google_calendar_webhooks: {
+        Row: {
+          calendar_id: string
+          channel_id: string
+          channel_token: string | null
+          created_at: string
+          expiration: string | null
+          id: number
+          last_notification: string | null
+          notification_count: number
+          org: string | null
+          profile: string | null
+          resource_id: string
+          resource_uri: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          calendar_id: string
+          channel_id: string
+          channel_token?: string | null
+          created_at?: string
+          expiration?: string | null
+          id?: number
+          last_notification?: string | null
+          notification_count?: number
+          org?: string | null
+          profile?: string | null
+          resource_id: string
+          resource_uri: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          calendar_id?: string
+          channel_id?: string
+          channel_token?: string | null
+          created_at?: string
+          expiration?: string | null
+          id?: number
+          last_notification?: string | null
+          notification_count?: number
+          org?: string | null
+          profile?: string | null
+          resource_id?: string
+          resource_uri?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_calendar_webhooks_org_fkey"
+            columns: ["org"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["subdomain"]
+          },
+          {
+            foreignKeyName: "google_calendar_webhooks_profile_fkey"
+            columns: ["profile"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -3061,6 +3253,80 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_processing_log: {
+        Row: {
+          calendar_id: string | null
+          channel_id: string
+          created_at: string
+          error_details: Json | null
+          error_message: string | null
+          event_id: string | null
+          event_type: string | null
+          events_created: number | null
+          events_deleted: number | null
+          events_processed: number | null
+          events_updated: number | null
+          id: number
+          operation: string | null
+          processed_at: string | null
+          processing_time_ms: number | null
+          resource_id: string | null
+          resource_state: string | null
+          status: string
+          webhook_id: number | null
+        }
+        Insert: {
+          calendar_id?: string | null
+          channel_id: string
+          created_at?: string
+          error_details?: Json | null
+          error_message?: string | null
+          event_id?: string | null
+          event_type?: string | null
+          events_created?: number | null
+          events_deleted?: number | null
+          events_processed?: number | null
+          events_updated?: number | null
+          id?: number
+          operation?: string | null
+          processed_at?: string | null
+          processing_time_ms?: number | null
+          resource_id?: string | null
+          resource_state?: string | null
+          status: string
+          webhook_id?: number | null
+        }
+        Update: {
+          calendar_id?: string | null
+          channel_id?: string
+          created_at?: string
+          error_details?: Json | null
+          error_message?: string | null
+          event_id?: string | null
+          event_type?: string | null
+          events_created?: number | null
+          events_deleted?: number | null
+          events_processed?: number | null
+          events_updated?: number | null
+          id?: number
+          operation?: string | null
+          processed_at?: string | null
+          processing_time_ms?: number | null
+          resource_id?: string | null
+          resource_state?: string | null
+          status?: string
+          webhook_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_processing_log_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "google_calendar_webhooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -3078,13 +3344,25 @@ export type Database = {
         Args: { p_profile_id: string; p_org: string }
         Returns: boolean
       }
+      cleanup_old_webhook_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       custom_access_token_hook: {
         Args: { event: Json }
         Returns: Json
       }
+      generate_unique_event_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       has_role_in_org: {
         Args: { org_id: string }
         Returns: boolean
+      }
+      mark_expired_webhooks: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {
@@ -3092,8 +3370,10 @@ export type Database = {
       app_role: "admin" | "roles_manager"
       app_role__old_version_to_be_dropped: "admin" | "roles_manager"
       appraisal_status: "draft" | "submitted" | "manager_reviewed"
+      appraisal_type: "objectives_goals_accessment" | "direct_score"
       boarding_state: "initial" | "pending" | "approved"
       boarding_type: "on" | "off"
+      calendar_access_type: "freeBusyReader" | "reader" | "writer" | "owner"
       calendar_platform: "google"
       contract_state:
         | "awaiting signatures"
@@ -3105,6 +3385,15 @@ export type Database = {
         | "scheduled termination"
       contract_type: "employee" | "contractor"
       employment_type: "full-time" | "part-time" | "contract"
+      event_status: "cancelled" | "confirmed" | "tentative"
+      event_type:
+        | "birthday"
+        | "default"
+        | "focusTime"
+        | "fromGmail"
+        | "outOfOffice"
+        | "workingLocation"
+      event_visibility: "default" | "public" | "private" | "confidential"
       file_ownership_type: "employee" | "organisation"
       file_type: "document" | "storage" | "link"
       is_open: "open" | "closed" | "partial"
@@ -3250,8 +3539,10 @@ export const Constants = {
       app_role: ["admin", "roles_manager"],
       app_role__old_version_to_be_dropped: ["admin", "roles_manager"],
       appraisal_status: ["draft", "submitted", "manager_reviewed"],
+      appraisal_type: ["objectives_goals_accessment", "direct_score"],
       boarding_state: ["initial", "pending", "approved"],
       boarding_type: ["on", "off"],
+      calendar_access_type: ["freeBusyReader", "reader", "writer", "owner"],
       calendar_platform: ["google"],
       contract_state: [
         "awaiting signatures",
@@ -3264,6 +3555,16 @@ export const Constants = {
       ],
       contract_type: ["employee", "contractor"],
       employment_type: ["full-time", "part-time", "contract"],
+      event_status: ["cancelled", "confirmed", "tentative"],
+      event_type: [
+        "birthday",
+        "default",
+        "focusTime",
+        "fromGmail",
+        "outOfOffice",
+        "workingLocation",
+      ],
+      event_visibility: ["default", "public", "private", "confidential"],
       file_ownership_type: ["employee", "organisation"],
       file_type: ["document", "storage", "link"],
       is_open: ["open", "closed", "partial"],

@@ -68,3 +68,4 @@ export * from './colors';
 export { parseRecurrence } from './revertRecurrenceString';
 export * from './calculate-appraisal-score';
 export * from './cn';
+export { formatText } from './format-text';

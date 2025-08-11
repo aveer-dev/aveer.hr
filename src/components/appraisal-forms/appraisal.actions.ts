@@ -198,15 +198,42 @@ export async function deleteQuestionTemplate({ id, org }: { id: string; org: str
 	if (templateError) throw templateError;
 }
 
-export const autoSaveAnswer = async ({ answerId, questionId, value, org, appraisalCycleId, contractId, answerType }: { answerId?: number; questionId: number; value: any; org: string; appraisalCycleId: number; contractId: number; answerType: 'self' | 'manager' | 'summary' }) => {
+export const autoSaveAnswer = async ({
+	answerId,
+	questionId,
+	value,
+	org,
+	appraisalCycleId,
+	contractId,
+	answerOwner
+}: {
+	answerId?: number;
+	questionId?: number;
+	value: any;
+	org: string;
+	appraisalCycleId: number;
+	contractId: number;
+	answerOwner: 'self' | 'manager' | 'summary';
+}) => {
 	const supabase = await createClient();
 
 	if (answerId) {
-		// Update existing answer
-		const { data: existingAnswer } = await supabase.from('appraisal_answers').select('answers, manager_answers').eq('id', answerId).single();
+		const { data: existingAnswer } = await supabase.from('appraisal_answers').select('answers, manager_answers, id').match({ contract_id: contractId, appraisal_cycle_id: appraisalCycleId }).single();
 
 		if (existingAnswer) {
-			const existingAnswers = existingAnswer[answerType == 'manager' ? 'manager_answers' : 'answers'] as unknown as Answer[];
+			// Update existing answer
+			if (!questionId) {
+				const { data, error } = await supabase
+					.from('appraisal_answers')
+					.update(answerOwner == 'manager' ? { manager_direct_score: value } : { direct_score: value })
+					.eq('id', existingAnswer.id)
+					.select();
+
+				if (error) throw error;
+				return data;
+			}
+
+			const existingAnswers = existingAnswer[answerOwner == 'manager' ? 'manager_answers' : 'answers'] as unknown as Answer[];
 			const answerIndex = existingAnswers.findIndex(a => a.question_id === questionId);
 
 			let answers: Answer[];
@@ -217,35 +244,57 @@ export const autoSaveAnswer = async ({ answerId, questionId, value, org, apprais
 
 			const { data, error } = await supabase
 				.from('appraisal_answers')
-				.update(answerType == 'manager' ? { manager_answers: answers } : { answers })
-				.eq('id', answerId)
+				.update(answerOwner == 'manager' ? { manager_answers: answers } : { answers })
+				.eq('id', existingAnswer.id)
 				.select();
 			if (error) throw error;
 			return data;
 		}
 	} else {
+		// Create new record
+		const payload: TablesInsert<'appraisal_answers'> = {
+			appraisal_cycle_id: appraisalCycleId,
+			contract_id: contractId,
+			org,
+			status: 'draft'
+		};
+
 		// Create new answer
-		const { data: existingAnswers } = await supabase.from('appraisal_answers').select('*').eq('appraisal_cycle_id', appraisalCycleId).eq('contract_id', contractId).eq('org', org).single();
+		const { data: existingAnswers } = await supabase.from('appraisal_answers').select('*').eq('appraisal_cycle_id', appraisalCycleId).match({ contract_id: contractId, appraisal_cycle_id: appraisalCycleId }).eq('org', org).single();
 
 		if (existingAnswers) {
+			if (!questionId) {
+				const { data, error } = await supabase
+					.from('appraisal_answers')
+					.update(answerOwner == 'manager' ? { manager_direct_score: value } : { direct_score: value })
+					.eq('id', existingAnswers.id)
+					.select();
+
+				if (error) throw error;
+				return data;
+			}
+
 			// Update existing record with new answer
-			const answers = [...(existingAnswers[answerType == 'manager' ? 'manager_answers' : 'answers'] as unknown as Answer[]), { question_id: questionId, answer: value }];
+			const answers = [...(existingAnswers[answerOwner == 'manager' ? 'manager_answers' : 'answers'] as unknown as Answer[]), { question_id: questionId, answer: value }];
 			const { data, error } = await supabase
 				.from('appraisal_answers')
-				.update(answerType == 'manager' ? { manager_answers: answers } : { answers })
+				.update(answerOwner == 'manager' ? { manager_answers: answers } : { answers })
 				.eq('id', existingAnswers.id)
 				.select();
 			if (error) throw error;
 			return data;
 		} else {
-			// Create new record
-			const payload: TablesInsert<'appraisal_answers'> = {
-				appraisal_cycle_id: appraisalCycleId,
-				contract_id: contractId,
-				org,
-				status: 'draft'
-			};
-			answerType == 'manager' ? (payload.manager_answers = [{ question_id: questionId, answer: value }]) : (payload.answers = [{ question_id: questionId, answer: value }]);
+			if (!questionId) {
+				payload[answerOwner == 'manager' ? 'manager_direct_score' : 'direct_score'] = value;
+				const { data, error } = await supabase.from('appraisal_answers').insert(payload).select();
+
+				console.log(error);
+
+				if (error) throw error;
+				return data;
+			}
+
+			answerOwner == 'manager' ? (payload.manager_answers = [{ question_id: questionId, answer: value }]) : (payload.answers = [{ question_id: questionId, answer: value }]);
 
 			const { data, error } = await supabase.from('appraisal_answers').insert(payload).select();
 			if (error) throw error;

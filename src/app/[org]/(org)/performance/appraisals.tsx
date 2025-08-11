@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlusIcon } from 'lucide-react';
 import { TeamRepository } from '@/dal/repositories/team.repository';
 import { ContractRepository } from '@/dal/repositories/contract.repository';
+import { BackButton } from '@/components/ui/back-button';
 
 export const AppraisalsPage = async ({ params }: { params: Promise<{ [key: string]: string }> }) => {
 	const org = (await params)?.org;
@@ -22,22 +23,18 @@ export const AppraisalsPage = async ({ params }: { params: Promise<{ [key: strin
 		return <div>Error loading teams or employees</div>;
 	}
 
-	// const teams = teamsData.map(team => ({
-	// 	...team,
-	// 	employees: employees.filter(employee => employee.team_id === team.id)
-	// }));
-
 	return (
 		<section>
 			<div className="mb-6 flex items-center gap-4">
-				<h1 className="text-xl font-bold">Appraisal</h1>
+				<BackButton className="lg:static lg:translate-y-0" />
+				<h1 className="text-xl font-bold">Appraisals Settings</h1>
 			</div>
 
-			<Tabs defaultValue="templates" className="w-full">
+			<Tabs defaultValue="cycles" className="w-full">
 				<div className="flex flex-col items-start justify-between gap-4 md:flex-row">
 					<TabsList className="flex w-fit">
-						<TabsTrigger value="templates">Question Templates</TabsTrigger>
 						<TabsTrigger value="cycles">Appraisal Cycles</TabsTrigger>
+						<TabsTrigger value="templates">Question Templates</TabsTrigger>
 					</TabsList>
 
 					<div className="flex w-full gap-2 md:w-fit">

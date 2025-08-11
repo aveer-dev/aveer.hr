@@ -23,8 +23,6 @@ const scoreRanges = [
 ];
 
 export const TeamScoreSummary = ({ teams, contracts, answers }: Props) => {
-	console.log(teams);
-
 	// Map teamId to contracts (employees) in that team
 	const teamMembersMap: Record<number, typeof contracts> = {};
 	contracts.forEach(contract => {

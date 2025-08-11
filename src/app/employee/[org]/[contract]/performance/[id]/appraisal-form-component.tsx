@@ -46,7 +46,7 @@ export const AppraisalFormComponent = ({
 	const customGroupNames = template.custom_group_names as { id: string; name: string }[];
 
 	const [answer, setAnswer] = useState<Tables<'appraisal_answers'> | null>(contractAnswer);
-	const [activeTab, setActiveTab] = useState<'objectives' | 'goal_scoring' | 'questions'>('objectives');
+	const [activeTab, setActiveTab] = useState<'objectives' | 'goal_scoring' | 'questions' | 'direct_score'>(appraisalCycle.type === 'objectives_goals_accessment' ? 'objectives' : 'direct_score');
 	const [selectedReviewType, setSelectedReviewType] = useState<'self' | 'manager' | 'summary'>('self');
 	const [selectedEmployee, setSelectedEmployee] = useState<Tables<'contracts'>>(contract);
 
@@ -83,8 +83,8 @@ export const AppraisalFormComponent = ({
 
 	return (
 		<div className="pb-28">
-			<div className="relative mb-4 flex items-center gap-2">
-				<BackButton />
+			<div className="mb-4 flex items-center gap-4">
+				<BackButton className="lg:static lg:translate-y-0" />
 				<h2 className="text-2xl font-semibold">{appraisalCycle.name}</h2>
 			</div>
 

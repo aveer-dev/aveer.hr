@@ -41,6 +41,11 @@ export class AppraisalRepository implements IAppraisalRepository {
 		const { data, error } = await supabase.from('appraisal_answers').select('*').eq('appraisal_cycle_id', cycleId);
 		return { data, error };
 	}
+	async getAllOrgAnswers(org: string) {
+		const supabase = await createClient();
+		const { data, error } = await supabase.from('appraisal_answers').select('*').eq('org', org);
+		return { data, error };
+	}
 	async createAnswer(payload: TablesInsert<'appraisal_answers'>) {
 		const supabase = await createClient();
 		const { data, error } = await supabase.from('appraisal_answers').insert(payload).select().single();

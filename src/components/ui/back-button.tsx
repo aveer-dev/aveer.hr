@@ -10,7 +10,7 @@ export const BackButton = (props: ButtonHTMLAttributes<HTMLButtonElement>) => {
 	const router = useRouter();
 
 	return (
-		<Button {...props} onClick={() => router.back()} variant={'outline'} size={'icon'} className={cn(props.className, 'rounded-full lg:absolute lg:-left-16 lg:top-1/2 lg:-translate-y-1/2')}>
+		<Button {...props} onClick={() => router.back()} variant={'outline'} size={'icon'} className={cn('rounded-full lg:absolute lg:-left-16 lg:top-1/2 lg:-translate-y-1/2', props.className)}>
 			<ChevronLeft size={12} />
 		</Button>
 	);
