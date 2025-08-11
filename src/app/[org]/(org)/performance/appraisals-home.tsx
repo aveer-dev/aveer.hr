@@ -352,114 +352,6 @@ export const AppraisalsHome = ({
 									))}
 							</div>
 						</section>
-
-						<Sheet open={isAppraisalSheetOpen} onOpenChange={state => toggleAppraisalSheet(state)}>
-							<SheetContent onOpenAutoFocus={e => e.preventDefault()} className={cn('w-full overflow-y-auto pb-16', cycles.find(cycle => cycle.id === selectedAnswer?.appraisal_cycle_id)?.type === 'direct_score' ? 'sm:max-w-lg' : 'sm:max-w-3xl')}>
-								<SheetHeader>
-									<SheetTitle>Employee Appraisal Details</SheetTitle>
-									<SheetDescription>Appraisal details for the selected employee</SheetDescription>
-								</SheetHeader>
-
-								<div className="mt-10 space-y-16">
-									{cycles.find(cycle => cycle.id === selectedAnswer?.appraisal_cycle_id)?.type === 'objectives_goals_accessment' && selectedAnswer && (
-										<>
-											{selectedAnswer?.objectives?.length === 0 && <div className="text-sm text-muted-foreground">No objectives found.</div>}
-											{selectedAnswer?.objectives?.map((objective: any, index: number) => (
-												<section key={objective.id}>
-													<h2 className="mb-6 border-b pb-4 text-base font-medium">Objective {index + 1}</h2>
-
-													<div className="space-y-8">
-														<div className="space-y-6">
-															<li className="flex gap-2 text-sm font-normal">
-																<div className="min-w-28">Title:</div>
-																<div className="text-sm leading-6 text-muted-foreground">{objective.title}</div>
-															</li>
-
-															{objective.description && (
-																<li className="flex gap-2 text-sm">
-																	<div className="min-w-28">Description:</div>
-																	<div className="text-sm leading-relaxed text-muted-foreground">{objective.description}</div>
-																</li>
-															)}
-
-															<li className="flex gap-2 text-sm">
-																<div className="min-w-28">Goals:</div>
-
-																<div>
-																	{objective.goals.map((goal: any, index: number) => (
-																		<div key={goal.id} className="space-y-6 border-b pb-8 pt-8 first:pt-0 last:border-b-0 last:pb-0">
-																			<div>
-																				<h4 className="text-sm font-normal">
-																					{index + 1}: {goal.title}
-																				</h4>
-																				{goal.description && <p className="mt-2 text-xs text-muted-foreground">{goal.description}</p>}
-																			</div>
-																			<div className="grid grid-cols-2 gap-6">
-																				{renderGoalScore(goal.id, selectedAnswer?.employee_goal_score || [], 'Self Assessment')}
-																				{renderGoalScore(goal.id, selectedAnswer?.manager_goal_score || [], 'Manager Assessment')}
-																			</div>
-																		</div>
-																	))}
-																</div>
-															</li>
-														</div>
-													</div>
-												</section>
-											))}
-										</>
-									)}
-
-									{cycles.find(cycle => cycle.id === selectedAnswer?.appraisal_cycle_id)?.type === 'direct_score' && selectedAnswer && (
-										<section className="space-y-6">
-											{['direct_score', 'manager_direct_score'].map(type => (
-												<div className="space-y-6 rounded-md bg-muted/70 p-4" key={type}>
-													<div className="space-y-2">
-														<h4 className="text-sm font-light text-muted-foreground">{type === 'direct_score' ? 'Self Assessment' : 'Manager Assessment'}</h4>
-
-														<div className="flex min-h-20 w-full max-w-lg gap-4">
-															{directScoreLabels.map(label => (
-																<div key={label.score} className="flex flex-col items-center justify-center gap-2">
-																	<div
-																		className={cn(
-																			buttonVariants({ variant: 'outline', size: 'icon' }),
-																			'h-16 w-16 hover:bg-background',
-																			(selectedAnswer[type as keyof typeof selectedAnswer] as unknown as { score: number })?.score === label.score ? 'border border-green-400 bg-green-100 hover:bg-green-100' : ''
-																		)}>
-																		{label.score}
-																	</div>
-
-																	<div className="flex items-center gap-2">
-																		<div className="text-xs text-support">{label.label}</div>
-																		{label.description && (
-																			<Tooltip>
-																				<TooltipTrigger>
-																					<Info size={12} className="text-muted-foreground" />
-																				</TooltipTrigger>
-																				<TooltipContent>
-																					<div className="max-w-64 text-xs">{label.description}</div>
-																				</TooltipContent>
-																			</Tooltip>
-																		)}
-																	</div>
-																</div>
-															))}
-														</div>
-													</div>
-
-													<div className="space-y-2">
-														<h4 className="text-sm font-light text-muted-foreground">Comment</h4>
-
-														<div className="min-h-20 rounded-md border bg-background p-2 text-xs leading-relaxed text-muted-foreground">
-															{(selectedAnswer[type as keyof typeof selectedAnswer] as unknown as { comment: string })?.comment || <span className="text-muted-foreground opacity-30">No comment</span>}
-														</div>
-													</div>
-												</div>
-											))}
-										</section>
-									)}
-								</div>
-							</SheetContent>
-						</Sheet>
 					</div>
 				</TabsContent>
 
@@ -606,6 +498,114 @@ export const AppraisalsHome = ({
 					</div>
 				</TabsContent>
 			</Tabs>
+
+			<Sheet open={isAppraisalSheetOpen} onOpenChange={state => toggleAppraisalSheet(state)}>
+				<SheetContent onOpenAutoFocus={e => e.preventDefault()} className={cn('w-full overflow-y-auto pb-16', cycles.find(cycle => cycle.id === selectedAnswer?.appraisal_cycle_id)?.type === 'direct_score' ? 'sm:max-w-lg' : 'sm:max-w-3xl')}>
+					<SheetHeader>
+						<SheetTitle>Employee Appraisal Details</SheetTitle>
+						<SheetDescription>Appraisal details for the selected employee</SheetDescription>
+					</SheetHeader>
+
+					<div className="mt-10 space-y-16">
+						{cycles.find(cycle => cycle.id === selectedAnswer?.appraisal_cycle_id)?.type === 'objectives_goals_accessment' && selectedAnswer && (
+							<>
+								{selectedAnswer?.objectives?.length === 0 && <div className="text-sm text-muted-foreground">No objectives found.</div>}
+								{selectedAnswer?.objectives?.map((objective: any, index: number) => (
+									<section key={objective.id}>
+										<h2 className="mb-6 border-b pb-4 text-base font-medium">Objective {index + 1}</h2>
+
+										<div className="space-y-8">
+											<div className="space-y-6">
+												<li className="flex gap-2 text-sm font-normal">
+													<div className="min-w-28">Title:</div>
+													<div className="text-sm leading-6 text-muted-foreground">{objective.title}</div>
+												</li>
+
+												{objective.description && (
+													<li className="flex gap-2 text-sm">
+														<div className="min-w-28">Description:</div>
+														<div className="text-sm leading-relaxed text-muted-foreground">{objective.description}</div>
+													</li>
+												)}
+
+												<li className="flex gap-2 text-sm">
+													<div className="min-w-28">Goals:</div>
+
+													<div>
+														{objective.goals.map((goal: any, index: number) => (
+															<div key={goal.id} className="space-y-6 border-b pb-8 pt-8 first:pt-0 last:border-b-0 last:pb-0">
+																<div>
+																	<h4 className="text-sm font-normal">
+																		{index + 1}: {goal.title}
+																	</h4>
+																	{goal.description && <p className="mt-2 text-xs text-muted-foreground">{goal.description}</p>}
+																</div>
+																<div className="grid grid-cols-2 gap-6">
+																	{renderGoalScore(goal.id, selectedAnswer?.employee_goal_score || [], 'Self Assessment')}
+																	{renderGoalScore(goal.id, selectedAnswer?.manager_goal_score || [], 'Manager Assessment')}
+																</div>
+															</div>
+														))}
+													</div>
+												</li>
+											</div>
+										</div>
+									</section>
+								))}
+							</>
+						)}
+
+						{cycles.find(cycle => cycle.id === selectedAnswer?.appraisal_cycle_id)?.type === 'direct_score' && selectedAnswer && (
+							<section className="space-y-6">
+								{['direct_score', 'manager_direct_score'].map(type => (
+									<div className="space-y-6 rounded-md bg-muted/70 p-4" key={type}>
+										<div className="space-y-2">
+											<h4 className="text-sm font-light text-muted-foreground">{type === 'direct_score' ? 'Self Assessment' : 'Manager Assessment'}</h4>
+
+											<div className="flex min-h-20 w-full max-w-lg gap-4">
+												{directScoreLabels.map(label => (
+													<div key={label.score} className="flex flex-col items-center justify-center gap-2">
+														<div
+															className={cn(
+																buttonVariants({ variant: 'outline', size: 'icon' }),
+																'h-16 w-16 hover:bg-background',
+																(selectedAnswer[type as keyof typeof selectedAnswer] as unknown as { score: number })?.score === label.score ? 'border border-green-400 bg-green-100 hover:bg-green-100' : ''
+															)}>
+															{label.score}
+														</div>
+
+														<div className="flex items-center gap-2">
+															<div className="text-xs text-support">{label.label}</div>
+															{label.description && (
+																<Tooltip>
+																	<TooltipTrigger>
+																		<Info size={12} className="text-muted-foreground" />
+																	</TooltipTrigger>
+																	<TooltipContent>
+																		<div className="max-w-64 text-xs">{label.description}</div>
+																	</TooltipContent>
+																</Tooltip>
+															)}
+														</div>
+													</div>
+												))}
+											</div>
+										</div>
+
+										<div className="space-y-2">
+											<h4 className="text-sm font-light text-muted-foreground">Comment</h4>
+
+											<div className="min-h-20 rounded-md border bg-background p-2 text-xs leading-relaxed text-muted-foreground">
+												{(selectedAnswer[type as keyof typeof selectedAnswer] as unknown as { comment: string })?.comment || <span className="text-muted-foreground opacity-30">No comment</span>}
+											</div>
+										</div>
+									</div>
+								))}
+							</section>
+						)}
+					</div>
+				</SheetContent>
+			</Sheet>
 		</>
 	);
 };
@@ -627,42 +627,33 @@ const ScoreCell = ({
 }) => {
 	return (
 		<div key={employee.id} className="relative flex min-h-16 w-full min-w-24 flex-col items-center justify-between rounded-xl bg-muted p-1 text-center">
-			{score && (
-				<div className="flex w-full items-center justify-between rounded-md bg-background px-2 py-1">
-					{/* div container added here to the space even if conditions of it children remains false */}
-					<div>
-						{(q.type === 'scale' || q.type === 'yesno') && (
-							<Tooltip>
-								<TooltipTrigger type="button" className="">
-									<Info size={12} className="text-muted-foreground" />
-								</TooltipTrigger>
-								<TooltipContent className="text-left">
-									{q.type === 'scale' && (
-										<>
-											<p className="text-xs">This is an answer to a scale of 1-5 question</p>
-											<ul className="mt-2 flex gap-1">
-												{(q.scale_labels as { label: string; description: string }[])?.map((label: any, index: number) => (
-													<li key={index} className="rounded-sm bg-muted px-2 py-1 text-xs">
-														{index + 1}. {label.label}
-													</li>
-												))}
-											</ul>
-										</>
-									)}
+			{score && (q.type === 'scale' || q.type === 'yesno') && (
+				<div className="flex w-full items-center justify-start p-1">
+					<Tooltip>
+						<TooltipTrigger type="button" className="">
+							<Info size={12} className="text-muted-foreground" />
+						</TooltipTrigger>
+						<TooltipContent className="text-left">
+							{q.type === 'scale' && (
+								<>
+									<p className="text-xs">This is an answer to a scale of 1-5 question</p>
+									<ul className="mt-2 flex gap-1">
+										{(q.scale_labels as { label: string; description: string }[])?.map((label: any, index: number) => (
+											<li key={index} className="rounded-sm bg-muted px-2 py-1 text-xs">
+												{index + 1}. {label.label}
+											</li>
+										))}
+									</ul>
+								</>
+							)}
 
-									{q.type === 'yesno' && (
-										<>
-											<p className="text-xs">This is an answer to a yes/no question</p>
-										</>
-									)}
-								</TooltipContent>
-							</Tooltip>
-						)}
-					</div>
-
-					<Button size={'icon'} onClick={() => openAppraisalSheet(employee, answer)} className="h-4 w-4 bg-transparent text-primary hover:bg-transparent">
-						<PanelRightOpen size={12} />
-					</Button>
+							{q.type === 'yesno' && (
+								<>
+									<p className="text-xs">This is an answer to a yes/no question</p>
+								</>
+							)}
+						</TooltipContent>
+					</Tooltip>
 				</div>
 			)}
 
