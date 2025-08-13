@@ -34,17 +34,17 @@ const directScoreLabels = [
 	{
 		score: 3,
 		label: 'Good',
-		description: 'The employee has performed well and needs to improve.'
+		description: 'The employee has performed averagely well.'
 	},
 	{
 		score: 4,
 		label: 'Very Good',
-		description: 'The employee has performed very well and needs to improve.'
+		description: 'The employee has performed very well, meeting expectations.'
 	},
 	{
 		score: 5,
 		label: 'Excellent',
-		description: 'The employee has performed exceptionally well and needs to improve.'
+		description: `The employee has performed excellently well and exceeded expectations.`
 	}
 ];
 

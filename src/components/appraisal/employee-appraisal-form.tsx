@@ -63,17 +63,17 @@ const directScoreLabels = [
 	{
 		score: 3,
 		label: 'Good',
-		description: 'The employee has performed well and needs to improve.'
+		description: 'The employee has performed averagely well.'
 	},
 	{
 		score: 4,
 		label: 'Very Good',
-		description: 'The employee has performed very well and needs to improve.'
+		description: 'The employee has performed very well, meeting expectations.'
 	},
 	{
 		score: 5,
 		label: 'Excellent',
-		description: 'The employee has performed exceptionally well and needs to improve.'
+		description: `The employee has performed excellently well and exceeded expectations.`
 	}
 ];
 
@@ -368,8 +368,8 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 		// check appraisal cycle type, if it is direct score, check if direct score is filled
 		if (appraisalCycle.type === 'direct_score') {
-			if (!directScore.score) {
-				toast.error('Please fill in the direct score before submitting.');
+			if (!directScore.score || !directScore.comment) {
+				toast.error('Please fill in the direct score and comment before submitting.');
 				return;
 			}
 		}
@@ -462,6 +462,11 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 	const handleNext = () => {
 		if (appraisalCycle.type === 'direct_score' && activeTab === 'direct_score') {
+			if (!directScore.score || !directScore.comment) {
+				toast.error('Please fill in the direct score and comment before proceeding.');
+				return;
+			}
+
 			setActiveTab('questions');
 			return;
 		}
@@ -1016,8 +1021,8 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 															<TooltipTrigger>
 																<Info size={12} className="text-muted-foreground" />
 															</TooltipTrigger>
-															<TooltipContent>
-																<div className="max-w-64 text-xs">{label.description}</div>
+															<TooltipContent className="w-fit">
+																<div className="w-full max-w-52 text-xs">{label.description}</div>
 															</TooltipContent>
 														</Tooltip>
 													</TooltipProvider>
@@ -1029,11 +1034,13 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 							</div>
 
 							<div className="space-y-2">
-								<Label htmlFor="comment">Comment</Label>
+								<Label htmlFor="comment">
+									Comment <span className="text-red-500">*</span>
+								</Label>
 								<Textarea
 									disabled={selectedReviewType === 'self' ? !canEditSelfAnswer : !canEditManagerAnswer}
 									id="comment"
-									placeholder="Add a comment about the score..."
+									placeholder="Comment on this overall score..."
 									className="min-h-[100px] w-full rounded-md border p-2 disabled:cursor-default disabled:opacity-100"
 									value={selectedReviewType === 'self' ? directScore.comment : directManagerScore.comment}
 									onChange={e => {
@@ -1061,9 +1068,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 								/* group */
 								return (
 									<div key={group} className="">
-										{/* <CardHeader className="mb-6 border-b border-border py-4"> */}
-										<h2 className={cn('text-sm font-medium transition-all duration-500', !isQuestionInGroupHighlighted(group) && focusedQuestionId && 'opacity-80 blur-md')}>{getGroupLabel(group)}</h2>
-										{/* </CardHeader> */}
+										<h2 className={cn('text-sm font-medium')}>{getGroupLabel(group)}</h2>
 
 										<div className="mt-4 space-y-10">
 											{groupedQuestions[group].map(currentQuestion => {
@@ -1072,14 +1077,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 
 												/* question and options */
 												return (
-													<div
-														key={currentQuestion.id}
-														className={cn('space-y-4 outline-none transition-all duration-500', isQuestionHighlighted(currentQuestion.id) && 'bg-white', isQuestionDimmed(currentQuestion.id) && 'opacity-80 blur-md')}
-														onMouseEnter={() => setFocusedQuestionId(currentQuestion.id)}
-														onMouseLeave={() => setFocusedQuestionId(null)}
-														onFocus={() => setFocusedQuestionId(currentQuestion.id)}
-														onBlur={() => setFocusedQuestionId(null)}
-														tabIndex={0}>
+													<div key={currentQuestion.id} className={cn('space-y-2 outline-none transition-all duration-500')} tabIndex={0}>
 														<div className="flex items-center gap-2">
 															<h3 className="text-sm font-light leading-6">
 																{selectedReviewType === 'manager' ? currentQuestion.manager_question : currentQuestion.question} {currentQuestion.required && <span className="text-red-500">*</span>}
