@@ -9,7 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Calendar } from '@/components/ui/calendar';
 import { HardHat, MinusCircle, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { addBusinessDays, addDays, differenceInBusinessDays, format, isSameDay, isWeekend, parseISO } from 'date-fns';
+import { addBusinessDays, differenceInBusinessDays, format, isSameDay, isWeekend } from 'date-fns';
+import { parseDateOnly } from '@/lib/utils';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -72,8 +73,8 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 			hand_over_note: data?.hand_over_note || '',
 			hand_over: data?.hand_over ? String((data?.hand_over as any)?.id || data?.hand_over) : '',
 			dates: {
-				from: data?.from ? new Date(data?.from) : date?.from,
-				to: data?.to ? new Date(data?.to) : date?.to
+				from: data?.from ? parseDateOnly(data?.from) : date?.from,
+				to: data?.to ? parseDateOnly(data?.to) : date?.to
 			}
 		}
 	});
@@ -149,8 +150,8 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 		const result: Date[] = [];
 
 		for (const item of usedLeaveDays!) {
-			const startDate = parseISO(item.from);
-			const endDate = parseISO(item.to);
+			const startDate = parseDateOnly(item.from);
+			const endDate = parseDateOnly(item.to);
 
 			for (let date = startDate as any; date <= endDate; date.setDate(date.getDate() + 1)) result.push(new Date(date));
 		}

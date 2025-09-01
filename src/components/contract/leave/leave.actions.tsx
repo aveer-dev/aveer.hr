@@ -21,8 +21,8 @@ export const emailAdmins = async ({ from, to, org, employeeName, leaveType }: { 
 				name: `${admin.profile.first_name}`,
 				org,
 				leaveType,
-				from: format(parseISO(from.toISOString()), 'PPPP'),
-				to: format(parseISO(to.toISOString()), 'PPPP'),
+				from: format(from, 'PPPP'),
+				to: format(to, 'PPPP'),
 				employeeName
 			})
 		});

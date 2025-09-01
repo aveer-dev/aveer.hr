@@ -4,7 +4,8 @@ import { sendEmail } from '@/api/email';
 import LeaveRequestEmail from '@/components/emails/leave-update';
 import { LeaveRepository } from '@/dal/repositories/leave.repository';
 import { ContractRepository } from '@/dal/repositories/contract.repository';
-import { differenceInBusinessDays, format, parseISO } from 'date-fns';
+import { differenceInBusinessDays, format } from 'date-fns';
+import { parseDateOnly } from '@/lib/utils';
 import { Tables, TablesUpdate } from '@/type/database.types';
 
 export const emailEmployee = async ({ from, to, contract, org, status, leaveType, profile }: { profile: { first_name: string; email: string }; leaveType: string; from: string; to: string; contract: number; org: { name: string; subdomain: string }; status: string }) => {
@@ -17,8 +18,8 @@ export const emailEmployee = async ({ from, to, contract, org, status, leaveType
 			org,
 			leaveType,
 			contract: contract,
-			from: format(parseISO(from), 'PPPP'),
-			to: format(parseISO(to), 'PPPP'),
+			from: format(parseDateOnly(from), 'PPPP'),
+			to: format(parseDateOnly(to), 'PPPP'),
 			status
 		})
 	});
@@ -35,7 +36,7 @@ export const cancelLeave = async (data: Tables<'time_off'>) => {
 
 		if (data.status === 'approved') {
 			const leaveTypeString = `${data.leave_type}_leave_used` as const;
-			const leaveDays = differenceInBusinessDays(parseISO(data.to), parseISO(data.from)) + 1;
+			const leaveDays = differenceInBusinessDays(parseDateOnly(data.to), parseDateOnly(data.from)) + 1;
 
 			// Fetch the contract to get the current leave used value
 			const contractId = (data.contract as any)?.id || data.contract;

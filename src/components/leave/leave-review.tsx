@@ -5,11 +5,11 @@ import { LoadingSpinner } from '@/components/ui/loader';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+import { cn, parseDateOnly } from '@/lib/utils';
 import { ROLE } from '@/type/contract.types';
 import { Tables } from '@/type/database.types';
 import { createClient } from '@/utils/supabase/client';
-import { differenceInBusinessDays, format, parseISO } from 'date-fns';
+import { differenceInBusinessDays, format } from 'date-fns';
 import { Check, Edit, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { HTMLAttributes, ReactNode, useCallback, useState } from 'react';
@@ -89,9 +89,11 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 			if (contract && (isAllApproved || isAnyDenied)) emailEmployee({ from: data.from, to: data.to, profile: contract?.profile as any, org: contract?.org as any, status: isAllApproved ? 'approved' : 'denied', leaveType: data.leave_type, contract: contract?.id });
 
 			if (isAllApproved) {
+				const fromDate = parseDateOnly(data.from);
+				const toDate = parseDateOnly(data.to);
 				await supabase
 					.from('contracts')
-					.update({ [`${data.leave_type}_leave_used`]: differenceInBusinessDays(data.to, data.from) + 1 + Number(data.contract[`${data.leave_type}_leave_used`] as any) })
+					.update({ [`${data.leave_type}_leave_used`]: differenceInBusinessDays(toDate, fromDate) + 1 + Number(data.contract[`${data.leave_type}_leave_used`] as any) })
 					.eq('id', data.contract.id);
 			}
 
@@ -207,7 +209,7 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 
 			{typeof children !== 'string' && <SheetTrigger asChild>{children}</SheetTrigger>}
 
-			<SheetContent onCloseAutoFocus={event => event.preventDefault()} className="overflow-y-auto sm:max-w-md">
+			<SheetContent onOpenAutoFocus={event => event.preventDefault()} onCloseAutoFocus={event => event.preventDefault()} className="overflow-y-auto sm:max-w-md">
 				<SheetHeader>
 					<SheetTitle>Leave Review</SheetTitle>
 					<SheetDescription>See details of selected leave below</SheetDescription>
@@ -249,8 +251,8 @@ export const LeaveReview = ({ data, reviewType, children, contractId, hideToolti
 							<h2 className="text-xs text-muted-foreground">Duration </h2>
 							<div className="text-xs leading-6">
 								<p>
-									<span className="text-muted-foreground">From:</span> {format(parseISO(data.from), 'ccc')}, {format(parseISO(data.from), 'PP')} - <span className="text-muted-foreground">To:</span> {format(parseISO(data.to), 'ccc')},{' '}
-									{format(parseISO(data.to), 'PP')} <span className="text-muted-foreground">({differenceInBusinessDays(parseISO(data.to), parseISO(data.from)) + 1} days)</span>
+									<span className="text-muted-foreground">From:</span> {format(parseDateOnly(data.from), 'ccc')}, {format(parseDateOnly(data.from), 'PP')} - <span className="text-muted-foreground">To:</span> {format(parseDateOnly(data.to), 'ccc')},{' '}
+									{format(parseDateOnly(data.to), 'PP')} <span className="text-muted-foreground">({differenceInBusinessDays(parseDateOnly(data.to), parseDateOnly(data.from)) + 1} days)</span>
 								</p>
 							</div>
 						</li>

@@ -69,3 +69,28 @@ export { parseRecurrence } from './revertRecurrenceString';
 export * from './calculate-appraisal-score';
 export * from './cn';
 export { formatText } from './format-text';
+
+/**
+ * Parses a date string as a local date (not UTC).
+ * This prevents timezone conversion issues when dealing with date-only values.
+ *
+ * @param dateString - Date string in format YYYY-MM-DD or ISO format
+ * @returns Date object representing the local date
+ */
+export const parseDateOnly = (dateString: string): Date => {
+	// If it's just a date string (YYYY-MM-DD), parse it as local date
+	if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+		const [year, month, day] = dateString.split('-').map(Number);
+		return new Date(year, month - 1, day); // month is 0-indexed
+	}
+
+	// If it's an ISO string, extract just the date part and parse as local
+	if (dateString.includes('T') || dateString.includes('Z')) {
+		const datePart = dateString.split('T')[0];
+		const [year, month, day] = datePart.split('-').map(Number);
+		return new Date(year, month - 1, day);
+	}
+
+	// Fallback to regular parsing
+	return new Date(dateString);
+};

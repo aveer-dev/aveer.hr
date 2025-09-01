@@ -3,7 +3,8 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/components//ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { differenceInBusinessDays, format, parseISO } from 'date-fns';
+import { differenceInBusinessDays, format } from 'date-fns';
+import { parseDateOnly } from '@/lib/utils';
 import { Tables } from '@/type/database.types';
 import { Badge } from '@/components/ui/badge';
 import { LeaveReview } from './leave-review';
@@ -62,7 +63,7 @@ export const columns: LEAVE_COLUMN[] = [
 		header: 'Duration',
 		cell: ({ row }) => (
 			<div>
-				<span>{format(parseISO(row.original.from), 'PP')}</span> - <span>{format(parseISO(row.original.to), 'PP')}</span>
+				<span>{format(parseDateOnly(row.original.from), 'PP')}</span> - <span>{format(parseDateOnly(row.original.to), 'PP')}</span>
 			</div>
 		),
 		enableHiding: true
@@ -70,7 +71,7 @@ export const columns: LEAVE_COLUMN[] = [
 	{
 		id: 'days',
 		header: 'Days',
-		cell: ({ row }) => <span className="whitespace-nowrap">{differenceInBusinessDays(row.original.to, row.original.from) + 1}</span>,
+		cell: ({ row }) => <span className="whitespace-nowrap">{differenceInBusinessDays(parseDateOnly(row.original.to), parseDateOnly(row.original.from)) + 1}</span>,
 		size: 50
 	},
 	{

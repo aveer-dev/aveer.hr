@@ -5,7 +5,8 @@ import { Card } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ROLE } from '@/type/contract.types';
 import { createClient } from '@/utils/supabase/server';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import { parseDateOnly } from '@/lib/utils';
 import { ChevronRight, List } from 'lucide-react';
 import { LeaveActions } from './leave-actions';
 import { Tables } from '@/type/database.types';
@@ -53,10 +54,10 @@ export const LeaveRequests = async ({ org, contract, reviewType, orgSettings }: 
 											<div className="space-y-3 text-xs text-muted-foreground">
 												<h3 className="font-semibold capitalize text-foreground">{leave.leave_type} leave</h3>
 												<div>
-													From <span className="text-foreground">{format(parseISO(leave.from), 'PP')}</span>
+													From <span className="text-foreground">{format(parseDateOnly(leave.from), 'PP')}</span>
 												</div>
 												<div>
-													To <span className="text-foreground">{format(parseISO(leave.to), 'PP')}</span>
+													To <span className="text-foreground">{format(parseDateOnly(leave.to), 'PP')}</span>
 												</div>
 											</div>
 
