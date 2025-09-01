@@ -2,7 +2,7 @@
 
 import { DayOfWeek, DayPicker } from 'react-day-picker';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, parseDateOnly } from '@/lib/utils';
 import { format, getDay, getYear, isFirstDayOfMonth, isSameDay, isThisMonth, isToday, setYear } from 'date-fns';
 import { ArrowUpRight, CalendarRange, ChevronLeft, ChevronRight, Maximize } from 'lucide-react';
 import { useEffect } from 'react';
@@ -41,8 +41,8 @@ export const Calendar = ({ org, teams, employees, calendar, role, calendarEvents
 	const activeUserContractData = userType == 'employee' && employees && employees.find(employee => employee.profile?.id == userId);
 
 	for (const item of timeOffs) {
-		const startDate = new Date(item.from);
-		const endDate = new Date(item.to);
+		const startDate = new Date(parseDateOnly(item.from));
+		const endDate = new Date(parseDateOnly(item.to));
 		const name = `${item.leave_type} leave | ${item.profile.first_name} ${item.profile.last_name}`;
 		const status = item.status;
 		const data = item;
