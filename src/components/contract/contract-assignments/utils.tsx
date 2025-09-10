@@ -20,7 +20,7 @@ const getDefaultApprovalPolicy = async (org: string, type: 'role_application' | 
  * @param contract - Contract object containing team and profile information
  * @param org - Organization identifier
  */
-export const getApplicants = async ({ manager, contract, org }: { manager?: Tables<'managers'> | null; contract: any; org: string }) => {
+export const getApplicants = async ({ manager, contract, org }: { manager?: Tables<'managers'>[] | null; contract: any; org: string }) => {
 	const supabase = await createClient();
 
 	// Fetch all job applications in interview stage for the organization
@@ -55,11 +55,13 @@ export const getApplicants = async ({ manager, contract, org }: { manager?: Tabl
 			const levels: any[] = applicant.levels?.length ? applicant.levels : defaultLevels;
 
 			// Determine if applicant should be included based on manager status
-			const shouldInclude = manager
-				? // For managers: include if applicant is in their team OR they're the direct report OR they're in approval levels
-					applicant.role.team == (contract.team?.id || contract.team) || applicant.role.direct_report == contract.id || levels.find(level => level.id == (contract.profile.id || contract.profile))
-				: // For non-managers: include if they're in approval levels
-					levels.find(level => level.id == (contract.id || contract));
+			const shouldInclude =
+				manager && manager.length > 0
+					? // For managers: include if applicant is in their team OR they're the direct report OR they're in approval levels
+						manager.some(manager => applicant.role.team == manager.team || applicant.role.direct_report == manager.person || levels.find(level => level.id == manager.profile))
+					: // applicant.role.team == (contract.team?.id || contract.team) || applicant.role.direct_report == contract.id || levels.find(level => level.id == (contract.profile.id || contract.profile))
+						// For non-managers: include if they're in approval levels
+						levels.find(level => level.id == (contract.id || contract));
 
 			return shouldInclude ? applicant : null;
 		}) || []
@@ -76,7 +78,7 @@ export const getApplicants = async ({ manager, contract, org }: { manager?: Tabl
  * @param org - Organization identifier
  * @param status - Optional status filter for leave requests
  */
-export const getLeaveRequests = async ({ manager, contract, org, status }: { status?: string; manager?: Tables<'managers'> | null; contract: any; org: string }) => {
+export const getLeaveRequests = async ({ manager, contract, org, status }: { status?: string; manager?: Tables<'managers'>[] | null; contract: any; org: string }) => {
 	const supabase = await createClient();
 
 	// Build query with optional status filter
@@ -115,7 +117,7 @@ export const getLeaveRequests = async ({ manager, contract, org, status }: { sta
 			const levels = timeoff.levels?.length ? timeoff.levels : defaultLevels;
 
 			// For managers: include if it's not their own request AND (they manage the team OR they're in approval levels)
-			const isManager = manager && manager.person !== timeoff.contract.id && (timeoff.contract.team == (contract.team?.id || contract.team) || levels.find(level => level.id == String(contract.id)));
+			const isManager = manager && manager.length > 0 && manager.some(manager => manager.person !== timeoff.contract.id && (timeoff.contract.team == manager.team || levels.find(level => level.id == String(manager.profile))));
 			const isDirectReport = timeoff.contract.direct_report == contract.id;
 
 			// Determine if request should be included based on manager status
@@ -135,7 +137,7 @@ export const getLeaveRequests = async ({ manager, contract, org, status }: { sta
  * @param contract - Contract object containing team and profile information
  * @param org - Organization identifier
  */
-export const getBoardingRequests = async ({ manager, contract, org }: { manager?: Tables<'managers'> | null; contract: any; org: string }) => {
+export const getBoardingRequests = async ({ manager, contract, org }: { manager?: Tables<'managers'>[] | null; contract: any; org: string }) => {
 	const supabase = await createClient();
 
 	// Fetch all boarding requests for the organization
@@ -161,11 +163,11 @@ export const getBoardingRequests = async ({ manager, contract, org }: { manager?
 			// Use request's levels if they exist, otherwise use default levels
 			const levels: any[] = boarding.levels?.length ? boarding.levels : defaultLevels;
 
-			const isManager = manager && manager.person !== boarding.contract.id && (boarding.contract.team == (contract.team?.id || contract.team) || levels.find(level => level.id == contract.id));
+			const isManager = manager && manager.length > 0 && manager.some(manager => manager.person !== boarding.contract.id && (boarding.contract.team == manager.team || levels.find(level => level.id == String(manager.profile))));
 			const isDirectReport = boarding.contract.direct_report == contract.id;
 
 			// Determine if request should be included based on manager status
-			const shouldInclude = isManager || isDirectReport || levels.find(level => level.id == contract.id);
+			const shouldInclude = isManager || isDirectReport || levels.find(level => level.id == String(contract.id));
 
 			return shouldInclude ? boarding : null;
 		}) || []

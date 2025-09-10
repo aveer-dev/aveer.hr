@@ -9,7 +9,7 @@ import { getApplicants } from './contract-assignments/utils';
 interface props {
 	org: string;
 	contract: Tables<'contracts'> & { profile: Tables<'profiles'>; role: Tables<'open_roles'>; team: { id: number; name: string } };
-	manager?: Tables<'managers'> | null;
+	manager?: Tables<'managers'>[] | null;
 }
 
 export const Applicants = async ({ org, contract, manager }: props) => {

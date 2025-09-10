@@ -19,38 +19,25 @@ import { ScheduleTerminationContractEmail } from '@/components/emails/schedule-t
 import { ContractStatus } from '@/components/ui/status-badge';
 import { ResendInviteButton } from './resend-invite-button';
 import { EmployeeTabs } from './employee-tabs';
+import { ContractRepository, ManagerRepository, OrgSettingsRepository } from '@/dal';
 
 export const Contract = async ({ org, id, signatureType }: { org: string; id: string; signatureType: 'profile' | 'org' }) => {
-	const supabase = await createClient();
-	const [{ data, error }, { data: orgSettings }] = await Promise.all([
-		supabase
-			.from('contracts')
-			.select(
-				`*, org:organisations!contracts_org_fkey(id, name, subdomain),
-                level:employee_levels!contracts_level_fkey(level, role),
-                entity:legal_entities!contracts_entity_fkey(incorporation_country:countries!legal_entities_incorporation_country_fkey(currency_code, name), address_state, street_address, address_code),
-                profile:profiles!contracts_profile_fkey(*, nationality:countries!profiles_nationality_fkey(*)),
-                signed_by:profiles!contracts_signed_by_fkey(first_name, last_name, email),
-                terminated_by:profiles!contracts_terminated_by_fkey(first_name, last_name, email),
-                team:teams!contracts_team_fkey(id, name),
-                direct_report(job_title, id, profile(first_name, last_name))`
-			)
-			.match({ org, id })
-			.single(),
+	const managerRepo = new ManagerRepository();
+	const contractRepo = new ContractRepository();
+	const orgSettingsRepo = new OrgSettingsRepository();
 
-		supabase.from('org_settings').select().match({ org })
-	]);
+	const [{ data: data, error: contractError }, { data: orgSettings }] = await Promise.all([contractRepo.getByIdWithRelations(org, id), orgSettingsRepo.getByOrg(org)]);
 
-	if (error) {
+	if (contractError) {
 		return (
 			<div>
 				<p className="text-center text-xs text-muted-foreground">Unable to fetch contract details. Please refresh page</p>
-				<p className="mx-auto mt-3 w-fit rounded-sm bg-accent p-1 text-center text-xs font-thin text-muted-foreground">{error.message}</p>
+				<p className="mx-auto mt-3 w-fit rounded-sm bg-accent p-1 text-center text-xs font-thin text-muted-foreground">{contractError.message}</p>
 			</div>
 		);
 	}
 
-	const manager = (await supabase.from('managers').select().match({ org, person: id, team: data.team?.id })).data;
+	const { data: manager } = await managerRepo.getByContract({ contractId: data.id, team: data.team?.id });
 
 	const sendTerminationScheduleEmail = async (endDate: string) => {
 		'use server';
@@ -202,7 +189,7 @@ export const Contract = async ({ org, id, signatureType }: { org: string; id: st
 				</div>
 
 				<div className="mt-4 flex items-center gap-3 text-xs font-light">
-					<ContractStatus state={data.status} start_date={data.start_date || ''} probation_days={orgSettings?.[0]?.probation} end_date={data?.end_date} />•
+					<ContractStatus state={data.status} start_date={data.start_date || ''} probation_days={orgSettings?.probation} end_date={data?.end_date} />•
 					{data?.status == 'scheduled termination' && data?.end_date && (
 						<>
 							<Badge className="h-fit gap-3 py-1 text-xs font-light" variant={data?.status.includes('term') ? 'secondary-destructive' : 'secondary'}>

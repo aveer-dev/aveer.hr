@@ -11,5 +11,5 @@ export interface IManagerRepository {
 	delete(id: number): Promise<{ data: null; error: PostgrestError | null }>;
 	// Team-related
 	getTeamsByManager(profile: string): Promise<{ data: Tables<'teams'>[] | null; error: PostgrestError | null }>;
-	getByContract({ contractId, team }: { contractId: number; team: number }): Promise<{ data: Tables<'managers'> | null; error: PostgrestError | null }>;
+	getByContract({ contractId, team }: { contractId: number; team: number }): Promise<{ data: Tables<'managers'>[] | null; error: PostgrestError | null }>;
 }

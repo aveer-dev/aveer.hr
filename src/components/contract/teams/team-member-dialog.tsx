@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 interface props {
 	person: Tables<'contracts'> & { profile: Tables<'profiles'>; level: Tables<'employee_levels'> };
 	children?: React.ReactNode;
-	orgSettings?: Tables<'org_settings'>[] | null;
+	orgSettings?: Tables<'org_settings'> | null;
 	org: string;
 	manager?: Tables<'managers'>[] | null;
 	signatureType: 'profile' | 'org' | 'manager';

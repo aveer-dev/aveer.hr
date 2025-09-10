@@ -10,7 +10,7 @@ interface props {
 	team: number;
 	contractId: number;
 	currentUser: 'profile' | 'org' | 'manager';
-	orgSettings: Tables<'org_settings'>[] | null;
+	orgSettings: Tables<'org_settings'> | null;
 }
 
 export const Teams = async ({ org, team, contractId, name, currentUser, orgSettings }: props) => {

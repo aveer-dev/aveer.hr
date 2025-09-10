@@ -12,7 +12,7 @@ import { Tables } from '@/type/database.types';
 import { cn } from '@/lib/utils';
 import { InfoIcon } from 'lucide-react';
 
-export const EmployeeTabs = ({ data, orgSettings, signatureType, manager, org }: { data: any; orgSettings: Tables<'org_settings'>[] | null; signatureType: 'profile' | 'org' | 'manager'; manager?: Tables<'managers'>[] | null; org: string }) => {
+export const EmployeeTabs = ({ data, orgSettings, signatureType, manager, org }: { data: any; orgSettings: Tables<'org_settings'> | null; signatureType: 'profile' | 'org' | 'manager'; manager?: Tables<'managers'>[] | null; org: string }) => {
 	return (
 		<Tabs defaultValue={data.profile_signed && data.org_signed ? 'profile' : 'contract'} className="space-y-6">
 			{data.profile_signed && data.org_signed && (
@@ -29,7 +29,7 @@ export const EmployeeTabs = ({ data, orgSettings, signatureType, manager, org }:
 			)}
 
 			<TabsContent value="leave">
-				<LeaveOverview orgSettings={orgSettings && orgSettings[0]} reviewType={manager?.length ? 'manager' : 'employee'} data={data as any} />
+				<LeaveOverview orgSettings={orgSettings} reviewType={manager?.length ? 'manager' : 'employee'} data={data as any} />
 			</TabsContent>
 
 			<TabsContent value="onboarding">
@@ -42,11 +42,11 @@ export const EmployeeTabs = ({ data, orgSettings, signatureType, manager, org }:
 
 			{signatureType == 'profile' && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && (
 				<TabsContent value="requests">
-					<Timeoff manager={manager && manager[0]} reviewType={manager?.length ? 'manager' : 'employee'} contract={data} org={org} team={data?.team?.id} />
+					<Timeoff manager={manager} reviewType={manager?.length ? 'manager' : 'employee'} contract={data} org={org} team={data?.team?.id} />
 
-					<Applicants contract={data as any} org={org} manager={manager && manager[0]} />
+					<Applicants contract={data as any} org={org} manager={manager} />
 
-					<BoardingsReview manager={manager && manager[0]} contract={data} org={org} />
+					<BoardingsReview manager={manager} contract={data} org={org} />
 				</TabsContent>
 			)}
 

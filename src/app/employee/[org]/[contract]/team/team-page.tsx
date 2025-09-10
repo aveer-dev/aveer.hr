@@ -33,5 +33,5 @@ export const TeamPageComponent = async ({ params }: { params: Promise<{ [key: st
 
 	const manager = await managerRepo.getByContract({ contractId: Number(contract), team: data.team?.id });
 
-	return data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <Teams orgSettings={orgSettings ? [orgSettings] : []} currentUser={!!manager?.data ? 'manager' : 'profile'} name={data.team.name} contractId={data.id} org={org} team={data.team.id} />;
+	return data.team && (!data.terminated_by || (data.end_date && !isPast(data.end_date))) && <Teams orgSettings={orgSettings} currentUser={!!manager?.data ? 'manager' : 'profile'} name={data.team.name} contractId={data.id} org={org} team={data.team.id} />;
 };

@@ -9,7 +9,7 @@ import { getBoardingRequests } from './contract-assignments/utils';
 interface props {
 	org: string;
 	contract: Tables<'contracts'>;
-	manager?: Tables<'managers'> | null;
+	manager?: Tables<'managers'>[] | null;
 }
 
 export const BoardingsReview = async ({ org, contract, manager }: props) => {

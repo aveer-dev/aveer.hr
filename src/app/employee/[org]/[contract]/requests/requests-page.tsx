@@ -31,7 +31,7 @@ export const RequestsPageComponent = async ({ params }: { params: Promise<{ [key
 
 	if (data?.status !== 'signed') redirect('./home');
 
-	const manager = await managerRepo.getByContract({ contractId: Number(contract), team: data.team?.id });
+	const manager = await managerRepo.getByContract({ contractId: Number(contract) });
 
 	return (
 		<>
@@ -39,7 +39,7 @@ export const RequestsPageComponent = async ({ params }: { params: Promise<{ [key
 
 			<Applicants contract={data as any} org={org} manager={manager && manager.data} />
 
-			<BoardingsReview manager={manager && manager.data} contract={data} org={org} />
+			<BoardingsReview manager={manager.data} contract={data} org={org} />
 		</>
 	);
 };

@@ -21,7 +21,7 @@ export default async function AppraisalPageComponent({ params }: { params: Promi
 	const questionRepo = new QuestionTemplateRepository();
 	const [teamMembers, manager, appraisalAnswers, teams, questions, template] = await Promise.all([
 		contractRepo.getByTeamStatusOrgWithProfile({ team: contractData?.team || undefined, status: 'signed', org, contractId: contractData.id }),
-		managerRepo.getByContract({ contractId: Number(contract) }),
+		managerRepo.getByContract({ contractId: Number(contract), team: contractData?.team || undefined }),
 		appraisalRepo.getAllAnswersForCycle(Number(id)),
 		teamRepo.getAllByOrg(org),
 		appraisalRepo.getQuestionsByTemplate(appraisalCycle.question_template),
@@ -82,7 +82,7 @@ export default async function AppraisalPageComponent({ params }: { params: Promi
 			template={template.data}
 			teams={teams.data || []}
 			teamMembers={teamMembers.data || []}
-			manager={manager?.data || null}
+			manager={manager?.data?.[0] || null}
 			teamMembersAnswers={teamMembersAnswers || []}
 			contract={contractData}
 			appraisalCycle={appraisalCycle}

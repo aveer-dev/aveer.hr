@@ -92,9 +92,9 @@ export default async function HomePageComponent(props: { params: Promise<{ [key:
 
 				<FileDocumentListServer org={org} />
 
-				<LeaveSummary org={org} contract={contract.data} orgSettings={orgSettings.data} usedLeaveDays={usedLeaveDays || []} />
-
 				<Todos profile={contract.data?.profile as Tables<'profiles'>} contract={contract.data} profileId={contract.data?.profile?.id} org={org} team={contract.data?.team as number} />
+
+				<LeaveSummary org={org} contract={contract.data} orgSettings={orgSettings.data} usedLeaveDays={usedLeaveDays || []} />
 
 				{/* <Payments contract={contract as any} /> */}
 			</div>

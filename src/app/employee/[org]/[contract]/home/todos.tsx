@@ -1,4 +1,3 @@
-import { createClient } from '@/utils/supabase/server';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { getApplicants, getBoardingRequests, getLeaveRequests } from '@/components/contract/contract-assignments/utils';
 import { cn } from '@/lib/utils';
@@ -6,17 +5,19 @@ import { Tables } from '@/type/database.types';
 import { format } from 'date-fns';
 import { LeaveReview } from '@/components/leave/leave-review';
 import { ApplicantDetails } from '@/components/open-role/roles/applicant-details';
+import { ManagerRepository } from '@/dal';
 
 export const Todos = async ({ profile, contract, org, team }: { profileId?: string; org: string; contract: Tables<'contracts'>; team: number; profile: Tables<'profiles'> }) => {
-	const supabase = await createClient();
+	const managerRepo = new ManagerRepository();
 
 	if (!profile) return;
+	if (contract.status != 'signed') return;
 
-	const manager = contract.status == 'signed' && (await supabase.from('managers').select().match({ org, person: contract.id, team: team })).data;
+	const { data: manager } = await managerRepo.getByContract({ contractId: contract.id });
 
-	const leaveRequests = contract.status == 'signed' && (await getLeaveRequests({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined, status: 'pending' }));
-	const applicants = contract.status == 'signed' && (await getApplicants({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined }));
-	// const boardingRequests = contract.status == 'signed' && (await getBoardingRequests({ org, contract, manager: manager && manager.length > 0 ? manager[0] : undefined }));
+	const leaveRequests = await getLeaveRequests({ org, contract, manager, status: 'pending' });
+	const applicants = await getApplicants({ org, contract, manager });
+	// const boardingRequests = (await getBoardingRequests({ org, contract, manager }));
 
 	const todos = [...(leaveRequests ? leaveRequests : []), ...(applicants ? applicants : [])].sort((a, b) => (new Date((a as any)?.created_at) as any) - (new Date((b as any)?.created_at) as any));
 

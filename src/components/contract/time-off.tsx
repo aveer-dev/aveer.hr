@@ -11,7 +11,7 @@ interface props {
 	team?: number | null;
 	contract: Tables<'contracts'>;
 	reviewType: ROLE;
-	manager?: Tables<'managers'> | null;
+	manager?: Tables<'managers'>[] | null;
 }
 
 export const Timeoff = async ({ org, contract, reviewType, manager }: props) => {
