@@ -73,7 +73,7 @@ export const Team = ({ data, org, onCreate, children, className }: { org: string
 		toggleDialogState(false);
 
 		if (!onCreate) router.refresh();
-		if (onCreate) response !== true ? onCreate(response) : onCreate();
+		response !== true ? onCreate?.(response) : onCreate?.();
 		form.reset();
 		form.setValue('managers', []);
 		setManagers([]);

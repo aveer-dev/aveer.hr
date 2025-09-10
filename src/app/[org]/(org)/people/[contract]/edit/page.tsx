@@ -3,19 +3,20 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { BackButton } from '@/components/ui/back-button';
 import { createClient } from '@/utils/supabase/server';
 import { ContractForm } from '@/components/forms/contract/form';
-import { getEmployees, getFormEntities, getOrgLevels, getOrgSettings, getRoles, getTeams } from '@/utils/form-data-init';
+import { getBoardingPolicies, getEmployees, getFormEntities, getOrgLevels, getOrgSettings, getRoles, getTeams } from '@/utils/form-data-init';
 
 export default async function EditContractPage(props: { params: Promise<{ [key: string]: string }>; searchParams: Promise<{ [key: string]: string }> }) {
 	const params = await props.params;
 	const supabase = await createClient();
-	const [{ data, error }, entities, levels, teams, roles, employees, orgSettings] = await Promise.all([
+	const [{ data, error }, entities, levels, teams, roles, employees, orgSettings, boardingPolicies] = await Promise.all([
 		await supabase.from('contracts').select('*, profile:profiles!contracts_profile_fkey(first_name, id, last_name, email, nationality)').match({ org: params.org, id: params.contract }).single(),
 		await getFormEntities({ org: params.org }),
 		await getOrgLevels({ org: params.org }),
 		await getTeams({ org: params.org }),
 		await getRoles({ org: params.org }),
 		await getEmployees({ org: params.org }),
-		await getOrgSettings({ org: params.org })
+		await getOrgSettings({ org: params.org }),
+		await getBoardingPolicies({ org: params.org })
 	]);
 
 	if (error) {
@@ -44,7 +45,7 @@ export default async function EditContractPage(props: { params: Promise<{ [key: 
 						<Skeleton className="h-60 w-full max-w-4xl"></Skeleton>
 					</div>
 				}>
-				<ContractForm employeesData={employees} orgBenefits={orgSettings?.data} contractData={data} entitiesData={entities as any} levels={levels} teamsData={teams} rolesData={roles} manager={manager} />
+				<ContractForm employeesData={employees} orgBenefits={orgSettings?.data} contractData={data} entitiesData={entities as any} levels={levels} teamsData={teams} rolesData={roles} manager={manager} boardingPoliciesData={boardingPolicies} />
 			</Suspense>
 		</div>
 	);

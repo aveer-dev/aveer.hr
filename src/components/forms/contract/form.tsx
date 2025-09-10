@@ -63,9 +63,10 @@ interface props {
 	manager?: PostgrestSingleResponse<Tables<'managers'>[]>;
 	policiesData?: PostgrestSingleResponse<Tables<'approval_policies'>[]>;
 	employeesData?: PostgrestSingleResponse<Tables<'contracts'>[]>;
+	boardingPoliciesData?: PostgrestSingleResponse<Tables<'boarding_check_lists'>[]>;
 }
 
-export const ContractForm = ({ employeesData, contractData, openRoleData, orgBenefits, levels, formType = 'contract', entitiesData, teamsData, rolesData, manager, policiesData }: props) => {
+export const ContractForm = ({ employeesData, contractData, openRoleData, boardingPoliciesData, orgBenefits, levels, formType = 'contract', entitiesData, teamsData, rolesData, manager, policiesData }: props) => {
 	const [entities] = useState<ENTITY[]>(entitiesData?.entities ? entitiesData.entities : []);
 	const [entityCurrency, setCurrency] = useState('');
 	const [roles] = useState<Tables<'open_roles'>[]>(rolesData?.data ?? []);
@@ -88,6 +89,7 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 	const [isManager, toggleManagerState] = useState(openRoleData ? !!openRoleData?.is_manager : false);
 	const [teams, updateTeam] = useState<Tables<'teams'>[]>(teamsData.data ?? []);
 	const [policies, setPolicies] = useState<Tables<'approval_policies'>[]>(policiesData?.data ?? []);
+	const [boardingPolicies, setBoardingPolicies] = useState<Tables<'boarding_check_lists'>[]>(boardingPoliciesData?.data ?? []);
 	const [selectedLevel, setActiveLevel] = useState<TablesInsert<'employee_levels'>>();
 	const [showAdditionalOffering, toggleAdditionalOffering] = useState(!!contractData?.additional_offerings?.length || !!openRoleData?.additional_offerings?.length || !!orgBenefits?.additional_offerings?.length);
 	const [showManualSystem, setManualSystem] = useState(!(contractData?.level || openRoleData?.level));
@@ -135,7 +137,9 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 		direct_report: z.string().optional(),
 		enable_location: z.boolean().optional(),
 		enable_voluntary_data: z.boolean().optional(),
-		compensation_public: z.boolean().optional()
+		compensation_public: z.boolean().optional(),
+		onboarding: z.number().optional(),
+		offboarding: z.number().optional()
 	});
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -174,7 +178,9 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			role: contractData?.role ? String(contractData?.role) : undefined,
 			enable_location: openRoleData?.enable_location,
 			enable_voluntary_data: openRoleData?.enable_voluntary_data,
-			compensation_public: openRoleData?.compensation_public
+			compensation_public: openRoleData?.compensation_public,
+			onboarding: contractData?.onboarding as any,
+			offboarding: contractData?.offboarding as any
 		}
 	});
 
@@ -256,7 +262,9 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 			work_location: values.work_location,
 			additional_offerings: values.additional_offerings,
 			team: values.team ? Number(values.team) : null,
-			direct_report: values.direct_report ? Number(values.direct_report) : null
+			direct_report: values.direct_report ? Number(values.direct_report) : null,
+			onboarding: values.onboarding,
+			offboarding: values.offboarding
 		};
 
 		if (showSigningBonus) contract.signing_bonus = Number(values.signing_bonus);
@@ -784,6 +792,81 @@ export const ContractForm = ({ employeesData, contractData, openRoleData, orgBen
 								<AdditionalOffering toggle={toggleAdditionalOffering} isToggled={showAdditionalOffering} form={form} />
 							</InputsContainer>
 						</FormSection>
+
+						{/* boarding policies */}
+						{formType == 'contract' && contractData && (
+							<FormSection key="boarding">
+								<FormSectionDescription>
+									<h2 className="font-semibold">Boarding policy</h2>
+									<p className="mt-3 max-w-72 text-xs font-thin text-support">What is the onboarding policy for this employee?</p>
+								</FormSectionDescription>
+
+								<InputsContainer>
+									<FormField
+										control={form.control}
+										name="onboarding"
+										render={({ field }) => {
+											console.log(field.value);
+											return (
+												<FormItem>
+													<FormLabel className="flex items-center justify-between">Onboarding policy</FormLabel>
+
+													<Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+														<FormControl>
+															<SelectTrigger>
+																<SelectValue placeholder="Select an existing policy" />
+															</SelectTrigger>
+														</FormControl>
+														<SelectContent>
+															{boardingPolicies
+																.filter(policy => policy.type == 'on')
+																.map(policy => (
+																	<SelectItem key={policy.id} value={String(policy.id)}>
+																		{policy.name}
+																	</SelectItem>
+																))}
+														</SelectContent>
+													</Select>
+													<FormDescription>
+														<NavLink org={params.org} target="_blank" href={'/settings?type=org#boarding'} className="inline-flex w-fit items-center gap-1 rounded-md bg-accent p-1">
+															Manage policies <ArrowUpRight size={12} />
+														</NavLink>
+													</FormDescription>
+													<FormMessage />
+												</FormItem>
+											);
+										}}
+									/>
+
+									<FormField
+										control={form.control}
+										name="offboarding"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Offboarding policy</FormLabel>
+												<Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue placeholder="Select an existing policy" />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														{boardingPolicies
+															.filter(policy => policy.type == 'off')
+															.map(policy => (
+																<SelectItem key={policy.id} value={String(policy.id)}>
+																	{policy.name}
+																</SelectItem>
+															))}
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</InputsContainer>
+							</FormSection>
+						)}
 
 						{/* job schedule */}
 						{formType === 'contract' && (

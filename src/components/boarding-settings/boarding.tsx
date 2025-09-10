@@ -29,6 +29,7 @@ interface props {
 	children?: ReactNode;
 	className?: string;
 	org: string;
+	onCreate?: (data?: Tables<'boarding_check_lists'>) => void;
 }
 
 const formSchema = z.object({
@@ -43,7 +44,7 @@ const formSchema = z.object({
 
 const supabase = createClient();
 
-export const Boarding = ({ data, children, className, org }: props) => {
+export const Boarding = ({ data, children, className, org, onCreate }: props) => {
 	const [isUpdating, setUpdateState] = useState(false);
 	const [isDeleting, setDeleteState] = useState(false);
 	const [items, updateItems] = useState<{ item: string; description: string; created_at?: string }[]>([]);
@@ -78,11 +79,12 @@ export const Boarding = ({ data, children, className, org }: props) => {
 		const response = data ? await updateBoarding(payload, data.id, org) : await createBoarding(payload, org);
 		setUpdateState(false);
 
-		if (data && response !== 'Update') return toast.error('Error', { description: response });
-		if (!data && response !== true) return toast.error('Error', { description: response });
+		if (data && response !== 'Update') return toast.error('Error', { description: response as string });
+		if (!data && response && typeof response == 'string') return toast.error('Error', { description: response });
 
 		toggleDialogState(false);
 		toast.success(`${values.type}boading items updated`);
+		typeof response == 'object' ? onCreate?.(response) : onCreate?.();
 		router.refresh();
 	};
 

@@ -23,10 +23,14 @@ export const createBoarding = async (boarding: TablesInsert<'boarding_check_list
 	if (typeof hasPermission == 'string') return hasPermission;
 
 	const supabase = await createClient();
-	const { error } = await supabase.from('boarding_check_lists').insert({ ...boarding, org });
+	const { data, error } = await supabase
+		.from('boarding_check_lists')
+		.insert({ ...boarding, org })
+		.select()
+		.single();
 	if (error) return error.message;
 
-	return true;
+	return data;
 };
 
 export const deleteBoarding = async (org: string, id?: number) => {

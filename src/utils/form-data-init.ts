@@ -51,6 +51,14 @@ export const getPolicies = async ({ org }: { org: string }) => {
 	return res;
 };
 
+export const getBoardingPolicies = async ({ org }: { org: string }) => {
+	const supabase = await createClient();
+
+	const res = await supabase.from('boarding_check_lists').select().match({ org });
+
+	return res;
+};
+
 export const getOrgSettings = async ({ org }: { org: string }) => {
 	const supabase = await createClient();
 

@@ -16,7 +16,7 @@ export const Boardings = async ({ org }: props) => {
 
 	return (
 		<Suspense>
-			<FormSection id="teams">
+			<FormSection id="boarding">
 				<FormSectionDescription>
 					<h2 className="mb-1 font-normal">Onboarding / Offboarding Checklist</h2>
 					<p className="mt-3 text-xs font-thin text-muted-foreground sm:max-w-72">Automate your employee onboarding / offboarding system with adequate approval systems</p>
