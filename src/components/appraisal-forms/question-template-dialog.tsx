@@ -682,7 +682,7 @@ export const QuestionTemplateDialog = ({ children, onSave, teams, employees, tem
 				</AlertDialogContent>
 			</AlertDialog>
 
-			<QuestionSetupDialog open={isQuestionDialogOpen} onOpenChange={setIsQuestionDialogOpen} question={editingQuestion} onSave={handleAddQuestion} teams={teams} group={selectedGroup} employees={employees} />
+			<QuestionSetupDialog open={isQuestionDialogOpen} onOpenChange={setIsQuestionDialogOpen} question={editingQuestion} onSave={handleAddQuestion} teams={teams} group={selectedGroup} customGroupName={customGroupNames[selectedGroup]} employees={employees} />
 		</>
 	);
 };

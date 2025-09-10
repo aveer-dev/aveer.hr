@@ -28,15 +28,6 @@ export default async function AppraisalPageComponent({ params }: { params: Promi
 		questionRepo.getById(appraisalCycle.question_template)
 	]);
 
-	if (manager.error) {
-		return (
-			<div className="flex h-56 w-full flex-col items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">
-				<p>Unable to fetch manager</p>
-				<p>Error: {manager.error?.message}</p>
-			</div>
-		);
-	}
-
 	if (teamMembers.error) {
 		return (
 			<div className="flex h-56 w-full flex-col items-center justify-center rounded-md bg-accent text-xs text-muted-foreground">

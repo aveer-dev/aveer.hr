@@ -73,9 +73,10 @@ interface QuestionSetupDialogProps {
 	teams: Tables<'teams'>[];
 	employees: ContractWithProfile[];
 	group: QuestionFormValues['group'];
+	customGroupName: string;
 }
 
-export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, teams, employees, group }: QuestionSetupDialogProps) => {
+export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, teams, employees, group, customGroupName }: QuestionSetupDialogProps) => {
 	const [isTypePopoverOpen, setIsTypePopoverOpen] = useState(false);
 	const [showScaleLabels, setShowScaleLabels] = useState(question?.type === 'scale' && !!question?.scaleLabels && question?.scaleLabels.length > 0);
 
@@ -172,10 +173,11 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 					<AlertDialogTitle className="flex items-center justify-between gap-2">
 						{question ? 'Edit Question' : 'Add Question'}
 						<Badge variant="secondary" className="text-xs">
-							{group
-								.split('_')
-								.map(word => word.charAt(0).toUpperCase() + word.slice(1))
-								.join(' ')}
+							{customGroupName ||
+								group
+									.split('_')
+									.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+									.join(' ')}
 						</Badge>
 					</AlertDialogTitle>
 					<AlertDialogDescription>Add question details and settings below.</AlertDialogDescription>

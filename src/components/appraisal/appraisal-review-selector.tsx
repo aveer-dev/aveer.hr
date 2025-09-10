@@ -53,7 +53,7 @@ export const AppraisalReviewSelector = ({
 					variant={activeReviewType === 'manager' && employee.id === selectedEmployee.id ? 'secondary' : 'ghost'}
 					onClick={() => handleReviewTypeSelect('manager', employee, answer)}
 					disabled={!canEditManagerReview && !canViewManagerReview}>
-					Manager Review
+					Manager&apos;s Review
 					<Badge variant="outline" className="ml-auto">
 						{canEditManagerReview ? 'Edit' : canViewManagerReview ? 'View' : 'Not Submitted'}
 					</Badge>
