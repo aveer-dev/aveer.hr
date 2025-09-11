@@ -6,17 +6,21 @@ import { CustomCard } from './types';
 import { ComposeMailDialog } from '../ui/mail-dialog';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { Badge } from '../ui/badge';
 
 export const BoardHead = ({ column, stages, moveCards }: { moveCards: (fromColumnId: string, toColumnId: string) => Promise<void>; stages: string[]; column: Column<CustomCard> }) => {
 	const [showEmailDialog, toggleEmailDialog] = useState(false);
 
 	return (
 		<div className="mb-2 mt-0.5 flex items-center justify-between">
-			<h2 className="text-sm font-semibold capitalize">{column.title}</h2>
+			<div className="flex items-center gap-2">
+				<h2 className="text-sm font-semibold capitalize">{column.title}</h2>
+				<Badge variant="outline">{column.cards.length}</Badge>
+			</div>
 
 			<DropdownMenu>
 				<DropdownMenuTrigger disabled={!column.cards.length} asChild>
-					<Button size={'icon'} variant="ghost" className="">
+					<Button size={'icon'} variant="outline" className="">
 						<EllipsisVertical size={14} />
 					</Button>
 				</DropdownMenuTrigger>

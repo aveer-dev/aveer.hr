@@ -5,11 +5,14 @@ import { ChevronRight } from 'lucide-react';
 
 export const BoardCard = (card: CustomCard, _options: any, onUpdateApplicant: (data: APPLICANT, oldStage?: string) => void) => {
 	return (
-		<div className="mb-7 w-full min-w-72 rounded-md border border-border/70 bg-muted/80">
+		<div className="mb-7 w-full min-w-72 rounded-md border border-border/70 bg-white">
 			<div className="space-y-4 px-3 pb-5 pt-3">
-				<h3 className="text-sm font-medium">
-					{card.first_name} {card.last_name}
-				</h3>
+				<div className="flex items-center gap-1">
+					<span className="text-muted-foreground">#{card.id}</span>
+					<h3 className="text-sm font-medium">
+						{card.first_name} {card.last_name}
+					</h3>
+				</div>
 
 				<ul className="space-y-2 text-xs text-muted-foreground">
 					<li>{card.email}</li>

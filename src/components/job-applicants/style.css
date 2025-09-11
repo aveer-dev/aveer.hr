@@ -3,7 +3,27 @@
 }
 
 .react-kanban-column {
-	@apply m-0 bg-transparent p-0;
+	@apply m-0 rounded-md bg-gray-50 p-4;
+
+	&:nth-of-type(2) {
+		@apply bg-indigo-50/50;
+	}
+
+	&:nth-of-type(3) {
+		@apply bg-purple-50/50;
+	}
+
+	&:nth-of-type(4) {
+		@apply bg-yellow-50/50;
+	}
+
+	&:nth-of-type(5) {
+		@apply bg-green-50/50;
+	}
+
+	&:nth-of-type(6) {
+		@apply bg-red-50/50;
+	}
 }
 
 [data-rfd-droppable-id='board-droppable'] {
@@ -11,5 +31,5 @@
 }
 
 .react-kanban-card-skeleton {
-	@apply h-44 border border-dashed;
+	@apply h-20 w-full;
 }

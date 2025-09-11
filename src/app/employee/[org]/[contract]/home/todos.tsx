@@ -15,7 +15,7 @@ export const Todos = async ({ profile, contract, org, team }: { profileId?: stri
 
 	const { data: manager } = await managerRepo.getByContract({ contractId: contract.id });
 
-	const leaveRequests = await getLeaveRequests({ org, contract, manager, status: 'pending' });
+	const leaveRequests = await getLeaveRequests({ org, contract, managerialPositions: manager, status: 'pending' });
 	const applicants = await getApplicants({ org, contract, manager });
 	// const boardingRequests = (await getBoardingRequests({ org, contract, manager }));
 

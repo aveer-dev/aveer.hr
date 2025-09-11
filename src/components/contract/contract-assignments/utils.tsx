@@ -78,7 +78,7 @@ export const getApplicants = async ({ manager, contract, org }: { manager?: Tabl
  * @param org - Organization identifier
  * @param status - Optional status filter for leave requests
  */
-export const getLeaveRequests = async ({ manager, contract, org, status }: { status?: string; manager?: Tables<'managers'>[] | null; contract: any; org: string }) => {
+export const getLeaveRequests = async ({ managerialPositions, contract, org, status }: { status?: string; managerialPositions?: Tables<'managers'>[] | null; contract: any; org: string }) => {
 	const supabase = await createClient();
 
 	// Build query with optional status filter
@@ -117,7 +117,7 @@ export const getLeaveRequests = async ({ manager, contract, org, status }: { sta
 			const levels = timeoff.levels?.length ? timeoff.levels : defaultLevels;
 
 			// For managers: include if it's not their own request AND (they manage the team OR they're in approval levels)
-			const isManager = manager && manager.length > 0 && manager.some(manager => manager.person !== timeoff.contract.id && (timeoff.contract.team == manager.team || levels.find(level => level.id == String(manager.profile))));
+			const isManager = managerialPositions && managerialPositions.length > 0 && managerialPositions.some(manager => manager.person !== timeoff.contract.id && (timeoff.contract.team == manager.team || levels.find(level => level.id == String(manager.profile))));
 			const isDirectReport = timeoff.contract.direct_report == contract.id;
 
 			// Determine if request should be included based on manager status

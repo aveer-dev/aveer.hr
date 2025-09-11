@@ -118,7 +118,7 @@ export const ApplicantsBoard = ({ stages, initialBoards, className }: { stages: 
 	};
 
 	return (
-		<div className={cn(className, 'h-[62vh] overflow-y-auto rounded-md bg-secondary/50 p-4')}>
+		<div className={cn(className, 'h-[62vh] overflow-y-auto')}>
 			<ControlledBoard
 				allowAddCard={false}
 				renderCard={(card, options) => BoardCard!(card as CustomCard, options, onUpdateApplicant)}

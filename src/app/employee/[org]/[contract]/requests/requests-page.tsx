@@ -31,7 +31,7 @@ export const RequestsPageComponent = async ({ params }: { params: Promise<{ [key
 
 	if (data?.status !== 'signed') redirect('./home');
 
-	const manager = await managerRepo.getByContract({ contractId: Number(contract) });
+	const manager = await managerRepo.getByContract({ contractId: data?.id });
 
 	return (
 		<>

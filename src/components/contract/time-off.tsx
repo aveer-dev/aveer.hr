@@ -15,7 +15,7 @@ interface props {
 }
 
 export const Timeoff = async ({ org, contract, reviewType, manager }: props) => {
-	const leaveRequests = await getLeaveRequests({ org, contract, manager });
+	const leaveRequests = await getLeaveRequests({ org, contract, managerialPositions: manager });
 
 	return (
 		<section className="mt-6">
