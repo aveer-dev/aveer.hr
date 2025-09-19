@@ -106,7 +106,7 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 		if (error) return toast('❌ Oooops', { description: error.message });
 
 		// send email notification
-		emailAdmins({ from: values.dates.from, to: values.dates.to, org: contract.org as any, leaveType: values.leave_type, employeeName: `${(contract.profile as any)?.first_name} ${(contract.profile as any)?.last_name}` });
+		emailAdmins({ from: format(values.dates.from, 'yyyy-MM-dd'), to: format(values.dates.to, 'yyyy-MM-dd'), org: contract.org as any, leaveType: values.leave_type, employeeName: `${(contract.profile as any)?.first_name} ${(contract.profile as any)?.last_name}` });
 
 		if (leaveRequestData.status == 'approved')
 			await supabase

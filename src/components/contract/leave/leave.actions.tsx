@@ -2,10 +2,11 @@
 
 import { sendEmail } from '@/api/email';
 import LeaveRequestEmail from '@/components/emails/leave-request';
+import { parseDateOnly } from '@/lib/utils';
 import { createClient } from '@/utils/supabase/server';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 
-export const emailAdmins = async ({ from, to, org, employeeName, leaveType }: { leaveType: string; from: Date; to: Date; org: { name: string; subdomain: string }; employeeName: string }) => {
+export const emailAdmins = async ({ from, to, org, employeeName, leaveType }: { leaveType: string; from: string; to: string; org: { name: string; subdomain: string }; employeeName: string }) => {
 	const supabase = await createClient();
 
 	const { data, error } = await supabase.from('profiles_roles').select('profile(first_name, last_name, email)').match({ organisation: org.subdomain, disable: false, role: 'admin' });
@@ -21,8 +22,8 @@ export const emailAdmins = async ({ from, to, org, employeeName, leaveType }: { 
 				name: `${admin.profile.first_name}`,
 				org,
 				leaveType,
-				from: format(from, 'PPPP'),
-				to: format(to, 'PPPP'),
+				from: format(parseDateOnly(from), 'PPPP'),
+				to: format(parseDateOnly(to), 'PPPP'),
 				employeeName
 			})
 		});

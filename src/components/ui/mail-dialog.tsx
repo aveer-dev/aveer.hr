@@ -45,7 +45,7 @@ export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, reci
 	const sendMessage = async (form: FormData) => {
 		const mailMessage = form.get('message') as string;
 		const mailSubject = form.get('subject') as string;
-		const cc = (form.get('cc') as string).split(',');
+		const bcc = (form.get('cc') as string).split(',');
 
 		if (!mailMessage || !mailSubject) return;
 
@@ -54,7 +54,7 @@ export const ComposeMailDialog = ({ isOpen, toggleDialog, message, subject, reci
 			to: recipients,
 			subject: mailSubject,
 			text: mailMessage,
-			cc,
+			bcc,
 			replyTo
 		}).then(response => {
 			if (response.error) return toast.error(response.error?.message);
