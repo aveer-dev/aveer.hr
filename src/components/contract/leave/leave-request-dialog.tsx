@@ -194,6 +194,41 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 		}
 	}, [contract.org]);
 
+	const onSelect = (range: DateRange | undefined) => {
+		const maxDays = leaveDays - leaveDaysUsed;
+		if (!range?.from) return setDate(undefined);
+
+		let from = range.from;
+		let to = range.to ?? range.from;
+
+		// Use date-fns helpers
+		const allDates: Date[] = [];
+		let current = from;
+		while (current <= to) {
+			allDates.push(current);
+			current = addBusinessDays(current, 1);
+		}
+
+		// Filter out weekends using isWeekend
+		const businessDates = allDates.filter(d => !isWeekend(d));
+		const businessDays = businessDates.length;
+
+		if (businessDays > maxDays) {
+			if (date?.to) {
+				return setDate({ from: to, to: undefined });
+			}
+			const allowedDates = businessDates.slice(0, maxDays);
+			const lastAllowedDate = allowedDates[allowedDates.length - 1];
+
+			toast('Exceeded leave days', {
+				description: `You only have ${maxDays} leave days left. The end date has been adjusted to ${format(lastAllowedDate, 'PPP')}.`
+			});
+			setDate({ from, to: lastAllowedDate });
+		} else {
+			setDate(range);
+		}
+	};
+
 	return (
 		<Sheet onOpenChange={toggleDialog} open={isDialoagOpen}>
 			{!children && (
@@ -270,12 +305,11 @@ export const LeaveRequestDialog = ({ onCreateLeave, contract, usedLeaveDays, chi
 												if (isPastLeaveDate) return true;
 												return false;
 											}}
-											max={leaveDays - leaveDaysUsed}
 											className="!mt-10"
 											mode="range"
 											defaultMonth={date?.from}
 											selected={date}
-											onSelect={setDate}
+											onSelect={onSelect}
 											numberOfMonths={1}
 										/>
 										<FormMessage />
