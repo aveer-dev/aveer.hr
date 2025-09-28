@@ -16,7 +16,7 @@ interface Props {
 	manager?: Tables<'managers'> | null;
 	activeReviewType: 'self' | 'manager' | 'summary';
 	teamMembersAnswers?: Tables<'appraisal_answers'>[];
-	showTeamMembers: boolean;
+	showTeamMembers?: boolean;
 }
 
 export const AppraisalReviewSelector = ({ selectedEmployee, teamMembers, contract, contractAnswer, isSelfReviewDueDatePassed, handleReviewTypeSelect, activeReviewType, manager, teamMembersAnswers, showTeamMembers = false }: Props) => {
