@@ -6,17 +6,7 @@ import { Tables } from '@/type/database.types';
 import { cn } from '@/lib/utils';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue, SelectLabel, SelectGroup } from '@/components/ui/select';
 
-export const AppraisalReviewSelector = ({
-	selectedEmployee,
-	teamMembers,
-	contract,
-	contractAnswer,
-	isSelfReviewDueDatePassed,
-	handleReviewTypeSelect,
-	activeReviewType,
-	manager,
-	teamMembersAnswers
-}: {
+interface Props {
 	selectedEmployee: Tables<'contracts'>;
 	teamMembers?: Tables<'contracts'>[] | null;
 	contract: Tables<'contracts'>;
@@ -26,7 +16,10 @@ export const AppraisalReviewSelector = ({
 	manager?: Tables<'managers'> | null;
 	activeReviewType: 'self' | 'manager' | 'summary';
 	teamMembersAnswers?: Tables<'appraisal_answers'>[];
-}) => {
+	showTeamMembers: boolean;
+}
+
+export const AppraisalReviewSelector = ({ selectedEmployee, teamMembers, contract, contractAnswer, isSelfReviewDueDatePassed, handleReviewTypeSelect, activeReviewType, manager, teamMembersAnswers, showTeamMembers = false }: Props) => {
 	const ReviewButtons = ({ employee, answer }: { employee: Tables<'contracts'>; answer: Tables<'appraisal_answers'> | null }) => {
 		const isMyContract = employee.id === contract.id;
 		const isEmployeesManager = employee.direct_report === contract.id || (!!manager?.team && employee.team === manager.team && employee.id !== manager.person);
@@ -132,7 +125,7 @@ export const AppraisalReviewSelector = ({
 				</Collapsible>
 
 				{/* Manager Reviews Group */}
-				{!!manager && teamMembers && teamMembers.length > 0 && (
+				{!!manager && teamMembers && teamMembers.length > 0 && showTeamMembers && (
 					<div className="space-y-4">
 						<h3 className="text-xs font-medium text-muted-foreground">Your team</h3>
 

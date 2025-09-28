@@ -9,18 +9,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DatePicker } from '@/components/ui/date-picker';
 import { useState, useEffect } from 'react';
 import { createAppraisalCycle, getQuestionTemplates, updateAppraisalCycle } from '@/components/appraisal-forms/appraisal.actions';
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command';
 import { Tables, TablesInsert } from '@/type/database.types';
 import { toast } from 'sonner';
 import { LoadingSpinner } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CheckCircle, Info, ListChecks } from 'lucide-react';
+import { Check, CheckCircle, ChevronsUpDown, Info, ListChecks, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Textarea } from '../ui/textarea';
 import { DeleteAppraisalCycle } from './delete-appraisal-cycle';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { searchPeople } from '@/utils/employee-search';
+import { getEmployees } from '@/utils/form-data-init';
 
 interface props {
 	org: string;
@@ -34,7 +39,7 @@ interface props {
 
 const appraisalTypes = [
 	{
-		name: 'Objectives and Goals Accessment',
+		name: 'Objectives and Goals',
 		value: 'objectives_goals_accessment',
 		description: 'Employees will be asked to provide their objectives, they and their manager will score them, and provide feedback on their performance.',
 		icon: ListChecks
@@ -52,6 +57,10 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 	const [isSheetOpen, setIsSheetOpen] = useState(isOpen || false);
 	const [questionTemplates, setQuestionTemplates] = useState<Tables<'question_templates'>[] | null>(null);
 	const router = useRouter();
+	const [isEmployeeOpen, setIsEmployeeOpen] = useState(false);
+	const [filteredEmployees, setFilteredEmployees] = useState<{ id: number; profile: { first_name: string; last_name: string; id: string } }[]>([]);
+	const [employees, setEmployees] = useState<Tables<'contracts'>[]>([]);
+	const [selectedEmployee, setSelectedEmployee] = useState<{ id: number; profile: { first_name: string; last_name: string; id: string } } | null>(null);
 
 	const formSchema = z
 		.object({
@@ -71,7 +80,8 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 			question_template: z.number(),
 			name: z.string().min(1, { message: 'Name is required' }),
 			description: z.string().optional(),
-			type: z.enum(['objectives_goals_accessment', 'direct_score'])
+			type: z.enum(['objectives_goals_accessment', 'direct_score', 'per_employee']),
+			employee: z.number().optional().nullable()
 		})
 		.refine(data => new Date(data.end_date) > new Date(data.start_date), { message: 'End date must be after start date', path: ['end_date'] })
 		.refine(
@@ -103,7 +113,8 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 			question_template: cycle?.question_template,
 			name: cycle?.name || '',
 			description: cycle?.description || '',
-			type: cycle?.type || 'objectives_goals_accessment'
+			type: cycle?.type || 'objectives_goals_accessment',
+			employee: cycle?.employee || null
 		}
 	});
 
@@ -121,8 +132,20 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 			}
 		};
 
+		const fetchEmployees = async () => {
+			const { data, error } = await getEmployees({ org });
+
+			if (!data || error) {
+				toast.error('Error fetching employees', { description: error instanceof Error ? error?.message : 'Unknown error' });
+				return;
+			}
+			setEmployees(data);
+			setFilteredEmployees(data as any);
+		};
+
 		if (isSheetOpen) {
 			fetchTemplates();
+			fetchEmployees();
 		}
 	}, [isSheetOpen, org]);
 
@@ -230,14 +253,6 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 														<type.icon size={16} />
 														<div className="flex flex-col gap-1">
 															<div className="text-sm font-medium">{type.name}</div>
-															<Tooltip>
-																<TooltipTrigger asChild className="absolute right-2 top-2">
-																	<Info className="ml-1 inline-block" size={12} />
-																</TooltipTrigger>
-																<TooltipContent className="max-w-xs">
-																	<p>Employees will be asked to provide their objectives, they and their manager will score them, and provide feedback on their performance.</p>
-																</TooltipContent>
-															</Tooltip>
 														</div>
 													</FormLabel>
 												</FormItem>
@@ -248,6 +263,77 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 								</FormItem>
 							)}
 						/>
+
+						<FormItem>
+							<FormField
+								control={form.control}
+								name="employee"
+								render={() => (
+									<FormItem>
+										<FormLabel className="flex items-center">
+											Employee
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<Info className="ml-1 inline-block" size={12} />
+												</TooltipTrigger>
+												<TooltipContent>
+													<p>The employee to be appraised, if appraisal is for a single employee</p>
+												</TooltipContent>
+											</Tooltip>
+										</FormLabel>
+
+										<Popover open={isEmployeeOpen} onOpenChange={setIsEmployeeOpen}>
+											<PopoverTrigger asChild>
+												<FormControl>
+													<Button variant="outline" role="combobox" className={cn('w-full justify-between bg-input-bg', !form.getValues(`employee`) && 'text-muted-foreground')}>
+														{form.getValues(`employee`) ? `${selectedEmployee?.profile.first_name} ${selectedEmployee?.profile.last_name}` : 'Select employee'}
+														<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+													</Button>
+												</FormControl>
+											</PopoverTrigger>
+
+											<PopoverContent className="w-[300px] p-0" align="start">
+												<Command shouldFilter={false}>
+													<CommandInput
+														placeholder="Search people"
+														onValueChange={value => {
+															const result = searchPeople(employees as any, value, ['first_name', 'last_name']);
+															setFilteredEmployees(result);
+														}}
+													/>
+
+													<CommandList>
+														<CommandEmpty>No person found with that name.</CommandEmpty>
+
+														<CommandGroup>
+															{filteredEmployees.map(employee => (
+																<CommandItem
+																	value={String(employee.id)}
+																	key={employee.id}
+																	onSelect={value => {
+																		const employeeDetails = filteredEmployees.find(employee => employee.id == Number(value));
+																		if (!employeeDetails) return;
+
+																		setSelectedEmployee(employeeDetails);
+																		form.setValue('employee', employeeDetails?.id);
+																		setIsEmployeeOpen(false);
+																	}}>
+																	<Check className={cn('mr-2 h-4 w-4', employee.id === selectedEmployee?.id ? 'opacity-100' : 'opacity-0')} />
+																	{employee.profile.first_name} {employee.profile.last_name}
+																</CommandItem>
+															))}
+														</CommandGroup>
+													</CommandList>
+												</Command>
+											</PopoverContent>
+										</Popover>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormMessage />
+						</FormItem>
 
 						<div className="space-y-4 rounded-md bg-accent p-4">
 							<h3 className="!mb-6 text-xs font-medium text-muted-foreground">Appraisal Cycle timeline</h3>

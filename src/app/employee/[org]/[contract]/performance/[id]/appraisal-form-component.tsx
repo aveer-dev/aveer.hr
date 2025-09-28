@@ -111,6 +111,7 @@ export const AppraisalFormComponent = ({
 					manager={manager}
 					activeReviewType={selectedReviewType}
 					teamMembersAnswers={teamMembersAnswers}
+					showTeamMembers={!appraisalCycle.employee}
 				/>
 
 				{/* Appraisal Form */}

@@ -20,7 +20,15 @@ const AppraisalCycleCardDialog = ({ org, cycle }: AppraisalCycleCardDialogProps)
 	<li className="flex items-center py-4">
 		<AppraisalCycleDialog key={cycle.id} org={org} cycle={cycle}>
 			<Button variant="ghost" className="h-10 w-full justify-between gap-2 focus:ring-border focus-visible:ring-border">
-				<div className="max-w-[9rem] truncate px-0 text-sm font-medium md:max-w-md">{cycle.name}</div>
+				<div className="max-w-[9rem] truncate px-0 text-sm font-medium md:max-w-md">
+					{cycle.name}
+					<Badge variant="secondary" className="ml-2 border-primary/5">
+						{cycle.type
+							.split('_')
+							.map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+							.join(' ')}
+					</Badge>
+				</div>
 
 				<div className="flex items-center gap-4">
 					<div className="max-w-sm truncate">
