@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -66,7 +67,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 		.object({
 			start_date: z.string().refine(
 				date => {
-					const startDate = new Date(date);
+					const startDate = parseDateOnly(date);
 					const today = new Date();
 					today.setHours(0, 0, 0, 0);
 					// Allow past dates only when updating an existing cycle
@@ -83,21 +84,21 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 			type: z.enum(['objectives_goals_accessment', 'direct_score', 'per_employee']),
 			employee: z.number().optional().nullable()
 		})
-		.refine(data => new Date(data.end_date) > new Date(data.start_date), { message: 'End date must be after start date', path: ['end_date'] })
+		.refine(data => parseDateOnly(data.end_date) > parseDateOnly(data.start_date), { message: 'End date must be after start date', path: ['end_date'] })
 		.refine(
 			data => {
-				const start = new Date(data.start_date);
-				const end = new Date(data.end_date);
-				const selfReview = new Date(data.self_review_due_date);
+				const start = parseDateOnly(data.start_date);
+				const end = parseDateOnly(data.end_date);
+				const selfReview = parseDateOnly(data.self_review_due_date);
 				return selfReview > start && selfReview < end;
 			},
 			{ message: 'Self review date must be between start and end date', path: ['self_review_due_date'] }
 		)
 		.refine(
 			data => {
-				const start = new Date(data.start_date);
-				const end = new Date(data.end_date);
-				const managerReview = new Date(data.manager_review_due_date);
+				const start = parseDateOnly(data.start_date);
+				const end = parseDateOnly(data.end_date);
+				const managerReview = parseDateOnly(data.manager_review_due_date);
 				return managerReview > start && managerReview < end;
 			},
 			{ message: 'Manager review date must be between start and end date', path: ['manager_review_due_date'] }
@@ -106,10 +107,10 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			start_date: cycle?.start_date || new Date().toISOString(),
-			end_date: cycle?.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-			self_review_due_date: cycle?.self_review_due_date || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-			manager_review_due_date: cycle?.manager_review_due_date || new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+			start_date: cycle?.start_date || format(new Date(), 'yyyy-MM-dd'),
+			end_date: cycle?.end_date || format(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
+			self_review_due_date: cycle?.self_review_due_date || format(new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
+			manager_review_due_date: cycle?.manager_review_due_date || format(new Date(Date.now() + 20 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
 			question_template: cycle?.question_template,
 			name: cycle?.name || '',
 			description: cycle?.description || '',
@@ -358,7 +359,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(date.toISOString())} disabled={readOnly} />
+												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(format(date, 'yyyy-MM-dd'))} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -384,7 +385,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(date.toISOString())} disabled={readOnly} />
+												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(format(date, 'yyyy-MM-dd'))} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -416,7 +417,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(date.toISOString())} disabled={readOnly} />
+												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(format(date, 'yyyy-MM-dd'))} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -442,7 +443,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(date.toISOString())} disabled={readOnly} />
+												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(format(date, 'yyyy-MM-dd'))} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>

@@ -22,7 +22,7 @@ export function DatePicker({ onSetDate, selected, children, disableButton, field
 					<FormControl>
 						<Button variant={'outline'} disabled={disableButton} className={cn('flex w-full justify-between border-input bg-input-bg px-3 text-left font-light', (!date || !field?.value) && 'text-muted-foreground')}>
 							{field?.value || date ? format(field?.value || date, 'PPP') : <span>Pick a date</span>}
-							<CalendarIcon className="mr-2 h-4 w-4" />
+							<CalendarIcon className="h-4 w-4" />
 						</Button>
 					</FormControl>
 				</PopoverTrigger>
@@ -32,7 +32,7 @@ export function DatePicker({ onSetDate, selected, children, disableButton, field
 				<PopoverTrigger asChild>
 					<Button variant={'outline'} disabled={disableButton} className={cn('flex w-full justify-between border-input bg-input-bg px-3 text-left font-light', !date && 'text-muted-foreground')}>
 						{date ? format(date, 'PPP') : <span>Pick a date</span>}
-						<CalendarIcon className="mr-2 h-4 w-4" />
+						<CalendarIcon className="h-4 w-4" />
 					</Button>
 				</PopoverTrigger>
 			)}
