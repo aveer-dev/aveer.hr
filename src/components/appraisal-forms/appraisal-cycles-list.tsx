@@ -63,8 +63,27 @@ export const AppraisalCyclesList = async ({ org }: Props) => {
 
 	return (
 		<div className="mt-12 space-y-12">
-			{/* Active Appraisals Section */}
+			{/* Future Appraisals Section */}
 
+			{cycles.some(cycle => parseDateOnly(cycle.start_date) > new Date() && parseDateOnly(cycle.end_date) >= new Date()) && (
+				<div className="space-y-2">
+					<div className="flex items-center justify-between gap-2">
+						<h3 className="w-fit whitespace-nowrap text-sm font-medium text-muted-foreground">Future Appraisals</h3>
+						<Separator className="w-[calc(100%-8rem)]" />
+					</div>
+
+					<ul className="divide-y">
+						{cycles
+							.filter(cycle => parseDateOnly(cycle.start_date) > new Date() && parseDateOnly(cycle.end_date) >= new Date())
+							.map(cycle => {
+								const isActive = parseDateOnly(cycle.start_date) > new Date() && parseDateOnly(cycle.end_date) >= new Date();
+								return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} badge={isActive ? <Badge variant="outline">Active</Badge> : null} />;
+							})}
+					</ul>
+				</div>
+			)}
+
+			{/* Active Appraisals Section */}
 			{cycles.some(cycle => parseDateOnly(cycle.start_date) <= new Date() && parseDateOnly(cycle.end_date) >= new Date()) && (
 				<div className="space-y-2">
 					<div className="flex items-center justify-between gap-2">
