@@ -217,32 +217,33 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 
 						<Separator />
 
-						<div className="">
-							<FormField
-								control={form.control}
-								name="type"
-								render={({ field }) => {
-									const isScaleOnlyGroup = group === 'competencies';
+						<FormField
+							control={form.control}
+							name="type"
+							render={({ field }) => {
+								const isScaleOnlyGroup = group === 'competencies';
 
-									return (
-										<FormItem>
-											<FormLabel>Select question type</FormLabel>
+								return (
+									<FormItem>
+										<FormLabel>Select question type</FormLabel>
 
-											<Popover open={isTypePopoverOpen} onOpenChange={setIsTypePopoverOpen}>
-												<PopoverTrigger asChild>
-													<FormControl>
-														<Button variant="outline" type="button" className="w-full justify-between" disabled={isScaleOnlyGroup}>
-															{inputTypes.find(t => t.type === field.value)?.label}
-															{!isScaleOnlyGroup && <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
-														</Button>
-													</FormControl>
-												</PopoverTrigger>
+										<Popover open={isTypePopoverOpen} onOpenChange={setIsTypePopoverOpen}>
+											<PopoverTrigger asChild>
+												<FormControl>
+													<Button variant="outline" type="button" className="w-full justify-between">
+														{inputTypes.find(t => t.type === field.value)?.label}
+														{!isScaleOnlyGroup && <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />}
+													</Button>
+												</FormControl>
+											</PopoverTrigger>
 
-												<PopoverContent align="start" className="w-[200px] p-0">
-													<Command>
-														<CommandList>
-															<CommandGroup>
-																{inputTypes.map(inputType => (
+											<PopoverContent align="start" className="w-[200px] p-0">
+												<Command>
+													<CommandList>
+														<CommandGroup>
+															{inputTypes
+																.filter(t => isScaleOnlyGroup && (t.type === 'scale' || t.type === 'yesno'))
+																.map(inputType => (
 																	<CommandItem
 																		key={inputType.type}
 																		onSelect={() => {
@@ -266,51 +267,30 @@ export const QuestionSetupDialog = ({ open, onOpenChange, question, onSave, team
 																		{inputType.label}
 																	</CommandItem>
 																))}
-															</CommandGroup>
-														</CommandList>
-													</Command>
-												</PopoverContent>
-											</Popover>
+														</CommandGroup>
+													</CommandList>
+												</Command>
+											</PopoverContent>
+										</Popover>
 
-											{isScaleOnlyGroup && (
-												<TooltipProvider>
-													<Tooltip>
-														<TooltipTrigger type="button" className="!mt-0">
-															<Info size={12} className="text-muted-foreground" />
-														</TooltipTrigger>
-
-														<TooltipContent>
-															<p className="text-xs">
-																Scale type is required for{' '}
-																{group
-																	.split('_')
-																	.map(word => word.charAt(0).toUpperCase() + word.slice(1))
-																	.join(' ')}{' '}
-																questions
-															</p>
-														</TooltipContent>
-													</Tooltip>
-												</TooltipProvider>
-											)}
-											<FormMessage />
-										</FormItem>
-									);
-								}}
-							/>
-
-							<FormField
-								control={form.control}
-								name="required"
-								render={({ field }) => (
-									<FormItem className="mt-2 flex items-center gap-2 space-y-0">
-										<FormLabel>Required</FormLabel>
-										<FormControl>
-											<Switch checked={field.value} onCheckedChange={field.onChange} className="scale-75" />
-										</FormControl>
+										<FormMessage />
 									</FormItem>
-								)}
-							/>
-						</div>
+								);
+							}}
+						/>
+
+						<FormField
+							control={form.control}
+							name="required"
+							render={({ field }) => (
+								<FormItem className="!mb-5 !mt-10 flex items-center justify-between gap-2 space-y-0 rounded-3xl bg-accent p-4">
+									<FormLabel>Required?</FormLabel>
+									<FormControl>
+										<Switch checked={field.value} onCheckedChange={field.onChange} className="scale-75" />
+									</FormControl>
+								</FormItem>
+							)}
+						/>
 
 						<FormField
 							control={form.control}
