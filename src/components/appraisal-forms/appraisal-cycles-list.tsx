@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '../ui/button';
 import { ReactNode } from 'react';
 import { AppraisalCycleDialog } from './appraisal-cycle-dialog';
+import { parseDateOnly } from '@/lib/utils';
 
 interface Props {
 	org: string;
@@ -32,7 +33,7 @@ const AppraisalCycleCardDialog = ({ org, cycle }: AppraisalCycleCardDialogProps)
 
 				<div className="flex items-center gap-4">
 					<div className="max-w-sm truncate">
-						{format(new Date(cycle.start_date), 'MMM d, yyyy')} - {format(new Date(cycle.end_date), 'MMM d, yyyy')}
+						{format(parseDateOnly(cycle.start_date), 'MMM d, yyyy')} - {format(parseDateOnly(cycle.end_date), 'MMM d, yyyy')}
 					</div>
 				</div>
 			</Button>

@@ -23,7 +23,7 @@ import { DeleteAppraisalCycle } from './delete-appraisal-cycle';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { cn, parseDateOnly } from '@/lib/utils';
 import { searchPeople } from '@/utils/employee-search';
 import { getEmployees } from '@/utils/form-data-init';
 
@@ -358,7 +358,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} disabled={readOnly} />
+												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(date.toISOString())} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -384,7 +384,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} disabled={readOnly} />
+												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(date.toISOString())} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -416,7 +416,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} disabled={readOnly} />
+												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(date.toISOString())} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -442,7 +442,7 @@ export const AppraisalCycleDialog = ({ org, cycle, children, readOnly = false, n
 												</TooltipProvider>
 											</FormLabel>
 											<FormControl>
-												<DatePicker selected={field.value ? new Date(field.value) : undefined} onSetDate={date => field.onChange(new Date(date).toISOString())} disabled={readOnly} />
+												<DatePicker selected={field.value ? parseDateOnly(field.value) : undefined} onSetDate={date => field.onChange(date.toISOString())} disabled={readOnly} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>

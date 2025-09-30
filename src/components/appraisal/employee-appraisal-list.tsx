@@ -15,7 +15,7 @@ export const EmployeeAppraisalList = async ({ org, contract }: Props) => {
 	const { data: appraisalCycles } = await supabase
 		.from('appraisal_cycles')
 		.select('*')
-		.or(`org.eq.${org},employee.eq.${contract.id}`)
+		.or(`and(org.eq.${org},employee.eq.${contract.id}),and(org.eq.${org},employee.is.null)`)
 		.gte('start_date', contract.start_date || new Date().toISOString())
 		.order('start_date', { ascending: false });
 
