@@ -133,6 +133,7 @@ export const AppraisalFormComponent = ({
 						groupedQuestions={groupedQuestions}
 						teams={teams}
 						customGroupNames={customGroupNames}
+						isEmployeesManager={isSelectedEmployeesManager}
 					/>
 				</div>
 			</div>

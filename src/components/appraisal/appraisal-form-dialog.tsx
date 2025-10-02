@@ -177,6 +177,7 @@ export const AppraisalFormDialog = ({ org, contract, appraisalCycle, contractAns
 							groupedQuestions={groupedQuestions}
 							teams={teams}
 							customGroupNames={customGroupNames}
+							isEmployeesManager={isSelectedEmployeesManager}
 						/>
 					</div>
 				</div>
