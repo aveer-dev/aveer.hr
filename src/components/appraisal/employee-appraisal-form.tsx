@@ -37,6 +37,7 @@ interface Props {
 	groupedQuestions: GroupedQuestions;
 	teams?: Tables<'teams'>[] | null;
 	customGroupNames?: { id: string; name: string }[];
+	isEmployeesManager: boolean;
 }
 
 interface DirectScore {
@@ -93,7 +94,7 @@ const canUpdateAppraisal = (reviewType: 'self' | 'manager', isManager: boolean, 
 	}
 };
 
-export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, appraisalCycle, activeTab, setActiveTab, answer, selectedReviewType, isManager, selectedEmployee, contract, isSelectedEmplyeesManager, customGroupNames }: Props) => {
+export const EmployeeAppraisalForm = ({ teams, isEmployeesManager, groupedQuestions, setOpen, org, appraisalCycle, activeTab, setActiveTab, answer, selectedReviewType, isManager, selectedEmployee, contract, isSelectedEmplyeesManager, customGroupNames }: Props) => {
 	const router = useRouter();
 	const questionGroups = Object.keys(groupedQuestions) as QuestionGroup[];
 	const [managerAnswers, setManagerAnswers] = useState<AnswersState>({});
@@ -145,6 +146,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 	const canViewManagerAnswer = answer?.manager_submission_date !== null || isSelectedEmplyeesManager;
 	const canEditSelfAnswer = selectedEmployee.id === contract.id && !isSelfReviewDueDatePassed;
 	const canEditManagerAnswer = isManager && selectedEmployee.id !== contract.id && !isManagerReviewDueDatePassed && isSelectedEmplyeesManager;
+	const canEditGoalsAndObjectives = (selectedEmployee.id === contract.id && !isSelfReviewDueDatePassed && selectedReviewType === 'self') || (isEmployeesManager && selectedReviewType === 'manager' && !isManagerReviewDueDatePassed);
 
 	const autoSaveAnswerDebounced = useDebounce(async ({ questionId, value }: { questionId?: number; value: any }) => {
 		try {
@@ -672,7 +674,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 							<div className="flex items-center justify-between">
 								<h3 className="text-base font-medium">Objectives & Goals</h3>
 
-								{selectedEmployee.id === contract.id && !isSelfReviewDueDatePassed && selectedReviewType === 'self' && (
+								{canEditGoalsAndObjectives && (
 									<Button
 										onClick={() => {
 											const newObjective: Objective = {
@@ -700,7 +702,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 												<h4 className="text-sm font-normal">{objective.title || 'Untitled Objective'}</h4>
 											</div>
 
-											{selectedEmployee.id === contract.id && !isSelfReviewDueDatePassed && selectedReviewType === 'self' && (
+											{canEditGoalsAndObjectives && (
 												<div className="flex gap-2">
 													<Button
 														variant="outline"
@@ -748,7 +750,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 														</div>
 
 														<div className="flex gap-2">
-															{selectedEmployee.id === contract.id && !isSelfReviewDueDatePassed && selectedReviewType === 'self' && (
+															{canEditGoalsAndObjectives && (
 																<>
 																	<Button variant="ghost" size="sm" onClick={() => setEditingGoal({ objectiveId: objective.id, goal })}>
 																		<Settings2 size={14} />
@@ -796,7 +798,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 												updateObjectives(newObjectives);
 											}
 										}}
-										disabled={selectedEmployee.id !== contract.id || isSelfReviewDueDatePassed}
+										disabled={canEditGoalsAndObjectives}
 									/>
 								</div>
 							</div>
@@ -834,7 +836,7 @@ export const EmployeeAppraisalForm = ({ teams, groupedQuestions, setOpen, org, a
 														const newObjectives = objectives.map(obj => (obj.id === objective.id ? { ...obj, weight } : obj));
 														updateObjectives(newObjectives);
 													}}
-													disabled={selectedEmployee.id !== contract.id || isSelfReviewDueDatePassed}
+													disabled={canEditGoalsAndObjectives}
 												/>
 												<span className="text-xs text-muted-foreground">%</span>
 											</div>

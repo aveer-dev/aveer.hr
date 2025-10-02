@@ -14,13 +14,12 @@ interface Props {
 interface AppraisalCycleCardDialogProps {
 	org: string;
 	cycle: any;
-	badge?: ReactNode;
 }
 
 const AppraisalCycleCardDialog = ({ org, cycle }: AppraisalCycleCardDialogProps) => (
-	<li className="flex items-center py-4">
+	<li className="flex items-center py-2">
 		<AppraisalCycleDialog key={cycle.id} org={org} cycle={cycle}>
-			<Button variant="ghost" className="h-10 w-full justify-between gap-2 focus:ring-border focus-visible:ring-border">
+			<Button variant="ghost" className="h-14 w-full justify-between gap-2 focus:ring-border focus-visible:ring-border">
 				<div className="max-w-[9rem] truncate px-0 text-sm font-medium md:max-w-md">
 					{cycle.name}
 					<Badge variant="secondary" className="ml-2 border-primary/5">
@@ -77,7 +76,7 @@ export const AppraisalCyclesList = async ({ org }: Props) => {
 							.filter(cycle => parseDateOnly(cycle.start_date) > new Date() && parseDateOnly(cycle.end_date) >= new Date())
 							.map(cycle => {
 								const isActive = parseDateOnly(cycle.start_date) > new Date() && parseDateOnly(cycle.end_date) >= new Date();
-								return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} badge={isActive ? <Badge variant="outline">Active</Badge> : null} />;
+								return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} />;
 							})}
 					</ul>
 				</div>
@@ -96,7 +95,7 @@ export const AppraisalCyclesList = async ({ org }: Props) => {
 							.filter(cycle => parseDateOnly(cycle.start_date) <= new Date() && parseDateOnly(cycle.end_date) >= new Date())
 							.map(cycle => {
 								const isActive = parseDateOnly(cycle.start_date) <= new Date() && parseDateOnly(cycle.end_date) >= new Date();
-								return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} badge={isActive ? <Badge variant="outline">Active</Badge> : null} />;
+								return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} />;
 							})}
 					</ul>
 				</div>
@@ -115,7 +114,7 @@ export const AppraisalCyclesList = async ({ org }: Props) => {
 							.filter(cycle => parseDateOnly(cycle.end_date) < new Date())
 							.map(cycle => {
 								const isPast = parseDateOnly(cycle.end_date) < new Date();
-								return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} badge={isPast ? <Badge variant="secondary">Past</Badge> : null} />;
+								return <AppraisalCycleCardDialog key={cycle.id} org={org} cycle={cycle} />;
 							})}
 					</ul>
 				</div>
