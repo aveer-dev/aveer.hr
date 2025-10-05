@@ -1,6 +1,6 @@
 import { createClient } from 'supabase';
 import { Resend } from 'resend';
-import { renderAsync } from 'react-email';
+import { render } from 'react-email';
 import { NotificationEmail } from './_templates/notification-email.tsx';
 import React from 'react';
 
@@ -9,7 +9,7 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const resend = new Resend(RESEND_API_KEY);
 
 const getEmailBody = async ({ link, name, title, body, type, org, contract }: { link: string; name: string; title: string; body: string; org: string; type: string; contract?: number }) => {
-	const html = await renderAsync(React.createElement(NotificationEmail, { link, name, title, body, type, org, contract }));
+	const html = await render(React.createElement(NotificationEmail, { link, name, title, body, type, org, contract }));
 
 	return html;
 };

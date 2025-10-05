@@ -5,11 +5,60 @@ import { Tables, Database } from '@/type/database.types';
 import { TablesInsert, TablesUpdate } from '@/type/database.types';
 import { doesUserHaveAdequatePermissions } from '@/utils/api';
 import { GOAL_SCORE, Objective } from '../appraisal/appraisal.types';
+import { AppraisalEmailScheduler } from '@/utils/appraisal-email-scheduler';
+import { sendEmail } from '@/api/email';
+import { NewAppraisalEmail } from '../emails/new-appraisal-email';
 
 interface Answer {
 	question_id: number;
 	answer: any;
 	[key: string]: any;
+}
+
+interface AdminRecipient {
+	id: string;
+	email: string;
+	first_name: string;
+	last_name: string;
+}
+
+/**
+ * Send immediate notification email to all active admins about new appraisal cycle
+ */
+async function sendAppraisalCycleNotificationEmail(appraisalCycle: Tables<'appraisal_cycles'>): Promise<void> {
+	try {
+		const supabase = await createClient();
+
+		// Get all active admins for the organization
+		const { data: admins, error: adminsError } = await supabase.from('profiles_roles').select('id, profile!inner(id, first_name, last_name, email)').match({
+			organisation: appraisalCycle.org,
+			role: 'admin',
+			disable: false
+		});
+
+		if (adminsError) return;
+
+		if (!admins || admins.length === 0) return;
+
+		// Prepare email content
+		const subject = `New Appraisal Cycle Created: ${appraisalCycle.name}`;
+
+		// Send emails to all admins
+		const emailPromises = admins.map(async admin => {
+			const adminProfile = admin.profile as AdminRecipient;
+			try {
+				const response = await sendEmail({
+					from: 'Aveer.hr <support@notification.aveer.hr>',
+					to: adminProfile.email,
+					subject: subject,
+					react: NewAppraisalEmail({ appraisalCycle, subject })
+				});
+				console.log(response);
+			} catch (emailError) {}
+		});
+
+		await Promise.allSettled(emailPromises);
+	} catch (error) {}
 }
 
 export async function createQuestionTemplate(data: TablesInsert<'question_templates'>) {
@@ -158,6 +207,16 @@ export const createAppraisalCycle = async (payload: TablesInsert<'appraisal_cycl
 
 	if (error) return error.message;
 
+	// Schedule email notifications for the new appraisal cycle
+	// Send immediate notification to admins about the new appraisal cycle
+	try {
+		const emailScheduler = new AppraisalEmailScheduler();
+		await Promise.all([emailScheduler.scheduleAppraisalEmails(data[0]), sendAppraisalCycleNotificationEmail(data[0])]);
+	} catch (emailError) {
+		console.error('Error sending appraisal cycle notification emails:', emailError);
+		// Don't fail the creation if email scheduling fails
+	}
+
 	return data;
 };
 
@@ -169,6 +228,15 @@ export const updateAppraisalCycle = async (payload: TablesUpdate<'appraisal_cycl
 	const { data, error } = await supabase.from('appraisal_cycles').update(payload).match({ org, id }).select();
 
 	if (error) return error.message;
+
+	// Reschedule email notifications for the updated appraisal cycle
+	try {
+		const emailScheduler = new AppraisalEmailScheduler();
+		await emailScheduler.rescheduleAppraisalEmails(data[0]);
+	} catch (emailError) {
+		console.error('Error rescheduling appraisal emails:', emailError);
+		// Don't fail the update if email rescheduling fails
+	}
 
 	return data;
 };

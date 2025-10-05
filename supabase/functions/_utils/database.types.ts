@@ -124,14 +124,18 @@ export type Database = {
           created_at: string
           created_by: string
           description: string | null
+          duration: number
           employee: number | null
           end_date: string
           entity: number | null
+          frequency: Database["public"]["Enums"]["appraisal_frequency"] | null
           id: number
+          manager_review_due: number | null
           manager_review_due_date: string
           name: string
           org: string
           question_template: number
+          self_review_due: number | null
           self_review_due_date: string
           start_date: string
           type: Database["public"]["Enums"]["appraisal_type"]
@@ -140,14 +144,18 @@ export type Database = {
           created_at?: string
           created_by?: string
           description?: string | null
+          duration?: number
           employee?: number | null
           end_date: string
           entity?: number | null
+          frequency?: Database["public"]["Enums"]["appraisal_frequency"] | null
           id?: number
+          manager_review_due?: number | null
           manager_review_due_date: string
           name: string
           org: string
           question_template: number
+          self_review_due?: number | null
           self_review_due_date: string
           start_date?: string
           type?: Database["public"]["Enums"]["appraisal_type"]
@@ -156,14 +164,18 @@ export type Database = {
           created_at?: string
           created_by?: string
           description?: string | null
+          duration?: number
           employee?: number | null
           end_date?: string
           entity?: number | null
+          frequency?: Database["public"]["Enums"]["appraisal_frequency"] | null
           id?: number
+          manager_review_due?: number | null
           manager_review_due_date?: string
           name?: string
           org?: string
           question_template?: number
+          self_review_due?: number | null
           self_review_due_date?: string
           start_date?: string
           type?: Database["public"]["Enums"]["appraisal_type"]
@@ -3494,10 +3506,6 @@ export type Database = {
         Returns: boolean
       }
       mark_expired_webhooks: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      trigger_appraisal_email_processor: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
